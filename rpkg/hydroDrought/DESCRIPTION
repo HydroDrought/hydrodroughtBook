@@ -1,0 +1,16 @@
+Package: hydroDrought
+Title: Hydrological Drought: Processes and Estimation Methods for Streamflow and Groundwater
+Version: 0.0.0.9000
+Authors@R: c(
+  person(given = "James H. Stagge", role = "cre",
+         email = "stagge.11@osu.edu", 
+         comment = c(ORCID = "0000-0002-3667-2904")),
+  person(given = "Tobias Gauster", role = "aut",
+         email = "t.gauster@boku.ac.at", 
+         comment = c(ORCID = "0000-0002-1163-4135")))
+Description: We provide a collection of data-sets and functions used in the book 'Hydrological Drought'.
+License: GPL-3
+Depends: tidyverse, lubridate, scales
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
