@@ -8,6 +8,7 @@ This repository contains code associated with the book, entitled, 'blah blah bla
 ## Contents
 
 * [Worked Examples](https://github.com/jstagge/hydroDrought/tree/master/worked_examples)
+  * 5.1: [Flow Duration Curve](http://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/6-1_flow-duration-curve.html)
 * [Data](https://github.com/jstagge/hydroDrought/tree/master/data)
 * [Case Studies](https://github.com/jstagge/hydroDrought/tree/master/case_studies)
 * [Self-Guided Tours](https://github.com/jstagge/hydroDrought/tree/master/self_guided_tours)
