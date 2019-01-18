@@ -18,9 +18,9 @@
 ### Option 2: Run code live in the cloud with no prerequisites
 
 Click at this badge to execute the analysis and replicate results using R-Studio in the cloud without needing to install R or its dependencies on your local machine.    
-RStudio: [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/v2/gh/jstagge/example_droughts/master?urlpath=rstudio)
+RStudio: [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/v2/gh/jstagge/hydroDrought/tree/master/worked_examples/?urlpath=rstudio)
 
-If you want to share this live RStudio link with others, please share this URL: http://mybinder.org/v2/gh/jstagge/example_droughts/master?urlpath=rstudio
+If you want to share this live RStudio link with others, please share this URL: http://mybinder.org/v2/gh/jstagge/hydroDrought/tree/master/worked_examples/?urlpath=rstudio
 
 *Note*, URLs that contain (https://hub.mybinder.org.....) will become invalid after few minutes of inactivity.
 
