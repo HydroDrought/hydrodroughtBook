@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+# ignore an entire directory
+/worked_examples/output/
