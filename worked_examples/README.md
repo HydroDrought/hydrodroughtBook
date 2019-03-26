@@ -1,18 +1,19 @@
 # Worked Examples  
 
 ## List of Worked Examples
-* Worked Example 5.1: [Flow Duration Curve](http://htmlpreview.github.io/?https://github.com/jstagge/example_droughts/blob/master/worked-examples/worked_example_fdc.nb.html)
-* Worked Example XXXXX: [Placeholder](http://htmlpreview.github.io/?https://github.com/jstagge/example_droughts/blob/master/worked-examples/worked_example_fdc.nb.html)
-* Worked Example XXXXX: [Placeholder](http://htmlpreview.github.io/?https://github.com/jstagge/example_droughts/blob/master/worked-examples/worked_example_fdc.nb.html)
-* Worked Example XXXXX: [Placeholder](http://htmlpreview.github.io/?https://github.com/jstagge/example_droughts/blob/master/worked-examples/worked_example_fdc.nb.html)
-* Worked Example XXXXX: [Placeholder](http://htmlpreview.github.io/?https://github.com/jstagge/example_droughts/blob/master/worked-examples/worked_example_fdc.nb.html)
-* Worked Example XXXXX: [Placeholder](http://htmlpreview.github.io/?https://github.com/jstagge/example_droughts/blob/master/worked-examples/worked_example_fdc.nb.html)
+* Worked Example 5.1: [Flow Duration Curve](https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/6-1_flow-duration-curve.html)
+* Worked Example 5.1 (as R Notebook): [Flow Duration Curve](https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/6-1_flow-duration-curve.nb.html)
+* Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
+* Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
+* Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
+* Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
+* Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
 
 ## Instructions for use
 
 ### Option 1: Static version in HTML (website) 
 
- * Worked Example 5.1: [Flow Duration Curve](http://htmlpreview.github.io/?https://github.com/jstagge/example_droughts/blob/master/worked-examples/worked_example_fdc.nb.html)
+ * Worked Example 5.1: [Flow Duration Curve](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
 
 
 ### Option 2: Run code live in the cloud with no prerequisites

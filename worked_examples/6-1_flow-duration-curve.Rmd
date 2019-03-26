@@ -1,9 +1,11 @@
 ---
 title: "Flow Duration Curve"
 author: "Worked Example 6.1"
-output: html_document
+output: 
+  html_notebook:
+    toc: false
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 
