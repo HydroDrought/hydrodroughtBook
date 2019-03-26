@@ -2,7 +2,6 @@
 
 ## List of Worked Examples
 * Worked Example 5.1: [Flow Duration Curve](https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/6-1_flow-duration-curve.html)
-* Worked Example 5.1 (as R Notebook): [Flow Duration Curve](https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/6-1_flow-duration-curve.nb.html)
 * Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
 * Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
 * Worked Example XXXXX: [Placeholder](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
