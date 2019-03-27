@@ -124,7 +124,7 @@ tbl  %>%
 ```
 
 
-To calculate a (riverflow) quantiles the function `lfquantile()`^[Tobias: I've written a small wrapper function around `base::quantile()` to circumvent the naming problem and the transformation into non-exceedande frequencies.] can also be used directly. The exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
+The function `lfquantile()`^[Tobias: I've written a small wrapper function around `base::quantile()` to circumvent the naming problem and the transformation into non-exceedande frequencies.] calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
 
 ```{r}
 lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))

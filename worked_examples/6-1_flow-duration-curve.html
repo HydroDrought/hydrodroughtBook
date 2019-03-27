@@ -606,7 +606,7 @@ Exceedance Frequency
 </tr>
 </tbody>
 </table>
-<p>To calculate a (riverflow) quantiles the function <code>lfquantile()</code><label for="tufte-sn-5" class="margin-toggle sidenote-number">5</label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">5</span> Tobias: I’ve written a small wrapper function around <code>base::quantile()</code> to circumvent the naming problem and the transformation into non-exceedande frequencies.</span> can also be used directly. The exact (interpolated) values for <span class="math inline">\(Q_{95}\)</span>, <span class="math inline">\(Q_{90}\)</span> and <span class="math inline">\(Q_{80}\)</span> would be:</p>
+<p>The function <code>lfquantile()</code><label for="tufte-sn-5" class="margin-toggle sidenote-number">5</label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">5</span> Tobias: I’ve written a small wrapper function around <code>base::quantile()</code> to circumvent the naming problem and the transformation into non-exceedande frequencies.</span> calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for <span class="math inline">\(Q_{95}\)</span>, <span class="math inline">\(Q_{90}\)</span> and <span class="math inline">\(Q_{80}\)</span> would be:</p>
 <pre class="r"><code>lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))</code></pre>
 <pre><code>##    Q95    Q90    Q80 
 ## 4.4303 5.2683 6.8012</code></pre>
