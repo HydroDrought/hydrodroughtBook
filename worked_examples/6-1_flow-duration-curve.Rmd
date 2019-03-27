@@ -2,89 +2,88 @@
 title: "Flow Duration Curve"
 author: "Worked Example 6.1"
 output: 
-  html_document: default
+  tufte::tufte_html:
+    tufte_features: ["fonts"]
+    css: style.css
 editor_options: 
   chunk_output_type: console
 ---
 
-
-```{r "setup",  message=FALSE, warning=FALSE}
-library(hydroDrought)
-```
-
-
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
 theme_set(theme_bw(base_size = 10))
 library(kableExtra)
 ```
 
 
-## Data
+# Loading the Data
 
-In this example we are going to use river flow data from the river Ngaruroro which is part of the `international` dataset in the package **hydroDrought**. 
+In this example we are going to use river flow data from the river Ngaruroro which is part of the `international` dataset in the package **hydroDrought**. This dataset becomes accessible by loading the **hydroDrougt** package. ^[Tobias: Currently the variable in the dataset is called *discharge* but we should consider using *flow* or *riverflow* for consistency. *river flow* (which a space in it) is not advisable as a variable name.]
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
+library(hydroDrought)
 ngaruroro <- filter(international, River == "Ngaruroro") %>%
   select(discharge) %>%
   unnest() 
 ```
 
-All years of daily data from River Ngaruroro at Kuripapango (NZ) are 
-used here to construct a flow duration curve based on a daily time step,
-$\Delta t = 1$ day. The total number of $\Delta t$ intervals is then $N = `r nrow(ngaruroro)`$ days. Table 5.1 lists the first seven flow values. The first two columns show the date and the corresponding flow value, $Q$.
+All years of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct a flow duration curve based on a daily time step, $\Delta t = 1$ day. The total number of $\Delta t$ intervals is then $N = `r nrow(ngaruroro)`$ days. Table 5.1 lists the first seven flow values. The first two columns show the date and the corresponding riverflow value, $Q$.
 
 
 
 
-## Calculation of the FDC
+# Calculation of the FDC
 
-The flow duration curve is constructed following the calculation steps as
-given in the right part of the table:
+The flow duration curve is constructed following the calculation steps as given in the right part of the table:
 
 - The rank, $i$, of each value is calculated (using the `rank()` function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in decending order and the $i^{th}$ largest value has rank $i$ (i.e. the largest value has rank 1).
 
-- The exceedance frequency, $EF_{Q_i}$ is calculated as: $EF_{Q_i}  = \frac{i} {N}$ 
-which gives an estimate of the empirical exceedance frequency of the
-$i^{th}$ largest event. $EF_{Q_i}$ designates here the observed frequency when
-the flow, $Q$, is larger than the flow value with rank $i$, $Q_i$ .
+- The exceedance frequency, $EF_{Q_i}$ is calculated as: 
+$$EF_{Q_i}  = \frac{i} {N}$$ 
+which gives an estimate of the empirical exceedance frequency of the $i^{th}$ largest event. $EF_{Q_i}$ designates here the observed frequency when the flow, $Q$, is larger than the flow value with rank $i$, $Q_i$ .
 
 ```{r}
-relative_rank <- function(discharge)
+exceedance_frequency <- function(flow)
 {
-  rank(-discharge, ties.method = "min", na.last = "keep") / length(na.omit(discharge))
+  # current rank
+  i <- rank(-flow, ties.method = "min", na.last = "keep") 
+  
+  # largest rank (= number of non-missing values)
+  N <- length(na.omit(flow))
+
+  # the exceedance frequency can be seen as the relative rank
+  return(i / N)
 }
 
 ngaruroro <- ngaruroro %>%
   mutate(rank = rank(-discharge, ties.method = "min"), 
-         freq.exc = relative_rank(discharge))
+         freq.exc = exceedance_frequency(discharge)) 
 ```
 
 
 ```{r, echo=FALSE}
 ngaruroro %>%
   mutate_if(is.numeric, round, 3) %>%
-  select(Date = time, Discharge = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+  select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
   head(7) %>%
   kable(caption = "Table 5.1 Calculation of a daily flow duration curve for River Ngaruroro at Kuripapango, NZ") %>%
-  kable_styling(bootstrap_options = "striped", full_width = F) %>%
-  add_header_above(c(" " = 1, "$Q$" = 1, "$i$" = 1, "$EF_Q$" = 1))
+  add_header_above(c(" " = 1, "$Q$ in $m^3s^{-1}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+                   align = "right")
 ```
 
 
 
 
-## Tabulation of the FDC
+# Tabulation of the FDC
 
-- Corresponding values of streamflow ($Q$ in $m^3s^{−1}$) and exceedance
-frequency ($EF_{Q_i}$ in %) are tabulated.
+- Corresponding values of riverflow ($Q$ in $m^3s^{-1}$) and exceedance frequency ($EF_{Q_i}$ in %) are tabulated^[Tobias: Tabulation was done implicitely in the sections before. ].
 
-- The two columns are sorted by $EF_{Q_i}$.
+- The two columns are sorted by $EF_{Q_i}$^[Tobias: Sorting is not required. I suggest to delete the section "Tabulation of the FDC."].
 
-## Plot of the FDC
-The sorted table columns are then plotted (Figure 5.2). The ordinate axis
-is here logarithmic.
+# Plot of the FDC
+The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic^[Tobias: I suggest to label the y-axis with "Flow percentile"]. 
 
-```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", warning=FALSE}
+```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", warning=FALSE, fig.margin = FALSE}
 ggplot(ngaruroro, aes(x = freq.exc, y = discharge)) +
   geom_line() +
   scale_y_log10() +
@@ -95,12 +94,8 @@ ggplot(ngaruroro, aes(x = freq.exc, y = discharge)) +
 
 
 
-## Selected exceedance values
-Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can
-be obtained as the value of $Q$ corresponding to the largest value of
-$EF_{Q_i}$ that is less than or equal to the value of $EF_{Q_i}$ sought for. A sample of corresponding
-values in this range is shown in Table 5.2, and the 90-percentile flow
-value is taken as $5.18 m^3s^{−1}$ . 
+# Selected exceedance values
+Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can be obtained as the value of $Q$ corresponding to the largest value of $EF_{Q_i}$ that is less than or equal to the value of $EF_{Q_i}$ sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as $5.18$ $m^3s^{-1}$. 
 
 ```{r include=FALSE}
 tbl <- ngaruroro %>%
@@ -110,13 +105,16 @@ tbl <- ngaruroro %>%
 
 
 ```{r echo=FALSE}
-kable(tbl) %>%
-  kable_styling(bootstrap_options = "striped", full_width = F)
+tbl  %>%
+  mutate_if(is.numeric, round, 3) %>%
+  select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+  kable(caption = "Table 5.2 An extract of values corresponding to $Q_{90}$") %>%
+  add_header_above(c(" " = 1, "$Q$ in $m^3s^{-1}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+                   align = "right")
 ```
 
 
-Alternatively, in case of large differences
-between successive values, a linear interpolation can be used. To calculate a (streamflow) quantile the R function `quantile` can also be used directly. The exact (inperolated) value for $Q_{90}$ would be: 
+Alternatively, in case of large differences between successive values, a linear interpolation can be used. To calculate a (riverflow) quantile the R function `quantile` can also be used directly. The exact (interpolated) value for $Q_{90}$ would be: 
 
 ```{r}
 quantile(ngaruroro$discharge, probs = 0.1, na.rm = TRUE)
