@@ -253,11 +253,43 @@ if (window.hljs) {
 
 
 
-<style type="text/css">.sidenote {
+<style type="text/css">.sidenote, label.sidenote-number {
 color: mediumvioletred;
 }
-label.sidenote-number {
-color: mediumvioletred;
+pre {
+background-color: rgb(255, 255, 255);
+border-color: rgb(204, 204, 204);
+border-radius: 4px;
+border-style: solid;
+border-width: 1px;
+border-image-outset: 0px;
+border-image-repeat: stretch;
+border-image-slice: 100%;
+border-image-source: none;
+border-image-width: 1;
+box-sizing: border-box;
+color: rgb(51, 51, 51);
+display: block;
+font-family: monospace;
+font-size: 13px;
+line-height: 18.5714px;
+margin-bottom: 10px;
+margin-left: 0px;
+margin-right: 0px;
+margin-top: 0px;
+overflow-wrap: break-word;
+overflow: auto;
+padding: 9.5px;
+text-size-adjust: 100%;
+white-space: pre;
+word-break: break-all;
+-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+.r {
+background-color: rgb(240, 240, 240);
+}
+table {
+width: 50%;
 }
 </style>
 
@@ -278,7 +310,7 @@ color: mediumvioletred;
 
 <div id="loading-the-data" class="section level1">
 <h1>Loading the Data</h1>
-<p>In this example we are going to use river flow data from the river Ngaruroro which is part of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. This dataset becomes accessible by loading the <strong>hydroDrougt</strong> package. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: Currently the variable in the dataset is called <em>discharge</em> but we should consider using <em>flow</em> or <em>riverflow</em> for consistency. <em>river flow</em> (which a space in it) is not advisable as a variable name.</span></p>
+<p>In this example we are going to use river flow data from the river Ngaruroro which is part of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. This dataset becomes accessible by loading the <strong>hydroDrought</strong> package. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: Currently the variable in the dataset is called <em>discharge</em> but we should consider using <em>flow</em> or <em>riverflow</em> for consistency. <em>river flow</em> (which a space in it) is not advisable as a variable name.</span></p>
 <pre class="r"><code>library(hydroDrought)
 ngaruroro &lt;- filter(international, River == &quot;Ngaruroro&quot;) %&gt;%
   select(discharge) %&gt;%
@@ -289,7 +321,7 @@ ngaruroro &lt;- filter(international, River == &quot;Ngaruroro&quot;) %&gt;%
 <h1>Calculation of the FDC</h1>
 <p>The flow duration curve is constructed following the calculation steps as given in the right part of the table:</p>
 <ul>
-<li><p>The rank, <span class="math inline">\(i\)</span>, of each value is calculated (using the <code>rank()</code> function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in decending order and the <span class="math inline">\(i^{th}\)</span> largest value has rank <span class="math inline">\(i\)</span> (i.e. the largest value has rank 1).</p></li>
+<li><p>The rank, <span class="math inline">\(i\)</span>, of each value is calculated (using the <code>rank()</code> function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the <span class="math inline">\(i^{th}\)</span> largest value has rank <span class="math inline">\(i\)</span> (i.e. the largest value has rank 1).</p></li>
 <li><p>The exceedance frequency, <span class="math inline">\(EF_{Q_i}\)</span> is calculated as: <span class="math display">\[EF_{Q_i}  = \frac{i} {N}\]</span> which gives an estimate of the empirical exceedance frequency of the <span class="math inline">\(i^{th}\)</span> largest event. <span class="math inline">\(EF_{Q_i}\)</span> designates here the observed frequency when the flow, <span class="math inline">\(Q\)</span>, is larger than the flow value with rank <span class="math inline">\(i\)</span>, <span class="math inline">\(Q_i\)</span> .</p></li>
 </ul>
 <pre class="r"><code>exceedance_frequency &lt;- function(flow)
@@ -297,7 +329,7 @@ ngaruroro &lt;- filter(international, River == &quot;Ngaruroro&quot;) %&gt;%
   # current rank
   i &lt;- rank(-flow, ties.method = &quot;min&quot;, na.last = &quot;keep&quot;) 
   
-  # largest rank (= number of non-missing values)
+  # largest rank in sample (= number of non-missing values)
   N &lt;- length(na.omit(flow))
 
   # the exceedance frequency can be seen as the relative rank
@@ -452,13 +484,13 @@ Exceedance Frequency
 <div id="tabulation-of-the-fdc" class="section level1">
 <h1>Tabulation of the FDC</h1>
 <ul>
-<li><p>Corresponding values of riverflow (<span class="math inline">\(Q\)</span> in <span class="math inline">\(m^3s^{-1}\)</span>) and exceedance frequency (<span class="math inline">\(EF_{Q_i}\)</span> in %) are tabulated<label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> Tobias: Tabulation was done implicitely in the sections before. </span>.</p></li>
-<li><p>The two columns are sorted by <span class="math inline">\(EF_{Q_i}\)</span><label for="tufte-sn-3" class="margin-toggle sidenote-number">3</label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">3</span> Tobias: Sorting is not required. I suggest to delete the section “Tabulation of the FDC.”</span>.</p></li>
+<li><p>Corresponding values of riverflow (<span class="math inline">\(Q\)</span> in m<sup>3</sup>s<sup>-1</sup>) and exceedance frequency (<span class="math inline">\(EF_{Q_i}\)</span> in %) are tabulated<label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> Tobias: Tabulation was done implicitly in the sections before. </span>.</p></li>
+<li><p>The two columns are sorted by <span class="math inline">\(EF_{Q_i}\)</span><label for="tufte-sn-3" class="margin-toggle sidenote-number">3</label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">3</span> Tobias: Sorting is not required. I suggest to delete the section “Tabulation of the FDC” entirely.</span>.</p></li>
 </ul>
 </div>
 <div id="plot-of-the-fdc" class="section level1">
 <h1>Plot of the FDC</h1>
-<p>The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic<label for="tufte-sn-4" class="margin-toggle sidenote-number">4</label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">4</span> Tobias: I suggest to label the y-axis with “Flow percentile”</span>.</p>
+<p>The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic<label for="tufte-sn-4" class="margin-toggle sidenote-number">4</label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">4</span> Tobias: I suggest to label the y-axis with “Flow percentile” (or more general “Flow quantile”).</span>.</p>
 <pre class="r"><code>ggplot(ngaruroro, aes(x = freq.exc, y = discharge)) +
   geom_line() +
   scale_y_log10() +
@@ -474,9 +506,9 @@ Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.
 </div>
 <div id="selected-exceedance-values" class="section level1">
 <h1>Selected exceedance values</h1>
-<p>Values for a particular frequency, for example the 90-percentile (<span class="math inline">\(Q_{90}\)</span>), can be obtained as the value of <span class="math inline">\(Q\)</span> corresponding to the largest value of <span class="math inline">\(EF_{Q_i}\)</span> that is less than or equal to the value of <span class="math inline">\(EF_{Q_i}\)</span> sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as <span class="math inline">\(5.18\)</span> <span class="math inline">\(m^3s^{-1}\)</span>.</p>
+<p>Values for a particular frequency, for example the 90-percentile (<span class="math inline">\(Q_{90}\)</span>), can be obtained as the value of <span class="math inline">\(Q\)</span> corresponding to the largest value of <span class="math inline">\(EF_{Q_i}\)</span> that is less than or equal to the value of <span class="math inline">\(EF_{Q_i}\)</span> sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as 5.269<i> </i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used.</p>
 <p><!--
-<caption>--><span class="marginnote shownote">Table 5.2 An extract of values corresponding to <span class="math inline">\(Q_{90}\)</span></span><!--</caption>--></p>
+<caption>--><span class="marginnote shownote">Table 5.2 An extract of values corresponding to <span class="math inline">\(Q_{90}\)</span>.</span><!--</caption>--></p>
 <table>
 
 
@@ -486,7 +518,7 @@ Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.
 </th>
 <th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
 <div style="border-bottom: 1px solid #ddd; padding-bottom: 5px;">
-<span class="math inline">\(Q\)</span> in <span class="math inline">\(m^3s^{-1}\)</span>
+<span class="math inline">\(Q\)</span> in <span class="math inline">\({m^3s^{-1}}\)</span>
 </div>
 </th>
 <th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="1">
@@ -527,7 +559,7 @@ Exceedance Frequency
 12063
 </td>
 <td style="text-align:right;">
-0.9
+0.89996
 </td>
 </tr>
 <tr>
@@ -541,7 +573,7 @@ Exceedance Frequency
 12064
 </td>
 <td style="text-align:right;">
-0.9
+0.90003
 </td>
 </tr>
 <tr>
@@ -555,7 +587,7 @@ Exceedance Frequency
 12064
 </td>
 <td style="text-align:right;">
-0.9
+0.90003
 </td>
 </tr>
 <tr>
@@ -569,15 +601,15 @@ Exceedance Frequency
 12066
 </td>
 <td style="text-align:right;">
-0.9
+0.90018
 </td>
 </tr>
 </tbody>
 </table>
-<p>Alternatively, in case of large differences between successive values, a linear interpolation can be used. To calculate a (riverflow) quantile the R function <code>quantile</code> can also be used directly. The exact (interpolated) value for <span class="math inline">\(Q_{90}\)</span> would be:</p>
-<pre class="r"><code>quantile(ngaruroro$discharge, probs = 0.1, na.rm = TRUE)</code></pre>
-<pre><code>##    10% 
-## 5.2683</code></pre>
+<p>To calculate a (riverflow) quantiles the function <code>lfquantile()</code><label for="tufte-sn-5" class="margin-toggle sidenote-number">5</label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">5</span> Tobias: I’ve written a small wrapper function around <code>base::quantile()</code> to circumvent the naming problem and the transformation into non-exceedande frequencies.</span> can also be used directly. The exact (interpolated) values for <span class="math inline">\(Q_{95}\)</span>, <span class="math inline">\(Q_{90}\)</span> and <span class="math inline">\(Q_{80}\)</span> would be:</p>
+<pre class="r"><code>lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))</code></pre>
+<pre><code>##    Q95    Q90    Q80 
+## 4.4303 5.2683 6.8012</code></pre>
 </div>
 
 
