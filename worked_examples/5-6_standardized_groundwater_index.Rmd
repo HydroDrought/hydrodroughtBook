@@ -1,0 +1,32 @@
+---
+title: "Standardized Groundwater Index"
+author: "Worked example 5.6"
+output: 
+  tufte::tufte_html:
+    tufte_features: ["fonts"]
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+theme_set(theme_bw(base_size = 10))
+library(kableExtra)
+```
+
+
+# Loading the Data
+
+In this example we are going to use ...
+
+```{r, message=FALSE, warning=FALSE}
+library(hydroDrought)
+```
+
+And we are going to do ...
+
+```{r}
+what_procedure()
+```
+
