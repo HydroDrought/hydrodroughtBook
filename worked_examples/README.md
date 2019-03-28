@@ -68,7 +68,7 @@ output:
 
 ### Option 1: Static version in HTML (website) 
 
- * Worked Example 5.1: [Flow Duration Curve](https://combinatronics.com/jstagge/hydroDrought/master/worked-examples/worked_example_fdc.nb.html)
+ * Worked Example 5.1: [Flow Duration Curve](https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/5-1_flow_duration_curve.html)
 
 
 ### Option 2: Run code live in the cloud with no prerequisites
