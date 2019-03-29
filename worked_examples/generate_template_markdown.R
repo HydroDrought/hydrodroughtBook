@@ -106,3 +106,63 @@ list_entry <- function(number, title, comment = "", ...)
 pmap_chr(tbl, list_entry) %>%
     cat(fill = TRUE)
 
+
+chapters <- tribble(
+    ~title, ~author,
+    "Introduction", c("Lena Tallaksen", "Henny van Lanen"),
+    "Hydroclimatology", c("Daniel Kingston", "Monica Ionita", "Kerstin Stahl"),
+    "Drought Generating Processes", c("Henny van Lanen", "Anne van Loon Miriam Fendeková", "John Bloomfield"),
+    "Hydrological Data", c("Jamie Hannaford", "Matt Fry", "Gregor Laaha", "Katie Muchan", "Gwyn Rees", "Henny van Lanen"),
+    "Hydrological Drought Characteristics", c("Hege Hisdal", "John Bloomfield", "Tobias Gauster", "Simon Parry", "Lena Tallaksen", "Niko Wanders"),
+    "Frequency Analysis", c("Lena M Tallaksen", "Hege Hisdal", "Gregor Laaha", "and Henrik Madsen"),
+    "Statistical modelling", c("Jim Stagge", "Monica Ionita", "Daniel Kingston", "Lena Tallaksen"),
+    "Regionalization Procedures", c("Gregor Laaha", "Tobias Gauster", "Eric Sauquet", "Kolbjørn Engeland"),
+    "Process-based modelling", c("Henny van Lanen", "Anne van Loon", "Niko Wanders and Christel Prudhomme"),
+    "Human Influences", c("Anne F. Van Loon", "Niko Wanders", "John Bloomfield", "Miriam Fendeková", "Henny A.J. Van Lanen"),
+    "Past and Future Droughts", c("Niko Wanders", "Christel Prudhomme", "Katie Smith", "Jim Stagge", "Jean-Philippe Vidal"),
+    "Drought Impacts", c("Kerstin Stahl", "Lucy Barker", "Veit Blauhut", "Jim Stagge"),
+    "Drought Early warning", c("Christel Prudhomme", "Lucy Barker", "Carmelo Cammalleri", "Shaun Harrigan", "Monica Ionita", "Jürgen Vogt"),
+    "Perspectives", c("Henny van Lanen", "Albert van Dijk", "Mark Svoboda", "Lena Tallaksen")
+)
+
+chapters  <- chapters %>%
+    mutate(no = row_number(),
+           lead = map_chr(author, 1))
+
+fmt_chapter <- function(no, title, lead, ...)
+{
+    x <- paste(
+        "  <tr>",
+        paste0("    <td> <b> ", no, ". ", title, "</b> </td>"),
+        paste0("    <td> <i>", lead, "</i> </td>"),
+        "    <td>  </td>",
+        "  </tr>\n", sep = "\n")
+
+    cat(x)
+}
+
+fmt_listentry <- function(number, title, comment = "", ...)
+{
+    prefix <- "https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/"
+    html <- paste0(sub(".", "-", x = number, fixed = TRUE),
+                   "_", gsub(" ", "_", x = tolower(title)), ".html")
+    rscript <- paste0(sub(".", "-", x = number, fixed = TRUE),
+                      "_", gsub(" ", "_", x = tolower(title)), ".R")
+
+    x <- paste(
+        paste0("  <li>", number, " ", title, ": "),
+        paste0('    <a href="', prefix, html, '">Worked Example</a>'),
+        paste0('    <a href="', prefix, rscript, '">R-script</a>'),
+        ifelse(comment == "" || length(comment) == 0, "", paste0("    <br><i>", comment, "</i>")),
+        "  </li>\n\n", sep = "\n"
+    )
+
+    cat(x)
+}
+
+pwalk(chapters, fmt_chapter)
+pwalk(tbl, fmt_listentry)
+
+tbl %>%
+    mutate(no = as.numeric(sub("\\..*", "", number))) %>%
+    right_join(chapters, by = "no")
