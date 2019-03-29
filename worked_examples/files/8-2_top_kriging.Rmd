@@ -1,0 +1,255 @@
+---
+title: "Top Kriging"
+author: "Worked example 8.2"
+output: 
+  tufte::tufte_html:
+    tufte_features: ["fonts"]
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+theme_set(theme_bw(base_size = 10))
+library(kableExtra)
+```
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE)
+
+# str() doesn't respect the options(width = ...)
+# str <- function(...) utils::str(..., width = 75, strict.width = "cut")
+```
+
+
+
+# Introduction
+This worked example^[Tobias: Will be adapted soon...] demonstrates the application of Top-kriging presented in Skøien et al. (2006, 2014) to model low flows along the stream network. We use a dataset of 30 gauged and 373 ungauged catchments situated in the forelands and prealps in the north-east of Austria (Zone 1). The dataset is fully described in Laaha & Blöschl (2006, 2014).
+
+The target variable is the long-term low flow characteristic Q95, standardized by catchment area to eliminate its predominant effect on low flows. The data consist of overlapping catchment polygons provided in two Shapefiles, the first containing the observed catchments only, the second containing all catchemnts (prediction locations incl. observed catchments).
+
+Note that the methods used here take the areal support of catchments into account (Laaha & Blöschl, 2013). 
+
+We learn how to import SpatialPolygonDataFrames and store them as an rtopObj, perform explorative statistics, conduct variogram analysis, fit a variogram model, employ kriging to perform interpolation to catchemnts along the stream network, perform cross-validation, and create low flow maps of obsereved and predicted values.
+
+
+# Data import
+
+```{r, eval=FALSE}
+install.packages("rtop")
+install.packages("rgdal")
+# install.packages("maptools") # alternative to rgdal, not used
+```
+
+
+
+
+```{r, message=FALSE, warning=FALSE}
+library(rtop)
+library(rgdal)
+
+# help(package = rtop)
+```
+
+
+
+
+### Reading shapefiles
+
+Set path of your data directory where the shapefiles are stored
+```{r}
+rpath <- "../../../hd-book/chapter8/Top-kriging/shape-files"
+```
+
+
+Observarion dataset (Shapefile)
+```{r}
+x.obs <- readOGR(rpath, "Watershed_Gesamt_zone1_nwkenn_OBS")
+x.obs <- rmapshaper::ms_simplify(input = x.obs, keep = 0.05, keep_shapes = TRUE)
+```
+
+
+
+Create a column with the target variable (in the dimension of specific runoff Q/AREA):
+```{r}
+x.obs$obs <- x.obs$Q95S
+dim(x.obs)
+names(x.obs)
+```
+
+Reading prediction dataset (Shapefile)
+```{r}
+x.pred <- readOGR(rpath, "Watershed_Gesamt_zone1_nwkenn_PRED_BIG3")
+# x.pred = readOGR(rpath,"Watershed_Gesamt_zone1_nwkenn")
+x.pred$obs <- x.pred$Q95S # also in x.pred for ploting
+```
+
+
+### Creating rtopObj
+
+```{r}
+params <- list(gDist = TRUE, cloud = TRUE)
+rtopObj <- createRtopObject(x.obs, x.pred, params = params) ## maybe include: formulaString=(obs)^2~1
+```
+
+
+# Explorative statistics
+
+### Checking distribution of the target variable
+```{r}
+hist(x.obs$obs)
+hist(log(x.obs$obs))
+hist(sqrt(x.obs$obs)) # best!
+```
+
+
+### Update rtopObj with transformed values
+```{r}
+x.obs$obs <- sqrt(x.obs$Q95S) # writing transfored obs in x.obs
+x.obs$trans <- sqrt(x.obs$Q95S) # writing transfored obs in x.obs
+x.pred$obs <- sqrt(x.pred$Q95S) # also in x.pred for ploting
+
+observation <- x.obs[, "trans"]
+prediction <- x.pred[, NULL]
+
+top <- createRtopObject(
+    observations = observation, 
+    predictionLocations = prediction, 
+    formulaString = "trans~1",
+    params = params)
+
+rtopObj <- createRtopObject(x.obs, x.pred, params = params) ## maybe include: formulaString=(obs)^2~1
+hist(rtopObj$observations$obs) # is now closer to Gaussian distribution
+```
+
+
+### Summary statistics
+```{r}
+summary(x.obs$obs)
+```
+
+
+### Plot data locations and values
+
+```{r}
+spplot(
+    obj = rtopObj$observations, 
+    zcol = c("Q95S", "obs"), 
+    col.regions = rev(heat.colors(n = 100)), 
+    col = "grey"
+)
+```
+
+
+
+# Variogram model
+
+A call to rtopVariogram adds the sample variogram to the object, whereas rtopFitVariogram fits a variogram model. The last function will call rtopVariogram if rtopObj does not contain a sample variogram.
+
+
+### add the Sample variogram to the object
+
+```{r}
+rtopObj <- rtopVariogram(rtopObj)
+top <- rtopVariogram(top)
+```
+
+
+### add the Theoretical variogram (various support) to the object
+
+```{r}
+rtopObj <- rtopFitVariogram(rtopObj)
+top <- rtopFitVariogram(top)
+```
+
+
+The function checkVario is useful to produce some diagnostic plots for the sample variogram and the fitted variogram model.
+
+```{r}
+checkVario(rtopObj)
+checkVario(top)
+```
+
+
+# Kriging
+The interpolation function (rtopKrige) solves the kriging system based on the computed regularized semivariances. The covariance matrices are created in a separate regularization function (varMat), and are stored in the rtop-object for easier access if it is necessary to redo parts of the analysis, as this is the computationally expensive part of the interpolation. Cross-validation can be called with the argument cv=TRUE, either in params or in the call to rtopKrige.
+
+<!-- # knitr::opts_chunk$set(fig.width=12, fig.height=8) # Changing -->
+
+```{r}
+rtopObj <- rtopKrige(rtopObj)
+top <- rtopKrige(top)
+names(rtopObj$predictions)
+names(top$predictions)
+```
+
+
+```{r fig1, fig.height = 8, fig.width = 12}
+spplot(
+    obj = rtopObj$predictions, col.regions = rev(heat.colors(n = 100)), col = "grey",
+    main = "Kriging: sqrt(q95s)",
+    c("obs", "var1.pred", "var1.var")
+)
+
+spplot(
+    obj = top$predictions, col.regions = rev(heat.colors(n = 100)), col = "grey",
+    main = "Kriging: sqrt(q95s)",
+    c("var1.pred", "var1.var")
+)
+```
+
+
+# Cross-validation
+```{r}
+rtopObj <- rtopKrige(rtopObj, cv = TRUE)
+```
+
+
+```{r fig2, fig.height = 8, fig.width = 12}
+spplot(
+    obj = rtopObj$predictions, col.regions = rev(heat.colors(n = 100)), col = "grey",
+    main = "Cross-validation: sqrt(q95)",
+    c("obs", "var1.pred", "var1.var")
+)
+```
+
+
+
+Some cv-performance measures
+```{r}
+cv_summary <- function(pred, obs) {
+    res <- pred - obs
+    ss <- sum(res^2)
+    # mse <- var(res) # NO! gives only random errors without bias
+    mse <- ss / length(res)
+    rmse <- sqrt(mse)
+    R2 <- 1 - (mse / var(obs))
+    bias <- mean(res)
+    return(list("RMSE" = rmse, "BIAS" = bias, "R²" = R2))
+}
+```
+
+
+
+CV-performance of transformed Q95S (sqrt)
+```{r}
+cv_summary(pred = rtopObj$predictions$var1.pred, obs = rtopObj$predictions$obs)
+```
+
+
+
+CV-performance of backtransformed Q95S (^2)
+```{r}
+cv_summary(pred = rtopObj$predictions$var1.pred^2, obs = rtopObj$predictions$obs^2)
+```
+
+
+# References
+* Laaha, G. & Blöschl, G. (2006) Seasonality indices for regionalizing low flows. Hydrological Processes 20(18), 3851-3878. doi:10.1002/hyp.6161
+* Laaha, G., Skøien, J.O., Nobilis, F. & Blöschl, G. (2013) Spatial Prediction of Stream Temperatures Using Top-Kriging with an External Drift. Environmental Modeling & Assessment 18(6), 671-683. doi:10.1007/s10666-013-9373-3
+* Laaha, G., Skøien, J.O. & Blöschl, G. (2014) Spatial prediction on river networks: comparison of top-kriging with regional regression. Hydrological Processes 28(2), 315-324.
+* Skøien, J.O., Merz, R. & Blöschl, G. (2006). Top-kriging - geostatistics on stream networks. Hydrology and Earth System Sciences, 10:277-287.
+* Skøien, J.O., Blöschl, G., Laaha, G., Pebesma, E., Parajka, J. & Viglione, A. (2014). Rtop: An R package for interpolation of data with a variable spatial support, with an example from river networks. Computers & Geosciences, 67.

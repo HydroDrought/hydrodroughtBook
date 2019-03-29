@@ -55,6 +55,13 @@ tbl <- tribble(
     "7.6", "PCA fundamentals",
     "", "",
 
+    "8.1", "Regional Regression",
+    "", "",
+
+    "8.2", "Top Kriging",
+    "", "",
+
+
     # Kerstin
     "12.1",  "EDII text report",
     "This will not have any R Code, it will consist of an example text and our instructions.",
@@ -91,7 +98,7 @@ list_entry <- function(number, title, comment = "", ...)
     filename <- paste0(sub(".", "-", x = number, fixed = TRUE),
                        "_", gsub(" ", "_", x = tolower(title)), ".html")
     paste0(" * Worked example ", number, ": [", title, "]",
-           "(https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/",
+           "(https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/",
            filename, ") ",
            ifelse(comment != "", paste0("(", comment, ")"), ""))
 }
