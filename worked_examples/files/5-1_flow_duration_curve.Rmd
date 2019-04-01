@@ -1,6 +1,6 @@
 ---
 title: "Flow Duration Curve"
-author: "Worked Example 6.1"
+author: "Worked Example 5.1"
 output: 
   tufte::tufte_html:
     tufte_features: ["fonts"]

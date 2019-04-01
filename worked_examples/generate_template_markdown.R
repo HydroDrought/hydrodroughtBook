@@ -151,7 +151,7 @@ fmt_listentry <- function(number, title, comment = "", ...)
 
     x <- paste(
         paste0("  <li>", number, " ", title, ": "),
-        paste0('    <a href="', prefix, html, '">Worked Example</a>'),
+        paste0('    <a href="', prefix, html, '">Worked Example</a>,  '),
         paste0('    <a href="', prefix, rscript, '">R-script</a>'),
         ifelse(comment == "" || length(comment) == 0, "", paste0("    <br><i>", comment, "</i>")),
         "  </li>\n\n", sep = "\n"
@@ -166,3 +166,16 @@ pwalk(tbl, fmt_listentry)
 tbl %>%
     mutate(no = as.numeric(sub("\\..*", "", number))) %>%
     right_join(chapters, by = "no")
+
+
+
+# extract R code from Rmd files
+dir <- "../../worked_examples/files"
+files <- data_frame(filename = list.files(path = dir, pattern = "\\.Rmd$",
+                                          full.names = TRUE)) %>%
+    extract(col = filename, into = c("chapter", "number"),
+            regex = c("(\\d+)-(\\d+)"), convert = TRUE, remove = FALSE) %>%
+    arrange(chapter, number)
+
+rmd <- files$filename[2]
+knitr::purl(input = rmd, output = sub(".Rmd", ".R", rmd, fixed = TRUE))
