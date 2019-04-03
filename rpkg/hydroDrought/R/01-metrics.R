@@ -16,3 +16,8 @@ low_flow_percentile <- function(x, prob, start = NA, end = NA)
     summarise(q = quantile(discharge, probs = prob, na.rm = TRUE)) %>%
     pull(q)
 }
+
+
+#' @importFrom lfstat baseflow
+#' @export
+lfstat::baseflow
