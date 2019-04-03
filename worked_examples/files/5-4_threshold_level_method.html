@@ -34,7 +34,7 @@ if (window.hljs) {
 
 
 
-<link href="data:text/css;charset=utf-8,%2Esidenote%2C%20label%2Esidenote%2Dnumber%20%7B%0Acolor%3A%20mediumvioletred%3B%0A%7D%0Apre%20%7B%0Abackground%2Dcolor%3A%20rgb%28255%2C%20255%2C%20255%29%3B%0Aborder%2Dcolor%3A%20rgb%28204%2C%20204%2C%20204%29%3B%0Aborder%2Dradius%3A%204px%3B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dimage%2Doutset%3A%200px%3B%0Aborder%2Dimage%2Drepeat%3A%20stretch%3B%0Aborder%2Dimage%2Dslice%3A%20100%25%3B%0Aborder%2Dimage%2Dsource%3A%20none%3B%0Aborder%2Dimage%2Dwidth%3A%201%3B%0Abox%2Dsizing%3A%20border%2Dbox%3B%0Acolor%3A%20rgb%2851%2C%2051%2C%2051%29%3B%0Adisplay%3A%20block%3B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%2018%2E5714px%3B%0Amargin%2Dbottom%3A%2010px%3B%0Amargin%2Dleft%3A%200px%3B%0Amargin%2Dright%3A%200px%3B%0Amargin%2Dtop%3A%200px%3B%0Aoverflow%2Dwrap%3A%20break%2Dword%3B%0Aoverflow%3A%20auto%3B%0Apadding%3A%209%2E5px%3B%0Atext%2Dsize%2Dadjust%3A%20100%25%3B%0Awhite%2Dspace%3A%20pre%3B%0Aword%2Dbreak%3A%20break%2Dall%3B%0A%2Dwebkit%2Dtap%2Dhighlight%2Dcolor%3A%20rgba%280%2C%200%2C%200%2C%200%29%3B%0A%7D%0A%2Er%20%7B%0Abackground%2Dcolor%3A%20rgb%28240%2C%20240%2C%20240%29%3B%0A%7D%0Atable%20%7B%0Awidth%3A%2050%25%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+<link href="data:text/css;charset=utf-8,%2Esidenote%2C%20label%2Esidenote%2Dnumber%20%7B%0Acolor%3A%20mediumvioletred%3B%0A%7D%0Apre%20%7B%0Abackground%2Dcolor%3A%20rgb%28255%2C%20255%2C%20255%29%3B%0Aborder%2Dcolor%3A%20rgb%28204%2C%20204%2C%20204%29%3B%0Aborder%2Dradius%3A%204px%3B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dimage%2Doutset%3A%200px%3B%0Aborder%2Dimage%2Drepeat%3A%20stretch%3B%0Aborder%2Dimage%2Dslice%3A%20100%25%3B%0Aborder%2Dimage%2Dsource%3A%20none%3B%0Aborder%2Dimage%2Dwidth%3A%201%3B%0Abox%2Dsizing%3A%20border%2Dbox%3B%0Acolor%3A%20rgb%2851%2C%2051%2C%2051%29%3B%0Adisplay%3A%20block%3B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%2018%2E5714px%3B%0Amargin%2Dbottom%3A%2010px%3B%0Amargin%2Dleft%3A%200px%3B%0Amargin%2Dright%3A%200px%3B%0Amargin%2Dtop%3A%200px%3B%0Aoverflow%2Dwrap%3A%20break%2Dword%3B%0Aoverflow%3A%20auto%3B%0Apadding%3A%209%2E5px%3B%0Atext%2Dsize%2Dadjust%3A%20100%25%3B%0Awhite%2Dspace%3A%20pre%3B%0Aword%2Dbreak%3A%20break%2Dall%3B%0A%2Dwebkit%2Dtap%2Dhighlight%2Dcolor%3A%20rgba%280%2C%200%2C%200%2C%200%29%3B%0A%7D%0A%2Er%20%7B%0Abackground%2Dcolor%3A%20rgb%28240%2C%20240%2C%20240%29%3B%0A%7D%0Atable%20%7B%0Awidth%3A%2050%25%3B%0Aborder%2Dspacing%3A%200%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
 
 
 
@@ -53,11 +53,79 @@ if (window.hljs) {
 
 <div id="loading-the-data" class="section level1">
 <h1>Loading the Data</h1>
-<p>In this example we are going to use …</p>
-<pre class="r"><code>library(hydroDrought)</code></pre>
-<p>And we are going to do …</p>
-<pre class="r"><code>what_procedure()</code></pre>
-<pre><code>## Same procedure as every day!</code></pre>
+<p>A program, Nizowka, for selecting and analysing drought events based on the threshold level method can be found on the CD under Software. This program also allows frequency analysis to estimate extreme quantiles of drought duration and deficit volume (Worked Example 6.2).</p>
+<p>Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below. In Nizowka it is possible to analyse several of the series in the Global Data Set (Section 4.5.1) and import additional data series to be analysed.</p>
+<p>36 years of daily flow (1 September 1964 to 31 August 2000) are analysed. In this river the low flow period covers the turn of the calendar year. To avoid problems with allocating droughts to a specific calendar year because of drought events starting in one year and ending in another year, the start of the year is defined to be 1 September. Periods of missing data have been interpolated if of short duration, whereas years containing long periods of missing values (&gt; 15 days) have been removed. In total four years are omitted from the series, 1967–1968, 1978–1979, 1986–1987 and 1987–1988. As the program does not allow for missing years, the years have been connected to avoid gaps. This has to be accounted for when analysing the date of the drought events.</p>
+<pre class="r"><code>library(hydroDrought)
+
+ngaruroro &lt;- filter(international, River == &quot;Ngaruroro&quot;) %&gt;%
+    select(discharge) %&gt;%
+    unnest() %&gt;%
+    append_group(by = &quot;year&quot;, start = &quot;-09-01&quot;)  %&gt;%
+    # filter(year &gt;= 1964, year &lt;= 1999) # original filter
+    filter(year &gt;= 1988, year &lt;= 1999) # time series without missing values</code></pre>
+</div>
+<div id="parameter-determination" class="section level1">
+<h1>Parameter determination</h1>
+<div id="threshold-selection" class="section level2">
+<h2>Threshold selection</h2>
+<p>A sequence of drought events is obtained from the streamflow hydrograph by considering periods with flow below a certain threshold, Q0. In Nizowka the threshold level is obtained as a value from the FDC and it is determined as an exceedance percentile (%) under the menu ‘Configuration’. In this example Q90 is used as threshold.</p>
+<pre class="r"><code>q90 &lt;- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
+q90</code></pre>
+<pre><code>##    Q90 
+## 5.1982</code></pre>
+<pre class="r"><code>droughts &lt;- ngaruroro %&gt;%
+    drought_events(threshold = q90)
+
+droughts</code></pre>
+<pre><code>## # A tibble: 57 x 9
+##    event start      end        duration   dbt  volume     vbt tqmin     
+##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;        &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;date&gt;    
+##  1     1 1989-03-28 1989-03-29        2     2 -2.87e4 -2.87e4 1989-03-29
+##  2     2 1989-04-03 1989-04-29       27    27 -2.01e6 -2.01e6 1989-04-29
+##  3     3 1989-05-21 1989-05-24        4     4 -6.67e4 -6.67e4 1989-05-23
+##  4     4 1990-02-24 1990-03-09       14    14 -9.11e5 -9.11e5 1990-03-09
+##  5     5 1990-04-12 1990-04-24       13    13 -6.45e5 -6.45e5 1990-04-23
+##  6     6 1990-12-27 1991-01-16       21    21 -1.28e6 -1.28e6 1991-01-14
+##  7     7 1991-01-18 1991-01-24        7     7 -5.49e5 -5.49e5 1991-01-23
+##  8     8 1991-02-11 1991-02-17        7     7 -3.80e5 -3.80e5 1991-02-16
+##  9     9 1991-03-30 1991-04-08       10    10 -3.42e5 -3.42e5 1991-04-08
+## 10    10 1991-12-19 1991-12-23        5     5 -8.79e4 -8.79e4 1991-12-22
+## # ... with 47 more rows, and 1 more variable: qmin &lt;dbl&gt;</code></pre>
+</div>
+<div id="minor-droughts" class="section level2">
+<h2>Minor droughts</h2>
+<p>To reduce the problem of minor droughts two restrictions can be imposed:</p>
+<ul>
+<li><p>a minimum drought duration, dmin, (minimum drought length, under the menu ‘Configuration’) that removes droughts with duration less than the specified number of days (here dmin is set equal to five days);</p></li>
+<li><p>a minimum drought deficit volume (coefficient alpha, under the menu ‘Configuration’), that removes droughts with a deficit volume less than a certain fraction α of the maximum drought deficit volume in the complete series of drought events (here α is set equal to 0.005).</p></li>
+</ul>
+<pre class="r"><code>filter(droughts, duration &gt;= 5, volume &lt; min(volume) * 0.005)</code></pre>
+<pre><code>## # A tibble: 32 x 9
+##    event start      end        duration   dbt  volume     vbt tqmin     
+##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;        &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;date&gt;    
+##  1     2 1989-04-03 1989-04-29       27    27 -2.01e6 -2.01e6 1989-04-29
+##  2     4 1990-02-24 1990-03-09       14    14 -9.11e5 -9.11e5 1990-03-09
+##  3     5 1990-04-12 1990-04-24       13    13 -6.45e5 -6.45e5 1990-04-23
+##  4     6 1990-12-27 1991-01-16       21    21 -1.28e6 -1.28e6 1991-01-14
+##  5     7 1991-01-18 1991-01-24        7     7 -5.49e5 -5.49e5 1991-01-23
+##  6     8 1991-02-11 1991-02-17        7     7 -3.80e5 -3.80e5 1991-02-16
+##  7     9 1991-03-30 1991-04-08       10    10 -3.42e5 -3.42e5 1991-04-08
+##  8    10 1991-12-19 1991-12-23        5     5 -8.79e4 -8.79e4 1991-12-22
+##  9    20 1993-01-28 1993-02-18       22    22 -1.46e6 -1.46e6 1993-02-18
+## 10    24 1994-01-17 1994-01-25        9     9 -6.69e5 -6.69e5 1994-01-24
+## # ... with 22 more rows, and 1 more variable: qmin &lt;dbl&gt;</code></pre>
+</div>
+<div id="dependent-droughts" class="section level2">
+<h2>Dependent droughts</h2>
+<p>The inter-event time criterion (IC) is used to pool dependent droughts which are separated by a short period of flow above the threshold. If the time between two droughts is less than a critical duration, tmin, (minimum distance between two successive droughts, under the menu ‘Configuration’) the two events are pooled. In this example tmin is set equal to two days.</p>
+</div>
+</div>
+<div id="calculation" class="section level1">
+<h1>Calculation</h1>
+<p>By selecting ‘Tables’ and then ‘Droughts’ from the menu, ticking the box ‘All year’, selecting the correct gauging station and finally pushing the button ‘Droughts’, the drought events are selected. A table is displayed including: * the start date, defined as the first day below the threshold; * the end date, defined as the last day below the threshold; * the deficit volume (1000 m3), defined as the sum of the daily deficit flows times the duration in days; * the average deficit or drought intensity (1000 m3 day−1), defined as the ratio between the drought deficit volume and the number of days from the start date to the end date, the latter called full drought duration in Nizowka; * the drought duration (days), defined as the full drought duration minus short periods (the inter-event time) above the threshold, called real drought duration in Nizowka; * the minimum flow (m3 s−1), defined as the minimum flow within a drought event; * the date of the minimum flow; * and the average flow during the drought (m3 s−1).</p>
+<p>The drought deficit characteristics of the first five drought events are given in Table 5.8. By selecting ‘Print’, two tables are displayed. Either the table ‘Parameters’ (as in Table 5.8) or the table ‘Number of droughts’ which summarises the number of droughts every year sorted by drought duration. From the latter table it can be seen that there are 71 drought events in total, on average two events every year. Minor droughts are dominating with 36 events lasting less than 11 days. Only 5 events lasted more than 30 days. All tables can be written to text files. The time series of the drought duration can be seen in Figure 5.12, and the major droughts are found in 1967, 1973, 1974, 1978 and 1983. A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed.</p>
+<p>Table 5.8 Drought deficit characteristics Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = Q90, dmin = 5 days, α = 0.005 and tmin = 2 days. Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = Q90, dmin = 5 days, α = 0.005 and tmin = 2 days.</p>
 </div>
 
 

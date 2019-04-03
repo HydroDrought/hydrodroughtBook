@@ -18,15 +18,78 @@ library(kableExtra)
 
 # Loading the Data
 
-In this example we are going to use ...
+A program, Nizowka, for selecting and analysing drought events based on the threshold level method can be found on the CD under Software. This program also allows frequency analysis to estimate extreme quantiles of drought duration and deficit volume (Worked Example 6.2). 
+
+Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below. In Nizowka it is possible to analyse several of the series in the Global Data Set (Section 4.5.1) and import additional data series to be analysed.
+
+
+36 years of daily flow (1 September 1964 to 31 August 2000) are analysed. In this river the low flow period covers the turn of the calendar year. To avoid problems with allocating droughts to a specific calendar year because of drought events starting in one year and ending in another year, the start of the year is defined to be 1 September. Periods of missing data have been interpolated if of short duration, whereas years containing long periods of missing values (> 15 days) have been removed. In total four years are omitted from the series, 1967–1968, 1978–1979, 1986–1987 and 1987–1988. As the program does not allow for missing years, the years have been connected to avoid gaps. This has to be accounted for when analysing the date of the drought events.
+
 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
+
+ngaruroro <- filter(international, River == "Ngaruroro") %>%
+    select(discharge) %>%
+    unnest() %>%
+    append_group(by = "year", start = "-09-01")  %>%
+    # filter(year >= 1964, year <= 1999) # original filter
+    filter(year >= 1988, year <= 1999) # time series without missing values
 ```
 
-And we are going to do ...
+
+
+
+# Parameter determination
+##	Threshold selection
+A sequence of drought events is obtained from the streamflow hydrograph by considering periods with flow below a certain threshold, Q0. In Nizowka the threshold level is obtained as a value from the FDC and it is determined as an exceedance percentile (%) under the menu ‘Configuration’. In this example Q90 is used as threshold. 
 
 ```{r}
-what_procedure()
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
+q90
+
+droughts <- ngaruroro %>%
+    drought_events(threshold = q90)
+
+droughts
+```
+
+
+
+## 	Minor droughts  
+ 
+To reduce the problem of minor droughts two restrictions can be imposed:
+
+ * a minimum drought duration, dmin, (minimum drought length, under the menu ‘Configuration’) that removes droughts with duration less than the specified number of days (here dmin is set equal to five days);
+
+ * a minimum drought deficit volume (coefficient alpha, under the menu ‘Configuration’), that removes droughts with a deficit volume less than a certain fraction α of the maximum drought deficit volume in the complete series of drought events (here α is set equal to 0.005). 
+ 
+```{r}
+filter(droughts, duration >= 5, volume < min(volume) * 0.005)
+```
+ 
+
+##	Dependent droughts
+The inter-event time criterion (IC) is used to pool dependent droughts which are separated by a short period of flow above the threshold. If the time between two droughts is less than a critical duration, tmin, (minimum distance between two successive droughts, under the menu ‘Configuration’) the two events are pooled. In this example tmin is set equal to two days.
+
+# Calculation
+By selecting ‘Tables’ and then ‘Droughts’ from the menu, ticking the box ‘All year’, selecting the correct gauging station and finally pushing the button ‘Droughts’, the drought events are selected. A table is displayed including:
+ *	the start date, defined as the first day below the threshold;
+ *	the end date, defined as the last day below the threshold; 
+ *	the deficit volume (1000 m3), defined as the sum of the daily deficit flows times the duration in days;
+ *	the average deficit or drought intensity (1000 m3 day−1), defined as the ratio between the drought deficit volume and the number of days from the start date to the end date, the latter called full drought duration in Nizowka;
+ *	the drought duration (days), defined as the full drought duration minus short periods (the inter-event time) above the threshold, called real drought duration in Nizowka;
+ *	the minimum flow (m3 s−1), defined as the minimum flow within a drought event;
+ *	the date of the minimum flow;
+ *	and the average flow during the drought (m3 s−1).
+
+The drought deficit characteristics of the first five drought events are given in Table 5.8. By selecting ‘Print’, two tables are displayed. Either the table ‘Parameters’ (as in Table 5.8) or the table ‘Number of droughts’ which summarises the number of droughts every year sorted by drought duration. From the latter table it can be seen that there are 71 drought events in total, on average two events every year. Minor droughts are dominating with 36 events lasting less than 11 days. Only 5 events lasted more than 30 days. All tables can be written to text files. The time series of the drought duration can be seen in Figure 5.12, and the major droughts are found in 1967, 1973, 1974, 1978 and 1983. A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed.
+
+Table 5.8 Drought deficit characteristics
+Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = Q90, dmin = 5 days, α = 0.005 and tmin = 2 days.
+Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = Q90, dmin = 5 days, α = 0.005 and tmin = 2 days.
+
+```{r}
+
 ```
 

@@ -2,6 +2,7 @@
 
 export(append_group)
 export(baseflow)
+export(drought_events)
 export(lfquantile)
 export(moving_average)
 export(what_procedure)
