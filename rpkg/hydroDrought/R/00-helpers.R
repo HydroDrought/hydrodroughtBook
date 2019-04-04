@@ -127,21 +127,21 @@ const_threshold <- function(x, fun, ...)
 drought_events <- function(x, threshold,
                            pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
                            pooling.pars = list(n = 10, sides = "center",
-                                               min.duration = 5, vol.ratio = 0.1),
-                           drop = TRUE, full.table = FALSE)
+                                               min.duration = 5, min.vol.ratio = 0.1),
+                           full.table = FALSE, relabel.events = TRUE)
 {
     pooling <- match.arg(pooling)
 
     # give warnings if using default parameters
     # specifing them explicitly silences it
 
-    # ? use deficit instead of volume
+    # todo? use deficit instead of volume
 
-    # make function resislient against NAs
+    # todo: make function resislient against NAs
     # NAs always terminate a drought, never pooled over NAs..
 
     if (pooling == "moving-average") {
-        # remove NAs introduced by moving average
+        # todo: remove NAs introduced by moving average
         x <- x %>%
             mutate(discharge = moving_average(discharge, n = pooling.pars$n,
                                               sides = pooling.pars$sides))
@@ -165,8 +165,7 @@ drought_events <- function(x, threshold,
 
     if (pooling == "sequent-peak") {
         # the real difference is the day the drought ends
-        x <- x %>%
-            mutate(cumvolume = cumsum(volume))
+        x <- mutate(x, cumvolume = cumsum(volume))
 
         n <- nrow(x)
         repeat {
@@ -178,27 +177,15 @@ drought_events <- function(x, threshold,
         }
 
         # we are under drought as long as there is a cumulative deficit
-        x <- x %>%
-            mutate(under.drought = cumvolume < 0)
+        x <-  mutate(x, under.drought = cumvolume < 0)
     }
 
-    x <- x %>%
-        mutate(change = under.drought != lag(under.drought))
+    x <-   mutate(x, change = under.drought != lag(under.drought))
     x$change[1] <- FALSE
 
-    x <- x %>%
-        # assign event numbers, only every second event is drought
-        mutate(event = cumsum(change))
 
-    if (pooling == "inter-event") {
-
-    }
-
-    # # only keep drought events?
-    # if (drop) {
-    x <- x  %>%
-        filter(under.drought)
-    # }
+    # assign event numbers, only every second event is drought
+    x <- mutate(x, event = cumsum(change))
 
     # summarizing each event
     x <- x %>%
@@ -207,8 +194,7 @@ drought_events <- function(x, threshold,
                   qmin = min(discharge), tqmin = time[which.min(discharge)[1]],
                   vbt = sum(volume[below.threshold]), volume = sum(volume),
                   dbt = sum(below.threshold),
-                  under.drought = unique(under.drought)) %>%
-           mutate(event = order(event))        # relabel events
+                  under.drought = unique(under.drought))
 
     # in theory volume must be zero when using sequent peak algorithm
     # because droughts most likely terminate during a day
@@ -216,10 +202,51 @@ drought_events <- function(x, threshold,
     # first day after
     if (pooling == "sequent-peak") x$volume[x$under.drought] <- 0
 
+    if (pooling == "inter-event") {
+        p <- 1
+        x$pool <- 0L
+
+        row <- if (x$under.drought[1]) 1 else 2   # start with first drought
+        while (row <= nrow(x)) {
+            x$pool[c(row, row + 1)] <- p
+
+            ie.time <- x$duration[row + 1]
+            # todo: check if we need to sum only over deficits
+            cumvol <- sum(x$volume[x$pool == p & x$under.drought])
+            vol.ratio <- cumvol / x$volume[row + 1]
+
+            depended <- ie.time <= pooling.pars$min.duration &&
+                vol.ratio < pooling.pars$min.vol.ratio
+
+            if (!depended) p <- p + 1
+
+            row <- row + 2
+        }
+
+        x <- x %>%
+            group_by(pool, under.drought) %>%
+            summarise(event = min(event), start = min(start), end = max(end),
+                      duration = sum(duration),
+                      qmin = min(qmin), tqmin = tqmin[which.min(qmin)],
+                      vbt = sum(vbt), volume = sum(volume), dbt = sum(dbt),
+                      pooled = n() - 1) %>%
+            arrange(start) %>%
+            ungroup() %>%
+            select(-pool)
+    }
+
+    x <- filter(x, under.drought) # # only keep drought events?
+    if (relabel.events) x <- mutate(x, event = order(event))
+
     # retain full table?
     if (!full.table) {
-        x <- x  %>%
-            select(event, start, end, duration, dbt, volume, vbt, tqmin, qmin)
+        if (pooling == "inter-event") {
+            x <- select(x, event, start, end, duration, dbt, volume, vbt, tqmin,
+                        qmin, pooled)
+        } else {
+            x <- select(x, event, start, end, duration, dbt, volume, vbt, tqmin,
+                        qmin)
+        }
     }
 
     return(x)

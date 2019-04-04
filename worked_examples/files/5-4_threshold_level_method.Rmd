@@ -57,39 +57,64 @@ droughts
 
 
 ## 	Minor droughts  
- 
+
 To reduce the problem of minor droughts two restrictions can be imposed:
 
- * a minimum drought duration, dmin, (minimum drought length, under the menu ‘Configuration’) that removes droughts with duration less than the specified number of days (here dmin is set equal to five days);
+* a minimum drought duration, dmin, (minimum drought length, under the menu ‘Configuration’) that removes droughts with duration less than the specified number of days (here dmin is set equal to five days);
 
- * a minimum drought deficit volume (coefficient alpha, under the menu ‘Configuration’), that removes droughts with a deficit volume less than a certain fraction α of the maximum drought deficit volume in the complete series of drought events (here α is set equal to 0.005). 
- 
+* a minimum drought deficit volume (coefficient alpha, under the menu ‘Configuration’), that removes droughts with a deficit volume less than a certain fraction α of the maximum drought deficit volume in the complete series of drought events (here α is set equal to 0.005). 
+
 ```{r}
 filter(droughts, duration >= 5, volume < min(volume) * 0.005)
 ```
- 
+
 
 ##	Dependent droughts
 The inter-event time criterion (IC) is used to pool dependent droughts which are separated by a short period of flow above the threshold. If the time between two droughts is less than a critical duration, tmin, (minimum distance between two successive droughts, under the menu ‘Configuration’) the two events are pooled. In this example tmin is set equal to two days.
 
+```{r}
+pooled <- ngaruroro %>%
+    drought_events(
+        threshold = q90, pooling = "inter-event", 
+        pooling.pars = list(min.duration = 2, min.vol.ratio = Inf)
+    ) %>%
+    filter(duration >= 5, volume < min(volume) * 0.005)    
+```
+
+
 # Calculation
 By selecting ‘Tables’ and then ‘Droughts’ from the menu, ticking the box ‘All year’, selecting the correct gauging station and finally pushing the button ‘Droughts’, the drought events are selected. A table is displayed including:
- *	the start date, defined as the first day below the threshold;
- *	the end date, defined as the last day below the threshold; 
- *	the deficit volume (1000 m3), defined as the sum of the daily deficit flows times the duration in days;
- *	the average deficit or drought intensity (1000 m3 day−1), defined as the ratio between the drought deficit volume and the number of days from the start date to the end date, the latter called full drought duration in Nizowka;
- *	the drought duration (days), defined as the full drought duration minus short periods (the inter-event time) above the threshold, called real drought duration in Nizowka;
- *	the minimum flow (m3 s−1), defined as the minimum flow within a drought event;
- *	the date of the minimum flow;
- *	and the average flow during the drought (m3 s−1).
+*	the start date, defined as the first day below the threshold;
+*	the end date, defined as the last day below the threshold; 
+*	the deficit volume (1000 m3), defined as the sum of the daily deficit flows times the duration in days;
+*	the average deficit or drought intensity (1000 m3 day−1), defined as the ratio between the drought deficit volume and the number of days from the start date to the end date, the latter called full drought duration in Nizowka;
+*	the drought duration (days), defined as the full drought duration minus short periods (the inter-event time) above the threshold, called real drought duration in Nizowka;
+*	the minimum flow (m3 s−1), defined as the minimum flow within a drought event;
+*	the date of the minimum flow;
+*	and the average flow during the drought (m3 s−1).
+
+```{r, echo=FALSE}
+library(kableExtra)
+pooled %>%
+    kable(caption = "Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ. ") 
+```
+
 
 The drought deficit characteristics of the first five drought events are given in Table 5.8. By selecting ‘Print’, two tables are displayed. Either the table ‘Parameters’ (as in Table 5.8) or the table ‘Number of droughts’ which summarises the number of droughts every year sorted by drought duration. From the latter table it can be seen that there are 71 drought events in total, on average two events every year. Minor droughts are dominating with 36 events lasting less than 11 days. Only 5 events lasted more than 30 days. All tables can be written to text files. The time series of the drought duration can be seen in Figure 5.12, and the major droughts are found in 1967, 1973, 1974, 1978 and 1983. A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed.
 
-Table 5.8 Drought deficit characteristics
+
 Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = Q90, dmin = 5 days, α = 0.005 and tmin = 2 days.
+```{r}
+ggplot(pooled, aes(x = start, y = duration)) + 
+    geom_col() + 
+    scale_x_date(date_breaks = "1 year", date_labels = "%Y")
+```
+
+
 Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = Q90, dmin = 5 days, α = 0.005 and tmin = 2 days.
 
 ```{r}
-
+ggplot(pooled, aes(duration)) + 
+    geom_histogram()
 ```
 
