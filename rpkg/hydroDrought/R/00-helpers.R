@@ -123,12 +123,11 @@ const_threshold <- function(x, fun, ...)
         summarise(threshold = fun(discharge, ...))
 }
 
-#' @export
-drought_events <- function(x, threshold,
-                           pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
-                           pooling.pars = list(n = 10, sides = "center",
-                                               min.duration = 5, min.vol.ratio = 0.1),
-                           full.table = FALSE, relabel.events = TRUE)
+
+.drought_events <- function(x, threshold,
+                            pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
+                            pooling.pars = list(n = 10, sides = "center",
+                                                min.duration = 5, min.vol.ratio = 0.1))
 {
     pooling <- match.arg(pooling)
 
@@ -164,43 +163,53 @@ drought_events <- function(x, threshold,
                under.drought = below.threshold)
 
     if (pooling == "sequent-peak") {
-        # the real difference is the day the drought ends
-        x <- mutate(x, cumvolume = cumsum(volume))
-
-        n <- nrow(x)
-        repeat {
-            start <- head(which(x$volume < 0 & x$cumvolume >= 0), 1)
-            if (length(start) == 0) break
-
-            mask <- seq(from = start, to = n)
-            x$cumvolume[mask] <- x$cumvolume[mask] - x$cumvolume[start - 1]
-        }
-
-        # we are under drought as long as there is a cumulative deficit
-        x <-  mutate(x, under.drought = cumvolume < 0)
+        # overwriting the column 'under.drought'
+        x <- x %>%
+            mutate(storage = .storage(x$discharge, threshold = threshold) * 86400,
+                   under.drought = storage > 0)
     }
 
-    x <-   mutate(x, change = under.drought != lag(under.drought))
-    x$change[1] <- FALSE
-
-
     # assign event numbers, only every second event is drought
-    x <- mutate(x, event = cumsum(change))
+    x <- mutate(x, event = .rle_id(under.drought))
+
+    return(x)
+}
+
+#' @export
+drought_events <- function(x, threshold,
+                           pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
+                           pooling.pars = list(n = 10, sides = "center",
+                                               min.duration = 5, min.vol.ratio = 0.1),
+                           full.table = FALSE, relabel.events = TRUE)
+{
+    pooling <- match.arg(pooling)
+
+    # only keep drought events?
+    x <- .drought_events(x = x, threshold = threshold,
+                         pooling = pooling, pooling.pars = pooling.pars) %>%
+        filter(under.drought)
 
     # summarizing each event
-    x <- x %>%
-        group_by(event) %>%
-        summarise(start = time[1], duration = n(), end = time[duration],
-                  qmin = min(discharge), tqmin = time[which.min(discharge)[1]],
-                  vbt = sum(volume[below.threshold]), volume = sum(volume),
-                  dbt = sum(below.threshold),
-                  under.drought = unique(under.drought))
+    # todo: capture the variables to summarize as quosures and add  spa Variables
 
-    # in theory volume must be zero when using sequent peak algorithm
-    # because droughts most likely terminate during a day
-    # we will obtain a (small) negative value as the upcrossing is on
-    # first day after
-    if (pooling == "sequent-peak") x$volume[x$under.drought] <- 0
+    if (pooling == "sequent-peak") {
+        # duration and volume are defined differently
+        x <- x %>%
+            group_by(event) %>%
+            summarise(dbt = sum(below.threshold),
+                      start = time[1], duration = dbt, end = time[duration],
+                      qmin = min(discharge), tqmin = time[which.min(discharge)[1]],
+                      vbt = sum(volume[below.threshold]), volume = vbt,
+                      under.drought = unique(under.drought))
+    } else {
+        x <- x %>%
+            group_by(event) %>%
+            summarise(start = time[1], duration = n(), end = time[duration],
+                      qmin = min(discharge), tqmin = time[which.min(discharge)[1]],
+                      vbt = sum(volume[below.threshold]), volume = sum(volume),
+                      dbt = sum(below.threshold),
+                      under.drought = unique(under.drought))
+    }
 
     if (pooling == "inter-event") {
         p <- 1
@@ -222,20 +231,8 @@ drought_events <- function(x, threshold,
 
             row <- row + 2
         }
-
-        x <- x %>%
-            group_by(pool, under.drought) %>%
-            summarise(event = min(event), start = min(start), end = max(end),
-                      duration = sum(duration),
-                      qmin = min(qmin), tqmin = tqmin[which.min(qmin)],
-                      vbt = sum(vbt), volume = sum(volume), dbt = sum(dbt),
-                      pooled = n() - 1) %>%
-            arrange(start) %>%
-            ungroup() %>%
-            select(-pool)
     }
 
-    x <- filter(x, under.drought) # # only keep drought events?
     if (relabel.events) x <- mutate(x, event = order(event))
 
     # retain full table?
@@ -250,4 +247,45 @@ drought_events <- function(x, threshold,
     }
 
     return(x)
+}
+
+.storage <- function(discharge, threshold)
+{
+    x <- data_frame(discharge = discharge,
+                    deficit = threshold - discharge,
+                    storage = 0)
+
+    x$storage[1] <- if (x$deficit[1] > 0) x$deficit else 0
+    for (i in seq(2, nrow(x))) {
+        s <- x$storage[i - 1] + x$deficit[i]
+        x$storage[i] <- if (s > 0) s else 0
+    }
+
+    return(x$storage)
+}
+
+
+
+.rle_id <- function(x)
+{
+    cumsum(x != lag(x, default = x[1]))
+}
+
+
+
+inspect_spa <- function(x)
+{
+    discharge <- ggplot(x, aes(time, discharge)) +
+        geom_line() +
+        geom_point(size = 0.5) +
+        geom_hline(yintercept = q90, col = 2, linetype = "dashed", size = 0.2) +
+        facet_wrap(~event, scales = "free", nrow = 1)
+
+    storage <- ggplot(x, aes(time, storage)) +
+        geom_line() +
+        geom_point(size = 0.5) +
+        expand_limits(y = 0) +
+        facet_wrap(~event, scales = "free", nrow = 1)
+
+    cowplot::plot_grid(discharge, storage, align = "v", ncol = 1)
 }

@@ -18,15 +18,63 @@ library(kableExtra)
 
 # Loading the Data
 
-In this example we are going to use ...
+Ten years of daily data from River Ngaruroro at Kuripapango (NZ) are used as an example. Table 5.9 lists the first flow values. The whole series can be found on the CD. The first two columns show the date and the corresponding flow value, Q.
+
 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
+
+ngaruroro <- filter(international, River == "Ngaruroro") %>%
+    select(discharge) %>%
+    unnest() %>%
+    append_group(by = "year", start = "-09-01")  %>%
+     filter(year >= 1988, year <= 1999) # time series without missing values
 ```
 
-And we are going to do ...
+# Calculation
+ 1.) Type the value of the desired yield (in cell number B5).
+ 2.) Calculate the storage according to Equation 5.5 (using the IF function in Excel). 
+The calculated storage is displayed in the right column. In the calculation Q90 is used as the desired yield, Q0.
+
 
 ```{r}
-what_procedure()
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
+
+droughts <- ngaruroro %>%
+    drought_events(threshold = q90, pooling = "sequent-peak")
 ```
 
+
+```{r}
+droughts %>%
+  head(7) %>%
+  kable(caption = "Table 5.10 An extract of drought deficit volumes and durations for River Ngaruroro at Kuripapango (NZ), calculated by SPA") 
+```
+
+
+# Selection of the drought deficit volume and duration
+The deficit volume is the maximum value in an uninterrupted sequence of positive St, and the drought duration is the time from the beginning of the depletion period to the time of the maximum depletion. Find these values by pushing the button named ‘Extract max.’ (Pushing this button activates a routine programmed in Visual Basic.) The date of the maximum depletion is also displayed.
+
+```{r, echo=FALSE}
+raw <- ngaruroro %>%
+    hydroDrought:::.drought_events(threshold = q90, pooling = "sequent-peak") %>%
+    filter(event == 3)
+
+hydroDrought:::inspect_spa(raw)
+```
+
+
+```{r, echo=FALSE}
+raw %>%
+    mutate(day = row_number()) %>%
+    select(time, day, discharge, volume, storage) %>% 
+  kable(caption = "Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")  %>% 
+    kable_styling(fixed_thead = TRUE, position = "left") %>%
+    row_spec(which.max(raw$storage), bold = TRUE)
+```
+
+
+
+# Results
+An extract of the drought duration and deficit volumes for the 10-year series is given in Table 5.10. The time series starts with a flow value below the threshold and the previous flows are not known. The first deficit volume and duration should therefore be omitted from further analyses.
+As can be seen from the results displayed on the CD, even though the SPA procedure is pooling minor and dependent droughts, the obtained time series of events still contains a number of minor drought events.
