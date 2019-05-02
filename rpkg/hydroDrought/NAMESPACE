@@ -2,8 +2,11 @@
 
 export(append_group)
 export(baseflow)
+export(const_threshold)
 export(drought_events)
+export(group_id)
 export(lfquantile)
 export(moving_average)
+export(var_threshold)
 export(what_procedure)
 importFrom(lfstat,baseflow)

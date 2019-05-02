@@ -47,7 +47,7 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
         # if existing, use names of the group
         nam <- names(start)
         is.named <- length(nam) == length(start) && all(!is.na(nam)) && all(nam != "")
-        if (is.named) x$season <- fct_recode(x$season, nam)
+        if (is.named) levels(x$season) <- nam
 
 
         if (unique.id) x$season.id <- season.id
@@ -66,6 +66,7 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
     return(x)
 }
 
+#' @export
 group_id <- function(time, starts)
 {
     starts <- regmatches(starts, regexpr("-.*", starts))
@@ -83,13 +84,14 @@ group_id <- function(time, starts)
     return(breaks[rowSums(season)])
 }
 
-var_threshold <- function(x, by = c("day", "week", "month", "season", "year"),
+#' @export
+var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year"),
                           fun, start = "-01-01", ...)
 {
-    by <- match.arg(by)
-    y <- append_group(x, by = by, start = start)
+    vary.by <- match.arg(vary.by)
+    y <- append_group(x, by = vary.by, start = start)
 
-    if (by == "day") {
+    if (vary.by == "day") {
         # interpolate discharge value on day 366
         # if year is not a leap year as the mean of the surrounding days
         # get list of non leap-years from data
@@ -110,11 +112,12 @@ var_threshold <- function(x, by = c("day", "week", "month", "season", "year"),
     y %>%
         # summaries with NA values do not make sense, avoids to always specify na.rm = TRUE
         filter(!is.na(discharge)) %>%
-        group_by(.dots = by) %>%
+        group_by(.dots = vary.by) %>%
         summarise(threshold = fun(discharge, ...))
 }
 
 
+#' @export
 const_threshold <- function(x, fun, ...)
 {
     x %>%

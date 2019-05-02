@@ -1,0 +1,109 @@
+---
+title: "Threshold"
+author: "Worked example 10.1"
+output: 
+  tufte::tufte_html:
+    tufte_features: ["fonts"]
+    css: style.css
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+theme_set(theme_bw(base_size = 10))
+library(kableExtra)
+```
+
+
+# Loading the Data
+
+Daily data from River Ngaruroro at Kuripapango (NZ) are used as an example. 
+
+
+```{r, message=FALSE, warning=FALSE}
+library(hydroDrought)
+
+ngaruroro <- filter(international, River == "Ngaruroro") %>%
+    select(discharge) %>%
+    unnest()
+```
+
+
+Threshold calculations always remove missing values. 
+
+Daily varying thresholds are more complicated because leap years need to be dealt with. 
+
+
+## Constant tresholds 
+
+The aggregating function can be any R function returning a single value like `mean()`, `quantile()`, `prob()`, ...
+
+```{r}
+const_threshold(ngaruroro, fun = lfquantile, exc.freq = 0.8)
+const_threshold(ngaruroro, fun = median)
+```
+
+
+## Varying thresholds
+
+Can vary by: day, week, month, season, year
+
+
+```{r}
+# specify the start of the season
+# year will be ignored, only month and day are relevant
+starts <- c("1971-02-24", "1971-06-03", "1971-10-22")
+starts <- c("-02-24", "-06-03", "-10-22")
+ngaruroro %>%
+    var_threshold(vary.by = "season", fun = lfquantile, exc.freq = 0.8, start = starts)
+
+
+# it is better to name the seasons
+starts <- c("summer" = "-09-01", "winter" = "-02-01")
+var_threshold(ngaruroro, vary.by = "season", 
+              fun = lfquantile, exc.freq = 0.8, start = starts)
+```
+
+
+## Subset
+Calculate threshold (Q70) for given years (eg. a subset of the whole time series). 
+```{r}
+threshold <- ngaruroro %>%
+    filter(time >= as.Date("1970-01-01") & time < as.Date("1990-01-01")) %>%
+    var_threshold(vary.by = "month", fun = lfquantile, exc.freq = 0.7)
+
+threshold
+```
+
+
+Use the threshold for the whole dataset. First we have to append a new column containing the groups we have calculated the threshold for (in our case months). Then the threshold will be joined based on that column. 
+```{r}
+# hydrological year starts in September (only relevat for plotting)
+grouped <- ngaruroro %>%
+    append_group(by = "month", start = "-09-01")
+
+grouped
+
+ng <- grouped %>%
+    left_join(threshold, by = "month") %>%
+    mutate(under.drought = discharge < threshold)
+
+ng
+```
+
+
+
+Demonstarte montly threshold for three years not used in threshold calculation. 
+```{r}
+ng %>%
+    filter(year %in% 1964:1966) %>%
+    ggplot() + 
+    geom_line(aes(x = time, y = discharge)) + 
+    geom_step(aes(x = time, y = threshold), 
+              linetype = "dashed", size = 0.2, col = "red") + 
+    scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+    scale_y_log10() +
+    facet_wrap(~year, scales = "free_x", ncol = 1, strip.position = "right")
+```
+
