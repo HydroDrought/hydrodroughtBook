@@ -61,6 +61,9 @@ tbl <- tribble(
     "8.2", "Top Kriging",
     "", "",
 
+    # Anne
+    "10.1",  "Threshold",
+    "", "",
 
     # Kerstin
     "12.1",  "EDII text report",

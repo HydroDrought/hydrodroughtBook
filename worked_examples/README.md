@@ -13,7 +13,7 @@
   <tr>
     <td> <b> 2. Hydroclimatology</b> </td>
     <td> <i>Daniel Kingston</i> </td>
-    <td>  </td>
+    <td> 0 </td>
   </tr>
   <tr>
     <td> <b> 3. Drought Generating Processes</b> </td>
@@ -161,8 +161,17 @@
   <tr>
     <td> <b> 10. Human Influences</b> </td>
     <td> <i>Anne F. Van Loon</i> </td>
-    <td>  </td>
+    <td> 1 </td>
   </tr>
+  <tr>
+  <td colspan="3">
+  <ul>
+  <li>10.1 Thresholds: 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/10-1_threshold.html">Worked Example</a>, 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/10-1_threshold.R">R-script</a>
+    <br><i></i>
+  </li>
+
   <tr>
     <td> <b> 11. Past and Future Droughts</b> </td>
     <td> <i>Niko Wanders</i> </td>

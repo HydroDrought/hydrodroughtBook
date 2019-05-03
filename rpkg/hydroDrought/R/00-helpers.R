@@ -23,6 +23,14 @@ moving_average <- function(x, n, sides = "past")
     return(as.numeric(y))
 }
 
+.jday <- function(x) {
+    #as.numeric(format(as.Date(x), "%j"))
+
+    # set the year to year 1972 (which is a leap year)
+    year(x) <- 1972
+    return(x)
+}
+
 #' @export
 append_group <- function(x, by = c("day", "week", "month", "season", "year"),
                          start = "-01-01", unique.id = FALSE)
@@ -30,8 +38,6 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
     by <- match.arg(by, several.ok = TRUE)
     x$time <- as.Date(x$time)
     start <- regmatches(start, regexpr("-.*", start))
-
-    .jday <- function(x) as.numeric(format(as.Date(x), "%j"))
 
     # always calculate the hydrological year, only id is meaningful
     x$year <- as.numeric(substring(group_id(x$time, start[1]), 1L, 4L))
@@ -49,13 +55,13 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
         is.named <- length(nam) == length(start) && all(!is.na(nam)) && all(nam != "")
         if (is.named) levels(x$season) <- nam
 
-
         if (unique.id) x$season.id <- season.id
     }
 
     # only week and month are trivial
-    f <- c(week = week, month = month)
-    for (i in setdiff(by, c("year", "season", "day"))) {
+    f <- c(week = week, month = month, day = .jday)
+    #for (i in setdiff(by, c("year", "season", "day"))) {
+    for (i in setdiff(by, c("year", "season"))) {
         x <- mutate(x, !!i := f[[i]](x$time))
         if (unique.id) x[[paste0(i, ".id")]] <- paste(x$year, x[[i]], sep = "-")
     }
@@ -86,44 +92,54 @@ group_id <- function(time, starts)
 
 #' @export
 var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year"),
-                          fun, start = "-01-01", ...)
+                          fun, start = "-01-01", append = FALSE, ...)
 {
     vary.by <- match.arg(vary.by)
     y <- append_group(x, by = vary.by, start = start)
 
     if (vary.by == "day") {
-        # interpolate discharge value on day 366
-        # if year is not a leap year as the mean of the surrounding days
-        # get list of non leap-years from data
-        leap <- filter(y, day >= 365) %>%
-            group_by(year) %>%
-            filter(n() == 1) %>%
-            mutate(time = as.Date(NA), day = 366, discharge = NA)
+        # interpolate Feb 29th with "surrounding" days if not a leap year
+        leapday <- as.Date("1972-02-29")
 
-        y <- bind_rows(y, leap) %>%
-            arrange(year, time) %>%
-            mutate(discharge = if_else(
-                day == 366 & is.na(discharge),
-                (lag(discharge) + lead(discharge)) / 2,
-                discharge
-            ))
+        leapdays <- filter(y, day == leapday - 1 | day == leapday + 1,
+                           !leap_year(time)) %>%
+            group_by(year) %>%
+            summarise(discharge = mean(discharge),
+                      day = leapday) %>%
+            # surrounding values could be NA
+            filter(!is.na(discharge))
+
+
+        y <- bind_rows(y, leapdays)
     }
 
-    y %>%
+    threshold <- y %>%
         # summaries with NA values do not make sense, avoids to always specify na.rm = TRUE
         filter(!is.na(discharge)) %>%
         group_by(.dots = vary.by) %>%
         summarise(threshold = fun(discharge, ...))
+
+    if (append) {
+        return(left_join(y, threshold, by = vary.by))
+    } else {
+        return(threshold)
+    }
 }
 
 
 #' @export
-const_threshold <- function(x, fun, ...)
+const_threshold <- function(x, fun, append = FALSE, ...)
 {
-    x %>%
+    threshold <- x %>%
         # summaries with NA values do not make sense, avoids to always specify na.rm = TRUE
         filter(!is.na(discharge)) %>%
         summarise(threshold = fun(discharge, ...))
+
+    if (append) {
+        return(left_join(x, threshold, by = vary.by))
+    } else {
+        return(threshold)
+    }
 }
 
 

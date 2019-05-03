@@ -12,7 +12,7 @@ editor_options:
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(ggplot2)
 theme_set(theme_bw(base_size = 10))
-library(kableExtra)
+library(viridisLite)
 ```
 
 
@@ -79,7 +79,7 @@ threshold
 
 Use the threshold for the whole dataset. First we have to append a new column containing the groups we have calculated the threshold for (in our case months). Then the threshold will be joined based on that column. 
 ```{r}
-# hydrological year starts in September (only relevat for plotting)
+# hydrological year starts in September (here only relevant for plotting)
 grouped <- ngaruroro %>%
     append_group(by = "month", start = "-09-01")
 
@@ -94,7 +94,7 @@ ng
 
 
 
-Demonstarte montly threshold for three years not used in threshold calculation. 
+Demonstrate monthly threshold for three years not used in threshold calculation. 
 ```{r}
 ng %>%
     filter(year %in% 1964:1966) %>%
@@ -105,5 +105,53 @@ ng %>%
     scale_x_date(date_breaks = "1 month", date_labels = "%b") +
     scale_y_log10() +
     facet_wrap(~year, scales = "free_x", ncol = 1, strip.position = "right")
+```
+
+
+## Daily varying threshold with smoothing
+
+```{r}
+threshold <- ngaruroro %>%
+    mutate(discharge = moving_average(discharge, n = 31, sides = "center")) %>%
+    filter(time >= as.Date("1970-01-01") & time < as.Date("1990-01-01")) %>%
+    var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.8)
+
+threshold
+
+ng <- ngaruroro %>%
+    append_group(by = "day", start = "-09-01") %>%
+    left_join(threshold, by = "day")
+```
+
+```{r}
+p1 <- ng %>%
+    filter(is.finite(discharge)) %>%
+    ggplot(aes(x = day, y = year, fill = threshold)) + 
+    geom_tile() + 
+    scale_fill_viridis_c() + 
+    scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
+    theme(legend.position = "top", 
+          axis.title.x = element_blank())
+
+p2 <- ggplot(data = threshold, aes(x = day, y = threshold)) + 
+    geom_step() + 
+    scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
+    theme(axis.title.x = element_blank())
+
+cowplot::plot_grid(p1, p2, align = "v", axis = c("l", "r"), 
+                   ncol = 1, rel_heights = c(5, 2))
+
+```
+
+
+
+## Fast Track
+The functions `var_threshold()` and `const_threshold()` both accept an argument `append = TRUE` to facilitate the computation of the threshold using the enitre time series and appending it. 
+
+```{r}
+ngaruroro %>%
+    var_threshold(vary.by = "month", 
+                  fun = lfquantile, exc.freq = 0.8, 
+                  append = TRUE)
 ```
 
