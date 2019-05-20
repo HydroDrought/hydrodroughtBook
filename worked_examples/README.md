@@ -166,8 +166,8 @@
   <tr>
   <td colspan="3">
   <ul>
-  <li>10.1 Thresholds: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/10-1_threshold.html">Worked Example</a>, 
+  <li>10.1 Human Influences: 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/10-1_human_influences.html">Worked Example</a>, 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/10-1_threshold.R">R-script</a>
     <br><i></i>
   </li>

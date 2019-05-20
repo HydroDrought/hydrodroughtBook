@@ -1,4 +1,5 @@
-as.monthDay <- function(x, origin = "-01-01")
+#' @export
+monthDay <- function(x, origin = "-01-01")
 {
     x <- as.Date(x)
     origin <- regmatches(origin, regexpr("-.*", origin))
@@ -26,38 +27,57 @@ as.monthDay <- function(x, origin = "-01-01")
     return(x)
 }
 
+#' @export
+is.monthDay <- function(x) inherits(x, "monthDay")
+
+# length, [, [<-, [[, [[<-, c
+
+#' @export
+`[.monthDay` <- function(x, ...) {
+    y <- NextMethod()
+
+    attr(y, "origin") <- attr(x, "origin")
+    return(y)
+}
+
+#' @export
+c.monthDay <- function(...) {
+    args <- list(...)
+    cl <- lapply(args, class)
+    origin <- attr(args[[1]], "origin")
+    y <- NextMethod()
+
+    # all elements must have same origin
+    o <- lapply(args, attr, which = "origin")
+    if (length(unique(o)) > 1) stop("Not all arguments have the same origin/start.")
+    attr(y, "origin") <- origin
+    class(y) <- cl[[1]]
+    return(y)
+}
+
+#' @export
 pillar_shaft.monthDay <- function(x, ...) {
     out <- format(x)
     out[is.na(x)] <- NA
     pillar::new_pillar_shaft_simple(out, align = "right")
 }
 
+#' @export
 type_sum.monthDay <- function(x) {
     "month-day"
 }
 
-
-# df <- data_frame(input = seq(as.Date("2011-01-01"), as.Date("2012-01-01"), by = "1 day"),
-#                  md = as.monthDay(input, origin = "-04-01"),
-#                  year = as.factor(year(md)))
-#
-# df %>%
-#     ggplot(aes(md, year)) +
-#     geom_raster(fill = "black")
-#
-
-
-# as.monthDay(today())
-
-print.monthDay <- function(x, format = "-%m-%d", ...)
-{
-    print(format.Date(x, format = format))
-}
-
+#' @export
 format.monthDay <- function(x, format = "-%m-%d", ...)
 {
-    format.Date(x, format = format)
+    NextMethod(format = format, ...)
 }
+
+#' @export
+print.monthDay <- function(x, ...) {
+    cat(format(x, ...), "\n")
+}
+
 
 # doesn't work
 # filter(ng, md == "-02-29")
@@ -67,22 +87,7 @@ format.monthDay <- function(x, format = "-%m-%d", ...)
 #     unclass(x) - as.numeric(attr(x, "origin")) + 1
 # }
 
-
+#' @export
 as.integer.monthDay <- function(x, ...) {
     as.integer(unclass(x) - as.numeric(attr(x, "origin")) + 1)
 }
-
-#
-# ng <- filter(international, River == "Ngaruroro") %>%
-#     select(discharge) %>%
-#     unnest() %>%
-#     append_group("year", start = "-09-01") %>%
-#     mutate(md = as.monthDay(time, origin = "-09-01"),
-#            day = as.integer(md),
-#            date = md)
-#
-# class(ng$date) <- "Date"
-#
-# ggplot(ng, aes(x = md, y = year)) +
-#     geom_raster() +
-#     scale_x_date(date_breaks = "1 months", date_labels = "%b")

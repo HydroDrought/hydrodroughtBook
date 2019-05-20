@@ -1,0 +1,184 @@
+---
+title: "Human Influences"
+author: "Worked example 10.1"
+output:
+    tufte::tufte_html:
+    tufte_features: ["fonts"]
+css: style.css
+editor_options:
+    chunk_output_type: console
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+theme_set(theme_bw(base_size = 10))
+library(viridisLite)
+library(kableExtra)
+```
+
+^[Tobias: What will be the name of the Worked Example?]
+
+
+```{r, echo = TRUE, message=FALSE, warning=FALSE}
+library(hydroDrought)
+# Let's pretend the data is already inside the package...
+origin <- "-09-01"
+guadiana <- read_tsv("../../data/Guadiana_Delay_LogEff_including_Psim.txt") %>%
+    select(time = "date.yyyymmdd",  Qsim, Qobs)  %>%
+    append_group(by = "day", start = origin)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+library(hydroDrought)
+guadiana
+```
+
+If we want to quantify the human influence on hydrological drought by comparing two time series, one with and one without this human influence, we want to use the threshold of the **benchmark** time series to calculate droughts in both the **human-influenced** and **benchmark** time series. These are the steps that we will discuss in this Worked Example:
+
+1) Calculate the threshold from the **benchmark** time series
+
+2) Calculate drought characteristics for the **benchmark** time series, using the **benchmark** threshold 
+
+3) Calculate drought characteristics for the **human-influenced** time series, using the **benchmark** threshold
+
+4) Compare drought characteristics between the **benchmark** & **human-influenced** time series
+
+
+# 1) Threshold calculation
+
+Calculate the threshold from the **benchmark** time series.
+
+Load the **benchmark** time series. Note that these can be calculated from a paired catchment analysis (Sect. XX), an upstream-downstream comparison (Sect. XX), model naturalisation (Sect. XX), or pre-post disturbance analysis (Sect. XX). As an example we here use the Upper-Guadiana data^[Tobias: What ist the start of the low-flow season? Or can we simply use calendar years? ]. The **benchmark** time series for this catchment are modelled as described in Sect. XX.
+Choose the threshold. 
+
+```{r}
+natural <- guadiana %>%
+    select(time, day, year, discharge = Qsim)
+```
+
+Here we are taking the example of a daily varying threshold, smoothed by a 30-day moving average. We are using the period 1960-2000 to calculate the threshold. ^[Tobias: Which aggregation function should we use? $Q_{95}$]
+
+```{r}
+threshold <- natural %>%
+    mutate(discharge = moving_average(discharge, n = 30, sides = "center")) %>%
+    filter(year >= 1960 & year <= 2000) %>%
+    var_threshold(vary.by = "day", start = origin, 
+                  fun = lfquantile, exc.freq = 0.95) %>%
+    print()
+```
+
+
+```{r, echo=FALSE}
+p1 <- natural %>%
+    left_join(threshold, by = "day") %>%
+    filter(is.finite(discharge)) %>%
+    ggplot(aes(x = day, y = year, fill = threshold)) + 
+    geom_tile() + 
+    scale_fill_viridis_c() + 
+    scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
+    theme(legend.position = "top", 
+          axis.title.x = element_blank())
+
+p2 <- ggplot(data = threshold, aes(x = day, y = threshold)) + 
+    geom_step() + 
+    scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
+    theme(axis.title.x = element_blank())
+
+cowplot::plot_grid(p1, p2, align = "v", axis = c("l", "r"), 
+                   ncol = 1, rel_heights = c(5, 2))
+```
+
+
+# 2) Drought characteristics (benchmark time series/ benchmark threshold)
+Calculate drought characteristics for the **benchmark** time series, using the **benchmark** threshold. ^[Tobias: Should we use pooling?]
+
+Extent the **benchmark** threshold calculated in step 1 to the period of the **benchmark** time series. Note that this can be a different time period than was used to calculate the **benchmark** threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).
+
+```{r}
+# thres.bench2 <- natural %>%
+#     mutate(discharge = moving_average(discharge, n = 30, sides = "center")) %>%
+#     filter(year >= 1981 & year <= 2000) %>%
+#     var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.95)
+```
+
+
+Calculate the drought characteristics you want to compare. For the Upper-Guadiana, these would be the **benchmark** drought characteristics: ^[Tobias: filter minor droughts?]
+
+```{r}
+dc.benchmark <- natural %>%
+    filter(year >= 1981 & year <= 2000) %>%
+    drought_events(threshold = threshold, pooling = "seq") 
+
+kable(dc.benchmark)
+```
+
+
+# 3) Drought characteristics (human-influenced time series/ benchmark threshold)    
+Calculate drought characteristics for the **human-influenced** time series, using the **benchmark** threshold
+
+Load the **human-influenced** time series. In this case we are using the observed time series from the Upper-Guadiana catchment.
+Extent the **benchmark** threshold calculated in step 1 to the period of the **human-influenced** time series. Note that this can be a different time period than was used to calculate the **benchmark** threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).
+
+```{r}
+influenced <- guadiana %>%
+    select(time, day, year, discharge = Qobs) %>%
+    filter(year >= 1991 & year <= 2000)
+
+```
+
+
+```{r, warning=FALSE, fig.width=8, fig.height=10}
+infl <- influenced %>%
+    left_join(threshold, by = "day")
+
+infl %>%
+    ggplot() + 
+    geom_line(aes(x = time, y = discharge)) + 
+    geom_step(aes(x = time, y = threshold), 
+              linetype = "dashed", size = 0.2, col = "red") + 
+    scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+    scale_y_log10() +
+    facet_wrap(~year, scales = "free_x", ncol = 1, strip.position = "right")
+```
+
+
+Calculate the drought characteristics you want to compare.
+For the Upper-Guadiana, these would be the **human-influenced** drought characteristics:
+
+```{r}
+dc.influenced <- influenced %>%
+    drought_events(threshold = threshold, pooling = "sequent-peak") 
+
+kable(dc.influenced)
+```
+
+
+
+# 4) Comparison of drought characteristics    
+
+Compare drought characteristics between the **benchmark** & **human-influenced** time series
+
+```{r}
+summarize_dc <- function(x) {
+    c("mean.duration" = mean(x$duration), 
+      "mean.deficit" = mean(x$volume))
+}
+```
+
+Calculate the percentage difference between the **benchmark** and **human-influenced** drought characteristics.
+
+$$\Delta DC = \frac{DCHI - DCBM}{DCBM} \cdot 100$$
+where $\Delta DC$ is the percentage change in drought characteristics ($DC$) between the **human-influenced** ($DCHI$) and **benchmark** ($DCBM$) time series.
+For the Upper-Guadiana, these would be the differences in drought characteristics:
+
+```{r}
+dc.hi <- summarize_dc(dc.influenced)
+print(dc.hi)
+
+dc.bm <- summarize_dc(dc.benchmark)
+print(dc.bm)
+
+(dc.hi - dc.bm) / dc.bm * 100
+```
+
