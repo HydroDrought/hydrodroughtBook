@@ -1,8 +1,8 @@
-# Example of Repository
+# Hydrological Drought Book
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.146.svg)](https://doi.org/10.5281/zenodo.146)
 
-This repository contains code associated with the book, entitled, 'blah blah blah'. When run, it will replicate the results published in the book ([link to the book](https://www.google.com)). Please cite both the textbook and this repository if you make use of any part of this.
+This repository contains code associated with the book, entitled, 'Hydrological Drought - Processes and estimation methods for streamflow and groundwater'. When run, it will replicate the results published in the book ([link to the book](https://www.google.com)). Please cite both the textbook and this repository if you make use of any part of this.
 
 
 ## Contents
