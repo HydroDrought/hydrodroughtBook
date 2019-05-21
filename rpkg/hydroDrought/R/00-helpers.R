@@ -23,13 +23,13 @@ moving_average <- function(x, n, sides = "past")
     return(as.numeric(y))
 }
 
-.jday <- function(x) {
-    #as.numeric(format(as.Date(x), "%j"))
-
-    # set the year to year 1972 (which is a leap year)
-    year(x) <- 1972
-    return(x)
-}
+# .jday <- function(x) {
+#     #as.numeric(format(as.Date(x), "%j"))
+#
+#     # set the year to year 1972 (which is a leap year)
+#     year(x) <- 1972
+#     return(x)
+# }
 
 #' @export
 append_group <- function(x, by = c("day", "week", "month", "season", "year"),
@@ -40,7 +40,7 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
     start <- regmatches(start, regexpr("-.*", start))
 
     # always calculate the hydrological year, only id is meaningful
-    x$year <- as.numeric(substring(group_id(x$time, start[1]), 1L, 4L))
+    x$year <- as.integer(substring(group_id(x$time, start[1]), 1L, 4L))
 
     if ("season" %in% by) {
         if (length(start) < 2) {
@@ -59,15 +59,18 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
     }
 
     # only week and month are trivial
-    f <- c(week = week, month = month, day = .jday)
-    #for (i in setdiff(by, c("year", "season", "day"))) {
-    for (i in setdiff(by, c("year", "season"))) {
+    f <- c(week = week, month = month)
+    for (i in setdiff(by, c("year", "season", "day"))) {
+        #for (i in setdiff(by, c("year", "season"))) {
         x <- mutate(x, !!i := f[[i]](x$time))
         if (unique.id) x[[paste0(i, ".id")]] <- paste(x$year, x[[i]], sep = "-")
     }
 
-    # calculate day at the end, so that we can copy week and season for day 366
-
+    # treat day differently, we need to pass the start of the year
+    if ("day" %in% by) {
+        x <- mutate(x, day = monthDay(x$time, origin = start[1]))
+        if (unique.id)  x <- mutate(x, day.id = as.integer(x$day))
+    }
 
     return(x)
 }
@@ -109,8 +112,9 @@ var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year
             # surrounding values could be NA
             filter(!is.na(discharge))
 
-
-        y <- bind_rows(y, leapdays)
+        y <- bind_rows(y, leapdays) %>%
+            # somehow, class gets lost...
+            mutate(day = monthDay(day, origin = start))
     }
 
     threshold <- y %>%
@@ -171,13 +175,14 @@ const_threshold <- function(x, fun, append = FALSE, ...)
     } else {
         # compute the same groups than threshold and join it
         by <- setdiff(colnames(threshold), "threshold")
+        origin <- pull(threshold, by)[1]
         x <- x %>%
-            append_group(by = by) %>%
+            append_group(by = by, start = origin) %>%
             left_join(threshold, by = by)
     }
 
     x <- x %>%
-        mutate(volume = (discharge - threshold) * 86400,
+        mutate(volume = -(discharge - threshold) * 86400,
                below.threshold = discharge < threshold,
                under.drought = below.threshold)
 
@@ -203,10 +208,8 @@ drought_events <- function(x, threshold,
 {
     pooling <- match.arg(pooling)
 
-    # only keep drought events?
     x <- .drought_events(x = x, threshold = threshold,
-                         pooling = pooling, pooling.pars = pooling.pars) %>%
-        filter(under.drought)
+                         pooling = pooling, pooling.pars = pooling.pars)
 
     # summarizing each event
     # todo: capture the variables to summarize as quosures and add  spa Variables
@@ -216,19 +219,22 @@ drought_events <- function(x, threshold,
         x <- x %>%
             group_by(event) %>%
             summarise(dbt = sum(below.threshold),
-                      start = time[1], duration = dbt, end = time[duration],
+                      start = time[1], duration = dbt, end = max(time),
                       qmin = min(discharge), tqmin = time[which.min(discharge)[1]],
                       vbt = sum(volume[below.threshold]), volume = vbt,
                       under.drought = unique(under.drought))
     } else {
         x <- x %>%
             group_by(event) %>%
-            summarise(start = time[1], duration = n(), end = time[duration],
+            summarise(start = time[1], duration = n(), end =  max(time),
                       qmin = min(discharge), tqmin = time[which.min(discharge)[1]],
                       vbt = sum(volume[below.threshold]), volume = sum(volume),
                       dbt = sum(below.threshold),
                       under.drought = unique(under.drought))
     }
+
+    # only keep drought events?
+    x <- filter(x, under.drought)
 
     if (pooling == "inter-event") {
         p <- 1
@@ -257,10 +263,10 @@ drought_events <- function(x, threshold,
     # retain full table?
     if (!full.table) {
         if (pooling == "inter-event") {
-            x <- select(x, event, start, end, duration, dbt, volume, vbt, tqmin,
+            x <- select(x, event, start, end, duration,  volume, tqmin, #dbt,  vbt,
                         qmin, pooled)
         } else {
-            x <- select(x, event, start, end, duration, dbt, volume, vbt, tqmin,
+            x <- select(x, event, start, end, duration, volume, tqmin, #dbt,  vbt,
                         qmin)
         }
     }
@@ -274,7 +280,7 @@ drought_events <- function(x, threshold,
                     deficit = threshold - discharge,
                     storage = 0)
 
-    x$storage[1] <- if (x$deficit[1] > 0) x$deficit else 0
+    x$storage[1] <- if (x$deficit[1] > 0) x$deficit[1] else 0
     for (i in seq(2, nrow(x))) {
         s <- x$storage[i - 1] + x$deficit[i]
         x$storage[i] <- if (s > 0) s else 0
@@ -282,6 +288,10 @@ drought_events <- function(x, threshold,
 
     return(x$storage)
 }
+
+# tibble(d = c(1, 1, 0, 0, -1, 0, -1, -1, -1, 1, 1, 1, 1),
+#        t = 0,
+#        s = .storage(d, t))
 
 
 
