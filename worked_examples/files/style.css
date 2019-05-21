@@ -45,3 +45,7 @@ table {
     width: 50%;
     border-spacing: 0;
 }
+
+.pagedtable-wrapper {
+    width: 55%;
+}

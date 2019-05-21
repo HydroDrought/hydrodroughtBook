@@ -26,68 +26,68 @@ First we load the dataset and define the observations and forecast variables:
 ```{r, message=FALSE, warning=FALSE}
 # Load the data 
 library(hydroDrought)
-head(fcst_dataset)
+rmarkdown::paged_table(as.data.frame(fcst_dataset), 
+                       options = list(cols.print = 5))
 
 # Subset observations vector 
 obs <- fcst_dataset$Observed_flow
 
 # Subset ensemble forecast matrix
-fcst_ens <- fcst_dataset[ ,3:53]
+fcst_ens <- fcst_dataset[, 3:53]
 
 # Plot observed and ensemble forecast
-boxplot(t(fcst_ens), xlab = "Hindcast year", ylab = "Flow (cumecs)", xaxt = "n", range = 0)
+boxplot(t(fcst_ens), xlab = "Hindcast year", ylab = "Flow (cumecs)", 
+        xaxt = "n", range = 0)
 axis(side = 1, at = 1:50, labels = fcst_dataset$Year)
 lines(obs)
 ```
 
-## Calculate long-term low flow threshold from observations 
+# Calculate long-term low flow threshold from observations 
 
-In this example we want to evaluate the ability of the ESP forecast to predict the probability of river discharge events below the long-term Q90 low flow threshold. We need to first calculate the long-term Q90 threshold from observations using the `quantile()` function:
+In this example we want to evaluate the ability of the ESP forecast to predict the probability of river discharge events below the long-term Q90 low flow threshold. We need to first calculate the long-term Q90 threshold from observations using the `lfquantile()` ^[Tobias: would use the function `lfquantile()` from the package. The names of the vector are easier to interpret.] function:
 
 ```{r}
-obs_Q90_threshold <- quantile(obs, probs = 0.1)
+obs_Q90_threshold <- lfquantile(obs, exc.freq = 0.1)
 obs_Q90_threshold
 ```
 
 
-## Calculate the Brier Score (BS)
+# Calculate the Brier Score (BS)
 
 The forecast evaluation metric we will use is the Brier score. The Brier score is essentially the mean squared error of the probability forecasts when the observation *obs~1~* = 1 if the event occurs, and *obs~2~* = 0 if the event does not occur. The score averages the squared differences between pairs of forecast probabilities and the subsequent binary observations,
 $$BS=\frac{1}{n}\sum_{k=1}^n(fcst_{k}-obs_{k})^2$$
-where the index *k* denotes numbering of trhe *n* forecast-event pairs. In our example *n* = 50. Perfect forecasts will have *BS* = 0. The steps to calculate the BS are as follows:
+where the index *k* denotes numbering of the *n* forecast-event pairs. In our example *n* = 50. Perfect forecasts will have *BS* = 0. The steps to calculate the BS are as follows:
 
 * Create vector of binary observations *obs* with 1 when an an event is observed (i.e. below the long-term observed Q90 threshold for that year) and 0 if not
-* Create the vector *fcst* of forecast probabilities (i.e. number of ensemble members below the long-term observed Q90 threhold for that year, expressed as a probability [0,1])
+* Create the vector *fcst* of forecast probabilities (i.e. number of ensemble members below the long-term observed Q90 threshold for that year, expressed as a probability [0,1])
 * In order to calculate the skill, we need a *benchmark* forecast against which to compare our ESP forecast A common benchmark forecast is the long-term climatology. In any given year the probability of the flow being below the Q90 threshold is simply 0.1 (i.e. the climatological probability). Therefore create the vector *bench* of climatological probabilities for each forecast (i.e. 0.1)
 * The Brier score is then calculated using the `brier()` function from the `verification` R package
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 library(verification)
 
 # Vector of binary observations 
 obs_vec <- ifelse(obs < obs_Q90_threshold, 1, 0)
 
-# Vector of forecast probabilities (i.e. number of ensemble members below threshold / total number of ensemble members)
-fcst_prob_vec <- apply(fcst_ens < obs_Q90_threshold, MARGIN = 1, FUN = sum) / length(fcst_ens)
+# Vector of forecast probabilities (i.e. number of ensemble members below 
+# threshold / total number of ensemble members)
+fcst_prob_vec <- apply(fcst_ens < obs_Q90_threshold, MARGIN = 1, FUN = mean)
 
-# Vector of climatological probabilities for benchmark forecast, simply a vector 0.1 (i.e. below Q90 threshold 10% of the time by chance)
+# Vector of climatological probabilities for benchmark forecast, simply a 
+# vector 0.1 (i.e. below Q90 threshold 10% of the time by chance)
 clim_vec <- rep(0.1, 50)
 
 # Calculate Brier Score for ESP forecast
-BS_esp <- verification::brier(obs = obs_vec, pred = fcst_prob_vec, bins = FALSE)["bs"]
-BS_esp <- as.numeric(BS_esp)
-#names(BS_esp) <- "BS_esp"
+BS_esp <- brier(obs = obs_vec, pred = fcst_prob_vec, bins = FALSE)$bs
 BS_esp
 
 # Calculate Brier Score for climatology benchmark forecast
-BS_bench <- verification::brier(obs = obs_vec, pred = clim_vec, bins = FALSE)["bs"]
-BS_bench <- as.numeric(BS_bench)
-#names(BS_bench) <- "BS_bench"
+BS_bench <- brier(obs = obs_vec, pred = clim_vec, bins = FALSE)$bs
 BS_bench
 ```
 
 
-## Calculate the Brier Skill Score (BSS)
+# Calculate the Brier Skill Score (BSS)
 
 We can compute the **Brier Skill Score** of the ESP forecast for predicting Q90 low flow events compared to a simple climatology benchmark forecast using the the generic skill score formula introduced in Section 12.3.8, with the following variables:
 
