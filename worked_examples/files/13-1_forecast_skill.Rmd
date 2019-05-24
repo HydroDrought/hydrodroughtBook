@@ -26,8 +26,7 @@ First we load the dataset and define the observations and forecast variables:
 ```{r, message=FALSE, warning=FALSE}
 # Load the data 
 library(hydroDrought)
-rmarkdown::paged_table(as.data.frame(fcst_dataset), 
-                       options = list(cols.print = 5))
+rmarkdown::paged_table(fcst_dataset, options = list(cols.print = 5))
 
 # Subset observations vector 
 obs <- fcst_dataset$Observed_flow
