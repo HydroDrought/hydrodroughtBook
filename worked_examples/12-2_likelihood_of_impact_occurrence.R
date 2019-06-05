@@ -29,7 +29,14 @@ dir.create(figure_path, showWarnings = FALSE)
 ###  Load functions
 ###########################################################################
 ### Load these functions
-require(tidyverse)
+#require(tidyverse)
+
+require(dplyr)
+require(readr)
+require(tidyr)
+require(ggplot2)
+
+
 require(lubridate)
 
 require(grid)
@@ -425,14 +432,14 @@ p <- logisthistplot(log.fit = spei_3_fit, log.var = "spei_3")
 p
 ### Save plot
 ggsave(file.path(figure_path, "spei3_logist_hist.png"), p, width=4.5, height=4.5, dpi=600)
-ggsave(file.path(figure_path, "spei3_logist_hist.pdf"), p, width=4.5, height=4.5)
+#ggsave(file.path(figure_path, "spei3_logist_hist.pdf"), p, width=4.5, height=4.5)
 
 p <- logisthistplot(log.fit = spi_12_fit, log.var = "spi_12")
 
 p
 ### Save plot
 ggsave(file.path(figure_path, "spei3_logist_hist.png"), p, width=4.5, height=4.5, dpi=600)
-ggsave(file.path(figure_path, "spei3_logist_hist.pdf"), p, width=4.5, height=4.5)
+#ggsave(file.path(figure_path, "spei3_logist_hist.pdf"), p, width=4.5, height=4.5)
 
 ###########################################################################
 ## Plot some logistic regression theory, showing how we create the previous plots

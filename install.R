@@ -1,4 +1,11 @@
-install.packages("tidyverse")
+#install.packages("tidyverse")
+
+### Tidyverse packages needed
+install.packages("dplyr")
+install.packages("readr")
+install.packages("tidyr")
+
+install.packages("ggplot2")
 install.packages("devtools")
 
 install.packages("strucchange")
