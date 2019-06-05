@@ -12,10 +12,12 @@
 ###########################################################################
 ## Set the Paths
 ###########################################################################
+require(here)
+
 ## Path for Data and Output	
 ### It is a good idea to separate input data and output data folders
-data_path <- "../data/impact_data"
-output_path <- "./output/Example_12_2"
+data_path  <- file.path(here::here(), "../data/impact_data")
+output_path <- file.path(here::here(), "./output/Example_12_2")
 
 ### Set output location
 ### This code will create an output folder if one does not exist
@@ -24,6 +26,7 @@ dir.create(write_output_base_path, showWarnings = FALSE)
 
 figure_path <- file.path(write_output_base_path, "figures")
 dir.create(figure_path, showWarnings = FALSE)
+
 
 ###########################################################################
 ###  Load functions
@@ -42,8 +45,8 @@ require(lubridate)
 require(grid)
 require(gridExtra)
 
+source(file.path(here::here(), "./files/12-2_impact/plotting_funcs.R"))
 
-source("./files/12-2_impact/plotting_funcs.R")
 ###########################################################################
 ## Set Initial Values
 ###########################################################################
