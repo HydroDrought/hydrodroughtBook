@@ -16,8 +16,9 @@ require(here)
 
 ## Path for Data and Output	
 ### It is a good idea to separate input data and output data folders
-data_path  <- file.path(here::here(), "../data/impact_data")
-output_path <- file.path(here::here(), "./output/Example_12_2")
+base_path <- here::here()
+data_path  <- file.path(base_path, "./data/impact_data")
+output_path <- file.path(here::here(), "./worked_examples/output/Example_12_2")
 
 ### Set output location
 ### This code will create an output folder if one does not exist
@@ -45,7 +46,7 @@ require(lubridate)
 require(grid)
 require(gridExtra)
 
-source(file.path(here::here(), "./files/12-2_impact/plotting_funcs.R"))
+source(file.path(here::here(), "./worked_examples/files/12-2_impact/plotting_funcs.R"))
 
 ###########################################################################
 ## Set Initial Values
