@@ -14,7 +14,7 @@ install.packages("lubridate")
 install.packages("Hmisc")
 install.packages("zyp")
 
-install.pacakges("here")
+install.packages("here")
 
 ### From Impact modeling
 install.packages("grid")
