@@ -193,7 +193,7 @@
 
   <li>12.2 Likelihood of impact occurrence: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/12-2_likelihood_of_impact_occurrence.html">Worked Example</a>, 
-    <a href="https://github.com/jstagge/hydroDrought/blob/testing_binder/worked_examples/12-2_likelihood_of_impact_occurrence.R">R-script</a>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/12-2_likelihood_of_impact_occurrence.R">R-script</a>
     <br><i>will be based on data and code from Jim’s JoH paper</i>
   </li>
   </ul>
@@ -235,7 +235,7 @@
 ### Option 2: Run code live in the cloud with no prerequisites
 
 Click at this badge to execute the analysis and replicate results using R-Studio in the cloud without needing to install R or its dependencies on your local machine.    
-RStudio: [![Binder](http://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jstagge/hydroDrought/testing_binder?urlpath=rstudio  )
+RStudio: [![Binder](http://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jstagge/hydroDrought?urlpath=rstudio  )
 
 If you want to share this live RStudio link with others, please share this URL: https://mybinder.org/v2/gh/jstagge/hydroDrought?urlpath=rstudio  
 
