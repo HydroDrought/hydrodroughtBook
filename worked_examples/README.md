@@ -193,7 +193,8 @@
 
   <li>12.2 Likelihood of impact occurrence: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/12-2_likelihood_of_impact_occurrence.html">Worked Example</a>, 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/12-2_likelihood_of_impact_occurrence.R">R-script</a>
+    <a href="https://github.com/jstagge/hydroDrought/blob/worked_examples/12-2_likelihood_of_impact_occurrence.R
+">R-script</a>
     <br><i>will be based on data and code from Jim’s JoH paper</i>
   </li>
   </ul>
