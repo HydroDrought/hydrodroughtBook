@@ -46,7 +46,7 @@ lines(obs)
 In this example we want to evaluate the ability of the ESP forecast to predict the probability of river discharge events below the long-term Q90 low flow threshold. We need to first calculate the long-term Q90 threshold from observations using the `lfquantile()` ^[Tobias: would use the function `lfquantile()` from the package. The names of the vector are easier to interpret.] function:
 
 ```{r}
-obs_Q90_threshold <- lfquantile(obs, exc.freq = 0.1)
+obs_Q90_threshold <- lfquantile(obs, exc.freq = 0.9)
 obs_Q90_threshold
 ```
 

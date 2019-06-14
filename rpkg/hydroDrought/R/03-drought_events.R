@@ -3,7 +3,8 @@ drought_events <- function(x, threshold,
                            pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
                            pooling.pars = list(n = 10, sides = "center",
                                                min.duration = 5, min.vol.ratio = 0.1),
-                           full.table = FALSE, relabel.events = TRUE)
+                           full.table = FALSE, relabel.events = TRUE,
+                           plot = FALSE)
 {
     pooling <- match.arg(pooling)
 
@@ -18,10 +19,10 @@ drought_events <- function(x, threshold,
     events <- x %>%
         group_by(event) %>%
         summarise(
-            start = min(time), end = max(time),
+            start = min(time), end = max(end),
             # duration for SPA is duration until max storage
             d.smax = as.difftime(first(which.max(storage)), units = "days"),
-            duration = `units<-`(x = end - start + 1, value = "days"),
+            duration = `units<-`(x = end - start, value = "days"),
             qmin = min(discharge),
             tqmin = time[first(which.min(discharge))],
             # volume for SPA is max storage
@@ -43,6 +44,34 @@ drought_events <- function(x, threshold,
     events <- filter(events, under.drought)
 
     if (relabel.events) events <- mutate(events, event = order(event))
+
+    if (plot) {
+        df <- x %>%
+            mutate(lwr = if_else(under.drought, discharge, threshold),
+                   upr = threshold) %>%
+            select(discharge, threshold, lwr, upr)
+
+        tbl <- events %>%
+            mutate(ttip = paste0("volume: ", signif(volume, 3), "\n",
+                                 "duration: ", duration, " days\n"))
+
+        p <- xts::xts(df, order.by = x$time) %>%
+            dygraph() %>%
+            dyRangeSelector() %>%
+            dySeries("discharge", stepPlot = step, drawPoints = TRUE, color = "darkblue") %>%
+            dySeries(c("lwr", "threshold", "upr"), stepPlot = step, color = "red",
+                     strokePattern = "dashed")
+
+
+        for (i in seq_len(nrow(tbl))) {
+            p <- dyShading(p, from = tbl$start[i], to = tbl$end[i], color = "lightgrey")
+            p <- dyAnnotation(p, x = tbl$start[i], text = tbl$event[i],
+                              tooltip = tbl$ttip[i],
+                              width = 30, attachAtBottom = TRUE)
+        }
+
+        print(p)
+    }
 
     # retain full table?
     if (!full.table) {
@@ -70,6 +99,7 @@ drought_events <- function(x, threshold,
                                                 min.duration = 5, min.vol.ratio = 0.1))
 {
     pooling <- match.arg(pooling)
+    att <- attr(threshold, "threshold")
 
     # give warnings if using default parameters
     # specifing them explicitly silences it
@@ -90,24 +120,44 @@ drought_events <- function(x, threshold,
         # append constant threshold to data
         x$threshold <- threshold
     } else {
+        if (is.null(att)) {
+            warning("Could not derive start of the hydrological year from 'threshold' object. Defaulting to '-01-01'.")
+           by <- setdiff(colnames(threshold), "threshold")
+           origin <- "-01-01"
+        } else {
+            by <- att$vary.by
+            origin <- att$start
+        }
+
         # compute the same groups than threshold and join it
-        by <- setdiff(colnames(threshold), "threshold")
-        origin <- pull(threshold, by)[1]
         x <- x %>%
             append_group(by = by, start = origin) %>%
             left_join(threshold, by = by)
     }
 
+    # append the "end" of the day
+    # it is an interval in a mathematical sense [start, end)
+    x <- mutate(x, end = lead(time, 1))
+
+    # for regular time series we can estimate the duration of the last interval
+    dt <- .guess_dt(x$time)
+    if (!is.na(dt)) {
+        x$end[nrow(x)] <- last(x$time) + dt
+    }
+
     x <- x %>%
-        mutate(volume = -(discharge - threshold) * 86400,
-               below.threshold = discharge < threshold,
-               under.drought = below.threshold,
-               storage = 0)
+        mutate(
+            volume = -(discharge - threshold) *
+                as.double(end - time, units = "secs"),
+            below.threshold = discharge < threshold,
+            under.drought = below.threshold,
+            storage = 0)
 
     if (pooling == "sequent-peak") {
         # overwriting the column 'under.drought'
         x <- x %>%
-            mutate(storage = .storage(x$discharge, threshold = threshold) * 86400,
+            mutate(storage = .storage(x$discharge, threshold = threshold) *
+                       as.double(end - time, units = "secs"),
                    under.drought = storage > 0)
     }
 
@@ -191,6 +241,7 @@ inspect_spa <- function(x)
     discharge <- ggplot(x, aes(time, discharge)) +
         geom_line() +
         geom_point(size = 0.5) +
+        # possible bug: q90 might not be defined
         geom_hline(yintercept = q90, col = 2, linetype = "dashed", size = 0.2) +
         facet_wrap(~event, scales = "free", nrow = 1)
 

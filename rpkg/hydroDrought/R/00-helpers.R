@@ -124,10 +124,14 @@ var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year
         summarise(threshold = fun(discharge, ...))
 
     if (append) {
-        return(left_join(y, threshold, by = vary.by))
+        res <- left_join(y, threshold, by = vary.by)
     } else {
-        return(threshold)
+        res <- threshold
     }
+
+    attr(res, "threshold") <- list(vary.by = vary.by, start = start)
+
+    return(res)
 }
 
 
@@ -150,4 +154,45 @@ const_threshold <- function(x, fun, append = FALSE, ...)
 .rle_id <- function(x)
 {
     cumsum(x != lag(x, default = x[1]))
+}
+
+
+# .time_difference <- function(time)
+# {
+#     dt <- .guess_dt(time)
+#
+#     if (!is.na(dt)) {
+#         # for regular time series we can estimate the duration of the
+#         # last interval
+#         inc <- as.double(diff(c(time, tail(time, 1) + dt)), units = "secs")
+#     } else {
+#         # for irregular time series it will be NA
+#         inc <- c(as.double(diff(time), units = "secs"), NA)
+#     }
+#
+#     return(inc)
+# }
+
+.guess_dt <- function(time)
+{
+    u <- c("second", "minute", "hour", "day", "month", "year")
+
+    inc <- int_diff(time)
+    for (i in u) {
+        # cat(i, ", ")
+        #rounded <- floor_date(time, unit = i, week_start = week_start)
+
+        span <- as.period(inc, unit = i)
+
+        # cannot use unique(): removes class
+        s <- span[!duplicated(span)]
+        regular <- length(s) == 1
+
+        # if(regular && s == period(1, units = i)) {
+        if (regular) {
+            return(s)
+        }
+    }
+    # irregular time series
+    return(NA)
 }
