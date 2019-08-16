@@ -208,8 +208,8 @@ p
 ### Save plot for publication
 ### PDF is vector data, which means it draws lines and text, rather than png raster format (can get blurry when blown up)
 ### Width and height are in inches
-ggsave(file.path(figure_path, "spi12_impact_timeseries.png"), p, width=7.5, height=3, dpi=600)
-ggsave(file.path(figure_path, "spi12_impact_timeseries.pdf"), p, width=7.5, height=3)
+ggsave(file.path(figure_path, "spi3_impact_timeseries.png"), p, width=7.5, height=3, dpi=600)
+ggsave(file.path(figure_path, "spi3_impact_timeseries.pdf"), p, width=7.5, height=3)
 
 
 
@@ -521,7 +521,7 @@ plot_df <- plot_df %>%
 	mutate(prob_lower = odds_lower / (1 + odds_lower))
 
 ### Plot Probability
-ggplot(plot_df, aes(x=spei_3)) %>%
+p <- ggplot(plot_df, aes(x=spei_3)) %>%
 	+ geom_vline(xintercept=0,  color = "grey30", linetype="longdash") %>%  ### Make a vartical axis at x= 0
 	+ geom_ribbon(aes(ymin = prob_lower, ymax = prob_upper), alpha = 0.2, fill = "grey20") %>%
 	+ geom_line(aes(y=prob), colour="black") %>%
