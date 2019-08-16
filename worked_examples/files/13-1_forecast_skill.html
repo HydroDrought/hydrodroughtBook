@@ -81,10 +81,10 @@ lines(obs)</code></pre>
 <div id="calculate-long-term-low-flow-threshold-from-observations" class="section level1">
 <h1>Calculate long-term low flow threshold from observations</h1>
 <p>In this example we want to evaluate the ability of the ESP forecast to predict the probability of river discharge events below the long-term Q90 low flow threshold. We need to first calculate the long-term Q90 threshold from observations using the <code>lfquantile()</code> <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: would use the function <code>lfquantile()</code> from the package. The names of the vector are easier to interpret.</span> function:</p>
-<pre class="r"><code>obs_Q90_threshold &lt;- lfquantile(obs, exc.freq = 0.1)
+<pre class="r"><code>obs_Q90_threshold &lt;- lfquantile(obs, exc.freq = 0.9)
 obs_Q90_threshold</code></pre>
-<pre><code>##      Q10 
-## 3.567967</code></pre>
+<pre><code>##       Q90 
+## 0.9278767</code></pre>
 </div>
 <div id="calculate-the-brier-score-bs" class="section level1">
 <h1>Calculate the Brier Score (BS)</h1>
@@ -111,11 +111,11 @@ clim_vec &lt;- rep(0.1, 50)
 # Calculate Brier Score for ESP forecast
 BS_esp &lt;- brier(obs = obs_vec, pred = fcst_prob_vec, bins = FALSE)$bs
 BS_esp</code></pre>
-<pre><code>## [1] 0.02888889</code></pre>
+<pre><code>## [1] 0.06038447</code></pre>
 <pre class="r"><code># Calculate Brier Score for climatology benchmark forecast
 BS_bench &lt;- brier(obs = obs_vec, pred = clim_vec, bins = FALSE)$bs
 BS_bench</code></pre>
-<pre><code>## [1] 0.73</code></pre>
+<pre><code>## [1] 0.09</code></pre>
 </div>
 <div id="calculate-the-brier-skill-score-bss" class="section level1">
 <h1>Calculate the Brier Skill Score (BSS)</h1>
@@ -128,7 +128,7 @@ BS_bench</code></pre>
 <pre class="r"><code># Brier Skill Score 
 BSS &lt;- (BS_esp - BS_bench) / (0 - BS_bench)
 BSS</code></pre>
-<pre><code>## [1] 0.9604262</code></pre>
+<pre><code>## [1] 0.3290615</code></pre>
 </div>
 
 

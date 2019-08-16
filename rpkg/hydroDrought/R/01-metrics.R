@@ -21,3 +21,11 @@ low_flow_percentile <- function(x, prob, start = NA, end = NA)
 #' @importFrom lfstat baseflow
 #' @export
 lfstat::baseflow
+
+#' @export
+sgi <- function(x, na.rm = TRUE)
+{
+    if (na.rm) x <- x[is.finite(x)]
+
+    qnorm(rank(x) / (length(x) + 1))
+}

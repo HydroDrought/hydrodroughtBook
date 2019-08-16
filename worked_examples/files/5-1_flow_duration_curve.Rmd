@@ -123,10 +123,50 @@ tbl  %>%
                    align = "right")
 ```
 
+# Fast-Track
 
 The function `lfquantile()`^[Tobias: I've written a small wrapper function around `base::quantile()` to circumvent the naming problem and the transformation into non-exceedande frequencies.] calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
 
 ```{r}
 lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
+```
+
+
+# Standardized Flow Duration Curves
+
+Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge. 
+```{r}
+rel_discharge <- function(discharge, area)
+{
+    discharge %>%
+        transmute(rel.discharge = discharge * 1000 / area)
+}
+
+lambournRay <- international %>%
+    filter(River %in% c("Lambourn", "Ray")) %>%
+    select(River, discharge, Area)
+
+lambournRay <- lambournRay %>%
+    mutate(rel.discharge = map2(discharge, Area, rel_discharge)) 
+
+lambournRay
+
+fdc <- lambournRay %>%
+    select(River, rel.discharge) %>%
+    unnest() %>%
+    group_by(River) %>%
+    mutate(freq.exc = exceedance_frequency(rel.discharge))
+
+fdc
+
+ggplot(fdc, mapping = aes(x = freq.exc, y = rel.discharge, 
+                          col = River, size = River)) +
+    geom_step(direction = "vh") +
+    scale_size_manual(values = c(0.1, 0.75)) +
+    scale_y_log10(limits = c(0.01, NA), 
+                  labels = number_format(accuracy = 0.01)) +
+    scale_x_continuous(labels = percent_format(accuracy = 1)) +
+    labs(x = "Exceedance Frequency",
+         y = expression(paste("Flow (", l, s^{-1}, km^{-2}, ")"))) 
 ```
 
