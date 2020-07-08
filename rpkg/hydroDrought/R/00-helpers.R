@@ -102,7 +102,7 @@ var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year
 
     if (vary.by == "day") {
         # interpolate Feb 29th with "surrounding" days if not a leap year
-        leapday <- as.Date("1972-02-29")
+        leapday <- monthDay(as.Date("1972-02-29"), origin = start)
 
         leapdays <- filter(y, day == leapday - 1 | day == leapday + 1,
                            !leap_year(time)) %>%
@@ -112,9 +112,7 @@ var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year
             # surrounding values could be NA
             filter(!is.na(discharge))
 
-        y <- bind_rows(y, leapdays) %>%
-            # somehow, class gets lost...
-            mutate(day = monthDay(day, origin = start))
+        y <- bind_rows(y, leapdays)
     }
 
     threshold <- y %>%
@@ -151,10 +149,22 @@ const_threshold <- function(x, fun, append = FALSE, ...)
 }
 
 
+# gleiche ID, solange sich die Werte nicht ändern
 .rle_id <- function(x)
 {
     cumsum(x != lag(x, default = x[1]))
 }
+
+#' @export
+.group_const_value <- .rle_id
+
+# gleiche ID, solange die Änderung konstant ist
+.group_const_change <- function(x, change = median(diff(x), na.rm = TRUE))
+{
+    d <- c(change, diff(x))
+    cumsum(d != change) + 1
+}
+
 
 
 # .time_difference <- function(time)
@@ -196,3 +206,200 @@ const_threshold <- function(x, fun, append = FALSE, ...)
     # irregular time series
     return(NA)
 }
+
+
+#' @export
+sanitize_ts <- function(x, # approx.missing = 0,
+                        time_col = "time", value_col = "discharge",
+                        id = NA_character_, message = TRUE,
+                        force_positive = FALSE, add_implicit_NA = TRUE,
+                        remove_duplicates = TRUE, sort = TRUE)
+{
+    id <- as.character(id)
+    xx <- x %>%
+        select(time = !!time_col, value = !!value_col) %>%
+        mutate(
+            # todo: works currently only for daily data
+            # todo: generalize for POSIXct
+            time = as.Date(time),
+            value = as.numeric(value)
+        )
+
+    msg <- msg_collector(n_in = nrow(x))
+
+    ## checks on the DATA VALUES
+    # explicitly missing values
+    bad <- filter(xx, !is.finite(value))
+    msg$append(what = "explicitly missing values", data = bad, id = id,
+               n_total = nrow(xx))
+
+    # negative values
+    bad <- filter(xx, value < 0)
+    if(force_positive) {
+        xx$value[xx$value < 0] <- NA
+        action <- "Setting them to NA."
+    } else {
+        action <-  ""
+    }
+    msg$append(what = "values below zero", data = bad, id = id,
+               n_total = nrow(xx), action = action)
+
+
+    # zeros
+    bad <- filter(xx, abs(value) < sqrt(.Machine$double.eps))
+    msg$append(what = "values equal to zero", data = bad, id = id,
+               n_total = nrow(xx))
+
+    # checks on the TIME INDICES
+    # missing values in time index
+    bad <- filter(xx, is.na(time))
+    xx <- filter(xx, !is.na(time))
+    msg$append(what = "invalid time indices", data = bad, id = id,
+               n_total = nrow(xx), action = "Removing these records.")
+
+
+    # exact duplicated time indices
+    dups <- xx %>%
+        group_by(time, value) %>%
+        filter(n() > 1)
+    msg$append(what = "completely identical input records", data = dups, id = id,
+               n_total = nrow(xx), action = "Removing them.")
+    xx <- distinct(xx)
+
+    # duplicated time indices
+    dups <- xx %>%
+        group_by(time) %>%
+        filter(n() > 1)
+    if (remove_duplicates) {
+        idx <- duplicated(xx$time)
+        xx <- xx[!idx, ]
+        action <-  "Keeping first occurance."
+    } else {
+        action <-  ""
+    }
+
+    msg$append(what = "duplicated time indices", data = dups, id = id,
+               n_total = nrow(xx), action = action)
+
+    # ordered/unordered
+    bad <- filter(xx, time < lag(time, default = min(time, na.rm = TRUE)))
+    if (sort) {
+        xx <- arrange(xx, time)
+        action <-  "Sorting time series."
+    } else {
+        action <-  ""
+    }
+
+    msg$append(what = "time indices jumping to the past (unordered time series)",
+               data = bad, action = action,
+               id = id, n_total = nrow(xx))
+
+    # gaps
+    # gaps are implicitly missing values
+    gaps <- tibble(
+        time = seq(from = min(xx$time), to = max(xx$time), by = "day"),
+    ) %>%
+        anti_join(xx, by = "time") %>%
+        mutate(
+            gap = .group_const_change(time),
+            value = NA_real_
+        )
+
+    if(nrow(gaps)) {
+        if (add_implicit_NA) {
+            xx <- bind_rows(xx, select(gaps, time, value))
+            action <- "Adding NA values."
+            if (sort) {
+                xx <- arrange(xx, time)
+                action <- "Adding NA values and sorting."
+            }
+        } else {
+            action <- ""
+        }
+
+        txt <- paste("implicitly missing values (", max(gaps$gap), "gaps)")
+        msg$append(what = txt, data = gaps, n = nrow(gaps),
+                   id = id, n_total = nrow(xx), action = action)
+
+
+    }
+
+
+
+
+    msg$final(n_out = nrow(xx))
+
+    if (message) msg$print()
+
+    res <- xx %>%
+        select(!!time_col := time, !!value_col := value)
+
+    attr(res, "message") <- msg$export()
+    return(res)
+}
+
+msg_collector <- function(n_in) {
+
+    m <- tibble(id = character(), what = character(), data = list(), n = integer())
+    n_in <- n_in
+    n_out <- 0
+
+    return(list(
+        append = function(what, data, id = NA, n = nrow(data), action = "",
+                          n_total = NA, force_message = FALSE)
+        {
+            if(nrow(data) > 0 | force_message) {
+                m <<- bind_rows(m, tibble(id = id,
+                                          what = what,
+                                          data = list(data),
+                                          n = n, action = action,
+                                          n_total = n_total))
+            }
+        },
+
+        print = function()
+        {
+            .print_one_message <- function(m, id = NA)
+            {
+                n_total <- max(m$n_total, na.rm = TRUE)
+                perc <- paste0(" (",
+                               format(m$n / n_out * 100, nsmall = 1, digits = 1),
+                               "%)")
+
+                n <- list("in" = n_in, "out" = n_out)
+                n <- if(n_in == n_out) {
+                    paste("  Importing and exporting:", n_in, "rows.")
+                } else {
+                    d <-  n_out - n_in
+                    paste0("  Importing ", n_in, ", and exporting ", n_out,
+                           " rows (", abs(d), ifelse(d < 0, " fewer", " more"), " rows).")
+                }
+
+                txt <- paste(
+                    c(paste0("Dataset: ", ifelse(!is.na(id), id, "")),
+                      n,
+                      paste0("  ", format(m$n), perc,
+                             " ", m$what, ". ", m$action)), collapse = "\n"
+                )
+                message(txt)
+            }
+
+            mesg <- m %>%
+                nest(data = c(-id))
+
+            walk2(mesg$data, mesg$id, .print_one_message)
+        },
+
+        export = function() return(m),
+        final = function(n_out) n_out <<- n_out
+    ))
+}
+
+# damit map() auch für difftime und POSIX Objekte funktioniert
+#' @export
+map_other <- function(.x, .f, ...)
+{
+    reduce(map(.x, .f, ...), c)
+}
+
+

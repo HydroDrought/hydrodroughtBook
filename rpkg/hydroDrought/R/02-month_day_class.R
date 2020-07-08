@@ -1,3 +1,7 @@
+# todo: expand POSIXct with origin and store as attribute or better as list
+# this way we do not have to propagate origin = "-01-01" through every function
+
+
 #' @export
 monthDay <- function(x, origin = "-01-01")
 {
@@ -11,14 +15,14 @@ monthDay <- function(x, origin = "-01-01")
 
     year(x) <- 1972
 
-    # year has to conatin Feb 29th.
+    # year has to contain Feb 29th.
     # if origin is after Feb 29th: take the previous or next year
     o <- paste0("1972", origin)
     if (o > as.Date("1972-02-29")) {
-        year(x[x >= o]) <- 1971
+        year(x[which(x >= o)]) <- 1971
         origin <- as.Date(paste0("1971", origin))
     } else {
-        year(x[x < o]) <- 1973
+        year(x[which(x < o)]) <- 1973
         origin <- as.Date(paste0("1972", origin))
     }
 
@@ -64,6 +68,11 @@ pillar_shaft.monthDay <- function(x, ...) {
 
 #' @export
 type_sum.monthDay <- function(x) {
+    "month-day"
+}
+
+#' @export
+vec_ptype_abbr.monthDay <- function(x) {
     "month-day"
 }
 

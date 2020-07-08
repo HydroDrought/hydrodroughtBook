@@ -10,7 +10,15 @@ Authors@R: c(
          comment = c(ORCID = "0000-0002-1163-4135")))
 Description: We provide a collection of data-sets and functions used in the book 'Hydrological Drought'.
 License: GPL-3
-Depends: tidyverse, lubridate, scales, dygraphs
+Depends: 
+    tidyverse,
+    lubridate,
+    scales,
+    dygraphs,
+    R (>= 2.10)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
+Imports: 
+    vctrs,
+    pillar
