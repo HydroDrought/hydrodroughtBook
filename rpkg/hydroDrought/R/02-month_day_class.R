@@ -67,11 +67,6 @@ pillar_shaft.monthDay <- function(x, ...) {
 }
 
 #' @export
-type_sum.monthDay <- function(x) {
-    "month-day"
-}
-
-#' @export
 vec_ptype_abbr.monthDay <- function(x) {
     "month-day"
 }

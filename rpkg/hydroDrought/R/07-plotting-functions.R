@@ -120,7 +120,7 @@ plot_daily_flow <- function(x, exc.freq = c(0.95, 0.9, 0.8, 0.5),
         pivot_longer(-state, names_to = "extreme", values_to = "data") %>%
         filter(state == "wet" & extreme == "max" | state == "dry" & extreme == "min") %>%
         unnest(data) %>%
-        mutate(text = paste0(time, ": ", round(discharge, 3), " m³/s"))
+        mutate(text = paste0(time, ": ", round(discharge, 3), " m\u00B3/s"))
 
 subtitle <- paste("Gauged daily flow for", year(min(x$time)), "-", year(max(x$time)),
                   subtitle)
@@ -146,7 +146,7 @@ ggplot(x, aes(x = day)) +
                              direction = "both", point.padding = 0.5, size = 3) +
 
     labs(title = title, subtitle = subtitle) +
-    scale_y_log10(label = function(x) paste(format(x, scientific = F, drop0trailing = T), "m³/s"),
+    scale_y_log10(label = function(x) paste(format(x, scientific = F, drop0trailing = T), " m\u00B3/s"),
                   breaks = log_breaks_covered, oob = squish_infinite) +
     scale_x_date(date_labels = "%b", breaks = month_label_midpoint,
                   expand = expansion(mult = 0, add = 0)) +
