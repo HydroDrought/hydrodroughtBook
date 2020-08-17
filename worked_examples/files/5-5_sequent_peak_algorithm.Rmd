@@ -24,16 +24,17 @@ Ten years of daily data from River Ngaruroro at Kuripapango (NZ) are used as an 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
 
-ngaruroro <- filter(international, River == "Ngaruroro") %>%
-    select(discharge) %>%
-    unnest() %>%
-    append_group(by = "year", start = "-09-01")  %>%
-     filter(year >= 1988, year <= 1999) # time series without missing values
+ngaruroro <-  ngaruroro <- intl %>%
+  filter(river == "Ngaruroro") %>%
+  select(data) %>%
+  unnest(data) %>%
+  append_group(by = "year", start = "-09-01")  %>%
+  filter(year >= 1988, year <= 1999) # time series without missing values
 ```
 
 # Calculation
- 1.) Type the value of the desired yield (in cell number B5).
- 2.) Calculate the storage according to Equation 5.5 (using the IF function in Excel). 
+1.) Type the value of the desired yield (in cell number B5).
+2.) Calculate the storage according to Equation 5.5 (using the IF function in Excel). 
 The calculated storage is displayed in the right column. In the calculation Q90 is used as the desired yield, Q0.
 
 
@@ -41,7 +42,7 @@ The calculated storage is displayed in the right column. In the calculation Q90 
 q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
 
 droughts <- ngaruroro %>%
-    drought_events(threshold = q90, pooling = "sequent-peak")
+  drought_events(threshold = q90, pooling = "sequent-peak")
 ```
 
 
@@ -57,8 +58,8 @@ The deficit volume is the maximum value in an uninterrupted sequence of positive
 
 ```{r, echo=FALSE}
 raw <- ngaruroro %>%
-    hydroDrought:::.drought_events(threshold = q90, pooling = "sequent-peak") %>%
-    filter(event == 3)
+  hydroDrought:::.drought_events(threshold = q90, pooling = "sequent-peak") %>%
+  filter(event == 3)
 
 hydroDrought:::inspect_spa(raw)
 ```
@@ -66,11 +67,11 @@ hydroDrought:::inspect_spa(raw)
 
 ```{r, echo=FALSE}
 raw %>%
-    mutate(day = row_number()) %>%
-    select(time, day, discharge, volume, storage) %>% 
+  mutate(day = row_number()) %>%
+  select(time, day, discharge, volume, storage) %>% 
   kable(caption = "Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")  %>% 
-    kable_styling(fixed_thead = TRUE, position = "left") %>%
-    row_spec(which.max(raw$storage), bold = TRUE)
+  kable_styling(fixed_thead = TRUE, position = "left") %>%
+  row_spec(which.max(raw$storage), bold = TRUE)
 ```
 
 

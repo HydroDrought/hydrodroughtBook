@@ -95,3 +95,10 @@ print.monthDay <- function(x, ...) {
 as.integer.monthDay <- function(x, ...) {
     as.integer(unclass(x) - as.numeric(attr(x, "origin")) + 1)
 }
+
+
+.origin <- function(x)
+{
+    str <- ifelse(is.na(x), NA_character_, paste0("2001", x))
+    monthDay(str)
+}

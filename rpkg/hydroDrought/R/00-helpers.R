@@ -94,6 +94,12 @@ group_id <- function(time, starts)
 }
 
 #' @export
+water_year <- function(time, start = "-01-01")
+{
+    year(group_id(time = time, starts = start))
+}
+
+#' @export
 var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year"),
                           fun, start = "-01-01", append = FALSE, ...)
 {
@@ -142,7 +148,7 @@ const_threshold <- function(x, fun, append = FALSE, ...)
         summarise(threshold = fun(discharge, ...))
 
     if (append) {
-        return(left_join(x, threshold, by = vary.by))
+        return(mutate(x, threshold = threshold$threshold))
     } else {
         return(threshold)
     }
@@ -401,5 +407,4 @@ map_other <- function(.x, .f, ...)
 {
     reduce(map(.x, .f, ...), c)
 }
-
 

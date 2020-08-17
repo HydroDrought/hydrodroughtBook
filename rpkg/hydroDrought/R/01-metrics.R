@@ -11,7 +11,7 @@ lfquantile <- function(x, exc.freq = c(0.95, 0.9, 0.8, 0.5), na.rm = TRUE, ...)
 low_flow_percentile <- function(x, prob, start = NA, end = NA)
 {
   x %>%
-    complete_seasons(start = start, end = end)  %>%
+    complete_seasons(start = start, end = end)  %>% # prototype in hd-book code
     ungroup() %>%
     summarise(q = quantile(discharge, probs = prob, na.rm = TRUE)) %>%
     pull(q)

@@ -29,9 +29,10 @@ Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the proced
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
 
-ngaruroro <- filter(international, River == "Ngaruroro") %>%
-    select(discharge) %>%
-    unnest() %>%
+ngaruroro <- ngaruroro <- intl %>%
+    filter(river == "Ngaruroro") %>%
+    select(data) %>%
+    unnest(data) %>%
     append_group(by = "year", start = "-09-01")  %>%
     # filter(year >= 1964, year <= 1999) # original filter
     filter(year >= 1988, year <= 1999) # time series without missing values
@@ -49,7 +50,7 @@ q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9)
 q90
 
 droughts <- ngaruroro %>%
-    drought_events(threshold = q90)
+    drought_events(threshold = q90, pooling = "none")
 
 droughts
 ```
@@ -64,8 +65,64 @@ To reduce the problem of minor droughts two restrictions can be imposed:
 
 * a minimum drought deficit volume (coefficient alpha, under the menu ‘Configuration’), that removes droughts with a deficit volume less than a certain fraction α of the maximum drought deficit volume in the complete series of drought events (here α is set equal to 0.005). 
 
+
 ```{r}
-filter(droughts, duration >= 5, volume < min(volume) * 0.005)
+droughts <- droughts %>%
+  mutate(is.minor = duration < 5 | volume < max(volume) * 0.005) %>%
+  print()
+```
+
+
+```{r, echo=FALSE}
+thres <- droughts %>%
+  summarise(duration = 5, volume = max(volume) * 0.005) %>%
+  pivot_longer(cols = everything(), names_to = "variable")
+
+d <- droughts %>%
+  mutate(
+    year = water_year(start, start = "-09-01"),
+    minor = if_else(duration < 5 | volume < min(volume) * 0.005, "minor drought", "drought"),
+    # label = factor(event, event, labels = sprintf("%i (%i)", event, year)),
+    duration = as.double(duration, units = "days"),
+    # duration = if_else(duration == 1, 1.051, duration),
+    event = factor(event)
+    ) %>%
+  select(event, minor, duration, volume, year) %>%
+  pivot_longer(cols = c(duration, volume), names_to = "variable")
+
+library(cowplot)
+p1 <- d %>%
+  filter(variable == "duration") %>%
+  ggplot(aes(event, value, fill = minor)) + 
+  geom_col() + 
+  geom_hline(data = filter(thres, variable == "duration"), 
+             aes(yintercept = value), 
+             linetype = "dashed", size = 0.2) + 
+  labs(y = "Drought duration in days") + 
+  # scale_y_log10() + 
+  scale_fill_manual("", values = c(drought = "grey30", "minor drought" = "grey70")) + 
+  facet_grid(rows = vars(variable), cols = vars(year), scales = "free", space = "free_x") + 
+  theme(axis.title.x = element_blank(), #element_text(angle = 90, hjust = 1, vjust = 0.5), 
+        legend.position = "top",
+        strip.text.y = element_blank())
+
+p2 <- d %>%
+  filter(variable == "volume") %>%
+  ggplot(aes(event, value, fill = minor)) + 
+  geom_col() + 
+  geom_hline(data = filter(thres, variable == "volume"), 
+             aes(yintercept = value), 
+             linetype = "dashed", size = 0.2) + 
+  labs(x = "Drought event number", y = "Drought deficit volume in m³") + 
+  scale_y_log10() + 
+  scale_fill_manual("", values = c(drought = "grey30", "minor drought" = "grey70")) + 
+  facet_grid(rows = vars(variable), cols = vars(year), scales = "free", space = "free_x") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), 
+        legend.position = "none", 
+        strip.text.y = element_blank())
+
+p <- plot_grid(p1, p2, align = "v", axis = "x", ncol = 1)
+p
 ```
 
 
@@ -78,8 +135,18 @@ pooled <- ngaruroro %>%
         threshold = q90, pooling = "inter-event", 
         pooling.pars = list(min.duration = 2, min.vol.ratio = Inf)
     ) %>%
-    filter(duration >= 5, volume < min(volume) * 0.005)    
+    filter(duration >= 5, volume > max(volume) * 0.005)   
 ```
+
+```{r, echo=FALSE}
+pooled %>%
+  mutate(duration = as.double(duration, units = "days")) %>% 
+ggplot(aes(duration)) + 
+  geom_histogram(binwidth = 5, col = "white") + 
+  scale_y_continuous(breaks = integer_breaks()) + 
+  labs(x = "Drought duration (days)", y = "Counts")
+```
+
 
 
 # Calculation
@@ -96,7 +163,7 @@ By selecting ‘Tables’ and then ‘Droughts’ from the menu, ticking the box
 ```{r, echo=FALSE}
 library(kableExtra)
 pooled %>%
-    kable(caption = "Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ. ") 
+    kable(caption = "Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ. ")
 ```
 
 

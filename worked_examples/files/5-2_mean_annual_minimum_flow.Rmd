@@ -71,7 +71,7 @@ mam <- am %>%
 ```{r, echo=FALSE}
 area <- filter(international, River == "Ngaruroro") %>%
     pull(Area)
-tbl <- data_frame(n = gsub("\\D", "", names(mam)),
+tbl <- tibble(n = gsub("\\D", "", names(mam)),
                   discharge = unlist(mam), 
                   rel.discharge = discharge * 1000 / area) 
 mam  %>%

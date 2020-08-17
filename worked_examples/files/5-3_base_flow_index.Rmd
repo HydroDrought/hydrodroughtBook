@@ -23,10 +23,10 @@ Three years of daily flow (1995 to 1997) from the Ray at Grendon Underwood (UK) 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
 
-ray <- filter(international, River == "Ray") %>%
-    select(discharge) %>%
-    unnest() %>%
-    filter(year(time) %in% 1995:1997)
+ray <- filter(intl, river == "Ray") %>%
+  select(data) %>%
+  unnest(data) %>%
+  filter(year(time) %in% 1995:1997)
 ```
 
 
@@ -34,20 +34,20 @@ ray <- filter(international, River == "Ray") %>%
 * The daily flows, $Q$<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>, are divided into non-overlapping blocks of five days (Column 1 and 2).
 ```{r}
 ray <- ray %>%
-    mutate(block = ((row_number() - 1) %/% 5) + 1)
+  mutate(block = ((row_number() - 1) %/% 5) + 1)
 ```
 
 * Mark the minima of each of these blocks and let them be called $Q_{min_1}$, <i>&hellip;</i> $Q_{min_n}$ (Column 3). Consider in turn ($Q_{min_1}$, $Q_{min_2}$, $Q_{min_3}$), <i>&hellip;</i> ($Q_{min_{n-1}}$, $Q_{min_{n}}$, $Q_{min_{n+1}}$). In each case, if 0.9<i>&middot;</i>central value <i>&le;</i> outer values, then the central value is a turning point for the base flow line (bold lines in Table 5.7). Continue this procedure until the whole time series has been analysed. 
 
 ```{r}
 points <- ray %>%
-    group_by(block) %>%
-    filter(discharge == min(discharge)) %>%
-    slice(1) %>%
-    ungroup() %>%
-    rename(Qmin = discharge) %>%
-    mutate(Qmin.red = 0.9 * Qmin,
-           is.turning.point = Qmin.red <= lag(Qmin) & Qmin.red <= lead(Qmin))
+  group_by(block) %>%
+  filter(discharge == min(discharge)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  rename(Qmin = discharge) %>%
+  mutate(Qmin.red = 0.9 * Qmin,
+         is.turning.point = Qmin.red <= lag(Qmin) & Qmin.red <= lead(Qmin))
 ```
 
 
@@ -55,12 +55,12 @@ points <- ray %>%
 
 ```{r}
 tp <- points %>%
-    filter(is.turning.point) %>%
-    select(time, Qmin)
+  filter(is.turning.point) %>%
+  select(time, Qmin)
 
 baseflow <- ray %>%
-    mutate(baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
-           baseflow = pmin(baseflow, discharge))
+  mutate(baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
+         baseflow = pmin(baseflow, discharge))
 ```
 
 
@@ -70,10 +70,10 @@ baseflow <- ray %>%
 
 ```{r}
 volume <- baseflow %>%
-    filter(year(time) == 1996) %>%
-    na.omit() %>%
-    summarise(total = sum(discharge) * 24 * 60 * 60,
-              baseflow = sum(baseflow) * 24 * 60 * 60)
+  filter(year(time) == 1996) %>%
+  na.omit() %>%
+  summarise(total = sum(discharge) * 24 * 60 * 60,
+            baseflow = sum(baseflow) * 24 * 60 * 60)
 ```
 
 * The BFI is then $V_{base}/V_{total}$.
@@ -86,32 +86,34 @@ bfi
 ```{r, echo=FALSE}
 options(knitr.kable.NA = '')
 library(kableExtra)
-tbl <- points %>% 
-    select(-block) %>%
-    right_join(baseflow, by = "time") 
+tbl <- points %>%
+  select(-block) %>%
+  right_join(baseflow, by = "time") %>% 
+  arrange(time)
 
 
 tbl <- tbl  %>%
-    filter(time <= as.Date("1995-02-09")) %>%
-    mutate_at(vars(discharge, Qmin, baseflow), .funs = round, digits = 3) %>%
-    mutate(Qmin.red = round(Qmin.red, digits = 4),
-           bold = is.finite(is.turning.point) & is.turning.point, 
-           # Qmin.red = text_spec(Qmin.red, format = "html", bold = bold)
-           ) 
+  filter(time <= as.Date("1995-02-09")) %>%
+  mutate_at(vars(discharge, Qmin, baseflow), .funs = round, digits = 3) %>%
+  mutate(Qmin.red = round(Qmin.red, digits = 4),
+         bold = is.finite(is.turning.point) & is.turning.point, 
+         # Qmin.red = text_spec(Qmin.red, format = "html", bold = bold)
+  ) 
 
 tbl %>%
-    select(Date = time, `Daily flow` = discharge, Qmin, `0.9 * Qmin` = Qmin.red, `Base flow` = baseflow) %>%
-    kable(#escape = F, 
-          caption = "Table 5.7 Calculation of the base flow separation line from time series of daily flow; non-overlapping 5-day blocks are indicated by alternating background colors and turning points are marked bold.") %>%
-    # add_header_above(c(" " = 1, 
-    #                    "$Q$ in ${m^3s^{-1}}$" = 1, 
-    #                    "in ${m^3s^{-1}}$" = 1, 
-    #                    "in ${m^3s^{-1}}$" = 1, 
-    #                    "$Q_b$ in ${m^3s^{-1}}$" = 1), 
-    #                  align = "right") %>%
-    kable_styling(fixed_thead = TRUE, position = "left") %>%
-    row_spec(which(!(tbl$block %% 2)), background = "#f0f0f0") %>%
-    row_spec(which(tbl$bold), bold = TRUE)
+  select(Date = time, `Daily flow` = discharge, Qmin, `0.9 * Qmin` = Qmin.red, `Base flow` = baseflow) %>%
+  
+  kable(#escape = F, 
+    caption = "Table 5.7 Calculation of the base flow separation line from time series of daily flow; non-overlapping 5-day blocks are indicated by alternating background colors and turning points are marked bold.") %>%
+  # add_header_above(c(" " = 1, 
+  #                    "$Q$ in ${m^3s^{-1}}$" = 1, 
+  #                    "in ${m^3s^{-1}}$" = 1, 
+  #                    "in ${m^3s^{-1}}$" = 1, 
+  #                    "$Q_b$ in ${m^3s^{-1}}$" = 1), 
+  #                  align = "right") %>%
+  kable_styling(fixed_thead = TRUE, position = "left") %>%
+  row_spec(which(!(tbl$block %% 2)), background = "#f0f0f0") %>%
+  row_spec(which(tbl$bold), bold = TRUE)
 ```
 
 
@@ -132,32 +134,32 @@ The base flow for a given time series can also be calculated directely using the
 ```{r, fig.cap="Figure 5.4 Annual recorded hydrograph and calculated continuous base flow line for UK river Ray in year 1996.", warning=FALSE, fig.margin = FALSE}
 
 bf <- ray %>%
-    select(time, discharge) %>%
-    mutate(baseflow = baseflow(discharge)) %>%
-    filter(year(time) == 1996)
+  select(time, discharge) %>%
+  mutate(baseflow = baseflow(discharge)) %>%
+  filter(year(time) == 1996)
 
 bf
 
 x <- bf %>%
-    gather(key = key, value = value, discharge, baseflow) %>%
-    mutate(key = factor(key, levels = c("discharge", "baseflow"),
-                        labels = c("Recorded Hydrograph", "Baseflow Line")))
+  gather(key = key, value = value, discharge, baseflow) %>%
+  mutate(key = factor(key, levels = c("discharge", "baseflow"),
+                      labels = c("Recorded Hydrograph", "Baseflow Line")))
 
 breaks <- seq(from = min(x$time), length.out = 12, by = "months")
-labels <- month(breaks, label = TRUE, abbr = TRUE, locale = "english")
+labels <- month(breaks, label = TRUE, abbr = TRUE) # locale = "english"
 
 library(ggplot2)
 ggplot(x, aes(time, value, size = key)) +
-    geom_line() +
-    scale_size_manual(values = c(0.2, 0.75)) +
-    scale_x_date(breaks = breaks, labels = labels) +
-    labs(y = expression(paste("Flow (", m^{3}, s^{-1}, ")"))) +
-    theme_bw(base_size = 12) +
-    theme(legend.position = c(0.8, 0.35),
-          axis.title.x = element_blank(),
-          legend.title = element_blank(),
-          panel.grid.minor.x = element_blank(),
-          axis.text.x = element_text(hjust = -0.4))
+  geom_line() +
+  scale_size_manual(values = c(0.2, 0.75)) +
+  scale_x_date(breaks = breaks, labels = labels) +
+  labs(y = expression(paste("Flow (", m^{3}, s^{-1}, ")"))) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = c(0.8, 0.35),
+        axis.title.x = element_blank(),
+        legend.title = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.text.x = element_text(hjust = -0.4))
 
 ```
 

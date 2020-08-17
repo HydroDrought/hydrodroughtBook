@@ -24,9 +24,10 @@ Daily data from River Ngaruroro at Kuripapango (NZ) are used as an example.
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
 
-ngaruroro <- filter(international, River == "Ngaruroro") %>%
-    select(discharge) %>%
-    unnest()
+ngaruroro <- intl %>%
+    filter(river == "Ngaruroro") %>%
+    select(data) %>%
+    unnest(data) 
 ```
 
 
@@ -114,7 +115,8 @@ ng %>%
 threshold <- ngaruroro %>%
     mutate(discharge = moving_average(discharge, n = 31, sides = "center")) %>%
     filter(time >= as.Date("1970-01-01") & time < as.Date("1990-01-01")) %>%
-    var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.8)
+    var_threshold(vary.by = "day", start = "-09-01", 
+                  fun = lfquantile, exc.freq = 0.8)
 
 threshold
 

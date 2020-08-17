@@ -174,7 +174,7 @@ tbl %>%
 
 # extract R code from Rmd files
 dir <- "../../worked_examples/files"
-files <- data_frame(filename = list.files(path = dir, pattern = "\\.Rmd$",
+files <- tibble(filename = list.files(path = dir, pattern = "\\.Rmd$",
                                           full.names = TRUE)) %>%
     extract(col = filename, into = c("chapter", "number"),
             regex = c("(\\d+)-(\\d+)"), convert = TRUE, remove = FALSE) %>%

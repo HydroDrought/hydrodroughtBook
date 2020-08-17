@@ -22,7 +22,7 @@ days_in_year <- function(x, origin = "-01-01")
 remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
 {
     has.year <- "year" %in% colnames(x)
-    if (has.year) x <- append_group(x, by = "year", start = origin)
+    if (!has.year) x <- append_group(x, by = "year", start = origin)
 
     coverage <- x %>%
         count(year) %>%
@@ -199,4 +199,15 @@ plot_coverage <- function(x, title = "", origin = "-01-01")
               panel.ontop = TRUE)
 
     plot(p)
+}
+
+
+
+integer_breaks <- function(n = 5, ...) {
+    fxn <- function(x) {
+        breaks <- floor(pretty(x, n, ...))
+        names(breaks) <- attr(breaks, "labels")
+        breaks
+    }
+    return(fxn)
 }
