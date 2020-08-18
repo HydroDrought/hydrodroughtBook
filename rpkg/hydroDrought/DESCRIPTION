@@ -12,8 +12,6 @@ Description: We provide a collection of data-sets and functions used in the book
 License: GPL-3
 Depends: 
     tidyverse,
-    lubridate,
-    scales,
     dygraphs,
     R (>= 2.10)
 Encoding: UTF-8
