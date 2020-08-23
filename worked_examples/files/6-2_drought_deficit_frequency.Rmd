@@ -1,0 +1,229 @@
+---
+title: "Drought deficit frequency"
+author: "Worked example 6.2"
+output: 
+  tufte::tufte_html:
+    tufte_features: ["fonts"]
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    css: style.css
+    fig_caption: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+theme_set(theme_bw(base_size = 10))
+library(kableExtra)
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(hydroDrought)
+
+# remove the same years as in figure 6.9 of the first edition
+incomplete <- tibble(year = c(1965, 1978, 1986, 1987, 2000))
+
+ngaruroro <- read_rds("~/Documents/boku/hydroDroughtDev/data/firstEdition/global.rds") %>%
+  arrange(River) %>%
+  filter(River == "Ngaruroro") %>%
+  select(discharge) %>%
+  unnest(discharge) %>%
+  sanitize_ts(approx.missing = 15) %>%
+  append_group(by = "year", start = "-09-01")
+
+# ngaruroro <- ng %>%
+#   append_group(by = "year", start = "-09-01") %>%
+#   filter(year >= 1964, year < 2000) %>%
+#   print()
+
+# incomplete <- ngaruroro %>%
+#   filter(!is.na(discharge)) %>%
+#   count(year) %>%
+#   mutate(
+#     days.in.year = days_in_year(year, origin = "-09-01"),
+#     days.missing = days.in.year - n
+#   ) %>%
+#   filter(days.missing > 0) %>%
+#   print()
+
+# ng %>%
+#   drought_events(
+#     threshold = 5.243, pooling = "inter-event",
+#     pooling.pars = list(min.duration = 3, min.vol.ratio = Inf),
+#     full.table = TRUE
+#   ) %>%
+#   filter(duration >= 5, volume > max(volume) * 0.005) %>%
+#   transmute(start = first.day, end = last.day, def.vol = volume / 1000, av.def = def.vol / as.double(duration), real.duration = dbt, min.flow = qmin, date.min.flow = tqmin)
+
+```
+
+River Ngaruroro at Kuripapango in New Zealand, applied for frequency
+analysis of annual minimum series in Worked Example 6.1, is here applied
+for frequency analysis of drought deficit characteristics. The drought events
+were derived using the Nizowka program (Software, CD) as described in
+Worked Example 5.4 (Section 5.4.1). Partial duration series (PDS) of drought
+events below a given threshold were selected from time series of daily
+discharge, and $Q_{90}$ was selected as the threshold. Two drought characteristics
+are analysed in the following: drought deficit volume and real drought
+duration as defined in Worked Example 5.4.
+
+# Data
+```{r, message=FALSE, warning=FALSE}
+library(hydroDrought)
+
+# remove the same years as in figure 6.9 of the first edition
+incomplete <- tibble(year = c(1965, 1978, 1986, 1987, 2000))
+
+ng <- ngaruroro %>%
+  anti_join(incomplete, by = "year") %>%
+  filter(year >= 1964, year < 2000) 
+```
+
+Drought events were selected for River Ngaruroro and details of the
+selection criteria are given in Worked Example 5.4. The series cover the
+period `r min(ng$year)` to `r min(ng$year)` and the start of the year is set to 1 September. 
+
+
+A total of `r hydroDrought:::numbers_english(nrow(incomplete))` years were omitted from the series, 
+`r hydroDrought:::paste_with_and(paste(incomplete$year, substr(incomplete$year + 1, 3L, 4L), sep = "/"))`, 
+due to missing data.
+
+```{r}
+# q90 <- lfquantile(ng$discharge, exc.freq = 0.9) 
+q90 <- 5.243
+
+droughts <- ng %>%
+  drought_events(
+    threshold = q90, pooling = "inter-event", 
+    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf), 
+    full.table = TRUE
+  ) %>%
+  filter(duration >= 5, volume > max(volume) * 0.005)  
+
+tbl <- droughts %>%
+  transmute(
+    event, first.day, last.day, 
+    real.duration = dbt, 
+    volume = volume / 1e3,
+    rel.volume = volume / (17.30839 * 86.4),
+    rel.volume = as.difftime(round(rel.volume, 2), unit = "days"), 
+    average.deficit = volume / as.double(duration),
+    duration
+  ) %>%
+  print()
+```
+
+
+```{r echo=FALSE}
+missing <- tbl %>%
+  mutate(time = first.day) %>%
+  append_group("year", start = "-09-01") %>%
+  pull(year) %>%
+  setdiff(x = full_seq(ng$year, period = 1))
+
+n <- diff(range(ng$year))
+```
+
+As only events below the $Q_{90}$
+percentile are selected, it might happen that the flow never becomes less
+than the threshold in a year (non-drought year). 
+
+A total of `r hydroDrought:::numbers_english(length(missing))` out of the 
+`r n - length(missing)` years with observations did not experience a drought 
+(`r round(100 * length(missing) / n, 1)`%). The PDS
+series of drought deficit volume and real duration are plotted in
+Figure 6.12. Less severe values are found in the second half of the
+observation period for both deficit volume (upper) and duration (lower).
+The data are still treated as one sample as the number of observations is
+considered insufficient for a separate analysis of two periods. It should
+further be noted that a similar trend towards less severe droughts is not as
+pronounced for the $AM(1)$ values (Worked Example 6.1). This is likely a
+result of the high base flow contribution in the catchment (Figure 6.6).
+
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 6.12 PDS of drought deficit volume (upper) and real duration (lower) for River
+Ngaruroro at Kuripapango (NZ)."
+```
+```{r, echo=FALSE, fig.cap=fig.cap, message=FALSE, warning=FALSE}
+library(cowplot)
+p1 <- ggplot(tbl, aes(x = first.day, y = average.deficit)) +
+  geom_point() + 
+  scale_x_date(expand = expansion(mult = 0.01), date_minor_breaks = "1 year") +
+  scale_y_continuous(limits = c(0, 200), expand = expansion()) + 
+  labs(y = expression(paste("Average deficit volume (", 10^{3}, m^{3}, ")"))) +
+  theme(axis.title.x = element_blank())
+
+p2 <- ggplot(tbl, aes(x = first.day, y = as.double(real.duration))) +
+  geom_point() + 
+  scale_x_date(expand = expansion(mult = 0.01), date_minor_breaks = "1 year") +
+  scale_y_continuous(limits = c(0, 70), expand = expansion()) +
+  labs(y = "Real duration (days)") + 
+  theme(axis.title.x = element_blank())
+
+cowplot::plot_grid(p1, p2, align = "v", axis = "x", ncol = 1)
+```
+
+# Derivation of distribution function
+Following Zelenhasic & Salvai (1987) an estimate of the non-exceedance
+probability, $F(x)$, for the largest event in each time interval is in Nizowka
+obtained by combining the distribution for the occurrence of events and
+the distribution for the magnitudes of deficit volume or duration. Here a
+time interval of one year is chosen. Subsequently the return period in
+years for a given event can be calculated. The number of drought events
+occurring in a time period t is commonly assumed to be Poisson
+distributed (Equation 6.9) with parameter $\lambda t$. In Nizowka the binomial
+Pascal distribution is offered along with the Poisson distribution as
+described in ‘Background Information NIZOWKA’ (Software, CD). The
+distribution that best fitted deficit volume was the Pascal distribution for
+the number of droughts and the GP distribution for the deficits. For
+duration the Pascal distribution was chosen along with the Log-Normal
+distribution. The $F(x)$ is for drought deficit volume plotted in Figure 6.13
+together with the observed values plotted using a plotting position. The
+chosen distribution describes the data well, with the exception of some
+values in the upper range. The maximum value is, however, satisfactorily
+modelled.
+
+
+
+```{r, eval=FALSE, echo=FALSE}
+# Absolute volume
+library(lmom)
+p <- 1 - c(1 / c(10, 100, 200))
+x <- as.double(droughts$volume / 1e3, unit = "days")
+
+l <- samlmu(x)
+
+evplot(x)
+evdistq(quagpa, pelgpa(l))
+
+quagpa(f = p, para = pelgpa(l))
+
+```
+
+
+
+```{r, eval=FALSE, echo=FALSE}
+# Real Drought Duration
+p <- 1 - c(1 / c(10, 100, 200))
+x <- as.double(droughts$dbt, unit = "days")
+
+l <- samlmu(x)
+
+evplot(x)
+evdistq(qualn3, pelln3(l))
+
+qualn3(f = p, para = pelln3(l))
+```
+
+
+# Calculation of the T-year event
+The return period of a given event is calculated following Equation 6.4.
+The relationship between the drought characteristics as defined in Worked
+Example 5.4 and $F(x)$ are given by the tabulated distribution functions in
+Nizowka. The design value for a particular return period, i.e. the T-year
+event, can be obtained from the tables for known values of $F(x)$. The
+estimated 10-, 100- and 200-year drought events are shown in Table 6.2.

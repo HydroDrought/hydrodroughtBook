@@ -25,6 +25,7 @@
     <td> <i>Jamie Hannaford</i> </td>
     <td>  </td>
   </tr>
+
   <tr>
     <td> <b> 5. Hydrological Drought Characteristics</b> </td>
     <td> <i>Hege Hisdal</i> </td>
@@ -78,11 +79,31 @@
   </td>
   </tr>
 
+
+
   <tr>
     <td> <b> 6. Frequency Analysis</b> </td>
     <td> <i>Lena M Tallaksen</i> </td>
     <td>  </td>
   </tr>
+    <tr>
+  <td colspan="3">
+  <ul>
+  <li>6.1 Low flow frequency analysis: 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/6-1_low_flow_frequency_analysis.html">Worked Example</a>, 
+    <br><i>new R-script, but using Ngaruroro time series from first edition, direct computation of distribution parameters differs.</i>
+  </li>
+
+  <li>6.2 Low flow frequency analysis: 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/6-2_drought_deficit_frequency.html">Worked Example</a>, 
+    <br><i>new R-script, estimation of combined distribution of drought volume and duration not yet implemented. </i>
+  </li>
+
+  </ul>
+  </td>
+  </tr>
+
+  
   <tr>
     <td> <b> 7. Statistical modelling</b> </td>
     <td> <i>Jim Stagge</i> </td>

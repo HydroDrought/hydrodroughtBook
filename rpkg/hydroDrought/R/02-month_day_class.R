@@ -1,7 +1,7 @@
 # todo: expand POSIXct with origin and store as attribute or better as list
 # this way we do not have to propagate origin = "-01-01" through every function
 
-
+#' @importFrom lubridate "year<-"
 #' @export
 monthDay <- function(x, origin = "-01-01")
 {

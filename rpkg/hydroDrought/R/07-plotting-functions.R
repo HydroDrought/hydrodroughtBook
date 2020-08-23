@@ -1,8 +1,9 @@
 
+#' @export
 days_in_year <- function(x, origin = "-01-01")
 {
   from <- if (is.numeric(x)) as.Date(paste0(x, origin)) else x
-  to <- as.Date(paste0(year(from)+1, origin))
+  to <- as.Date(paste0(year(from) + 1, origin))
 
   days <- as.double(to - from, units = "days")
   return(as.integer(days))
@@ -18,6 +19,7 @@ days_in_year <- function(x, origin = "-01-01")
 #         mutate(coverage = n / days_in_year(year, origin = origin)) %>%
 #         arrange(year)
 # }
+
 
 remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
 {
@@ -43,21 +45,22 @@ remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
   return(res)
 }
 
+#' @importFrom lubridate year floor_date ceiling_date days
 month_midpoints <- function(limits)
 {
-    l <- c(lubridate::floor_date(limits[1], unit = "month"),
-           lubridate::ceiling_date(limits[2], unit = "month"))
+    l <- c(floor_date(limits[1], unit = "month"),
+           ceiling_date(limits[2], unit = "month"))
 
     nmonths <- (as.double(l[2] - l[1], unit = "days") + 31) / 30
-    s <- l[1] + lubridate::days(14) + months(seq(0, nmonths - 1))
+    s <- l[1] + days(14) + months(seq(0, nmonths - 1))
 
     s
 }
 
 month_breaks <- function(limits)
 {
-  l <- c(lubridate::floor_date(limits[1], unit = "month"),
-         lubridate::ceiling_date(limits[2], unit = "month"))
+  l <- c(floor_date(limits[1], unit = "month"),
+         ceiling_date(limits[2], unit = "month"))
 
   nmonths <- (as.double(l[2] - l[1], unit = "days") + 31) / 30
   s <- l[1] + months(seq(0, nmonths))
@@ -66,10 +69,10 @@ month_breaks <- function(limits)
 }
 
 
-
+#' @importFrom lubridate month
 month_localized <- function(x, locale = "en_US.utf8")
 {
-  lubridate::month(x, label = TRUE, abbr = TRUE, locale = locale)
+  month(x, label = TRUE, abbr = TRUE, locale = locale)
 }
 
 #' @export
@@ -241,7 +244,7 @@ plot_coverage <- function(x, title = "", origin = "-01-01")
 }
 
 
-
+#' @export
 integer_breaks <- function(n = 5, ...) {
   fxn <- function(x) {
     breaks <- floor(pretty(x, n, ...))

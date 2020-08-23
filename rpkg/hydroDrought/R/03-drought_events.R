@@ -1,3 +1,4 @@
+#' @importFrom lubridate days
 #' @export
 drought_events <- function(x, threshold,
                            pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
@@ -19,16 +20,22 @@ drought_events <- function(x, threshold,
   events <- x %>%
     group_by(event) %>%
     summarise(
-      start = min(time), end = max(end),
+      first.day = min(time), last.day = max(end) - days(1),
       # duration for SPA is duration until max storage
-      d.smax = as.difftime(as.double(which.max(storage)), units = "days"),
-      duration = `units<-`(x = end - start, value = "days"),
+      # only meaningful if pooling == "sequent-peak"
+      d.smax = which.max(storage),
+      d.smax = as.difftime(as.double(d.smax), units = "days"),
+      # duration = `units<-`(x = end - first.day, value = "days") - 1,
+      duration = last.day - first.day + as.difftime(1, units = "days"),
+      dbt = as.difftime(as.double(sum(under.drought)), units = "days"),
       qmin = min(discharge),
       tqmin = time[which.min(discharge)],
       # volume for SPA is max storage
       volume = sum(volume),
       v.smax = max(storage),
-      under.drought = unique(under.drought)
+      under.drought = unique(under.drought),
+      # mean.flow = mean(discharge),
+      .groups = "drop"
     )
 
   if (pooling == "inter-event") {
@@ -43,7 +50,7 @@ drought_events <- function(x, threshold,
   # only keeping drought events
   events <- filter(events, under.drought)
 
-  if (relabel.events) events <- mutate(events, event = order(event))
+  if (relabel.events) events <- mutate(events, event = seq_along(event))
 
   if (plot) {
     df <- x %>%
@@ -64,8 +71,8 @@ drought_events <- function(x, threshold,
 
 
     for (i in seq_len(nrow(tbl))) {
-      p <- dyShading(p, from = tbl$start[i], to = tbl$end[i], color = "lightgrey")
-      p <- dyAnnotation(p, x = tbl$start[i], text = tbl$event[i],
+      p <- dyShading(p, from = tbl$first.day[i], to = tbl$last.day[i], color = "lightgrey")
+      p <- dyAnnotation(p, x = tbl$first.day[i], text = tbl$event[i],
                         tooltip = tbl$ttip[i],
                         width = 30, attachAtBottom = TRUE)
     }
@@ -76,11 +83,11 @@ drought_events <- function(x, threshold,
   # retain full table?
   if (!full.table) {
     cols <- case_when(
-      pooling == "inter-event" ~ list(c("event", "start", "end", "duration", "volume", "qmin", "tqmin",
-                                   "pooled")),
-      pooling == "sequent-peak" ~ list(c("event", "start", "end", duration = "d.smax", volume = "v.smax",
-                                    "qmin", "tqmin")),
-      TRUE ~ list(c("event", "start", "end", "duration",  "volume", "qmin", "tqmin"))
+      pooling == "inter-event" ~ list(c("event", "first.day", "last.day", "duration", "volume", "qmin", "tqmin",
+                                        "pooled")),
+      pooling == "sequent-peak" ~ list(c("event", "first.day", "last.day", duration = "d.smax", volume = "v.smax",
+                                         "qmin", "tqmin")),
+      TRUE ~ list(c("event", "first.day", "last.day", "duration",  "volume", "qmin", "tqmin"))
     )[[1]]
 
     events <- select(events, all_of(cols))
@@ -104,7 +111,7 @@ drought_events <- function(x, threshold,
   # todo? use deficit instead of volume
 
   # todo: make function resislient against NAs
-  # NAs always terminate a drought, never pooled over NAs..
+  # never pooled over NAs..
 
   if (pooling == "moving-average") {
     # todo: remove NAs introduced by moving average
@@ -134,6 +141,7 @@ drought_events <- function(x, threshold,
 
   # append the "end" of the day
   # it is an interval in a mathematical sense [start, end)
+  # todo: avoid confusion by using first.day = start, last.day = end - 1
   x <- mutate(x, end = lead(time, 1))
 
   # for regular time series we can estimate the duration of the last interval
@@ -153,17 +161,43 @@ drought_events <- function(x, threshold,
   if (pooling == "sequent-peak") {
     # overwriting the column 'under.drought'
     x <- x %>%
-      mutate(storage = .storage(x$discharge, threshold = threshold) *
-               as.double(end - time, units = "secs"),
+      mutate(storage = .storage(x$discharge, threshold = threshold),
+             # akwardly, storage is not defined as a volume, but as discharge
+             # storate = storage * as.double(end - time, units = "secs"),
              under.drought = storage > 0)
   }
 
+  .warn_na(x)
+
   # assign event numbers, only every second event is drought
-  x <- mutate(x, event = .rle_id(under.drought))
+  # periods with NAs get negative event numbers and are relabeled
+  x <- mutate(
+    x,
+    event = .group_const_value(under.drought | is.na(discharge)),
+    event = if_else(is.na(discharge), -event, event),
+    event = as.integer(.group_const_value(event) + 1)
+  )
 
   return(x)
 }
 
+.warn_na <- function(x)
+{
+  na.pos <- which(is.na(x$discharge))
+  if (length(na.pos)) {
+    # test if values around NAs are below threshold
+    neighbors <- unique(c(na.pos - 1, na.pos + 1))
+    candidates <- x %>%
+      slice(neighbors) %>%
+      filter(!is.na(discharge), discharge <= threshold)
+
+    if (nrow(candidates)) {
+      warning("Missing values adjacent to flows below threshold.\nNAs always terminate drought event. To avoid this interpolate first.")
+      return(TRUE)
+    }
+  }
+  return(FALSE)
+}
 
 .pool_inter_event <- function(x, min.duration, min.vol.ratio)
 {
@@ -184,7 +218,7 @@ drought_events <- function(x, threshold,
     cumvol <- sum(x$volume[x$pool == p & x$under.drought])
     vol.ratio <- cumvol / x$volume[row + 1]
 
-    depended <- ie.time <= min.duration &&
+    depended <- ie.time < min.duration &&
       vol.ratio < min.vol.ratio
 
     if (!depended) p <- p + 1
@@ -197,9 +231,10 @@ drought_events <- function(x, threshold,
     filter(under.drought) %>%
     group_by(pool) %>%
     summarise(
-      start = first(start),
-      end = last(end),
-      duration = `units<-`(x = end - start + 1, value = "days"),
+      first.day = first(first.day),
+      last.day = last(last.day),
+      duration = `units<-`(x = last.day - first.day + 1, value = "days"),
+      dbt = sum(dbt),
       under.drought = first(under.drought),
       volume = sum(volume),
       tqmin = tqmin[first(which.min(qmin))],
@@ -217,10 +252,10 @@ drought_events <- function(x, threshold,
               deficit = threshold - discharge,
               storage = 0)
 
-  x$storage[1] <- if (x$deficit[1] > 0) x$deficit[1] else 0
+  x$storage[1] <- if (x$deficit[1] > 0 & !is.na(x$deficit[1])) x$deficit[1] else 0
   for (i in seq(2, nrow(x))) {
     s <- x$storage[i - 1] + x$deficit[i]
-    x$storage[i] <- if (s > 0) s else 0
+    x$storage[i] <- if (s > 0 & !is.na(x$deficit[i])) s else 0
   }
 
   return(x$storage)

@@ -1,3 +1,5 @@
+#' @importFrom rlang .data
+
 #' @export
 
 moving_average <- function(x, n, sides = "past")
@@ -59,7 +61,7 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
     }
 
     # only week and month are trivial
-    f <- c(week = week, month = month)
+    f <- c(week = lubridate::week, month = lubridate::month)
     for (i in setdiff(by, c("year", "season", "day"))) {
         #for (i in setdiff(by, c("year", "season"))) {
         x <- mutate(x, !!i := f[[i]](x$time))
@@ -75,6 +77,8 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
     return(x)
 }
 
+
+#' @importFrom lubridate year
 #' @export
 group_id <- function(time, starts)
 {
@@ -189,6 +193,7 @@ const_threshold <- function(x, fun, append = FALSE, ...)
 #     return(inc)
 # }
 
+#' @importFrom lubridate int_diff as.period
 .guess_dt <- function(time)
 {
     u <- c("second", "minute", "hour", "day", "month", "year")
@@ -219,7 +224,8 @@ sanitize_ts <- function(x, # approx.missing = 0,
                         time_col = "time", value_col = "discharge",
                         id = NA_character_, message = TRUE,
                         force_positive = FALSE, add_implicit_NA = TRUE,
-                        remove_duplicates = TRUE, sort = TRUE)
+                        remove_duplicates = TRUE, sort = TRUE,
+                        approx.missing = 0)
 {
     id <- as.character(id)
     xx <- x %>%
@@ -326,15 +332,25 @@ sanitize_ts <- function(x, # approx.missing = 0,
         txt <- paste("implicitly missing values (", max(gaps$gap), "gaps)")
         msg$append(what = txt, data = gaps, n = nrow(gaps),
                    id = id, n_total = nrow(xx), action = action)
+    }
 
+    interpolated  <- .fill_na(xx$value, max.len = approx.missing)
+    xx$value <- interpolated
+    idx <- attr(interpolated, "index.interpolated")
+    if (length(idx)) {
+        gaps <- xx %>%
+            slice(idx) %>%
+            mutate(group = .group_const_change(idx)) %>%
+            nest(data = c(time, value))
+        txt <- paste("gaps with length <=", approx.missing, "days")
+        action <- "Filling with linear interpolation."
+
+        msg$append(what = txt, data = gaps, n = nrow(gaps),
+                   id = id, n_total = nrow(xx), action = action)
 
     }
 
-
-
-
     msg$final(n_out = nrow(xx))
-
     if (message) msg$print()
 
     res <- xx %>%
@@ -401,10 +417,44 @@ msg_collector <- function(n_in) {
     ))
 }
 
+.fill_na <- function(x, max.len = Inf, ...)
+{
+    g <- .group_const_value(is.na(x))
+    rl <- rle(g)
+    len <- rep(rl$lengths, rl$lengths)
+
+    # indices, for which interpolation is required
+    mask <- is.na(x) & len <= max.len
+    # idx <- seq_along(x)[mask]
+    idx <- which(mask)
+    x[idx] <- approx(seq_along(x), x, xout = idx, rule = 2, ...)$y
+
+    # gaps are periods of missing values
+    attr(x, "index.interpolated") <- if (length(idx)) idx else logical()
+
+    return(x)
+}
+
+
 # damit map() auch für difftime und POSIX Objekte funktioniert
 #' @export
 map_other <- function(.x, .f, ...)
 {
     reduce(map(.x, .f, ...), c)
+}
+
+
+numbers_english <- function(x)
+{
+    x <- as.numeric(x)
+    text <- c("one", "two", "three", "four", "five", "six", "seven", "eight",
+              "nine", "ten", "eleven", "twelve")[x]
+
+    ifelse(x <= 12, text, x)
+}
+
+paste_with_and <- function(x , sep = ", ", final = " and ")
+{
+    paste(paste(head(x, -1), collapse = sep), tail(x, 1), sep = final)
 }
 

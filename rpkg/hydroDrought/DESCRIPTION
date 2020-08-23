@@ -13,14 +13,16 @@ License: GPL-3
 Depends: 
     tidyverse,
     dygraphs,
-    R (>= 2.10)
+    R (>= 3.5.0)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.0
 Imports: 
+    rlang,
     vctrs,
     pillar,
     pracma,
     lfstat,
     ggrepel,
-    cowplot
+    cowplot,
+    lubridate
