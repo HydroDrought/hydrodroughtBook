@@ -96,6 +96,7 @@
 
   <li>6.2 Low flow frequency analysis: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/6-2_drought_deficit_frequency.html">Worked Example</a>, 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/6-2_drought_deficit_frequency_old.html">Worked Example with dataset from first edition</a>
     <br><i>new R-script, estimation of combined distribution of drought volume and duration not yet implemented. </i>
   </li>
 
