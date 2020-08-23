@@ -4,7 +4,11 @@ author: "Worked Example 5.1"
 output: 
   tufte::tufte_html:
     tufte_features: ["fonts"]
+    toc: true
+    toc_depth: 2
+    number_sections: true
     css: style.css
+    fig_caption: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -18,13 +22,14 @@ library(kableExtra)
 
 # Loading the Data
 
-In this example we are going to use river flow data from the river Ngaruroro which is part of the `international` dataset in the package **hydroDrought**. This dataset becomes accessible by loading the **hydroDrought** package. ^[Tobias: Currently the variable in the dataset is called *discharge* but we should consider using *flow* or *riverflow* for consistency. *river flow* (which a space in it) is not advisable as a variable name.]
-
+In this example we are going to use river flow data from the river Ngaruroro which is part of the `international` dataset in the package **hydroDrought**. This dataset becomes accessible by loading the **hydroDrought** package. 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
-ngaruroro <- filter(international, River == "Ngaruroro") %>%
-  select(discharge) %>%
-  unnest() 
+ngaruroro <- intl %>%
+  filter(river == "Ngaruroro") %>%
+  select(data) %>%
+  unnest(data) %>%
+  print()
 ```
 
 All years of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct a flow duration curve based on a daily time step, $\Delta t = 1$ day. The total number of $\Delta t$ intervals is then $N = `r nrow(ngaruroro)`$ days. Table 5.1 lists the first seven flow values. The first two columns show the date and the corresponding riverflow value, $Q$.
@@ -50,14 +55,16 @@ exceedance_frequency <- function(flow)
   
   # largest rank in sample (= number of non-missing values)
   N <- length(na.omit(flow))
-
+  
   # the exceedance frequency can be seen as the relative rank
   return(i / N)
 }
 
 ngaruroro <- ngaruroro %>%
-  mutate(rank = rank(-discharge, ties.method = "min"), 
-         freq.exc = exceedance_frequency(discharge)) 
+  mutate(
+    rank = rank(-discharge, ties.method = "min"), 
+    freq.exc = exceedance_frequency(discharge)
+  )
 ```
 
 
@@ -83,7 +90,8 @@ ngaruroro %>%
 # Plot of the FDC
 The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic^[Tobias: I suggest to label the y-axis with "Flow percentile" (or more general "Flow quantile").]. 
 
-```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", warning=FALSE, fig.margin = FALSE}
+```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", warning=FALSE, fig.margin = FALSE, message=FALSE}
+library(scales)
 ggplot(ngaruroro, aes(x = freq.exc, y = discharge)) +
   geom_line() +
   scale_y_log10() +
@@ -125,7 +133,7 @@ tbl  %>%
 
 # Fast-Track
 
-The function `lfquantile()`^[Tobias: I've written a small wrapper function around `base::quantile()` to circumvent the naming problem and the transformation into non-exceedande frequencies.] calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
+The function `lfquantile()` calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
 
 ```{r}
 lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
@@ -138,35 +146,36 @@ Comparing FDCs from different catchments requires standardization eg. dividing t
 ```{r}
 rel_discharge <- function(discharge, area)
 {
-    discharge %>%
-        transmute(rel.discharge = discharge * 1000 / area)
+  discharge %>%
+    transmute(rel.discharge = discharge * 1000 / area)
 }
 
-lambournRay <- international %>%
-    filter(River %in% c("Lambourn", "Ray")) %>%
-    select(River, discharge, Area)
+lambournRay <- intl %>%
+  filter(river %in% c("Lambourn", "Ray")) %>%
+  select(river, area = catchment, data)
 
 lambournRay <- lambournRay %>%
-    mutate(rel.discharge = map2(discharge, Area, rel_discharge)) 
-
-lambournRay
+  mutate(
+    data = map2(data, area, ~mutate(.x, rel.discharge = discharge * 1000 / .y))
+  ) %>%
+  print()
 
 fdc <- lambournRay %>%
-    select(River, rel.discharge) %>%
-    unnest() %>%
-    group_by(River) %>%
-    mutate(freq.exc = exceedance_frequency(rel.discharge))
+  select(river, data) %>%
+  unnest(cols = data) %>%
+  group_by(river) %>%
+  mutate(freq.exc = exceedance_frequency(rel.discharge)) %>%
+  print()
 
-fdc
 
 ggplot(fdc, mapping = aes(x = freq.exc, y = rel.discharge, 
-                          col = River, size = River)) +
-    geom_step(direction = "vh") +
-    scale_size_manual(values = c(0.1, 0.75)) +
-    scale_y_log10(limits = c(0.01, NA), 
-                  labels = number_format(accuracy = 0.01)) +
-    scale_x_continuous(labels = percent_format(accuracy = 1)) +
-    labs(x = "Exceedance Frequency",
-         y = expression(paste("Flow (", l, s^{-1}, km^{-2}, ")"))) 
+                          size = river)) +
+  geom_step(direction = "vh") +
+  scale_size_manual(values = c(0.1, 0.75)) +
+  scale_y_log10(limits = c(0.01, NA), 
+                labels = number_format(accuracy = 0.01)) +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  labs(x = "Exceedance Frequency",
+       y = expression(paste("Flow (", l, s^{-1}, km^{-2}, ")"))) 
 ```
 

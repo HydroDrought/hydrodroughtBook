@@ -272,14 +272,15 @@ inspect_spa <- function(x)
 {
   discharge <- ggplot(x, aes(time, discharge)) +
     geom_line() +
-    geom_point(size = 0.5) +
-    # possible bug: q90 might not be defined
-    geom_hline(yintercept = q90, col = 2, linetype = "dashed", size = 0.2) +
+    geom_point(size = 1) +
+    coord_cartesian(ylim = c(NA, x$threshold[1])) +
+    scale_y_continuous(expand = expansion(c(0.04, 0.1))) +
+    geom_hline(yintercept = x$threshold[1], col = 2, linetype = "dashed", size = 0.2) +
     facet_wrap(~event, scales = "free", nrow = 1)
 
   storage <- ggplot(x, aes(time, storage)) +
-    geom_line() +
-    geom_point(size = 0.5) +
+    geom_step() +
+    geom_point(size = 1) +
     expand_limits(y = 0) +
     facet_wrap(~event, scales = "free", nrow = 1)
 

@@ -335,24 +335,50 @@ width: 55%;
 <h4 class="author">Worked example 5.3</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#calculation"><span class="toc-section-number">2</span> Calculation</a></li>
+<li><a href="#results"><span class="toc-section-number">3</span> Results</a></li>
+</ul>
+</div>
 
 <div id="loading-the-data" class="section level1">
-<h1>Loading the Data</h1>
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>Three years of daily flow (1995 to 1997) from the Ray at Grendon Underwood (UK) have been selected. The base flow separation is done for the whole period, whereas the BFI is calculated for the mid-year 1996. This ensures that days at the start and end of the calculation year are included. In Table 5.7 the calculation steps are illustrated using data from the beginning of the record.</p>
 <pre class="r"><code>library(hydroDrought)
+library(lubridate)
 
-ray &lt;- filter(intl, river == &quot;Ray&quot;) %&gt;%
+ray &lt;- intl %&gt;%
+  filter(river == &quot;Ray&quot;) %&gt;%
   select(data) %&gt;%
   unnest(data) %&gt;%
   filter(year(time) %in% 1995:1997)</code></pre>
 </div>
 <div id="calculation" class="section level1">
-<h1>Calculation</h1>
+<h1><span class="header-section-number">2</span> Calculation</h1>
 <ul>
 <li>The daily flows, <span class="math inline">\(Q\)</span><i> </i>m<sup>3</sup>s<sup>-1</sup>, are divided into non-overlapping blocks of five days (Column 1 and 2).</li>
 </ul>
 <pre class="r"><code>ray &lt;- ray %&gt;%
-  mutate(block = ((row_number() - 1) %/% 5) + 1)</code></pre>
+  mutate(
+    block = ((row_number() - 1) %/% 5) + 1
+  ) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 1,096 x 3
+##    time       discharge block
+##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
+##  1 1995-01-01     0.109     1
+##  2 1995-01-02     0.063     1
+##  3 1995-01-03     0.043     1
+##  4 1995-01-04     0.039     1
+##  5 1995-01-05     0.229     1
+##  6 1995-01-06     0.186     2
+##  7 1995-01-07     0.116     2
+##  8 1995-01-08     0.111     2
+##  9 1995-01-09     0.095     2
+## 10 1995-01-10     0.123     2
+## # … with 1,086 more rows</code></pre>
 <ul>
 <li>Mark the minima of each of these blocks and let them be called <span class="math inline">\(Q_{min_1}\)</span>, <i>…</i> <span class="math inline">\(Q_{min_n}\)</span> (Column 3). Consider in turn (<span class="math inline">\(Q_{min_1}\)</span>, <span class="math inline">\(Q_{min_2}\)</span>, <span class="math inline">\(Q_{min_3}\)</span>), <i>…</i> (<span class="math inline">\(Q_{min_{n-1}}\)</span>, <span class="math inline">\(Q_{min_{n}}\)</span>, <span class="math inline">\(Q_{min_{n+1}}\)</span>). In each case, if 0.9<i>·</i>central value <i>≤</i> outer values, then the central value is a turning point for the base flow line (bold lines in Table 5.7). Continue this procedure until the whole time series has been analysed.</li>
 </ul>
@@ -362,18 +388,36 @@ ray &lt;- filter(intl, river == &quot;Ray&quot;) %&gt;%
   slice(1) %&gt;%
   ungroup() %&gt;%
   rename(Qmin = discharge) %&gt;%
-  mutate(Qmin.red = 0.9 * Qmin,
-         is.turning.point = Qmin.red &lt;= lag(Qmin) &amp; Qmin.red &lt;= lead(Qmin))</code></pre>
+  mutate(
+    Qmin.red = 0.9 * Qmin,
+    is.turning.point = Qmin.red &lt;= lag(Qmin) &amp; Qmin.red &lt;= lead(Qmin)
+  )</code></pre>
 <ul>
 <li>Join the turning points by straight lines to form the base flow separation line and assign to each day a base flow value <span class="math inline">\(Q_b\)</span>, by linear interpolation between the turning points. If, on any day, the base flow estimated by this line exceeds the total flow, the base flow is set to be equal to the total flow <span class="math inline">\(Q\)</span>, on that day.</li>
 </ul>
 <pre class="r"><code>tp &lt;- points %&gt;%
   filter(is.turning.point) %&gt;%
-  select(time, Qmin)
-
-baseflow &lt;- ray %&gt;%
-  mutate(baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
-         baseflow = pmin(baseflow, discharge))</code></pre>
+  select(time, Qmin) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 110 x 2
+##    time        Qmin
+##    &lt;date&gt;     &lt;dbl&gt;
+##  1 1995-01-16 0.054
+##  2 1995-02-07 0.1  
+##  3 1995-02-19 0.188
+##  4 1995-03-01 0.126
+##  5 1995-03-26 0.022
+##  6 1995-04-13 0.004
+##  7 1995-04-21 0.003
+##  8 1995-05-03 0.003
+##  9 1995-05-06 0.003
+## 10 1995-05-11 0.003
+## # … with 100 more rows</code></pre>
+<pre class="r"><code>baseflow &lt;- ray %&gt;%
+  mutate(
+    baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
+    baseflow = pmin(baseflow, discharge)
+  )</code></pre>
 <ul>
 <li><p>Calculate the volume of water (<span class="math inline">\(V_{base}\)</span>) beneath the base flow hydrograph between the first and last date of interest. The volume (m<sup>3</sup>) is simply derived as the sum of the daily base flow values times the timespan in seconds per day.</p></li>
 <li><p>Calculate the corresponding volume of water beneath the recorded hydrograph (<span class="math inline">\(V_{total}\)</span>). The volume (m<sup>3</sup>) is obtained by summing the daily flow values between the first and the last dates inclusive. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: Why do we phrase it differently for the <span class="math inline">\(V_{total}\)</span>? What about the mulitplication with 86400?</span></p></li>
@@ -381,8 +425,10 @@ baseflow &lt;- ray %&gt;%
 <pre class="r"><code>volume &lt;- baseflow %&gt;%
   filter(year(time) == 1996) %&gt;%
   na.omit() %&gt;%
-  summarise(total = sum(discharge) * 24 * 60 * 60,
-            baseflow = sum(baseflow) * 24 * 60 * 60)</code></pre>
+  summarise(
+    total = sum(discharge) * 24 * 60 * 60,
+    baseflow = sum(baseflow) * 24 * 60 * 60
+  )</code></pre>
 <ul>
 <li>The BFI is then <span class="math inline">\(V_{base}/V_{total}\)</span>.</li>
 </ul>
@@ -1019,18 +1065,12 @@ Base flow
 </table>
 </div>
 <div id="results" class="section level1">
-<h1>Results</h1>
+<h1><span class="header-section-number">3</span> Results</h1>
 <ul>
 <li><p>The first and second turning points are found on day 1995-01-16 and day 1995-01-16 (Column 4), respectively, and a linear interpolation is used to estimate the base flow between these dates (Column 5). The daily base flow separation line is subsequently calculated for the whole period by linear interpolation between all turning points.</p></li>
 <li><p>The volume beneath the base flow line, <span class="math inline">\(V_{base}\)</span>, for 1996 is found to be 348<i> </i>494.5<i> </i>m<sup>3</sup><label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> Tobias: values shown in edition 1 are <strong>not volumes</strong>, as they are not multiplied by 86400. This is not relevant for the BFI; probably it is even more clear like this because we do not need to show such large numbers.</span>, whereas the volume of the total flow, <span class="math inline">\(V_{total}\)</span>, is 1<i> </i>721<i> </i>693<i> </i>m<sup>3</sup>. The resultant BFI is 0.2. The base flow separation line for River Ray in 1996 is shown in Figure 5.4 of the book.</p></li>
 </ul>
 <p>The base flow for a given time series can also be calculated directely using the function <code>baseflow()</code>, optionally with a different choice of the block length or the reduction factor for the central value.</p>
-<pre class="r"><code>bf &lt;- ray %&gt;%
-  select(time, discharge) %&gt;%
-  mutate(baseflow = baseflow(discharge)) %&gt;%
-  filter(year(time) == 1996)
-
-bf</code></pre>
 <pre><code>## # A tibble: 366 x 3
 ##    time       discharge baseflow
 ##    &lt;date&gt;         &lt;dbl&gt;    &lt;dbl&gt;
@@ -1045,26 +1085,6 @@ bf</code></pre>
 ##  9 1996-01-09     1.38    0.0285
 ## 10 1996-01-10     0.475   0.0279
 ## # … with 356 more rows</code></pre>
-<pre class="r"><code>x &lt;- bf %&gt;%
-  gather(key = key, value = value, discharge, baseflow) %&gt;%
-  mutate(key = factor(key, levels = c(&quot;discharge&quot;, &quot;baseflow&quot;),
-                      labels = c(&quot;Recorded Hydrograph&quot;, &quot;Baseflow Line&quot;)))
-
-breaks &lt;- seq(from = min(x$time), length.out = 12, by = &quot;months&quot;)
-labels &lt;- month(breaks, label = TRUE, abbr = TRUE) # locale = &quot;english&quot;
-
-library(ggplot2)
-ggplot(x, aes(time, value, size = key)) +
-  geom_line() +
-  scale_size_manual(values = c(0.2, 0.75)) +
-  scale_x_date(breaks = breaks, labels = labels) +
-  labs(y = expression(paste(&quot;Flow (&quot;, m^{3}, s^{-1}, &quot;)&quot;))) +
-  theme_bw(base_size = 12) +
-  theme(legend.position = c(0.8, 0.35),
-        axis.title.x = element_blank(),
-        legend.title = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        axis.text.x = element_text(hjust = -0.4))</code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">
 Figure 5.4 Annual recorded hydrograph and calculated continuous base flow line for UK river Ray in year 1996.

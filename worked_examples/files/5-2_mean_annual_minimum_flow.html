@@ -335,25 +335,33 @@ width: 55%;
 <h4 class="author">Worked example 5.2</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+</ul>
+</div>
 
 <div id="loading-the-data" class="section level1">
-<h1>Loading the Data</h1>
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we are again going to use river flow data from the river Ngaruroro of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from <strong>hydrological years</strong> starting 1 September and ending 31 August. Table 5.4 lists the first flow values. <!-- The first two columns show the date and the corresponding flow value, Q. --></p>
 <p>In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function <code>append_group(..., by = &quot;years&quot;)</code> which appends an addtional column named <code>year</code> to the dataset.</p>
 <pre class="r"><code>library(hydroDrought)
 
 # attribute each observation to the correct hydrological year
 # and select only the hydrological years between 1990 und 2000
-ngaruroro &lt;- filter(international, River == &quot;Ngaruroro&quot;) %&gt;%
-    select(discharge) %&gt;%
-    unnest() %&gt;%
-    append_group(by = &quot;year&quot;, start = &quot;-09-01&quot;)  %&gt;%
-    filter(year &gt;= 1990, year &lt;= 1999)
+ngaruroro &lt;- intl %&gt;%
+  filter(river == &quot;Ngaruroro&quot;) %&gt;%
+  select(data) %&gt;%
+  unnest(data) %&gt;%
+  append_group(by = &quot;year&quot;, start = &quot;-09-01&quot;)  %&gt;%
+  filter(year &gt;= 1990, year &lt;= 1999)
 
 smoothed &lt;- ngaruroro %&gt;%
-    mutate(MA1 = moving_average(discharge, n = 1),
-           MA7 = moving_average(discharge, n = 7),
-           MA30 = moving_average(discharge, n = 30))</code></pre>
+  mutate(
+    MA1 = moving_average(discharge, n = 1),
+    MA7 = moving_average(discharge, n = 7),
+    MA30 = moving_average(discharge, n = 30)
+  )</code></pre>
 <p><!--
 <caption>--><span class="marginnote shownote">Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ.</span><!--</caption>--></p>
 <table>
@@ -826,14 +834,14 @@ NA
 </table>
 <pre class="r"><code># compute the annual minima
 am &lt;- smoothed %&gt;%
-    select(-discharge, -time) %&gt;%
-    group_by(year) %&gt;%
-    summarise_all(min, na.rm = TRUE)
+  select(-discharge, -time) %&gt;%
+  group_by(year) %&gt;%
+  summarise_all(min, na.rm = TRUE)
 
 # average the annual minima to get the mean annual minima
 mam &lt;- am %&gt;% 
-    select(-year) %&gt;%
-    summarise_all(mean)</code></pre>
+  select(-year) %&gt;%
+  summarise_all(mean)</code></pre>
 <p><!--
 <caption>--><span class="marginnote shownote">Table 5.5 <span class="math inline">\(MAM\)</span>(n-day), <span class="math inline">\(n=1\)</span> day, 7 days and 30 days</span><!--</caption>--></p>
 <table>

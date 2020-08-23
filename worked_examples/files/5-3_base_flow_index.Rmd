@@ -2,9 +2,13 @@
 title: "Base Flow Index"
 author: "Worked example 5.3"
 output: 
-  tufte::tufte_html:
+   tufte::tufte_html:
     tufte_features: ["fonts"]
+    toc: true
+    toc_depth: 2
+    number_sections: true
     css: style.css
+    fig_caption: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -22,8 +26,10 @@ Three years of daily flow (1995 to 1997) from the Ray at Grendon Underwood (UK) 
 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
+library(lubridate)
 
-ray <- filter(intl, river == "Ray") %>%
+ray <- intl %>%
+  filter(river == "Ray") %>%
   select(data) %>%
   unnest(data) %>%
   filter(year(time) %in% 1995:1997)
@@ -34,7 +40,10 @@ ray <- filter(intl, river == "Ray") %>%
 * The daily flows, $Q$<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>, are divided into non-overlapping blocks of five days (Column 1 and 2).
 ```{r}
 ray <- ray %>%
-  mutate(block = ((row_number() - 1) %/% 5) + 1)
+  mutate(
+    block = ((row_number() - 1) %/% 5) + 1
+  ) %>%
+  print()
 ```
 
 * Mark the minima of each of these blocks and let them be called $Q_{min_1}$, <i>&hellip;</i> $Q_{min_n}$ (Column 3). Consider in turn ($Q_{min_1}$, $Q_{min_2}$, $Q_{min_3}$), <i>&hellip;</i> ($Q_{min_{n-1}}$, $Q_{min_{n}}$, $Q_{min_{n+1}}$). In each case, if 0.9<i>&middot;</i>central value <i>&le;</i> outer values, then the central value is a turning point for the base flow line (bold lines in Table 5.7). Continue this procedure until the whole time series has been analysed. 
@@ -46,8 +55,10 @@ points <- ray %>%
   slice(1) %>%
   ungroup() %>%
   rename(Qmin = discharge) %>%
-  mutate(Qmin.red = 0.9 * Qmin,
-         is.turning.point = Qmin.red <= lag(Qmin) & Qmin.red <= lead(Qmin))
+  mutate(
+    Qmin.red = 0.9 * Qmin,
+    is.turning.point = Qmin.red <= lag(Qmin) & Qmin.red <= lead(Qmin)
+  )
 ```
 
 
@@ -56,11 +67,14 @@ points <- ray %>%
 ```{r}
 tp <- points %>%
   filter(is.turning.point) %>%
-  select(time, Qmin)
+  select(time, Qmin) %>%
+  print()
 
 baseflow <- ray %>%
-  mutate(baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
-         baseflow = pmin(baseflow, discharge))
+  mutate(
+    baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
+    baseflow = pmin(baseflow, discharge)
+  )
 ```
 
 
@@ -72,8 +86,10 @@ baseflow <- ray %>%
 volume <- baseflow %>%
   filter(year(time) == 1996) %>%
   na.omit() %>%
-  summarise(total = sum(discharge) * 24 * 60 * 60,
-            baseflow = sum(baseflow) * 24 * 60 * 60)
+  summarise(
+    total = sum(discharge) * 24 * 60 * 60,
+    baseflow = sum(baseflow) * 24 * 60 * 60
+  )
 ```
 
 * The BFI is then $V_{base}/V_{total}$.
@@ -131,7 +147,7 @@ fmt_number <- function(x) format(x, big.mark = "<i>&#8239;</i>")
 
 The base flow for a given time series can also be calculated directely using the function `baseflow()`, optionally with a different choice of the block length or the reduction factor for the central value.
 
-```{r, fig.cap="Figure 5.4 Annual recorded hydrograph and calculated continuous base flow line for UK river Ray in year 1996.", warning=FALSE, fig.margin = FALSE}
+```{r, fig.cap="Figure 5.4 Annual recorded hydrograph and calculated continuous base flow line for UK river Ray in year 1996.", warning=FALSE, fig.margin = FALSE, echo=FALSE}
 
 bf <- ray %>%
   select(time, discharge) %>%
