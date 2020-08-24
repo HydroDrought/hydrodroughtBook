@@ -2,9 +2,13 @@
 title: "Sequent Peak Algorithm"
 author: "Worked example 5.5"
 output: 
-  tufte::tufte_html:
+   tufte::tufte_html:
     tufte_features: ["fonts"]
+    toc: true
+    toc_depth: 2
+    number_sections: true
     css: style.css
+    fig_caption: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -18,64 +22,131 @@ library(kableExtra)
 
 # Loading the Data
 
-Ten years of daily data from River Ngaruroro at Kuripapango (NZ) are used as an example. Table 5.9 lists the first flow values. The whole series can be found on the CD. The first two columns show the date and the corresponding flow value, Q.
-
+Ten years of daily data without missing values from River Ngaruroro at Kuripapango (NZ) 
+are used as an example. 
 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
 
-ngaruroro <-  ngaruroro <- intl %>%
+ngaruroro <- intl %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) %>%
-  append_group(by = "year", start = "-09-01")  %>%
-  filter(year >= 1988, year <= 1999) # time series without missing values
+  mutate(
+    year = group_ts(time, by = "year", start = "-09-01")
+  ) %>%
+  filter(year >= 1988, year <= 1999) %>%
+  print()
+  
 ```
 
 # Calculation
-1.) Type the value of the desired yield (in cell number B5).
-2.) Calculate the storage according to Equation 5.5 (using the IF function in Excel). 
-The calculated storage is displayed in the right column. In the calculation Q90 is used as the desired yield, Q0.
-
+The storage $S_t$ is appended as new column to the time series using the function 
+`storage()` with the discharges and the threshold as input values. 
 
 ```{r}
 q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
 
-droughts <- ngaruroro %>%
-  drought_events(threshold = q90, pooling = "sequent-peak")
+ng <- ngaruroro %>%
+  mutate(
+    storage = storage(discharge = discharge, threshold = q90)
+    ) %>%
+  print()
+```
+
+As long as the discharge is above the threshold the storage is zero as only 
+flows below the $Q_90$ contributes to the storage. The first time that is the 
+case is on on `r ng$time[ng$storage > 0][1]`.
+
+```{r}
+ng %>%
+  filter(storage > 0)
 ```
 
 
-```{r}
+Filtering for `storage > 0` and assigning new `event` numbers when the time increment
+in the (filtered) time series suddenly changes allows us to identify 
+series of uninterrupted sequences of positive $S_t$. 
+
+```{r, warning=FALSE, message=FALSE}
+ng <- ng %>%
+  filter(storage > 0) %>%
+  mutate(
+    event = group_const_change(time)
+    ) %>%
+  print()
+```
+
+# Selection of the drought deficit volume and duration
+The deficit volume is the maximum value in an uninterrupted sequence of positive 
+$S_t$, and the drought duration is the time from the beginning of the depletion 
+period to the time of the maximum depletion. The date of the maximum depletion 
+is also displayed.
+
+```{r, warning=FALSE, message=FALSE}
+ng %>%
+  group_by(event) %>%
+  summarise(
+    volume = max(storage), 
+    duration = which.max(storage),
+    time = time[which.max(storage)]
+  )
+```
+
+
+```{r, echo=FALSE, }
+fig.cap <- "Figure x.xx Depiction of the relationship between discharge $Q_t$ and storage $Q_t$ for drought event number 3."
+```
+```{r, warning=FALSE, message=FALSE,fig.cap=fig.cap, echo = FALSE}
+raw <- ngaruroro %>%
+  hydroDrought:::.drought_events(threshold = q90, pooling = "sequent-peak") 
+
+e <- filter(raw, event == 6)
+
+sample.event <- raw %>%
+  filter(
+    time >= min(e$time) - lubridate::days(1), 
+    time <= max(e$time) + lubridate::days(1)
+  ) 
+
+sample.event %>%
+  mutate(event = " ") %>%
+  hydroDrought:::inspect_spa()
+```
+
+
+```{r, echo=FALSE, eval=FALSE}
+r <- sample.event  %>%
+  # mutate(day = row_number()) %>%
+  select(time, discharge, volume, storage) %>% 
+  head(30) 
+
+r %>%
+  kable(caption = "Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")  %>% 
+  kable_styling(fixed_thead = TRUE, position = "left") %>%
+  row_spec(which.max(r$storage), bold = TRUE)
+```
+
+
+
+# Results
+
+```{r, echo=FALSE, eval=FALSE}
 droughts %>%
   head(7) %>%
   kable(caption = "Table 5.10 An extract of drought deficit volumes and durations for River Ngaruroro at Kuripapango (NZ), calculated by SPA") 
 ```
 
 
-# Selection of the drought deficit volume and duration
-The deficit volume is the maximum value in an uninterrupted sequence of positive St, and the drought duration is the time from the beginning of the depletion period to the time of the maximum depletion. Find these values by pushing the button named ‘Extract max.’ (Pushing this button activates a routine programmed in Visual Basic.) The date of the maximum depletion is also displayed.
+An extract of the drought duration and deficit volumes for the 10-year series 
+is given in the output below. Even though the SPA procedure is pooling minor and
+dependent droughts, the obtained time series of events still contains a number 
+of minor drought events.
 
-```{r, echo=FALSE}
-raw <- ngaruroro %>%
-  hydroDrought:::.drought_events(threshold = q90, pooling = "sequent-peak") %>%
-  filter(event == 3)
-
-hydroDrought:::inspect_spa(raw)
+# Fast Track
+```{r, warning=FALSE, message=FALSE}
+ngaruroro %>%
+  drought_events(threshold = q90, pooling = "sequent-peak") 
 ```
 
 
-```{r, echo=FALSE}
-raw %>%
-  mutate(day = row_number()) %>%
-  select(time, day, discharge, volume, storage) %>% 
-  kable(caption = "Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")  %>% 
-  kable_styling(fixed_thead = TRUE, position = "left") %>%
-  row_spec(which.max(raw$storage), bold = TRUE)
-```
-
-
-
-# Results
-An extract of the drought duration and deficit volumes for the 10-year series is given in Table 5.10. The time series starts with a flow value below the threshold and the previous flows are not known. The first deficit volume and duration should therefore be omitted from further analyses.
-As can be seen from the results displayed on the CD, even though the SPA procedure is pooling minor and dependent droughts, the obtained time series of events still contains a number of minor drought events.

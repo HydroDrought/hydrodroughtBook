@@ -274,7 +274,7 @@ p <- pooled %>%
     year = group_ts(first.day, by = "year", start = "-09-01")
   ) %>%
   group_by(year) %>%
-  mutate(event = .group_const_value(event) + 1) %>%
+  mutate(event = group_const_value(event) + 1) %>%
   select(event, duration, year) %>%
   right_join(tibble(year = full_seq(.$year, 1)), by = "year")
 

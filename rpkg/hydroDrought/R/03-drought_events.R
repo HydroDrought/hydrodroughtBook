@@ -161,7 +161,7 @@ drought_events <- function(x, threshold,
   if (pooling == "sequent-peak") {
     # overwriting the column 'under.drought'
     x <- x %>%
-      mutate(storage = .storage(x$discharge, threshold = threshold),
+      mutate(storage = storage(x$discharge, threshold = threshold),
              # akwardly, storage is not defined as a volume, but as discharge
              # storate = storage * as.double(end - time, units = "secs"),
              under.drought = storage > 0)
@@ -173,9 +173,9 @@ drought_events <- function(x, threshold,
   # periods with NAs get negative event numbers and are relabeled
   x <- mutate(
     x,
-    event = .group_const_value(under.drought | is.na(discharge)),
+    event = group_const_value(under.drought | is.na(discharge)),
     event = if_else(is.na(discharge), -event, event),
-    event = as.integer(.group_const_value(event) + 1)
+    event = as.integer(group_const_value(event) + 1)
   )
 
   return(x)
@@ -246,7 +246,8 @@ drought_events <- function(x, threshold,
   return(x)
 }
 
-.storage <- function(discharge, threshold)
+#' @export
+storage <- function(discharge, threshold)
 {
   x <- tibble(discharge = discharge,
               deficit = threshold - discharge,
@@ -261,10 +262,6 @@ drought_events <- function(x, threshold,
   return(x$storage)
 }
 
-# tibble(d = c(1, 1, 0, 0, -1, 0, -1, -1, -1, 1, 1, 1, 1),
-#        t = 0,
-#        s = .storage(d, t))
-
 
 
 
@@ -274,15 +271,19 @@ inspect_spa <- function(x)
     geom_line() +
     geom_point(size = 1) +
     coord_cartesian(ylim = c(NA, x$threshold[1])) +
+    scale_x_date(date_labels = "%Y-%m-%d") +
     scale_y_continuous(expand = expansion(c(0.04, 0.1))) +
     geom_hline(yintercept = x$threshold[1], col = 2, linetype = "dashed", size = 0.2) +
-    facet_wrap(~event, scales = "free", nrow = 1)
+    facet_wrap(~event, scales = "free", nrow = 1) +
+    theme(axis.title.x = element_blank())
 
   storage <- ggplot(x, aes(time, storage)) +
     geom_step() +
     geom_point(size = 1) +
+    scale_x_date(date_labels = "%Y-%m-%d") +
     expand_limits(y = 0) +
-    facet_wrap(~event, scales = "free", nrow = 1)
+    facet_wrap(~event, scales = "free", nrow = 1) +
+    theme(axis.title.x = element_blank())
 
   cowplot::plot_grid(discharge, storage, align = "v", ncol = 1)
 }

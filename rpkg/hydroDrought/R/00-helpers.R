@@ -106,7 +106,7 @@ group_ts <- function(time, by = c("day", "week", "month", "season", "year"),
     if (unique.id & by != "year") {
         if (is.unsorted(time)) warning("Time series is not sorted.")
 
-        group <- paste(x$year, .group_const_value(group), sep = ".")
+        group <- paste(x$year, group_const_value(group), sep = ".")
     }
 
     return(group)
@@ -218,10 +218,11 @@ const_threshold <- function(x, fun, append = FALSE, ...)
 }
 
 #' @export
-.group_const_value <- .rle_id
+group_const_value <- .rle_id
 
+#' @export
 # gleiche ID, solange die Änderung konstant ist
-.group_const_change <- function(x, change = median(diff(x), na.rm = TRUE))
+group_const_change <- function(x, change = median(diff(x), na.rm = TRUE))
 {
     d <- c(change, diff(x))
     cumsum(d != change) + 1
@@ -365,7 +366,7 @@ sanitize_ts <- function(x, # approx.missing = 0,
     ) %>%
         anti_join(xx, by = "time") %>%
         mutate(
-            gap = .group_const_change(time),
+            gap = group_const_change(time),
             value = NA_real_
         )
 
@@ -392,7 +393,7 @@ sanitize_ts <- function(x, # approx.missing = 0,
     if (length(idx)) {
         gaps <- xx %>%
             slice(idx) %>%
-            mutate(group = .group_const_change(idx)) %>%
+            mutate(group = group_const_change(idx)) %>%
             nest(data = c(time, value))
         txt <- paste("gaps with length <=", approx.missing, "days")
         action <- "Filling with linear interpolation."
@@ -471,7 +472,7 @@ msg_collector <- function(n_in) {
 
 .fill_na <- function(x, max.len = Inf, ...)
 {
-    g <- .group_const_value(is.na(x))
+    g <- group_const_value(is.na(x))
     rl <- rle(g)
     len <- rep(rl$lengths, rl$lengths)
 
