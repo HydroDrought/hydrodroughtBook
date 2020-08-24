@@ -83,9 +83,9 @@ drought_events <- function(x, threshold,
   # retain full table?
   if (!full.table) {
     cols <- case_when(
-      pooling == "inter-event" ~ list(c("event", "first.day", "last.day", "duration", "volume", "qmin", "tqmin",
+      pooling == "inter-event" ~ list(c("event", "first.day", "last.day", "duration", "dbt", "volume", "qmin", "tqmin",
                                         "pooled")),
-      pooling == "sequent-peak" ~ list(c("event", "first.day", "last.day", duration = "d.smax", volume = "v.smax",
+      pooling == "sequent-peak" ~ list(c("event", "first.day", "last.day", duration = "d.smax", "dbt", volume = "v.smax",
                                          "qmin", "tqmin")),
       TRUE ~ list(c("event", "first.day", "last.day", "duration",  "volume", "qmin", "tqmin"))
     )[[1]]

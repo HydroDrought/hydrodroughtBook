@@ -37,6 +37,8 @@ pre {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+pre code { font-size: 12px; }
+
 .r {
   background-color: rgb(240, 240, 240);
 }

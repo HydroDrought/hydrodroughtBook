@@ -74,12 +74,12 @@ vec_ptype_abbr.monthDay <- function(x) {
 #' @export
 format.monthDay <- function(x, format = "-%m-%d", ...)
 {
-    NextMethod(format = format, ...)
+    format.Date(x =x, format = format, ...)
 }
 
 #' @export
 print.monthDay <- function(x, ...) {
-    cat(format(x, ...), "\n")
+    print(format(x, ...))
 }
 
 

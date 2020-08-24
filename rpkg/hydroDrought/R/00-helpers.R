@@ -78,6 +78,41 @@ append_group <- function(x, by = c("day", "week", "month", "season", "year"),
 }
 
 
+
+#' @export
+group_ts <- function(time, by = c("day", "week", "month", "season", "year"),
+                     start = "-01-01", unique.id = FALSE)
+{
+    by <- match.arg(by)
+    time <- as.Date(time)
+    start <- regmatches(start, regexpr("-.*", start))
+
+    x <- .group_id_list(time = time, starts = start)
+
+    # only week and month are trivial
+    if (by == "year") {
+        group <- x$year
+    } else if (by == "season") {
+        group <- x$season
+    } else if (by %in% c("week", "month")) {
+        fun <- list(week = lubridate::week, month = lubridate::month)
+        group <- fun[[by]](time)
+    } else if(by == "day") {
+        # treat day differently, we need to pass the start of the year
+        group <- monthDay(time, origin = start[1])
+    }
+
+    # year is already a group for itself
+    if (unique.id & by != "year") {
+        if (is.unsorted(time)) warning("Time series is not sorted.")
+
+        group <- paste(x$year, .group_const_value(group), sep = ".")
+    }
+
+    return(group)
+}
+
+
 #' @importFrom lubridate year
 #' @export
 group_id <- function(time, starts)
@@ -95,6 +130,23 @@ group_id <- function(time, starts)
     season <- outer(time, breaks, ">=")
 
     return(breaks[rowSums(season)])
+}
+
+.group_id_list <- function(time, starts)
+{
+    x <- group_id(time = time, starts = starts)
+    season <- factor(substr(x, 5L, 10L), levels = starts)
+
+    # if existing, use names of the group
+    nam <- names(starts)
+    is.named <- length(nam) == length(starts) && all(!is.na(nam)) && all(nam != "")
+    if (is.named) levels(season) <- nam
+
+    list(
+        start = x,
+        year = as.integer(substr(x, start = 1L, stop = 4L)),
+        season = season
+    )
 }
 
 #' @export
@@ -390,10 +442,10 @@ msg_collector <- function(n_in) {
 
                 n <- list("in" = n_in, "out" = n_out)
                 n <- if(n_in == n_out) {
-                    paste("  Importing and exporting:", n_in, "rows.")
+                    paste("  Reading and writing:", n_in, "rows.")
                 } else {
                     d <-  n_out - n_in
-                    paste0("  Importing ", n_in, ", and exporting ", n_out,
+                    paste0("  Reading ", n_in, ", and writing ", n_out,
                            " rows (", abs(d), ifelse(d < 0, " fewer", " more"), " rows).")
                 }
 
