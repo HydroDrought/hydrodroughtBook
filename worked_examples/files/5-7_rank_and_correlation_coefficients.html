@@ -327,28 +327,37 @@ width: 55%;
 <h4 class="author">Worked example 5.7</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+</ul>
+</div>
 
 <div id="loading-the-data" class="section level1">
-<h1>Loading the Data</h1>
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought) 
 
 regional</code></pre>
 <pre><code>## # A tibble: 29 x 44
-##    id    discharge river station catchment altitude   lon   lat start      end             x      y  Q95s  Q95w   Q95     A    H0    Hx    Hr    Hm    Sm
-##    &lt;chr&gt; &lt;list&gt;    &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;     &lt;date&gt;      &lt;int&gt;  &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-##  1 2100… &lt;tibble … Rabn… Piring…     118.      298.  16.4  47.4 1971-01-01 2015-12-31 632579 399019 1.11   1.76  1.21 11.8   3.36  8.5   5.14  5.88   8.3
-##  2 2100… &lt;tibble … Rabn… Manner…     224.      231.  16.5  47.4 1966-01-01 2015-12-31 641191 397501 1.09   1.55  1.23 10.8   2.37  7.05  4.68  3.60   4.8
-##  3 2100… &lt;tibble … Stoob Oberpu…     149       237.  16.5  47.5 1966-01-01 2015-12-31 639309 404781 0.92   1.25  0.98 15.0   2.56  7.81  5.25  4.70   7.4
-##  4 2100… &lt;tibble … Wulka Wulkap…     221.      162.  16.5  47.8 1966-01-01 2015-12-31 637884 437789 0.67   0.91  0.71 22.3   1.75  7.2   5.45  3.21   5.9
-##  5 2102… &lt;tibble … Lafn… Dobers…     925.      234   16.1  47.0 1951-01-01 2015-12-31 613036 350694 2.33   2.88  2.76 13.9   2.37  4.52  2.15  3.10   3.9
-##  6 2102… &lt;tibble … Pinka Woppen…     417.      242   16.4  47.2 1951-01-01 2015-12-31 631684 371673 1.26   2     1.44 24.4   2.41  7.76  5.35  3.78   5  
-##  7 2102… &lt;tibble … Tauc… Altsch…      89.2     316.  16.3  47.3 1966-01-01 2015-12-31 623122 383547 1.63   2.19  1.83  9.04  3.28  8.34  5.06  5.50  10.4
-##  8 2102… &lt;tibble … Tauc… Hanner…     175.      247.  16.4  47.2 1951-01-01 2015-12-31 630727 374437 0.72   1.21  1.06  8.51  2.64  8.27  5.63  3.77   5.6
-##  9 2102… &lt;tibble … Strem Güssing     316.      210.  16.3  47.1 1976-01-01 2015-12-31 627048 355737 0.570  0.91  0.65 31.6   2.2   4.46  2.26  3.12   4.6
-## 10 2102… &lt;tibble … Strem Heilig…     400.      200.  16.4  47.0 1951-01-01 2015-12-31 634613 352828 0.46   0.71  0.63  8.41  2.01  3.34  1.33  2.64   3.8
-## # … with 19 more rows, and 23 more variables: Ssl &lt;dbl&gt;, Smo &lt;dbl&gt;, Sst &lt;dbl&gt;, P &lt;dbl&gt;, Ps &lt;dbl&gt;, Pw &lt;dbl&gt;, Gb &lt;dbl&gt;, Gq &lt;dbl&gt;, Gt &lt;dbl&gt;, Gf &lt;dbl&gt;, Gl &lt;dbl&gt;,
-## #   Gc &lt;dbl&gt;, Ggs &lt;dbl&gt;, Ggd &lt;dbl&gt;, Gso &lt;int&gt;, Lu &lt;dbl&gt;, La &lt;dbl&gt;, Lc &lt;dbl&gt;, Lg &lt;dbl&gt;, Lf &lt;dbl&gt;, Lr &lt;dbl&gt;, Lwa &lt;dbl&gt;, D &lt;dbl&gt;</code></pre>
+##    id    discharge river station catchment altitude   lon   lat start     
+##    &lt;chr&gt; &lt;list&gt;    &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;    
+##  1 2100… &lt;tibble … Rabn… Piring…     118.      298.  16.4  47.4 1971-01-01
+##  2 2100… &lt;tibble … Rabn… Manner…     224.      231.  16.5  47.4 1966-01-01
+##  3 2100… &lt;tibble … Stoob Oberpu…     149       237.  16.5  47.5 1966-01-01
+##  4 2100… &lt;tibble … Wulka Wulkap…     221.      162.  16.5  47.8 1966-01-01
+##  5 2102… &lt;tibble … Lafn… Dobers…     925.      234   16.1  47.0 1951-01-01
+##  6 2102… &lt;tibble … Pinka Woppen…     417.      242   16.4  47.2 1951-01-01
+##  7 2102… &lt;tibble … Tauc… Altsch…      89.2     316.  16.3  47.3 1966-01-01
+##  8 2102… &lt;tibble … Tauc… Hanner…     175.      247.  16.4  47.2 1951-01-01
+##  9 2102… &lt;tibble … Strem Güssing     316.      210.  16.3  47.1 1976-01-01
+## 10 2102… &lt;tibble … Strem Heilig…     400.      200.  16.4  47.0 1951-01-01
+## # … with 19 more rows, and 35 more variables: end &lt;date&gt;, x &lt;int&gt;, y &lt;int&gt;,
+## #   Q95s &lt;dbl&gt;, Q95w &lt;dbl&gt;, Q95 &lt;dbl&gt;, A &lt;dbl&gt;, H0 &lt;dbl&gt;, Hx &lt;dbl&gt;, Hr &lt;dbl&gt;,
+## #   Hm &lt;dbl&gt;, Sm &lt;dbl&gt;, Ssl &lt;dbl&gt;, Smo &lt;dbl&gt;, Sst &lt;dbl&gt;, P &lt;dbl&gt;, Ps &lt;dbl&gt;,
+## #   Pw &lt;dbl&gt;, Gb &lt;dbl&gt;, Gq &lt;dbl&gt;, Gt &lt;dbl&gt;, Gf &lt;dbl&gt;, Gl &lt;dbl&gt;, Gc &lt;dbl&gt;,
+## #   Ggs &lt;dbl&gt;, Ggd &lt;dbl&gt;, Gso &lt;int&gt;, Lu &lt;dbl&gt;, La &lt;dbl&gt;, Lc &lt;dbl&gt;, Lg &lt;dbl&gt;,
+## #   Lf &lt;dbl&gt;, Lr &lt;dbl&gt;, Lwa &lt;dbl&gt;, D &lt;dbl&gt;</code></pre>
 <pre class="r"><code># functions for the percentiles we want to include
 my_percentiles &lt;- function(x)
 {

@@ -327,9 +327,18 @@ width: 55%;
 <h4 class="author">Worked example 5.5</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#calculation"><span class="toc-section-number">2</span> Calculation</a></li>
+<li><a href="#selection-of-the-drought-deficit-volume-and-duration"><span class="toc-section-number">3</span> Selection of the drought deficit volume and duration</a></li>
+<li><a href="#results"><span class="toc-section-number">4</span> Results</a></li>
+<li><a href="#fast-track"><span class="toc-section-number">5</span> Fast Track</a></li>
+</ul>
+</div>
 
 <div id="loading-the-data" class="section level1">
-<h1>Loading the Data</h1>
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>Ten years of daily data without missing values from River Ngaruroro at Kuripapango (NZ) are used as an example.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
@@ -359,7 +368,7 @@ ngaruroro &lt;- intl %&gt;%
 ## # … with 4,373 more rows</code></pre>
 </div>
 <div id="calculation" class="section level1">
-<h1>Calculation</h1>
+<h1><span class="header-section-number">2</span> Calculation</h1>
 <p>The storage <span class="math inline">\(S_t\)</span> is appended as new column to the time series using the function <code>storage()</code> with the discharges and the threshold as input values.</p>
 <pre class="r"><code>q90 &lt;- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
 
@@ -422,7 +431,7 @@ ng &lt;- ngaruroro %&gt;%
 ## # … with 515 more rows</code></pre>
 </div>
 <div id="selection-of-the-drought-deficit-volume-and-duration" class="section level1">
-<h1>Selection of the drought deficit volume and duration</h1>
+<h1><span class="header-section-number">3</span> Selection of the drought deficit volume and duration</h1>
 <p>The deficit volume is the maximum value in an uninterrupted sequence of positive <span class="math inline">\(S_t\)</span>, and the drought duration is the time from the beginning of the depletion period to the time of the maximum depletion. The date of the maximum depletion is also displayed.</p>
 <pre class="r"><code>ng %&gt;%
   group_by(event) %&gt;%
@@ -453,11 +462,11 @@ Figure x.xx Depiction of the relationship between discharge <span class="math in
 </div>
 </div>
 <div id="results" class="section level1">
-<h1>Results</h1>
+<h1><span class="header-section-number">4</span> Results</h1>
 <p>An extract of the drought duration and deficit volumes for the 10-year series is given in the output below. Even though the SPA procedure is pooling minor and dependent droughts, the obtained time series of events still contains a number of minor drought events.</p>
 </div>
 <div id="fast-track" class="section level1">
-<h1>Fast Track</h1>
+<h1><span class="header-section-number">5</span> Fast Track</h1>
 <pre class="r"><code>ngaruroro %&gt;%
   drought_events(threshold = q90, pooling = &quot;sequent-peak&quot;) </code></pre>
 <pre><code>## # A tibble: 41 x 8

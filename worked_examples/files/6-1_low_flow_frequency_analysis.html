@@ -327,9 +327,18 @@ width: 55%;
 <h4 class="author">Worked example 6.1</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#derivation-of-an-empirical-distribution-function"><span class="toc-section-number">2</span> Derivation of an empirical distribution function</a></li>
+<li><a href="#fitting-a-distribution"><span class="toc-section-number">3</span> Fitting a distribution</a></li>
+<li><a href="#ft"><span class="toc-section-number">4</span> Fast Track</a></li>
+<li><a href="#probability-plot-using-the-exponential-reduced-variate"><span class="toc-section-number">5</span> Probability plot using the exponential reduced variate</a></li>
+</ul>
+</div>
 
 <div id="loading-the-data" class="section level1">
-<h1>Loading the Data</h1>
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been selected for frequency analysis of annual minimum 1-day values, <span class="math inline">\(AM(1)\)</span>, using the Weibull (WEI) distribution. In mid-latitudes in the Northern Hemisphere the calendar year can often be used to select the annual minimum flows. This is a suitable period for the selection of independent events as the drought or low flow period commonly occurs during the summer months. In the Southern Hemisphere the low flow season occurs at the opposite time of the year, and for Ngaruroro the lowest flows are typically found in the period November to May. As a result <span class="math inline">\(AM(1)\)</span> flows were selected for a hydrological year starting at the 1<sup>st</sup> September.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
@@ -414,7 +423,7 @@ Kuripapango (NZ); histogram" width="672" />
 <p>Ngaruroro has a flashy river regime, but has no observed zero flows. The <span class="math inline">\(AM(1)\)</span> flows are considered to come from the same population as only a minor part of the catchment is influenced by snow in winter. The observations cover the period 1964 to 1964 and with the omission of 7 years (1963, 1965, 1978, 1986, 1987, 2001 and 2019) with missing data a total of 50 values results. A histogram of the values is shown in Figure 6.3 (upper left). To test the assumption of stationarity the <span class="math inline">\(AM(1)\)</span> values are plotted against time in Figure 6.9. No trend can be detected in the series and the data are therefore assumed to fulfil the requirement of independent and identically distributed data (iid).</p>
 </div>
 <div id="derivation-of-an-empirical-distribution-function" class="section level1">
-<h1>Derivation of an empirical distribution function</h1>
+<h1><span class="header-section-number">2</span> Derivation of an empirical distribution function</h1>
 <pre class="r"><code>empirical &lt;- am %&gt;%
   mutate(
     rank = rank(flow),
@@ -445,7 +454,7 @@ Kuripapango (NZ); histogram" width="672" />
 </ol>
 </div>
 <div id="fitting-a-distribution" class="section level1">
-<h1>Fitting a distribution</h1>
+<h1><span class="header-section-number">3</span> Fitting a distribution</h1>
 <p>Fitting the two-parameter Weibull (WEI) distribution function (Section A6.1.4) using the method of L-moments and the fact that <span class="math inline">\(Y = −\ln(X)\)</span> has a Gumbel distribution if <span class="math inline">\(X\)</span> has a WEI distribution. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> The direct estimation of the Weibull parameters is shown in <a href="#ft">section Fast Track</a>. </span></p>
 <ol style="list-style-type: lower-alpha">
 <li>The first two L-moments (<span class="math inline">\(\hat\lambda_1\)</span> and <span class="math inline">\(\hat\lambda_2\)</span>) are estimated based on time series of <span class="math inline">\(\ln(x)\)</span>. These so called sample L-moments are calculated with the function <code>samlmu()</code> from the package <strong>lmom</strong>.</li>
@@ -525,7 +534,7 @@ round(q, 2)</code></pre>
 <p>which gives: <span class="math inline">\(\hat x_{50} = 1.88\)</span>m<sup>3</sup>s<sup>-1</sup> and <span class="math inline">\(\hat x_{100} = 1.62\)</span>m<sup>3</sup>s<sup>-1</sup>.</p>
 </div>
 <div id="ft" class="section level1">
-<h1>Fast Track</h1>
+<h1><span class="header-section-number">4</span> Fast Track</h1>
 <p>To obtain L-moment estimates of the two parameter Weibull distribution the lower bound (location parameter <span class="math inline">\(\xi\)</span>) is set to zero otherwise a three parameter distribution is fitted.</p>
 <pre class="r"><code>library(lmom)
 lmom &lt;- samlmu(am$flow)
@@ -539,7 +548,7 @@ par.wei</code></pre>
 <pre><code>## [1] 1.79 1.53</code></pre>
 </div>
 <div id="probability-plot-using-the-exponential-reduced-variate" class="section level1">
-<h1>Probability plot using the exponential reduced variate</h1>
+<h1><span class="header-section-number">5</span> Probability plot using the exponential reduced variate</h1>
 <pre class="r"><code>fitted.fast &lt;- am %&gt;%
   mutate(
     prob.emp = rank(flow) / (n() + 1),

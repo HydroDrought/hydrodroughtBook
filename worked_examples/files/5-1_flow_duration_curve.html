@@ -336,9 +336,20 @@ width: 55%;
 <h4 class="author">Worked Example 5.1</h4>
 
 
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#calculation-of-the-fdc"><span class="toc-section-number">2</span> Calculation of the FDC</a></li>
+<li><a href="#tabulation-of-the-fdc"><span class="toc-section-number">3</span> Tabulation of the FDC</a></li>
+<li><a href="#plot-of-the-fdc"><span class="toc-section-number">4</span> Plot of the FDC</a></li>
+<li><a href="#selected-exceedance-values"><span class="toc-section-number">5</span> Selected exceedance values</a></li>
+<li><a href="#fast-track"><span class="toc-section-number">6</span> Fast-Track</a></li>
+<li><a href="#standardized-flow-duration-curves"><span class="toc-section-number">7</span> Standardized Flow Duration Curves</a></li>
+</ul>
+</div>
 
 <div id="loading-the-data" class="section level1">
-<h1>Loading the Data</h1>
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we are going to use river flow data from the river Ngaruroro which is part of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. This dataset becomes accessible by loading the <strong>hydroDrought</strong> package.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
@@ -364,7 +375,7 @@ ngaruroro &lt;- intl %&gt;%
 <p>All years of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct a flow duration curve based on a daily time step, <span class="math inline">\(\Delta t = 1\)</span> day. The total number of <span class="math inline">\(\Delta t\)</span> intervals is then <span class="math inline">\(N = 20473\)</span> days. Table 5.1 lists the first seven flow values. The first two columns show the date and the corresponding riverflow value, <span class="math inline">\(Q\)</span>.</p>
 </div>
 <div id="calculation-of-the-fdc" class="section level1">
-<h1>Calculation of the FDC</h1>
+<h1><span class="header-section-number">2</span> Calculation of the FDC</h1>
 <p>The flow duration curve is constructed following the calculation steps as given in the right part of the table:</p>
 <ul>
 <li><p>The rank, <span class="math inline">\(i\)</span>, of each value is calculated (using the <code>rank()</code> function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the <span class="math inline">\(i^{th}\)</span> largest value has rank <span class="math inline">\(i\)</span> (i.e. the largest value has rank 1).</p></li>
@@ -530,14 +541,14 @@ Exceedance Frequency
 </table>
 </div>
 <div id="tabulation-of-the-fdc" class="section level1">
-<h1>Tabulation of the FDC</h1>
+<h1><span class="header-section-number">3</span> Tabulation of the FDC</h1>
 <ul>
 <li><p>Corresponding values of riverflow (<span class="math inline">\(Q\)</span> in m<sup>3</sup>s<sup>-1</sup>) and exceedance frequency (<span class="math inline">\(EF_{Q_i}\)</span> in %) are tabulated<label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: Tabulation was done implicitly in the sections before. </span>.</p></li>
 <li><p>The two columns are sorted by <span class="math inline">\(EF_{Q_i}\)</span><label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> Tobias: Sorting is not required. I suggest to delete the section “Tabulation of the FDC” entirely.</span>.</p></li>
 </ul>
 </div>
 <div id="plot-of-the-fdc" class="section level1">
-<h1>Plot of the FDC</h1>
+<h1><span class="header-section-number">4</span> Plot of the FDC</h1>
 <p>The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic.</p>
 <pre class="r"><code>library(scales)
 ggplot(ngaruroro, aes(x = freq.exc, y = discharge)) +
@@ -554,7 +565,7 @@ Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.
 </div>
 </div>
 <div id="selected-exceedance-values" class="section level1">
-<h1>Selected exceedance values</h1>
+<h1><span class="header-section-number">5</span> Selected exceedance values</h1>
 <p>Values for a particular frequency, for example the 90-percentile (<span class="math inline">\(Q_{90}\)</span>), can be obtained as the value of <span class="math inline">\(Q\)</span> corresponding to the largest value of <span class="math inline">\(EF_{Q_i}\)</span> that is less than or equal to the value of <span class="math inline">\(EF_{Q_i}\)</span> sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as 4.936<i> </i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used.</p>
 <p><!--
 <caption>--><span class="marginnote shownote">Table 5.2 An extract of values corresponding to <span class="math inline">\(Q_{90}\)</span>.</span><!--</caption>--></p>
@@ -727,14 +738,14 @@ Exceedance Frequency
 </table>
 </div>
 <div id="fast-track" class="section level1">
-<h1>Fast-Track</h1>
+<h1><span class="header-section-number">6</span> Fast-Track</h1>
 <p>The function <code>lfquantile()</code> calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for <span class="math inline">\(Q_{95}\)</span>, <span class="math inline">\(Q_{90}\)</span> and <span class="math inline">\(Q_{80}\)</span> would be:</p>
 <pre class="r"><code>lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))</code></pre>
 <pre><code>##     Q95     Q90     Q80 
 ## 4.10925 4.93600 6.46200</code></pre>
 </div>
 <div id="standardized-flow-duration-curves" class="section level1">
-<h1>Standardized Flow Duration Curves</h1>
+<h1><span class="header-section-number">7</span> Standardized Flow Duration Curves</h1>
 <p>Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge.</p>
 <pre class="r"><code>lambournRay &lt;- intl %&gt;%
   filter(river %in% c(&quot;Lambourn&quot;, &quot;Ray&quot;)) %&gt;%
