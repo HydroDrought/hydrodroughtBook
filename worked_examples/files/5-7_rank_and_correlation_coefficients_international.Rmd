@@ -19,7 +19,7 @@ theme_set(theme_bw(base_size = 10))
 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought) 
-regional
+intl
 ```
 
 
@@ -45,14 +45,14 @@ my_mams <- function(discharge, time, n = c(1, 10, 30))
 }
 
 
-indices <- regional  %>%
-  select(station, data = discharge, area = catchment) %>%
+indices <- intl  %>%
+  select(river, data, area = catchment) %>%
   filter(is.finite(area)) %>%
   mutate(
-    # data = map2(data, area, ~mutate(.x, discharge = discharge * 1000 / .y)),
-    Q.mean = map_dbl(data, ~mean(.$discharge, na.rm = TRUE)),
-    quantiles = map(data, ~my_percentiles(.x$discharge)),
-    mams = map(data, ~my_mams(discharge = .x$discharge, time = .x$time))
+    data = map2(data, area, ~mutate(.x, rel.discharge = discharge * 1000 / .y)),
+    Q.mean = map_dbl(data, ~mean(.$rel.discharge, na.rm = TRUE)),
+    quantiles = map(data, ~my_percentiles(.x$rel.discharge)),
+    mams = map(data, ~my_mams(discharge = .x$rel.discharge, time = .x$time))
   )  %>%
   select(-data, -area) %>%
   unnest(cols = c(quantiles, mams)) %>%
@@ -77,11 +77,27 @@ indices <- indices %>%
 ```{r, warning=FALSE, message=FALSE}
 # install_github("vqv/ggbiplot")
 df <- indices %>%
-  column_to_rownames(var = "station") 
+  filter(Q50 > 0) %>%
+  column_to_rownames(var = "river") 
 
 pca <- prcomp(df, center = TRUE, scale. = TRUE)
 
+# there may be more meaningful groups ... 
+continent <- tribble(
+  ~continent, ~country,
+  "Europe", c("Denmark", "Norway", "Spain", "Sweden", "The Netherlands", "United Kingdom"),
+  "Africa", c("Namibia", "South Africa"), 
+  "Asia", c("Nepal", "Russia"), 
+  "Australia", c("New Zealand"),  
+  "America", "United States of America"
+) %>%
+  unnest(country) %>%
+  right_join(select(intl, river, country), by = "country")
+
+g <- tibble(river = rownames(df)) %>%
+  left_join(continent, by = "river")
+
 library(ggbiplot)
-ggbiplot(pca, labels=rownames(df))
+ggbiplot(pca, labels=rownames(df), groups = g$continent, ellipse = T)
 ```
 
