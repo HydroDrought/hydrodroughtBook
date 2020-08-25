@@ -1,5 +1,4 @@
 
-#' @export
 days_in_year <- function(x, origin = "-01-01")
 {
   from <- if (is.numeric(x)) as.Date(paste0(x, origin)) else x
@@ -15,7 +14,7 @@ coverage_yearly <- function(x, origin = "-01-01")
 {
   tibble(time = x) %>%
     mutate(
-      year = water_year(.data$time, start = origin)
+      year = water_year(.data$time, origin = origin)
     ) %>%
     count(.data$year, name = "days.with.data") %>%
     mutate(
@@ -31,7 +30,7 @@ remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
 {
   has.year <- "year" %in% colnames(x)
   if (!has.year) x <- mutate(
-    year = water_year(.data$time, start = origin)
+    year = water_year(.data$time, origin = origin)
   )
 
   coverage <- x %>%
@@ -113,7 +112,7 @@ plot_daily_flow <- function(x, exc.freq = c(0.95, 0.9, 0.8, 0.5),
 {
   x <- x %>%
     mutate(
-      year = water_year(.data$time, start = origin),
+      year = water_year(.data$time, origin = origin),
       day = monthDay(.data$time, origin = origin)
     ) %>%
     remove_incomplete_first_last(origin = origin)
@@ -226,7 +225,7 @@ plot_coverage <- function(x, title = "", origin = "-01-01")
 
   x <- x %>%
     mutate(
-      year = water_year(.data$time, start = origin)
+      year = water_year(.data$time, origin = origin)
     ) %>%
     mutate(
       day = monthDay(.data$time, origin = origin),

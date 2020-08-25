@@ -39,7 +39,7 @@ ngaruroro <- intl %>%
   select(data) %>%
   unnest(data) %>%
   mutate(
-    year = water_year(time, start = "-09-01")
+    year = water_year(time, origin = "-09-01")
    ) %>%
   filter(year >= 1990, year <= 1999)
 
@@ -97,9 +97,9 @@ mam  %>%
 ngaruroro %>% 
   select(discharge, time) %>%
   summarise(
-    `MAM(1)` = mean_annual_minimum(discharge, time, start = "-09-01", n = 1),
-    `MAM(7)` = mean_annual_minimum(discharge, time, start = "-09-01", n = 7),
-    `MAM(30)` = mean_annual_minimum(discharge, time, start = "-09-01", n = 30)
+    `MAM(1)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 1),
+    `MAM(7)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 7),
+    `MAM(30)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 30)
   )
 ```
 

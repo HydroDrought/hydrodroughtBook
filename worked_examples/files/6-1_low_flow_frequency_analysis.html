@@ -300,6 +300,7 @@ white-space: pre;
 word-break: break-all;
 -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
+pre code { font-size: 12px; }
 .r {
 background-color: rgb(240, 240, 240);
 }
@@ -326,31 +327,26 @@ width: 55%;
 <h4 class="author">Worked example 6.1</h4>
 
 
-<div id="TOC">
-<ul>
-<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
-<li><a href="#derivation-of-an-empirical-distribution-function"><span class="toc-section-number">2</span> Derivation of an empirical distribution function</a></li>
-<li><a href="#fitting-a-distribution"><span class="toc-section-number">3</span> Fitting a distribution</a></li>
-<li><a href="#ft"><span class="toc-section-number">4</span> Fast Track</a></li>
-<li><a href="#probability-plot-using-the-exponential-reduced-variate"><span class="toc-section-number">5</span> Probability plot using the exponential reduced variate</a></li>
-</ul>
-</div>
 
 <div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<h1>Loading the Data</h1>
 <p>River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been selected for frequency analysis of annual minimum 1-day values, <span class="math inline">\(AM(1)\)</span>, using the Weibull (WEI) distribution. In mid-latitudes in the Northern Hemisphere the calendar year can often be used to select the annual minimum flows. This is a suitable period for the selection of independent events as the drought or low flow period commonly occurs during the summer months. In the Southern Hemisphere the low flow season occurs at the opposite time of the year, and for Ngaruroro the lowest flows are typically found in the period November to May. As a result <span class="math inline">\(AM(1)\)</span> flows were selected for a hydrological year starting at the 1<sup>st</sup> September.</p>
-<pre class="r"><code>library(hydroDrought)
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought)
+
 ngaruroro &lt;- intl %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
   select(data) %&gt;%
   unnest(data) %&gt;%
   # fill gaps with a length of up to 15 days
   sanitize_ts(approx.missing = 15) %&gt;%
-  append_group(by = &quot;year&quot;, start = &quot;-09-01&quot;) %&gt;%
+   mutate(
+    year = water_year(time, origin = &quot;-09-01&quot;)
+    ) %&gt;%
   print()</code></pre>
 <pre><code>## # A tibble: 20,473 x 3
 ##    time       discharge  year
-##    &lt;date&gt;         &lt;dbl&gt; &lt;int&gt;
+##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
 ##  1 1963-09-20      30.5  1963
 ##  2 1963-09-21      52.8  1963
 ##  3 1963-09-22      43.6  1963
@@ -365,23 +361,20 @@ ngaruroro &lt;- intl %&gt;%
 <pre class="r"><code># remove incomplete years
 incomplete &lt;- ngaruroro %&gt;%
   filter(!is.na(discharge)) %&gt;%
-  count(year, name = &quot;days.with.data&quot;) %&gt;%
-  mutate(
-    days.in.year = days_in_year(year, origin = &quot;-09-01&quot;),
-    days.missing = days.in.year - days.with.data
-  ) %&gt;%
+  pull(time) %&gt;%
+  coverage_yearly(origin = &quot;-09-01&quot;) %&gt;%
   filter(days.missing &gt; 0) %&gt;%
   print()</code></pre>
-<pre><code>## # A tibble: 7 x 4
-##    year days.with.data days.in.year days.missing
-##   &lt;int&gt;          &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
-## 1  1963            347          366           19
-## 2  1965            294          365           71
-## 3  1978            305          365           60
-## 4  1986            341          365           24
-## 5  1987            336          366           30
-## 6  2001            344          365           21
-## 7  2019             38          366          328</code></pre>
+<pre><code>## # A tibble: 7 x 5
+##    year days.with.data days.in.year days.missing coverage
+##   &lt;dbl&gt;          &lt;int&gt;        &lt;int&gt;        &lt;int&gt;    &lt;dbl&gt;
+## 1  1963            347          366           19    0.948
+## 2  1965            294          365           71    0.805
+## 3  1978            305          365           60    0.836
+## 4  1986            341          365           24    0.934
+## 5  1987            336          366           30    0.918
+## 6  2001            344          365           21    0.942
+## 7  2019             38          366          328    0.104</code></pre>
 <pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
     anti_join(incomplete, by = &quot;year&quot;)</code></pre>
 <pre class="r"><code># derivation of the annual minima
@@ -392,7 +385,7 @@ am &lt;- ngaruroro %&gt;%
   print()</code></pre>
 <pre><code>## # A tibble: 50 x 2
 ##     year  flow
-##    &lt;int&gt; &lt;dbl&gt;
+##    &lt;dbl&gt; &lt;dbl&gt;
 ##  1  2014  2.17
 ##  2  2012  2.34
 ##  3  1982  2.46
@@ -421,7 +414,7 @@ Kuripapango (NZ); histogram" width="672" />
 <p>Ngaruroro has a flashy river regime, but has no observed zero flows. The <span class="math inline">\(AM(1)\)</span> flows are considered to come from the same population as only a minor part of the catchment is influenced by snow in winter. The observations cover the period 1964 to 1964 and with the omission of 7 years (1963, 1965, 1978, 1986, 1987, 2001 and 2019) with missing data a total of 50 values results. A histogram of the values is shown in Figure 6.3 (upper left). To test the assumption of stationarity the <span class="math inline">\(AM(1)\)</span> values are plotted against time in Figure 6.9. No trend can be detected in the series and the data are therefore assumed to fulfil the requirement of independent and identically distributed data (iid).</p>
 </div>
 <div id="derivation-of-an-empirical-distribution-function" class="section level1">
-<h1><span class="header-section-number">2</span> Derivation of an empirical distribution function</h1>
+<h1>Derivation of an empirical distribution function</h1>
 <pre class="r"><code>empirical &lt;- am %&gt;%
   mutate(
     rank = rank(flow),
@@ -432,7 +425,7 @@ Kuripapango (NZ); histogram" width="672" />
   print()</code></pre>
 <pre><code>## # A tibble: 50 x 5
 ##     year  flow  rank prob.emp rp.emp
-##    &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
 ##  1  2014  2.17     1   0.0196  51   
 ##  2  2012  2.34     2   0.0392  25.5 
 ##  3  1982  2.46     3   0.0588  17   
@@ -452,7 +445,7 @@ Kuripapango (NZ); histogram" width="672" />
 </ol>
 </div>
 <div id="fitting-a-distribution" class="section level1">
-<h1><span class="header-section-number">3</span> Fitting a distribution</h1>
+<h1>Fitting a distribution</h1>
 <p>Fitting the two-parameter Weibull (WEI) distribution function (Section A6.1.4) using the method of L-moments and the fact that <span class="math inline">\(Y = −\ln(X)\)</span> has a Gumbel distribution if <span class="math inline">\(X\)</span> has a WEI distribution. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> The direct estimation of the Weibull parameters is shown in <a href="#ft">section Fast Track</a>. </span></p>
 <ol style="list-style-type: lower-alpha">
 <li>The first two L-moments (<span class="math inline">\(\hat\lambda_1\)</span> and <span class="math inline">\(\hat\lambda_2\)</span>) are estimated based on time series of <span class="math inline">\(\ln(x)\)</span>. These so called sample L-moments are calculated with the function <code>samlmu()</code> from the package <strong>lmom</strong>.</li>
@@ -505,7 +498,7 @@ Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles
 <pre class="r"><code>fitted</code></pre>
 <pre><code>## # A tibble: 50 x 5
 ##     year  flow prob.emp prob.wei rp.wei
-##    &lt;int&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+##    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
 ##  1  2014  2.17   0.0196   0.0399  25.1 
 ##  2  2012  2.34   0.0392   0.0556  18.0 
 ##  3  1982  2.46   0.0588   0.0705  14.2 
@@ -532,7 +525,7 @@ round(q, 2)</code></pre>
 <p>which gives: <span class="math inline">\(\hat x_{50} = 1.88\)</span>m<sup>3</sup>s<sup>-1</sup> and <span class="math inline">\(\hat x_{100} = 1.62\)</span>m<sup>3</sup>s<sup>-1</sup>.</p>
 </div>
 <div id="ft" class="section level1">
-<h1><span class="header-section-number">4</span> Fast Track</h1>
+<h1>Fast Track</h1>
 <p>To obtain L-moment estimates of the two parameter Weibull distribution the lower bound (location parameter <span class="math inline">\(\xi\)</span>) is set to zero otherwise a three parameter distribution is fitted.</p>
 <pre class="r"><code>library(lmom)
 lmom &lt;- samlmu(am$flow)
@@ -546,7 +539,7 @@ par.wei</code></pre>
 <pre><code>## [1] 1.79 1.53</code></pre>
 </div>
 <div id="probability-plot-using-the-exponential-reduced-variate" class="section level1">
-<h1><span class="header-section-number">5</span> Probability plot using the exponential reduced variate</h1>
+<h1>Probability plot using the exponential reduced variate</h1>
 <pre class="r"><code>fitted.fast &lt;- am %&gt;%
   mutate(
     prob.emp = rank(flow) / (n() + 1),
@@ -557,7 +550,7 @@ par.wei</code></pre>
   print()</code></pre>
 <pre><code>## # A tibble: 50 x 5
 ##     year  flow prob.emp prob.wei prob.exp
-##    &lt;int&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+##    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
 ##  1  2014  2.17   0.0196   0.0472   0     
 ##  2  2012  2.34   0.0392   0.0644   0     
 ##  3  1982  2.46   0.0588   0.0806   0     

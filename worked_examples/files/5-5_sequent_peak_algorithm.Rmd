@@ -34,7 +34,7 @@ ngaruroro <- intl %>%
   select(data) %>%
   unnest(data) %>%
   mutate(
-    year = group_ts(time, by = "year", start = "-09-01")
+    year = water_year(time, origin = "-09-01")
   ) %>%
   filter(year >= 1988, year <= 1999) %>%
   print()

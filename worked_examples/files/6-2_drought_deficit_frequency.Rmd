@@ -34,12 +34,12 @@ ngaruroro <- read_rds("~/Documents/boku/hydroDroughtDev/data/firstEdition/global
   unnest(discharge) %>%
   sanitize_ts(approx.missing = 15) %>%
    mutate(
-    year = water_year(time, start = "-09-01")
+    year = water_year(time, origin = "-09-01")
     )
 
 # ngaruroro <- ng %>%
 #   mutate(
-#     year = water_year(time, start = "-09-01")
+#     year = water_year(time, origin = "-09-01")
 #   )
 # filter(year >= 1964, year < 2000) %>%
 #   print()
@@ -75,7 +75,9 @@ duration as defined in Worked Example 5.4.
 
 # Data
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
+
 
 # remove the same years as in figure 6.9 of the first edition
 incomplete <- tibble(year = c(1965, 1978, 1986, 1987, 2000))
@@ -124,7 +126,7 @@ tbl <- droughts %>%
 missing <- tbl %>%
   mutate(time = first.day) %>%
    mutate(
-    year = water_year(first.day, start = "-09-01")
+    year = water_year(first.day, origin = "-09-01")
    ) %>%
   pull(year) %>%
   setdiff(x = full_seq(ng$year, period = 1))

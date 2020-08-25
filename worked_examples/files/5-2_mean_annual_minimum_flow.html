@@ -336,15 +336,9 @@ width: 55%;
 <h4 class="author">Worked example 5.2</h4>
 
 
-<div id="TOC">
-<ul>
-<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
-<li><a href="#fast-track"><span class="toc-section-number">2</span> Fast Track</a></li>
-</ul>
-</div>
 
 <div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<h1>Loading the Data</h1>
 <p>In this example we are again going to use river flow data from the river Ngaruroro of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from <strong>hydrological years</strong> starting 1 September and ending 31 August. Table 5.4 lists the first flow values. <!-- The first two columns show the date and the corresponding flow value, Q. --></p>
 <p>In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function <code>water_year()</code> which appends an additional column named <code>year</code> to the dataset.</p>
 <pre class="r"><code>library(tidyverse)
@@ -357,7 +351,7 @@ ngaruroro &lt;- intl %&gt;%
   select(data) %&gt;%
   unnest(data) %&gt;%
   mutate(
-    year = water_year(time, start = &quot;-09-01&quot;)
+    year = water_year(time, origin = &quot;-09-01&quot;)
    ) %&gt;%
   filter(year &gt;= 1990, year &lt;= 1999)
 
@@ -888,13 +882,13 @@ MA(30)
 </table>
 </div>
 <div id="fast-track" class="section level1">
-<h1><span class="header-section-number">2</span> Fast Track</h1>
+<h1>Fast Track</h1>
 <pre class="r"><code>ngaruroro %&gt;% 
   select(discharge, time) %&gt;%
   summarise(
-    `MAM(1)` = mean_annual_minimum(discharge, time, start = &quot;-09-01&quot;, n = 1),
-    `MAM(7)` = mean_annual_minimum(discharge, time, start = &quot;-09-01&quot;, n = 7),
-    `MAM(30)` = mean_annual_minimum(discharge, time, start = &quot;-09-01&quot;, n = 30)
+    `MAM(1)` = mean_annual_minimum(discharge, time, origin = &quot;-09-01&quot;, n = 1),
+    `MAM(7)` = mean_annual_minimum(discharge, time, origin = &quot;-09-01&quot;, n = 7),
+    `MAM(30)` = mean_annual_minimum(discharge, time, origin = &quot;-09-01&quot;, n = 30)
   )</code></pre>
 <pre><code>## # A tibble: 1 x 3
 ##   `MAM(1)` `MAM(7)` `MAM(30)`

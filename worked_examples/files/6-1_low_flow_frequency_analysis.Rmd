@@ -36,7 +36,9 @@ were selected for a hydrological year starting at the 1<sup>st</sup> September.
 
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
+
 ngaruroro <- intl %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
@@ -44,7 +46,7 @@ ngaruroro <- intl %>%
   # fill gaps with a length of up to 15 days
   sanitize_ts(approx.missing = 15) %>%
    mutate(
-    year = water_year(time, start = "-09-01")
+    year = water_year(time, origin = "-09-01")
     ) %>%
   print()
 ```

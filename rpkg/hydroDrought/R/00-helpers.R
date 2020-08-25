@@ -41,61 +41,18 @@ moving_average <- function(x, n, sides = "past")
 #     return(x)
 # }
 
-# append_group <- function(x, by = c("day", "week", "month", "season", "year"),
-#                          start = "-01-01", unique.id = FALSE)
-# {
-#     by <- match.arg(by, several.ok = TRUE)
-#     x$time <- as.Date(x$time)
-#     start <- regmatches(start, regexpr("-.*", start))
-#
-#     # always calculate the hydrological year, only id is meaningful
-#     x$year <- as.integer(substring(group_id(x$time, start[1]), 1L, 4L))
-#
-#     if ("season" %in% by) {
-#         if (length(start) < 2) {
-#             warning("There have to be a least two seasons. Specify argument 'start' accordingly.")
-#         }
-#         season.id <- group_id(x$time, start)
-#
-#         x$season <- factor(substr(season.id, 5L, 10L), levels = start)
-#
-#         # if existing, use names of the group
-#         nam <- names(start)
-#         is.named <- length(nam) == length(start) && all(!is.na(nam)) && all(nam != "")
-#         if (is.named) levels(x$season) <- nam
-#
-#         if (unique.id) x$season.id <- season.id
-#     }
-#
-#     # only week and month are trivial
-#     f <- c(week = lubridate::week, month = lubridate::month)
-#     for (i in setdiff(by, c("year", "season", "day"))) {
-#         #for (i in setdiff(by, c("year", "season"))) {
-#         x <- mutate(x, !!i := f[[i]](x$time))
-#         if (unique.id) x[[paste0(i, ".id")]] <- paste(x$year, x[[i]], sep = "-")
-#     }
-#
-#     # treat day differently, we need to pass the start of the year
-#     if ("day" %in% by) {
-#         x <- mutate(x, day = monthDay(x$time, origin = start[1]))
-#         if (unique.id)  x <- mutate(x, day.id = as.integer(x$day))
-#     }
-#
-#     return(x)
-# }
-
 
 #' @importFrom dplyr mutate %>% slice filter summarise group_by if_else select
 #' @importFrom rlang :=
 #' @export
 group_ts <- function(time, by = c("day", "week", "month", "season", "year"),
-                     start = "-01-01", unique.id = FALSE)
+                     origin = "-01-01", unique.id = FALSE)
 {
     by <- match.arg(by)
     time <- as.Date(time)
-    start <- regmatches(start, regexpr("-.*", start))
+    origin <- regmatches(origin, regexpr("-.*", origin))
 
-    x <- .group_id_list(time = time, starts = start)
+    x <- .group_id_list(time = time, starts = origin)
 
     # only week and month are trivial
     if (by == "year") {
@@ -106,8 +63,8 @@ group_ts <- function(time, by = c("day", "week", "month", "season", "year"),
         fun <- list(week = lubridate::week, month = lubridate::month)
         group <- fun[[by]](time)
     } else if(by == "day") {
-        # treat day differently, we need to pass the start of the year
-        group <- monthDay(time, origin = start[1])
+        # treat day differently, we need to pass the origin of the year
+        group <- monthDay(time, origin = origin[1])
     }
 
     # year is already a group for itself
@@ -122,7 +79,6 @@ group_ts <- function(time, by = c("day", "week", "month", "season", "year"),
 
 
 #' @importFrom lubridate year leap_year
-#' @export
 group_id <- function(time, starts)
 {
     starts <- regmatches(starts, regexpr("-.*", starts))
@@ -158,9 +114,9 @@ group_id <- function(time, starts)
 }
 
 #' @export
-water_year <- function(time, start = "-01-01")
+water_year <- function(time, origin = "-01-01")
 {
-    year(group_id(time = time, starts = start))
+    year(group_id(time = time, starts = origin))
 }
 
 
@@ -172,8 +128,8 @@ var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year
     vary.by <- match.arg(vary.by)
     y <- x %>%
         mutate(
-            year = water_year(time = .data$time, start = start),
-            group = group_ts(time = .data$time, by = vary.by, start = start)
+            year = water_year(time = .data$time, origin = start),
+            group = group_ts(time = .data$time, by = vary.by, origin = start)
         )
 
     if (vary.by == "day") {
@@ -209,7 +165,7 @@ var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year
         res <- threshold
     }
 
-    attr(res, "threshold") <- list(vary.by = vary.by, start = start)
+    attr(res, "threshold") <- list(vary.by = vary.by, origin = start)
 
     return(res)
 }
@@ -510,7 +466,6 @@ msg_collector <- function(n_in) {
 
 
 # damit map() auch für difftime und POSIX Objekte funktioniert
-#' @export
 map_other <- function(.x, .f, ...)
 {
     purrr::reduce(purrr::map(.x, .f, ...), c)

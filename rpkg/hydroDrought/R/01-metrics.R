@@ -33,12 +33,12 @@ sgi <- function(x, na.rm = TRUE)
 }
 
 #' @export
-mean_annual_minimum <- function(discharge, time, start = "-01-01", n = 1,
+mean_annual_minimum <- function(discharge, time, origin = "-01-01", n = 1,
                                 na.rm = FALSE, omit.missing.years = TRUE)
 {
   x <- tibble(
     time = time,
-    year = water_year(time, start = start),
+    year = water_year(time, origin = origin),
     discharge = discharge
   ) %>%
     mutate(

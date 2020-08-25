@@ -34,7 +34,7 @@ ngaruroro <- intl %>%
   select(data) %>%
   unnest(data) %>%
   mutate(
-    year = water_year(time, start = "-09-01")
+    year = water_year(time, origin = "-09-01")
   )
 ```
 
@@ -94,7 +94,7 @@ Use the threshold for the whole dataset. First we have to append a new column co
 # hydrological year starts in September (here only relevant for plotting)
 grouped <- ngaruroro %>%
   mutate(
-    month = group_ts(time = time, by = "month", start = "-09-01")
+    month = group_ts(time = time, by = "month", origin = "-09-01")
   ) 
 
 grouped
@@ -141,7 +141,7 @@ threshold
 
 ng <- ngaruroro %>%
   mutate(
-    day = group_ts(time = time, by = "day", start = "-09-01")
+    day = group_ts(time = time, by = "day", origin = "-09-01")
   ) %>%
   left_join(threshold, by = "day") %>%
   print()

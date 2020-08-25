@@ -126,18 +126,18 @@ drought_events <- function(x, threshold,
     x$threshold <- threshold
   } else {
     if (is.null(att)) {
-      warning("Could not derive start of the hydrological year from 'threshold' object. Defaulting to '-01-01'.")
+      warning("Could not derive origin of the hydrological year from 'threshold' object. Defaulting to '-01-01'.")
       by <- setdiff(colnames(threshold), "threshold")
       origin <- "-01-01"
     } else {
       by <- att$vary.by
-      origin <- att$start
+      origin <- att$origin
     }
 
     # compute the same groups than threshold and join it
     x <- x %>%
       mutate(
-        group = group_ts(time = .data$time, by = by, start = origin)
+        group = group_ts(time = .data$time, by = by, origin = origin)
       ) %>%
       rename(!!by := .data$group) %>%
       left_join(threshold, by = by)

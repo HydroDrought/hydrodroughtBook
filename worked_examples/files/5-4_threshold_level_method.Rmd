@@ -60,7 +60,7 @@ Instead periods of missing data can been interpolated if of short duration
 ngaruroro <- ngaruroro %>%
   sanitize_ts(approx.missing = 14) %>%
   mutate(
-    year = group_ts(time, by = "year", start = "-09-01")
+    year = water_year(time, origin = "-09-01")
   ) %>%
   print()
 
@@ -166,7 +166,7 @@ thres <- droughts %>%
 
 d <- droughts %>%
   mutate(
-    year = water_year(first.day, start = "-09-01"),
+    year = water_year(first.day, origin = "-09-01"),
     minor = if_else(duration < 5 | volume < min(volume) * 0.005, "minor drought", "drought"),
     # label = factor(event, event, labels = sprintf("%i (%i)", event, year)),
     duration = as.double(duration, units = "days"),
@@ -251,7 +251,7 @@ example the following metrics:
 ```{r, message=FALSE}
 pooled %>%
   mutate(
-    year = group_ts(first.day, by = "year", start = "-09-01")
+    year = water_year(first.day, origin = "-09-01")
   ) %>%
   group_by(year) %>%
   summarise(
@@ -269,7 +269,7 @@ less than 11 days. Only `r sum(pooled$duration > 30)` events lasted more than 30
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 p <- pooled %>%
   mutate(
-    year = group_ts(first.day, by = "year", start = "-09-01")
+    year = water_year(first.day, origin = "-09-01")
   ) %>%
   group_by(year) %>%
   mutate(event = group_const_value(event) + 1) %>%

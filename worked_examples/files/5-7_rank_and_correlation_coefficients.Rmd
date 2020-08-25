@@ -4,7 +4,11 @@ author: "Worked example 5.7"
 output: 
   tufte::tufte_html:
     tufte_features: ["fonts"]
+    toc: true
+    toc_depth: 2
+    number_sections: true
     css: style.css
+    fig_caption: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -18,7 +22,9 @@ theme_set(theme_bw(base_size = 10))
 # Loading the Data
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought) 
+
 regional
 ```
 
@@ -38,7 +44,7 @@ my_mams <- function(discharge, time, n = c(1, 10, 30))
   long <- map_df(n, ~map(list(value = mean_annual_minimum), exec, 
                          n = .x,
                          discharge = discharge, time = time,  
-                         start = "-09-01", na.rm = TRUE), 
+                         origin = "-09-01", na.rm = TRUE), 
                  .id = "variable")
   
   pivot_wider(long, names_from = variable, values_from = value)
@@ -81,7 +87,6 @@ df <- indices %>%
 
 pca <- prcomp(df, center = TRUE, scale. = TRUE)
 
-library(ggbiplot)
-ggbiplot(pca, labels=rownames(df))
+ggbiplot::ggbiplot(pca, labels=rownames(df))
 ```
 
