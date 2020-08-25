@@ -144,12 +144,6 @@ lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
 
 Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge. 
 ```{r}
-rel_discharge <- function(discharge, area)
-{
-  discharge %>%
-    transmute(rel.discharge = discharge * 1000 / area)
-}
-
 lambournRay <- intl %>%
   filter(river %in% c("Lambourn", "Ray")) %>%
   select(river, area = catchment, data)

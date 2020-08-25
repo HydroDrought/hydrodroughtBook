@@ -29,3 +29,34 @@ sgi <- function(x, na.rm = TRUE)
 
     qnorm(rank(x) / (length(x) + 1))
 }
+
+#' @export
+mean_annual_minimum <- function(discharge, time, start = "-01-01", n = 1,
+                                na.rm = FALSE, omit.missing.years = TRUE)
+{
+  x <- tibble(
+    time = time,
+    year = water_year(time, start = start),
+    discharge = discharge
+  ) %>%
+    mutate(
+      smoothed = moving_average(discharge, n = n),
+      # replace NAs introduced by smoothing with Inf so they do not affect the min()
+      smoothed = replace(smoothed, seq_len(n - 1), Inf)
+    ) %>%
+    group_by(year) %>%
+    summarise(am = min(smoothed, na.rm = na.rm), .groups = "drop")
+
+  if (omit.missing.years) {
+    x <- x %>%
+      filter(is.finite(am))
+  }
+
+  x <- x %>%
+    summarise(mam = mean(am)) %>%
+    pull(mam)
+
+  names(x) <- paste0("MAM(", n, ")")
+
+  return(x)
+}

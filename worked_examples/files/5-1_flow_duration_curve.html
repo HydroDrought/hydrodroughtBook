@@ -309,6 +309,7 @@ white-space: pre;
 word-break: break-all;
 -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
+pre code { font-size: 12px; }
 .r {
 background-color: rgb(240, 240, 240);
 }
@@ -745,13 +746,7 @@ Exceedance Frequency
 <div id="standardized-flow-duration-curves" class="section level1">
 <h1><span class="header-section-number">7</span> Standardized Flow Duration Curves</h1>
 <p>Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge.</p>
-<pre class="r"><code>rel_discharge &lt;- function(discharge, area)
-{
-  discharge %&gt;%
-    transmute(rel.discharge = discharge * 1000 / area)
-}
-
-lambournRay &lt;- intl %&gt;%
+<pre class="r"><code>lambournRay &lt;- intl %&gt;%
   filter(river %in% c(&quot;Lambourn&quot;, &quot;Ray&quot;)) %&gt;%
   select(river, area = catchment, data)
 

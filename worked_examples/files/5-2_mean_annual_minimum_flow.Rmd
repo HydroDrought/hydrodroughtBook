@@ -88,3 +88,15 @@ mam  %>%
   add_header_above(c("$Q$ in ${m^3s^{-1}}$" = 3), align = "center")
 ```
 
+# Fast Track
+
+```{r}
+ngaruroro %>% 
+  select(discharge, time) %>%
+  summarise(
+    `MAM(1)` = mean_annual_minimum(discharge, time, start = "-09-01", n = 1),
+    `MAM(7)` = mean_annual_minimum(discharge, time, start = "-09-01", n = 7),
+    `MAM(30)` = mean_annual_minimum(discharge, time, start = "-09-01", n = 30)
+  )
+```
+
