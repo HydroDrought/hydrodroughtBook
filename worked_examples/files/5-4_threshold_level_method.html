@@ -340,7 +340,8 @@ width: 55%;
 <div id="loading-the-data" class="section level1">
 <h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>It is possible to analyse any of the series in the International Data Set (Section 4.5.1) as long as there are not too many missing values in the dataset and a meaningful threshold <span class="math inline">\(Q_0\)</span> is choosen. Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below.</p>
-<pre class="r"><code>library(hydroDrought)
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought)
 
 ngaruroro &lt;- intl %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
@@ -374,24 +375,21 @@ ngaruroro &lt;- intl %&gt;%
 ## # … with 20,463 more rows</code></pre>
 <pre class="r"><code>incomplete &lt;- ngaruroro %&gt;%
   filter(!is.na(discharge)) %&gt;%
-  count(year, name = &quot;days.with.data&quot;) %&gt;%
-  mutate(
-    days.in.year = days_in_year(year, origin = &quot;-09-01&quot;),
-    days.missing = days.in.year - days.with.data
-  ) %&gt;%
+  pull(time) %&gt;%
+  coverage_yearly(origin = &quot;-09-01&quot;) %&gt;%
   filter(days.missing &gt; 0) %&gt;%
   print()</code></pre>
-<pre><code>## # A tibble: 8 x 4
-##    year days.with.data days.in.year days.missing
-##   &lt;int&gt;          &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
-## 1  1963            347          366           19
-## 2  1965            294          365           71
-## 3  1977            350          365           15
-## 4  1978            305          365           60
-## 5  1986            341          365           24
-## 6  1987            336          366           30
-## 7  2001            344          365           21
-## 8  2019             38          366          328</code></pre>
+<pre><code>## # A tibble: 8 x 5
+##    year days.with.data days.in.year days.missing coverage
+##   &lt;dbl&gt;          &lt;int&gt;        &lt;int&gt;        &lt;int&gt;    &lt;dbl&gt;
+## 1  1963            347          366           19    0.948
+## 2  1965            294          365           71    0.805
+## 3  1977            350          365           15    0.959
+## 4  1978            305          365           60    0.836
+## 5  1986            341          365           24    0.934
+## 6  1987            336          366           30    0.918
+## 7  2001            344          365           21    0.942
+## 8  2019             38          366          328    0.104</code></pre>
 <pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
   anti_join(incomplete, by = &quot;year&quot;)</code></pre>
 <p>After preprocessing the time series 49 years of daily flow (1964-09-01 to 2019-08-31) will be analysed. In total eight years are omitted from the series (1963/64, 1965/66, 1977/78, 1978/79, 1986/87, 1987/88, 2001/02 and 2019/20).</p>

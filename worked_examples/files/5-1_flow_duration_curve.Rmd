@@ -24,6 +24,7 @@ library(kableExtra)
 
 In this example we are going to use river flow data from the river Ngaruroro which is part of the `international` dataset in the package **hydroDrought**. This dataset becomes accessible by loading the **hydroDrought** package. 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
 ngaruroro <- intl %>%
   filter(river == "Ngaruroro") %>%
@@ -88,7 +89,7 @@ ngaruroro %>%
 - The two columns are sorted by $EF_{Q_i}$^[Tobias: Sorting is not required. I suggest to delete the section "Tabulation of the FDC" entirely.].
 
 # Plot of the FDC
-The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic^[Tobias: I suggest to label the y-axis with "Flow percentile" (or more general "Flow quantile").]. 
+The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic. 
 
 ```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", warning=FALSE, fig.margin = FALSE, message=FALSE}
 library(scales)
@@ -143,7 +144,7 @@ lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
 # Standardized Flow Duration Curves
 
 Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge. 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 lambournRay <- intl %>%
   filter(river %in% c("Lambourn", "Ray")) %>%
   select(river, area = catchment, data)

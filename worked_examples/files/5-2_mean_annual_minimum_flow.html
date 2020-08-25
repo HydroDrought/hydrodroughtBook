@@ -346,8 +346,9 @@ width: 55%;
 <div id="loading-the-data" class="section level1">
 <h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we are again going to use river flow data from the river Ngaruroro of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from <strong>hydrological years</strong> starting 1 September and ending 31 August. Table 5.4 lists the first flow values. <!-- The first two columns show the date and the corresponding flow value, Q. --></p>
-<p>In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function <code>append_group(..., by = &quot;years&quot;)</code> which appends an addtional column named <code>year</code> to the dataset.</p>
-<pre class="r"><code>library(hydroDrought)
+<p>In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function <code>water_year()</code> which appends an additional column named <code>year</code> to the dataset.</p>
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought)
 
 # attribute each observation to the correct hydrological year
 # and select only the hydrological years between 1990 und 2000
@@ -355,7 +356,9 @@ ngaruroro &lt;- intl %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
   select(data) %&gt;%
   unnest(data) %&gt;%
-  append_group(by = &quot;year&quot;, start = &quot;-09-01&quot;)  %&gt;%
+  mutate(
+    year = water_year(time, start = &quot;-09-01&quot;)
+   ) %&gt;%
   filter(year &gt;= 1990, year &lt;= 1999)
 
 smoothed &lt;- ngaruroro %&gt;%

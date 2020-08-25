@@ -21,6 +21,7 @@ library(kableExtra)
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
 
 # remove the same years as in figure 6.9 of the first edition
@@ -32,22 +33,24 @@ ngaruroro <- read_rds("~/Documents/boku/hydroDroughtDev/data/firstEdition/global
   select(discharge) %>%
   unnest(discharge) %>%
   sanitize_ts(approx.missing = 15) %>%
-  append_group(by = "year", start = "-09-01")
+   mutate(
+    year = water_year(time, start = "-09-01")
+    )
 
 # ngaruroro <- ng %>%
-#   append_group(by = "year", start = "-09-01") %>%
-#   filter(year >= 1964, year < 2000) %>%
+#   mutate(
+#     year = water_year(time, start = "-09-01")
+#   )
+# filter(year >= 1964, year < 2000) %>%
 #   print()
 
 # incomplete <- ngaruroro %>%
 #   filter(!is.na(discharge)) %>%
-#   count(year) %>%
-#   mutate(
-#     days.in.year = days_in_year(year, origin = "-09-01"),
-#     days.missing = days.in.year - n
-#   ) %>%
+#   pull(time) %>%
+#   coverage_yearly(origin = "-09-01") %>%
 #   filter(days.missing > 0) %>%
 #   print()
+
 
 # ng %>%
 #   drought_events(
@@ -120,7 +123,9 @@ tbl <- droughts %>%
 ```{r echo=FALSE}
 missing <- tbl %>%
   mutate(time = first.day) %>%
-  append_group("year", start = "-09-01") %>%
+   mutate(
+    year = water_year(first.day, start = "-09-01")
+   ) %>%
   pull(year) %>%
   setdiff(x = full_seq(ng$year, period = 1))
 

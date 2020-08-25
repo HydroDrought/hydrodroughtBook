@@ -340,7 +340,8 @@ width: 55%;
 <div id="loading-the-data" class="section level1">
 <h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>Ten years of daily data without missing values from River Ngaruroro at Kuripapango (NZ) are used as an example.</p>
-<pre class="r"><code>library(hydroDrought)
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought)
 
 ngaruroro &lt;- intl %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%

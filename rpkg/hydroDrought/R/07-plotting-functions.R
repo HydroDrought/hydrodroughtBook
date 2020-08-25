@@ -9,22 +9,30 @@ days_in_year <- function(x, origin = "-01-01")
   return(as.integer(days))
 }
 
-# todo: use origin instead of start in whole package
 
-# coverage_yearly <- function(x, origin = "-01-01")
-# {
-#     tibble(time = x) %>%
-#         append_group(by = "year", start = origin) %>%
-#         count(year) %>%
-#         mutate(coverage = n / days_in_year(year, origin = origin)) %>%
-#         arrange(year)
-# }
+#' @export
+coverage_yearly <- function(x, origin = "-01-01")
+{
+  tibble(time = x) %>%
+    mutate(
+      year = water_year(.data$time, start = origin)
+    ) %>%
+    count(.data$year, name = "days.with.data") %>%
+    mutate(
+      days.in.year = days_in_year(.data$year, origin = origin),
+      days.missing = .data$days.in.year - .data$days.with.data,
+      coverage = .data$days.with.data / .data$days.in.year
+    ) %>%
+    arrange(.data$year)
+}
 
 
 remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
 {
   has.year <- "year" %in% colnames(x)
-  if (!has.year) x <- append_group(x, by = "year", start = origin)
+  if (!has.year) x <- mutate(
+    year = water_year(.data$time, start = origin)
+  )
 
   coverage <- x %>%
     count(year) %>%
@@ -48,13 +56,13 @@ remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
 #' @importFrom lubridate year floor_date ceiling_date days
 month_midpoints <- function(limits)
 {
-    l <- c(floor_date(limits[1], unit = "month"),
-           ceiling_date(limits[2], unit = "month"))
+  l <- c(floor_date(limits[1], unit = "month"),
+         ceiling_date(limits[2], unit = "month"))
 
-    nmonths <- (as.double(l[2] - l[1], unit = "days") + 31) / 30
-    s <- l[1] + days(14) + months(seq(0, nmonths - 1))
+  nmonths <- (as.double(l[2] - l[1], unit = "days") + 31) / 30
+  s <- l[1] + days(14) + months(seq(0, nmonths - 1))
 
-    s
+  s
 }
 
 month_breaks <- function(limits)
@@ -83,11 +91,12 @@ scale_x_month <- function(..., locale = "en_US.utf8")
                minor_breaks = month_breaks, ...)
 }
 
+#' @export
 scale_x_datetime_month <- function(..., locale = "en_US.utf8")
 {
-    scale_x_datetime(breaks = month_midpoints,
-                 labels = function(x) month_localized(x, locale = locale),
-                 minor_breaks = month_breaks, ...)
+  scale_x_datetime(breaks = month_midpoints,
+                   labels = function(x) month_localized(x, locale = locale),
+                   minor_breaks = month_breaks, ...)
 }
 
 
@@ -103,8 +112,10 @@ plot_daily_flow <- function(x, exc.freq = c(0.95, 0.9, 0.8, 0.5),
                             title = "", subtitle = "", origin = "-01-01")
 {
   x <- x %>%
-    append_group("year", start = origin) %>%
-    mutate(day = monthDay(time, origin = origin)) %>%
+    mutate(
+      year = water_year(.data$time, start = origin),
+      day = monthDay(.data$time, origin = origin)
+    ) %>%
     remove_incomplete_first_last(origin = origin)
 
   f <- function(x)
@@ -112,79 +123,79 @@ plot_daily_flow <- function(x, exc.freq = c(0.95, 0.9, 0.8, 0.5),
     list(
       tibble(
         discharge = lfquantile(x, exc.freq = exc.freq),
-        exc.freq = names(discharge)
+        exc.freq = names(.data$discharge)
       ) %>%
-        mutate(exc.freq = factor(exc.freq, levels = exc.freq))
+        mutate(exc.freq = factor(.data$exc.freq, levels = .data$exc.freq))
     )
   }
 
   quantiles <- x %>%
     var_threshold(vary.by = "day", fun = f, start = origin) %>%
-    unnest(threshold) %>%
-    group_by(exc.freq) %>%
+    unnest(.data$threshold) %>%
+    group_by(.data$exc.freq) %>%
     mutate(
-      smoothed = pracma::whittaker(discharge),
-      smoothed = case_when(smoothed < 0.00025 ~ 0,
-                           smoothed < 0.0005 ~ 0.0005,
+      smoothed = pracma::whittaker(.data$discharge),
+      smoothed = case_when(.data$smoothed < 0.00025 ~ 0,
+                           .data$smoothed < 0.0005 ~ 0.0005,
                            TRUE ~ smoothed)
     )
 
   q.const <- x %>%
     const_threshold(fun = f) %>%
-    unnest(threshold)
+    unnest(.data$threshold)
 
   envelope <- x %>%
-    group_by(day) %>%
-    summarise(across(discharge, lst(min, max), na.rm = T), .groups = "drop")
+    group_by(.data$day) %>%
+    summarise(across(.data$discharge, lst(min, max), na.rm = T), .groups = "drop")
 
   extremes <- x %>%
     group_by(year) %>%
     summarise(
-      resid.dry = sum((discharge[discharge < median(discharge)])^2),
-      resid.wet = sum((discharge[discharge > median(discharge)])^2),
+      resid.dry = sum((.data$discharge[.data$discharge < median(.data$discharge)])^2),
+      resid.wet = sum((.data$discharge[.data$discharge > median(.data$discharge)])^2),
       .groups = "drop") %>%
     nest(data = everything()) %>%
     transmute(
-      wet = slice_max(data[[1]], resid.wet, n = 1, with_ties = FALSE)$year,
-      dry = slice_min(data[[1]], resid.dry, n = 1, with_ties = FALSE)$year
+      wet = slice_max(.data$data[[1]], .data$resid.wet, n = 1, with_ties = FALSE)$year,
+      dry = slice_min(.data$data[[1]], .data$resid.dry, n = 1, with_ties = FALSE)$year
     ) %>%
     pivot_longer(everything(), names_to = "state", values_to = "year") %>%
     left_join(x, by = "year")
 
   labels <- extremes %>%
-    select(state, time, discharge, day) %>%
-    nest(data = c(discharge, time, day)) %>%
+    select(.data$state, .data$time, .data$discharge, .data$day) %>%
+    nest(data = c(.data$discharge, .data$time, .data$day)) %>%
     mutate(
-      min = map(data, ~slice_min(.x, discharge, n = 1, with_ties = FALSE)),
-      max = map(data, ~slice_max(.x, discharge, n = 1, with_ties = FALSE))
+      min = map(.data$data, ~slice_min(.x, discharge, n = 1, with_ties = FALSE)),
+      max = map(.data$data, ~slice_max(.x, discharge, n = 1, with_ties = FALSE))
     ) %>%
-    select(-data) %>%
-    pivot_longer(-state, names_to = "extreme", values_to = "data") %>%
-    filter(state == "wet" & extreme == "max" | state == "dry" & extreme == "min") %>%
-    unnest(data) %>%
-    mutate(text = paste0(time, ": ", round(discharge, 3), " m\u00B3/s"))
+    select(-.data$data) %>%
+    pivot_longer(-.data$state, names_to = "extreme", values_to = "data") %>%
+    filter(.data$state == "wet" & .data$extreme == "max" | .data$state == "dry" & .data$extreme == "min") %>%
+    unnest(.data$data) %>%
+    mutate(text = paste0(.data$time, ": ", round(.data$discharge, 3), " m\u00B3/s"))
 
   subtitle <- paste("Gauged daily flow for", year(min(x$time)), "-", year(max(x$time)),
                     subtitle)
 
   #  muted(hue_pal()(2), l = 90, c = 30)
-  ggplot(x, aes(x = day)) +
+  ggplot(x, aes(x = .data$day)) +
 
     # envelopes
-    geom_ribbon(data = envelope, aes(ymax = discharge_min), ymin = -Inf, fill = "#FFD7D5") +
-    geom_ribbon(data = envelope, aes(ymin = discharge_max), ymax = Inf, fill =  "#B3EDF0") +
+    geom_ribbon(data = envelope, aes(ymax = .data$discharge_min), ymin = -Inf, fill = "#FFD7D5") +
+    geom_ribbon(data = envelope, aes(ymin = .data$discharge_max), ymax = Inf, fill =  "#B3EDF0") +
 
     # yearly discharge
-    geom_line(mapping = aes(y = discharge, group = year), alpha = 0.2, size = 0.1) +
+    geom_line(mapping = aes(y = .data$discharge, group = .data$year), alpha = 0.2, size = 0.1) +
 
     # quantiles
-    geom_line(data = quantiles, mapping = aes(y = smoothed, linetype = exc.freq), size = 0.2) +
-    geom_hline(data = q.const, aes(yintercept = discharge, linetype = exc.freq), size = 0.2) +
+    geom_line(data = quantiles, mapping = aes(y = .data$smoothed, linetype = exc.freq), size = 0.2) +
+    geom_hline(data = q.const, aes(yintercept = .data$discharge, linetype = exc.freq), size = 0.2) +
 
     # extreme years
-    geom_point(data = labels, mapping = aes(y = discharge), shape = 1, size = 2) +
-    geom_line(data = extremes, mapping = aes(y = discharge, col = state), show = FALSE) +
-    ggrepel::geom_text_repel(data = labels, mapping = aes(y = discharge, label = text),
+    geom_point(data = labels, mapping = aes(y = .data$discharge), shape = 1, size = 2) +
+    geom_line(data = extremes, mapping = aes(y = .data$discharge, col = .data$state), show.legend = FALSE) +
+    ggrepel::geom_text_repel(data = labels, mapping = aes(y = .data$discharge, label = .data$text),
                              direction = "both", point.padding = 0.5, size = 3) +
 
     labs(title = title, subtitle = subtitle) +
@@ -193,8 +204,6 @@ plot_daily_flow <- function(x, exc.freq = c(0.95, 0.9, 0.8, 0.5),
     scale_x_date(date_labels = "%b", breaks = month_midpoints,
                  expand = expansion(mult = 0, add = 0)) +
     scale_linetype_discrete("", guide = guide_legend(reverse = TRUE)) +
-
-    # coord_cartesian(ylim = c(max(0.0005, min(x$discharge[x$discharge > 0], na.rm = TRUE)), NA)) +
 
     theme_bw(base_size = 10) +
     theme(panel.grid = element_line(color = "black"),
@@ -216,14 +225,16 @@ plot_coverage <- function(x, title = "", origin = "-01-01")
   subtitle <- paste("Data coverage for", year(min(x$time)), "-", year(max(x$time)))
 
   x <- x %>%
-    append_group("year", start = origin) %>%
     mutate(
-      day = monthDay(time, origin = origin),
-      coverage = if_else(is.na(discharge), "data missing", "data available"),
-      coverage = factor(coverage, levels = c("data missing", "data available"))
+      year = water_year(.data$time, start = origin)
+    ) %>%
+    mutate(
+      day = monthDay(.data$time, origin = origin),
+      coverage = if_else(is.na(.data$discharge), "data missing", "data available"),
+      coverage = factor(.data$coverage, levels = c("data missing", "data available"))
     )
 
-  p <- ggplot(x, aes(day, year, fill = coverage)) +
+  p <- ggplot(x, aes(.data$day, .data$year, fill = .data$coverage)) +
     geom_tile() +
 
     labs(title = title, subtitle = subtitle) +
@@ -240,7 +251,7 @@ plot_coverage <- function(x, title = "", origin = "-01-01")
           panel.background = element_rect(fill = NA),
           panel.ontop = TRUE)
 
-  plot(p)
+  p
 }
 
 
@@ -252,4 +263,28 @@ integer_breaks <- function(n = 5, ...) {
     breaks
   }
   return(fxn)
+}
+
+
+inspect_spa <- function(x)
+{
+  discharge <- ggplot(x, aes(.data$time, .data$discharge)) +
+    geom_line() +
+    geom_point(size = 1) +
+    coord_cartesian(ylim = c(NA, x$threshold[1])) +
+    scale_x_date(date_labels = "%Y-%m-%d") +
+    scale_y_continuous(expand = expansion(c(0.04, 0.1))) +
+    geom_hline(yintercept = x$threshold[1], col = 2, linetype = "dashed", size = 0.2) +
+    facet_wrap(~event, scales = "free", nrow = 1) +
+    theme(axis.title.x = element_blank())
+
+  storage <- ggplot(x, aes(.data$time, .data$storage)) +
+    geom_step() +
+    geom_point(size = 1) +
+    scale_x_date(date_labels = "%Y-%m-%d") +
+    expand_limits(y = 0) +
+    facet_wrap(~event, scales = "free", nrow = 1) +
+    theme(axis.title.x = element_blank())
+
+  cowplot::plot_grid(discharge, storage, align = "v", ncol = 1)
 }

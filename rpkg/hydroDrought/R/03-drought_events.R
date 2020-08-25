@@ -1,4 +1,5 @@
 #' @importFrom lubridate days
+#' @importFrom dygraphs dygraph dyRangeSelector dySeries dyShading dyAnnotation
 #' @export
 drought_events <- function(x, threshold,
                            pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
@@ -18,22 +19,22 @@ drought_events <- function(x, threshold,
 
   # aggregate over events, still keeping non-drought events
   events <- x %>%
-    group_by(event) %>%
+    group_by(.data$event) %>%
     summarise(
-      first.day = min(time), last.day = max(end) - days(1),
+      first.day = min(.data$time), last.day = max(.data$end) - days(1),
       # duration for SPA is duration until max storage
       # only meaningful if pooling == "sequent-peak"
-      d.smax = which.max(storage),
-      d.smax = as.difftime(as.double(d.smax), units = "days"),
+      d.smax = which.max(.data$storage),
+      d.smax = as.difftime(as.double(.data$d.smax), units = "days"),
       # duration = `units<-`(x = end - first.day, value = "days") - 1,
-      duration = last.day - first.day + as.difftime(1, units = "days"),
-      dbt = as.difftime(as.double(sum(under.drought)), units = "days"),
-      qmin = min(discharge),
-      tqmin = time[which.min(discharge)],
+      duration = .data$last.day - .data$first.day + as.difftime(1, units = "days"),
+      dbt = as.difftime(as.double(sum(.data$under.drought)), units = "days"),
+      qmin = min(.data$discharge),
+      tqmin = .data$time[which.min(.data$discharge)],
       # volume for SPA is max storage
-      volume = sum(volume),
-      v.smax = max(storage),
-      under.drought = unique(under.drought),
+      volume = sum(.data$volume),
+      v.smax = max(.data$storage),
+      under.drought = unique(.data$under.drought),
       # mean.flow = mean(discharge),
       .groups = "drop"
     )
@@ -48,25 +49,25 @@ drought_events <- function(x, threshold,
 
   # drop non-drought events now, after inter-event pooling
   # only keeping drought events
-  events <- filter(events, under.drought)
+  events <- filter(events, .data$under.drought)
 
-  if (relabel.events) events <- mutate(events, event = seq_along(event))
+  if (relabel.events) events <- mutate(events, event = seq_along(.data$event))
 
   if (plot) {
     df <- x %>%
-      mutate(lwr = if_else(under.drought, discharge, threshold),
-             upr = threshold) %>%
-      select(discharge, threshold, lwr, upr)
+      mutate(lwr = if_else(.data$under.drought, .data$discharge, .data$threshold),
+             upr = .data$threshold) %>%
+      select(.data$discharge, .data$threshold, .data$lwr, .data$upr)
 
     tbl <- events %>%
-      mutate(ttip = paste0("volume: ", signif(volume, 3), "\n",
-                           "duration: ", duration, " days\n"))
+      mutate(ttip = paste0("volume: ", signif(.data$volume, 3), "\n",
+                           "duration: ", .data$duration, " days\n"))
 
     p <- xts::xts(df, order.by = x$time) %>%
       dygraph() %>%
       dyRangeSelector() %>%
-      dySeries("discharge", stepPlot = step, drawPoints = TRUE, color = "darkblue") %>%
-      dySeries(c("lwr", "threshold", "upr"), stepPlot = step, color = "red",
+      dySeries("discharge", stepPlot = .data$step, drawPoints = TRUE, color = "darkblue") %>%
+      dySeries(c("lwr", "threshold", "upr"), stepPlot = .data$step, color = "red",
                strokePattern = "dashed")
 
 
@@ -96,7 +97,7 @@ drought_events <- function(x, threshold,
   return(events)
 }
 
-
+#' @importFrom rlang .data
 .drought_events <- function(x, threshold,
                             pooling = c("none", "moving-average", "sequent-peak", "inter-event"),
                             pooling.pars = list(n = 10, sides = "center",
@@ -116,7 +117,7 @@ drought_events <- function(x, threshold,
   if (pooling == "moving-average") {
     # todo: remove NAs introduced by moving average
     x <- x %>%
-      mutate(discharge = moving_average(discharge, n = pooling.pars$n,
+      mutate(discharge = moving_average(.data$discharge, n = pooling.pars$n,
                                         sides = pooling.pars$sides))
   }
 
@@ -135,14 +136,16 @@ drought_events <- function(x, threshold,
 
     # compute the same groups than threshold and join it
     x <- x %>%
-      append_group(by = by, start = origin) %>%
+      mutate(
+        group = group_ts(time = .data$time, by = by, start = origin)
+      ) %>%
+      rename(!!by := .data$group) %>%
       left_join(threshold, by = by)
   }
 
   # append the "end" of the day
   # it is an interval in a mathematical sense [start, end)
-  # todo: avoid confusion by using first.day = start, last.day = end - 1
-  x <- mutate(x, end = lead(time, 1))
+  x <- mutate(x, end = lead(.data$time, 1))
 
   # for regular time series we can estimate the duration of the last interval
   dt <- .guess_dt(x$time)
@@ -152,19 +155,19 @@ drought_events <- function(x, threshold,
 
   x <- x %>%
     mutate(
-      volume = -(discharge - threshold) *
-        as.double(end - time, units = "secs"),
-      below.threshold = discharge < threshold,
-      under.drought = below.threshold,
+      volume = -(.data$discharge - .data$threshold) *
+        as.double(.data$end - .data$time, units = "secs"),
+      below.threshold = .data$discharge < .data$threshold,
+      under.drought = .data$below.threshold,
       storage = 0)
 
   if (pooling == "sequent-peak") {
     # overwriting the column 'under.drought'
     x <- x %>%
-      mutate(storage = storage(x$discharge, threshold = threshold),
+      mutate(storage = storage(.data$discharge, threshold = .data$threshold),
              # akwardly, storage is not defined as a volume, but as discharge
              # storate = storage * as.double(end - time, units = "secs"),
-             under.drought = storage > 0)
+             under.drought = .data$storage > 0)
   }
 
   .warn_na(x)
@@ -173,9 +176,9 @@ drought_events <- function(x, threshold,
   # periods with NAs get negative event numbers and are relabeled
   x <- mutate(
     x,
-    event = group_const_value(under.drought | is.na(discharge)),
-    event = if_else(is.na(discharge), -event, event),
-    event = as.integer(group_const_value(event) + 1)
+    event = group_const_value(.data$under.drought | is.na(.data$discharge)),
+    event = if_else(is.na(.data$discharge), -.data$event, .data$event),
+    event = as.integer(group_const_value(.data$event) + 1)
   )
 
   return(x)
@@ -189,7 +192,7 @@ drought_events <- function(x, threshold,
     neighbors <- unique(c(na.pos - 1, na.pos + 1))
     candidates <- x %>%
       slice(neighbors) %>%
-      filter(!is.na(discharge), discharge <= threshold)
+      filter(!is.na(.data$discharge), .data$discharge <= .data$threshold)
 
     if (nrow(candidates)) {
       warning("Missing values adjacent to flows below threshold.\nNAs always terminate drought event. To avoid this interpolate first.")
@@ -228,20 +231,20 @@ drought_events <- function(x, threshold,
 
   # sum up events that got pooled
   x <- x %>%
-    filter(under.drought) %>%
-    group_by(pool) %>%
+    filter(.data$under.drought) %>%
+    group_by(.data$pool) %>%
     summarise(
-      first.day = first(first.day),
-      last.day = last(last.day),
-      duration = `units<-`(x = last.day - first.day + 1, value = "days"),
-      dbt = sum(dbt),
-      under.drought = first(under.drought),
-      volume = sum(volume),
-      tqmin = tqmin[first(which.min(qmin))],
-      qmin = min(qmin),
+      first.day = first(.data$first.day),
+      last.day = last(.data$last.day),
+      duration = `units<-`(x = .data$last.day - .data$first.day + 1, value = "days"),
+      dbt = sum(.data$dbt),
+      under.drought = first(.data$under.drought),
+      volume = sum(.data$volume),
+      tqmin = .data$tqmin[first(which.min(.data$qmin))],
+      qmin = min(.data$qmin),
       pooled = n() - 1
     ) %>%
-    rename(event = pool)
+    rename(event = .data$pool)
 
   return(x)
 }
@@ -264,26 +267,3 @@ storage <- function(discharge, threshold)
 
 
 
-
-inspect_spa <- function(x)
-{
-  discharge <- ggplot(x, aes(time, discharge)) +
-    geom_line() +
-    geom_point(size = 1) +
-    coord_cartesian(ylim = c(NA, x$threshold[1])) +
-    scale_x_date(date_labels = "%Y-%m-%d") +
-    scale_y_continuous(expand = expansion(c(0.04, 0.1))) +
-    geom_hline(yintercept = x$threshold[1], col = 2, linetype = "dashed", size = 0.2) +
-    facet_wrap(~event, scales = "free", nrow = 1) +
-    theme(axis.title.x = element_blank())
-
-  storage <- ggplot(x, aes(time, storage)) +
-    geom_step() +
-    geom_point(size = 1) +
-    scale_x_date(date_labels = "%Y-%m-%d") +
-    expand_limits(y = 0) +
-    facet_wrap(~event, scales = "free", nrow = 1) +
-    theme(axis.title.x = element_blank())
-
-  cowplot::plot_grid(discharge, storage, align = "v", ncol = 1)
-}

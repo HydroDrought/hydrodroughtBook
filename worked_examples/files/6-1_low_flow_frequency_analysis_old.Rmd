@@ -42,7 +42,9 @@ ngaruroro.n <- intl %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) %>%
-  append_group(by = "year", start = "-09-01") %>%
+  mutate(
+    year = water_year(time, start = "-09-01")
+  ) %>%
   filter(year %in% 1964:1999)
 
 # am.dig <- tibble(
@@ -85,7 +87,9 @@ ng <- read_rds("~/Documents/boku/hydroDroughtDev/data/firstEdition/global.rds") 
 ```{r, message=FALSE, warning=FALSE}
 library(hydroDrought)
 ngaruroro <- ng %>%
-  append_group(by = "year", start = "-09-01") %>%
+  mutate(
+    year = water_year(time, start = "-09-01")
+  ) %>%
   filter(year >= 1964, year < 2000) %>%
   print()
 

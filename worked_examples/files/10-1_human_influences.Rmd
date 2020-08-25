@@ -1,10 +1,14 @@
 ---
 title: "Quantifying effect of human influences"
 author: "Worked example 10.1"
-output:
-    tufte::tufte_html:
+output: 
+  tufte::tufte_html:
     tufte_features: ["fonts"]
-css: style.css
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    css: style.css
+    fig_caption: true
 editor_options:
     chunk_output_type: console
 ---
@@ -18,11 +22,12 @@ library(kableExtra)
 
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
 # Let's pretend the data is already inside the package...
 guadiana <- read_tsv("../../data/Guadiana_Delay_LogEff_including_Psim.txt") %>%
-    select(time = "date.yyyymmdd",  Qsim, Qobs)  # %>%
-    # append_group(by = "day")
+  select(time = "date.yyyymmdd",  Qsim, Qobs)  # %>%
+# append_group(by = "day")
 ```
 
 
@@ -42,7 +47,9 @@ If we want to quantify the human influence on hydrological drought by comparing 
 As an example we here use the Upper-Guadiana dataset with the two time series: the **benchmark** time series and the **human-influenced** time series. 
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
+
 print(guadiana)
 range(guadiana$time)
 ```
@@ -53,7 +60,11 @@ The **benchmark** time series comprises the uninfluenced, naturalized discharge 
 
 ```{r}
 benchmark <- guadiana %>%
-    select(time, discharge = Qsim)
+  select(time, discharge = Qsim) %>%
+  mutate(
+    year = water_year(time)
+  ) %>%
+  print()
 ```
 
 
@@ -62,24 +73,27 @@ The **human-influenced** time series is basically the time series of observed di
 
 ```{r}
 influenced <- guadiana %>%
-    select(time, discharge = Qobs)
+  select(time, discharge = Qobs) %>%
+  mutate(
+    year = water_year(time)
+  ) %>%print()
 ```
 
 
-# 1) Threshold calculation
+# Threshold calculation
 
 Here we are taking the `benchmark` time series. First we are smoothing the column `discharge` with a 30-day moving average. The threshold itself is calculated as a daily varying $Q_{95}$ yielding a dataset with a row for each day of the year and the appropriate $Q_{95}$ in the column named `threshold`. 
 
 ```{r}
 threshold <- benchmark %>%
-    # applying a 30-day moving average smoother
-    mutate(discharge = moving_average(discharge, n = 30, sides = "center")) %>%
-    
-    # the following line could be obsolete
-    filter(year(time) >= 1960 & year(time) <= 2000) %>%
-    
-    # computing the Q95 for each day of the year
-    var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.95) 
+  # applying a 30-day moving average smoother
+  mutate(discharge = moving_average(discharge, n = 30, sides = "center")) %>%
+  
+  # the following line could be obsolete
+  filter(year >= 1960,  year <= 2000) %>%
+  
+  # computing the Q95 for each day of the year
+  var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.95) 
 
 print(threshold)
 ```
@@ -88,27 +102,35 @@ print(threshold)
 
 ```{r, echo=FALSE}
 p1 <- benchmark %>%
-    append_group(by = "day") %>%
-    left_join(threshold, by = "day") %>%
-    filter(is.finite(discharge)) %>%
-    ggplot(aes(x = day, y = year, fill = threshold)) + 
-    geom_tile() + 
-    scale_fill_viridis_c() + 
-    scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
-    theme(legend.position = "top", 
-          axis.title.x = element_blank())
+  filter(is.finite(discharge)) %>%
+  plot_coverage() + 
+  theme(legend.position = "top")
+
+# p1 <- benchmark %>%
+#   mutate(
+#     day = group_ts(time = time, by = "day")
+#   ) %>%
+#   left_join(threshold, by = "day") %>%
+#   
+#   ggplot(aes(x = day, y = year, fill = threshold)) + 
+#   geom_tile() + 
+#   scale_fill_viridis_c() + 
+#   scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
+#   theme(legend.position = "top", 
+#         axis.title.x = element_blank())
 
 p2 <- ggplot(data = threshold, aes(x = day, y = threshold)) + 
-    geom_step() + 
-    scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
-    theme(axis.title.x = element_blank())
+  geom_step() + 
+  scale_x_date(date_breaks = "1 months", date_labels = "%b", 
+               expand = expansion()) + 
+  theme(axis.title.x = element_blank())
 
-cowplot::plot_grid(p1, p2, align = "v", axis = c("l", "r"), 
+cowplot::plot_grid(p1, p2, align = "hv", axis = c("l", "r"), 
                    ncol = 1, rel_heights = c(5, 2))
 ```
 
 
-# 2) Benchmark Drought characteristics
+# Benchmark Drought characteristics
 
 ^[Tobias: I think this Worked Example could be easier to follow if we fist compute the drought events for both time series and in a separate section the drought characteristics. So section 2 could become "Drought Events", Section 3 "Drought Characteristics".]
 
@@ -119,10 +141,10 @@ events <- list(benchmark = NULL, influenced = NULL)
 # initialize empty list for final drought characteristics
 drought.char <- list(benchmark = NULL, influenced = NULL) 
 
-# functin that computes the drought characteristics given a table of events
+# function that computes the drought characteristics given a table of events
 summarize_dc <- function(x) {
-    c("mean.duration" = as.double(mean(x$duration)), 
-      "mean.deficit" = mean(x$volume))
+  c("mean.duration" = as.double(mean(x$duration)), 
+    "mean.deficit" = mean(x$volume))
 }
 ```
 
@@ -131,11 +153,13 @@ Periods with discharges below the before calculated threshold are considered dro
 ```{r}
 # calculate the drought events for the benchmark time series
 events$benchmark <- benchmark %>%
-    filter(year(time) >= 1981 & year(time) <= 2000) %>%
-    drought_events(threshold = threshold,
-                   pooling = "inter-event",
-                   pooling.pars = list(min.duration = 10, min.vol.ratio = Inf))  %>%
-    filter(duration > 10)
+  filter(year >= 1981, year <= 2000) %>%
+  drought_events(
+    threshold = threshold,
+    pooling = "inter-event",
+    pooling.pars = list(min.duration = 10, min.vol.ratio = Inf)
+  )  %>%
+  filter(duration > 10)
 
 # calculate the drought characteristics for the benchmark time series
 drought.char$benchmark <- summarize_dc(events$benchmark)
@@ -149,7 +173,7 @@ print(events$benchmark)
 
 
 
-# 3) Human-influenced drought characteristics 
+# Human-influenced drought characteristics 
 
 Extent the **benchmark** threshold calculated in step 1 to the period of the **human-influenced** time series. Note that this can be a different time period than was used to calculate the **benchmark** threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).^[Tobias: this paragraph doesn't make sense here. This is probably my fault but I think you don't need it at all.]
 
@@ -158,18 +182,20 @@ Extent the **benchmark** threshold calculated in step 1 to the period of the **h
 
 ```{r, warning=FALSE, echo=FALSE, fig.width=8, fig.height=10}
 infl <- influenced %>%
-    append_group(by = "day") %>%
-    filter(year(time) >= 1991 & year(time) <= 2000) %>%
-    left_join(threshold, by = "day")
+  mutate(
+    day = group_ts(time = time, by = "day")
+  ) %>%
+  filter(year >= 1991 & year <= 2000) %>%
+  left_join(threshold, by = "day")
 
 infl %>%
-    ggplot() + 
-    geom_line(aes(x = time, y = discharge)) + 
-    geom_step(aes(x = time, y = threshold), 
-              linetype = "dashed", size = 0.2, col = "red") + 
-    scale_x_date(date_breaks = "1 month", date_labels = "%b") +
-    scale_y_log10() +
-    facet_wrap(~year, scales = "free_x", ncol = 1, strip.position = "right")
+  ggplot() + 
+  geom_line(aes(x = time, y = discharge)) + 
+  geom_step(aes(x = time, y = threshold), 
+            linetype = "dashed", size = 0.2, col = "red") + 
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
+  scale_y_log10() +
+  facet_wrap(~year, scales = "free_x", ncol = 1, strip.position = "right")
 ```
 
 
@@ -177,11 +203,11 @@ infl %>%
 ```{r}
 # calculate the drought events for the human influenced time series
 events$influenced <- influenced %>%
-    filter(year(time) >= 1991 & year(time) <= 2000) %>%
-    drought_events(threshold = threshold,
-                   pooling = "inter-event",
-                   pooling.pars = list(min.duration = 10, min.vol.ratio = Inf))  %>%
-    filter(duration > 10)
+  filter(year >= 1991 & year <= 2000) %>%
+  drought_events(threshold = threshold,
+                 pooling = "inter-event",
+                 pooling.pars = list(min.duration = 10, min.vol.ratio = Inf))  %>%
+  filter(duration > 10)
 
 # calculate the drought characteristics for the human influenced time series
 drought.char$influenced <- summarize_dc(events$influenced)
@@ -189,18 +215,12 @@ drought.char$influenced <- summarize_dc(events$influenced)
 
 
 
-# 4) Comparison of drought characteristics    
+# Comparison of drought characteristics    
 
-For the Upper-Guadiana, these would be the **benchmark** drought characteristics:
+For the Upper-Guadiana, these would be the drought characteristics:
 ```{r}
-drought.char$benchmark
+drought.char
 ```
-
-and the **human-influenced** drought characteristics:
-```{r}
-drought.char$influenced
-```
-
 
 
 Calculate the percentage difference between the **benchmark** and **human-influenced** drought characteristics.

@@ -25,14 +25,17 @@ library(kableExtra)
 Three years of daily flow (1995 to 1997) from the Ray at Grendon Underwood (UK) have been selected. The base flow separation is done for the whole period, whereas the BFI is calculated for the mid-year 1996. This ensures that days at the start and end of the calculation year are included. In Table 5.7 the calculation steps are illustrated using data from the beginning of the record.
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
-library(lubridate)
 
 ray <- intl %>%
   filter(river == "Ray") %>%
   select(data) %>%
   unnest(data) %>%
-  filter(year(time) %in% 1995:1997)
+  mutate(
+    year = water_year(time)
+  ) %>%
+  filter(year >= 1995, year <= 1997)
 ```
 
 
@@ -84,7 +87,7 @@ baseflow <- ray %>%
 
 ```{r}
 volume <- baseflow %>%
-  filter(year(time) == 1996) %>%
+  filter(year == 1996) %>%
   na.omit() %>%
   summarise(
     total = sum(discharge) * 24 * 60 * 60,
@@ -150,9 +153,9 @@ The base flow for a given time series can also be calculated directely using the
 ```{r, fig.cap="Figure 5.4 Annual recorded hydrograph and calculated continuous base flow line for UK river Ray in year 1996.", warning=FALSE, fig.margin = FALSE, echo=FALSE}
 
 bf <- ray %>%
-  select(time, discharge) %>%
+  select(time, discharge, year) %>%
   mutate(baseflow = baseflow(discharge)) %>%
-  filter(year(time) == 1996)
+  filter(year == 1996)
 
 bf
 
@@ -161,21 +164,22 @@ x <- bf %>%
   mutate(key = factor(key, levels = c("discharge", "baseflow"),
                       labels = c("Recorded Hydrograph", "Baseflow Line")))
 
-breaks <- seq(from = min(x$time), length.out = 12, by = "months")
-labels <- month(breaks, label = TRUE, abbr = TRUE) # locale = "english"
+# breaks <- seq(from = min(x$time), length.out = 12, by = "months")
+# labels <- month(breaks, label = TRUE, abbr = TRUE) # locale = "english"
 
 library(ggplot2)
 ggplot(x, aes(time, value, size = key)) +
   geom_line() +
   scale_size_manual(values = c(0.2, 0.75)) +
-  scale_x_date(breaks = breaks, labels = labels) +
+  scale_x_month(expand = expansion()) +
   labs(y = expression(paste("Flow (", m^{3}, s^{-1}, ")"))) +
   theme_bw(base_size = 12) +
   theme(legend.position = c(0.8, 0.35),
         axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
         legend.title = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        axis.text.x = element_text(hjust = -0.4))
+        panel.grid.major = element_blank()
+        )
 
 ```
 

@@ -43,7 +43,9 @@ ngaruroro <- intl %>%
   unnest(data) %>%
   # fill gaps with a length of up to 15 days
   sanitize_ts(approx.missing = 15) %>%
-  append_group(by = "year", start = "-09-01") %>%
+   mutate(
+    year = water_year(time, start = "-09-01")
+    ) %>%
   print()
 ```
 
@@ -52,11 +54,8 @@ ngaruroro <- intl %>%
 # remove incomplete years
 incomplete <- ngaruroro %>%
   filter(!is.na(discharge)) %>%
-  count(year, name = "days.with.data") %>%
-  mutate(
-    days.in.year = days_in_year(year, origin = "-09-01"),
-    days.missing = days.in.year - days.with.data
-  ) %>%
+  pull(time) %>%
+  coverage_yearly(origin = "-09-01") %>%
   filter(days.missing > 0) %>%
   print()
 

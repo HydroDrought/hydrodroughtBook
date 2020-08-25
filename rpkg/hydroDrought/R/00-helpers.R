@@ -1,7 +1,15 @@
 #' @importFrom rlang .data
+#' @importFrom dplyr mutate %>% slice filter summarise group_by if_else select case_when lag lead ungroup pull left_join first last n rename bind_rows across transmute slice_max slice_min count arrange semi_join distinct arrange anti_join
+#' @importFrom tidyselect all_of everything
+#' @importFrom ggplot2 ggplot aes geom_line geom_point coord_cartesian scale_x_date scale_y_continuous expansion geom_hline scale_y_log10 geom_tile labs theme_bw element_rect facet_wrap theme element_blank geom_step expand_limits scale_fill_viridis_d scale_linetype_discrete  geom_ribbon labs guide_legend element_line scale_x_datetime
+#' @importFrom scales squish_infinite
+#' @importFrom tibble tibble lst
+#' @importFrom tidyr pivot_longer pivot_wider nest unnest
+#' @importFrom purrr walk2 map
 
+
+#' @importFrom  stats quantile approx
 #' @export
-
 moving_average <- function(x, n, sides = "past")
 {
     dict <- c("past" = 1, "center" = 2, "future" = 3)
@@ -33,52 +41,52 @@ moving_average <- function(x, n, sides = "past")
 #     return(x)
 # }
 
-#' @export
-append_group <- function(x, by = c("day", "week", "month", "season", "year"),
-                         start = "-01-01", unique.id = FALSE)
-{
-    by <- match.arg(by, several.ok = TRUE)
-    x$time <- as.Date(x$time)
-    start <- regmatches(start, regexpr("-.*", start))
-
-    # always calculate the hydrological year, only id is meaningful
-    x$year <- as.integer(substring(group_id(x$time, start[1]), 1L, 4L))
-
-    if ("season" %in% by) {
-        if (length(start) < 2) {
-            warning("There have to be a least two seasons. Specify argument 'start' accordingly.")
-        }
-        season.id <- group_id(x$time, start)
-
-        x$season <- factor(substr(season.id, 5L, 10L), levels = start)
-
-        # if existing, use names of the group
-        nam <- names(start)
-        is.named <- length(nam) == length(start) && all(!is.na(nam)) && all(nam != "")
-        if (is.named) levels(x$season) <- nam
-
-        if (unique.id) x$season.id <- season.id
-    }
-
-    # only week and month are trivial
-    f <- c(week = lubridate::week, month = lubridate::month)
-    for (i in setdiff(by, c("year", "season", "day"))) {
-        #for (i in setdiff(by, c("year", "season"))) {
-        x <- mutate(x, !!i := f[[i]](x$time))
-        if (unique.id) x[[paste0(i, ".id")]] <- paste(x$year, x[[i]], sep = "-")
-    }
-
-    # treat day differently, we need to pass the start of the year
-    if ("day" %in% by) {
-        x <- mutate(x, day = monthDay(x$time, origin = start[1]))
-        if (unique.id)  x <- mutate(x, day.id = as.integer(x$day))
-    }
-
-    return(x)
-}
-
+# append_group <- function(x, by = c("day", "week", "month", "season", "year"),
+#                          start = "-01-01", unique.id = FALSE)
+# {
+#     by <- match.arg(by, several.ok = TRUE)
+#     x$time <- as.Date(x$time)
+#     start <- regmatches(start, regexpr("-.*", start))
+#
+#     # always calculate the hydrological year, only id is meaningful
+#     x$year <- as.integer(substring(group_id(x$time, start[1]), 1L, 4L))
+#
+#     if ("season" %in% by) {
+#         if (length(start) < 2) {
+#             warning("There have to be a least two seasons. Specify argument 'start' accordingly.")
+#         }
+#         season.id <- group_id(x$time, start)
+#
+#         x$season <- factor(substr(season.id, 5L, 10L), levels = start)
+#
+#         # if existing, use names of the group
+#         nam <- names(start)
+#         is.named <- length(nam) == length(start) && all(!is.na(nam)) && all(nam != "")
+#         if (is.named) levels(x$season) <- nam
+#
+#         if (unique.id) x$season.id <- season.id
+#     }
+#
+#     # only week and month are trivial
+#     f <- c(week = lubridate::week, month = lubridate::month)
+#     for (i in setdiff(by, c("year", "season", "day"))) {
+#         #for (i in setdiff(by, c("year", "season"))) {
+#         x <- mutate(x, !!i := f[[i]](x$time))
+#         if (unique.id) x[[paste0(i, ".id")]] <- paste(x$year, x[[i]], sep = "-")
+#     }
+#
+#     # treat day differently, we need to pass the start of the year
+#     if ("day" %in% by) {
+#         x <- mutate(x, day = monthDay(x$time, origin = start[1]))
+#         if (unique.id)  x <- mutate(x, day.id = as.integer(x$day))
+#     }
+#
+#     return(x)
+# }
 
 
+#' @importFrom dplyr mutate %>% slice filter summarise group_by if_else select
+#' @importFrom rlang :=
 #' @export
 group_ts <- function(time, by = c("day", "week", "month", "season", "year"),
                      start = "-01-01", unique.id = FALSE)
@@ -113,7 +121,7 @@ group_ts <- function(time, by = c("day", "week", "month", "season", "year"),
 }
 
 
-#' @importFrom lubridate year
+#' @importFrom lubridate year leap_year
 #' @export
 group_id <- function(time, starts)
 {
@@ -155,36 +163,48 @@ water_year <- function(time, start = "-01-01")
     year(group_id(time = time, starts = start))
 }
 
+
 #' @export
 var_threshold <- function(x, vary.by = c("day", "week", "month", "season", "year"),
                           fun, start = "-01-01", append = FALSE, ...)
 {
+    # todo: var_threshold() should have arguments discharge = , time =,
     vary.by <- match.arg(vary.by)
-    y <- append_group(x, by = vary.by, start = start)
+    y <- x %>%
+        mutate(
+            year = water_year(time = .data$time, start = start),
+            group = group_ts(time = .data$time, by = vary.by, start = start)
+        )
 
     if (vary.by == "day") {
         # interpolate Feb 29th with "surrounding" days if not a leap year
         leapday <- monthDay(as.Date("1972-02-29"), origin = start)
 
-        leapdays <- filter(y, day == leapday - 1 | day == leapday + 1,
-                           !leap_year(time)) %>%
-            group_by(year) %>%
-            summarise(discharge = mean(discharge),
-                      day = leapday) %>%
+        leapdays <- y %>%
+            filter(.data$group == leapday - 1 | .data$group == leapday + 1,
+                   !leap_year(.data$time)) %>%
+            group_by(.data$year) %>%
+            summarise(
+                discharge = mean(.data$discharge),
+                group = leapday
+            ) %>%
             # surrounding values could be NA
-            filter(!is.na(discharge))
+            filter(!is.na(.data$discharge))
 
         y <- bind_rows(y, leapdays)
     }
 
     threshold <- y %>%
         # summaries with NA values do not make sense, avoids to always specify na.rm = TRUE
-        filter(!is.na(discharge)) %>%
-        group_by(.dots = vary.by) %>%
-        summarise(threshold = fun(discharge, ...))
+        filter(!is.na(.data$discharge)) %>%
+        group_by(.data$group) %>%
+        summarise(threshold = fun(.data$discharge, ...)) %>%
+        rename(!!vary.by := .data$group)
 
     if (append) {
-        res <- left_join(y, threshold, by = vary.by)
+        res <- y %>%
+            rename(!!vary.by := .data$group) %>%
+            left_join(threshold, by = vary.by)
     } else {
         res <- threshold
     }
@@ -200,8 +220,8 @@ const_threshold <- function(x, fun, append = FALSE, ...)
 {
     threshold <- x %>%
         # summaries with NA values do not make sense, avoids to always specify na.rm = TRUE
-        filter(!is.na(discharge)) %>%
-        summarise(threshold = fun(discharge, ...))
+        filter(!is.na(.data$discharge)) %>%
+        summarise(threshold = fun(.data$discharge, ...))
 
     if (append) {
         return(mutate(x, threshold = threshold$threshold))
@@ -211,17 +231,17 @@ const_threshold <- function(x, fun, append = FALSE, ...)
 }
 
 
-# gleiche ID, solange sich die Werte nicht ändern
-.rle_id <- function(x)
+# assign same IDs as log as values do not change
+#' @export
+group_const_value  <- function(x)
 {
     cumsum(x != lag(x, default = x[1]))
 }
 
-#' @export
-group_const_value <- .rle_id
 
+#' @importFrom stats median
 #' @export
-# gleiche ID, solange die Änderung konstant ist
+# assign same IDs as log as change is constant
 group_const_change <- function(x, change = median(diff(x), na.rm = TRUE))
 {
     d <- c(change, diff(x))
@@ -286,20 +306,20 @@ sanitize_ts <- function(x, # approx.missing = 0,
         mutate(
             # todo: works currently only for daily data
             # todo: generalize for POSIXct
-            time = as.Date(time),
-            value = as.numeric(value)
+            time = as.Date(.data$time),
+            value = as.numeric(.data$value)
         )
 
     msg <- msg_collector(n_in = nrow(x))
 
     ## checks on the DATA VALUES
     # explicitly missing values
-    bad <- filter(xx, !is.finite(value))
+    bad <- filter(xx, !is.finite(.data$value))
     msg$append(what = "explicitly missing values", data = bad, id = id,
                n_total = nrow(xx))
 
     # negative values
-    bad <- filter(xx, value < 0)
+    bad <- filter(xx, .data$value < 0)
     if(force_positive) {
         xx$value[xx$value < 0] <- NA
         action <- "Setting them to NA."
@@ -311,21 +331,21 @@ sanitize_ts <- function(x, # approx.missing = 0,
 
 
     # zeros
-    bad <- filter(xx, abs(value) < sqrt(.Machine$double.eps))
+    bad <- filter(xx, abs(.data$value) < sqrt(.Machine$double.eps))
     msg$append(what = "values equal to zero", data = bad, id = id,
                n_total = nrow(xx))
 
     # checks on the TIME INDICES
     # missing values in time index
-    bad <- filter(xx, is.na(time))
-    xx <- filter(xx, !is.na(time))
+    bad <- filter(xx, is.na(.data$time))
+    xx <- filter(xx, !is.na(.data$time))
     msg$append(what = "invalid time indices", data = bad, id = id,
                n_total = nrow(xx), action = "Removing these records.")
 
 
     # exact duplicated time indices
     dups <- xx %>%
-        group_by(time, value) %>%
+        group_by(.data$time, .data$value) %>%
         filter(n() > 1)
     msg$append(what = "completely identical input records", data = dups, id = id,
                n_total = nrow(xx), action = "Removing them.")
@@ -333,7 +353,7 @@ sanitize_ts <- function(x, # approx.missing = 0,
 
     # duplicated time indices
     dups <- xx %>%
-        group_by(time) %>%
+        group_by(.data$time) %>%
         filter(n() > 1)
     if (remove_duplicates) {
         idx <- duplicated(xx$time)
@@ -347,9 +367,9 @@ sanitize_ts <- function(x, # approx.missing = 0,
                n_total = nrow(xx), action = action)
 
     # ordered/unordered
-    bad <- filter(xx, time < lag(time, default = min(time, na.rm = TRUE)))
+    bad <- filter(xx, .data$time < lag(.data$time, default = min(.data$time, na.rm = TRUE)))
     if (sort) {
-        xx <- arrange(xx, time)
+        xx <- arrange(xx, .data$time)
         action <-  "Sorting time series."
     } else {
         action <-  ""
@@ -366,16 +386,16 @@ sanitize_ts <- function(x, # approx.missing = 0,
     ) %>%
         anti_join(xx, by = "time") %>%
         mutate(
-            gap = group_const_change(time),
+            gap = group_const_change(.data$time),
             value = NA_real_
         )
 
     if(nrow(gaps)) {
         if (add_implicit_NA) {
-            xx <- bind_rows(xx, select(gaps, time, value))
+            xx <- bind_rows(xx, select(.data$gaps, .data$time, .data$value))
             action <- "Adding NA values."
             if (sort) {
-                xx <- arrange(xx, time)
+                xx <- arrange(xx, .data$time)
                 action <- "Adding NA values and sorting."
             }
         } else {
@@ -394,7 +414,7 @@ sanitize_ts <- function(x, # approx.missing = 0,
         gaps <- xx %>%
             slice(idx) %>%
             mutate(group = group_const_change(idx)) %>%
-            nest(data = c(time, value))
+            nest(data = c(.data$time, .data$value))
         txt <- paste("gaps with length <=", approx.missing, "days")
         action <- "Filling with linear interpolation."
 
@@ -407,7 +427,7 @@ sanitize_ts <- function(x, # approx.missing = 0,
     if (message) msg$print()
 
     res <- xx %>%
-        select(!!time_col := time, !!value_col := value)
+        select(!!time_col := .data$time, !!value_col := .data$value)
 
     attr(res, "message") <- msg$export()
     return(res)
@@ -460,7 +480,7 @@ msg_collector <- function(n_in) {
             }
 
             mesg <- m %>%
-                nest(data = c(-id))
+                nest(data = c(-.data$id))
 
             walk2(mesg$data, mesg$id, .print_one_message)
         },
@@ -493,7 +513,7 @@ msg_collector <- function(n_in) {
 #' @export
 map_other <- function(.x, .f, ...)
 {
-    reduce(map(.x, .f, ...), c)
+    purrr::reduce(purrr::map(.x, .f, ...), c)
 }
 
 
@@ -508,6 +528,9 @@ numbers_english <- function(x)
 
 paste_with_and <- function(x , sep = ", ", final = " and ")
 {
-    paste(paste(head(x, -1), collapse = sep), tail(x, 1), sep = final)
+    paste(
+        paste(utils::head(x, -1), collapse = sep),
+        utils::tail(x, 1), sep = final
+    )
 }
 

@@ -26,9 +26,10 @@ In this example we are again going to use river flow data from the river Ngaruro
 Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the $n$-day average flow for $n$ equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from **hydrological years** starting 1 September and ending 31 August. Table 5.4 lists the first flow values. 
 <!-- The first two columns show the date and the corresponding flow value, Q. -->
 
-In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function `append_group(..., by = "years")` which appends an addtional column named `year` to the dataset. 
+In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function `water_year()` which appends an additional column named `year` to the dataset. 
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
 
 # attribute each observation to the correct hydrological year
@@ -37,7 +38,9 @@ ngaruroro <- intl %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) %>%
-  append_group(by = "year", start = "-09-01")  %>%
+  mutate(
+    year = water_year(time, start = "-09-01")
+   ) %>%
   filter(year >= 1990, year <= 1999)
 
 smoothed <- ngaruroro %>%

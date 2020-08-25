@@ -36,6 +36,7 @@ Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the
 procedure in the example below. 
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
 
 ngaruroro <- intl %>%
@@ -65,11 +66,8 @@ ngaruroro <- ngaruroro %>%
 
 incomplete <- ngaruroro %>%
   filter(!is.na(discharge)) %>%
-  count(year, name = "days.with.data") %>%
-  mutate(
-    days.in.year = days_in_year(year, origin = "-09-01"),
-    days.missing = days.in.year - days.with.data
-  ) %>%
+  pull(time) %>%
+  coverage_yearly(origin = "-09-01") %>%
   filter(days.missing > 0) %>%
   print()
 

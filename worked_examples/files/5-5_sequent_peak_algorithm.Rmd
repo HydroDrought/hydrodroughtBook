@@ -26,6 +26,7 @@ Ten years of daily data without missing values from River Ngaruroro at Kuripapan
 are used as an example. 
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
 
 ngaruroro <- intl %>%
