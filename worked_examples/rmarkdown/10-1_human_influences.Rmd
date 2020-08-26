@@ -35,6 +35,7 @@ As an example we here use the Upper-Guadiana dataset with the two time series: t
 
 ```{r}
 library(tidyverse)
+library(lubridate)
 library(hydroDrought)
 
 print(guadiana)

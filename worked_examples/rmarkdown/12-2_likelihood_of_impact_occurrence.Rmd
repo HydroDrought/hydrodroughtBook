@@ -1,0 +1,455 @@
+---
+title: "Likelihood of impact occurrence"
+author: "Worked example 12.2"
+---
+
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+require(dplyr)
+require(readr)
+require(tidyr)
+require(lubridate)
+require(grid)
+require(gridExtra)
+
+require(here)
+
+## Path for Data and Output	
+### It is a good idea to separate input data and output data folders
+base_path <- here::here()
+data_path  <- file.path(base_path, "../data/impact_data")
+output_path <- file.path(here::here(), "../worked_examples/output/Example_12_2")
+
+### Set output location
+### This code will create an output folder if one does not exist
+write_output_base_path <- output_path
+dir.create(write_output_base_path, showWarnings = FALSE)
+
+figure_path <- file.path(write_output_base_path, "figures")
+dir.create(figure_path, showWarnings = FALSE)
+
+#source(file.path(here::here(), "../worked_examples/files/12-2_impact/plotting_funcs.R"))
+
+```
+
+
+# Loading Impact Data
+
+First, we want to read in the impact data. The impact data file has already been compiled for Agricultural impacts at the NUTS-3 resolution. After reading in, we will cut to only the relevant columns of year, NUTS id, and impact presence. We will then rename the columns and verify that the data imported correctly.
+
+```{r, message=FALSE, warning=FALSE}
+library(hydroDrought)
+
+### Read in Impacts
+impact_df <- read_csv(file.path(data_path, "MT_Central_Ic_01.csv"))
+
+### Process the data
+impact_df <- impact_df %>%
+	select(YYYY, HIT, NUTS_ID_x) %>%  ### Cut to only year, impact, and NUTS region
+	rename("nuts" = "NUTS_ID_x", "year" = "YYYY", "impact" = "HIT") %>%   ### Rename columns
+	mutate(impact = as.logical(impact))	### Make impact column TRUE/FALSE
+
+### Check the read-in
+head(impact_df)
+```
+# Prepare the agricultural impact data
+We will focus on agricultural impacts at the national resolution and so, we must first generate a column for country by subsetting the NUTS id to the first 2 letters. Then, to determine if there was an impact for each country/year combination, we will perform a group_by command, count the number of impacts using the summarise command and then create a new column with a TRUE whenever we have at least one impact report. Finally, we should check the resulting table output and check visually. Here, we check visually by plotting impact occurence with time for all countries. We can see that Germany has several impacts occuring between 1970 and the present, and so we don't have a noteable temporal bias (i.e. more impacts at the end of the period than the start).
+
+
+```{r}
+### Prepare to cut impacts to a country level
+### Create a country column using the first two letters of NUTS region
+impact_df <- impact_df %>%
+	mutate(country = substr(nuts, 1, 2))
+head(impact_df)
+
+### Aggregate impacts at NUTS spatial scale to country level
+impact_df <- impact_df %>%
+	group_by(year, country) %>%
+	summarise(impact_count = sum(impact, na.rm=TRUE), nuts_n = n()) %>%	### Calculate number of impacts 
+	mutate(impact = impact_count > 0) 	### Assume an impact if at least one NUTS region has impact in year
+
+### Check results
+head(impact_df)
+
+### Visual check
+ggplot(impact_df, aes(x=year, y=impact, colour=country, group=country)) + geom_line() + theme_classic(8) + facet_wrap(~ country)
+
+```
+
+# Load and prepare the drought indices
+Next, we read in the SPI3, SPEI3, SPI12, and SPEI12 calculated at the national scale. This gives us precipitation-only and water balance indices for short (3 month) and long (12 month) accumulation periods. To do this, we read in each CSV file, select only the relevant columns, provide a column for the index name, and combine them all into a long dataframe that contains all data.
+
+```{r}
+### Read in SPI/SPEI for 3 and 12 month periods
+### Cut to Germany because we will be focusing on Germany
+
+### Read in a dataframe for SPI 3
+spi_3 <- read_csv(file.path(data_path, "spi_3_combined_countries_monthly_wide.csv")) %>%
+	mutate(index = "spi_3") %>%		### Create a column for the drought index
+	select(X, DE, index) 	### Cut to only Germany
+head(spi_3)
+
+### Read in a dataframe for SPEI 3
+spei_3 <- read_csv(file.path(data_path, "spei_3_combined_countries_monthly_wide.csv")) %>%
+	mutate(index = "spei_3") %>%		### Create a column for the drought index
+	select(X, DE, index) 	### Cut to only Germany
+
+### Read in a dataframe for SPI 12
+spi_12 <- read_csv(file.path(data_path, "spi_12_combined_countries_monthly_wide.csv")) %>%
+	mutate(index = "spi_12") %>%
+	select(X, DE, index) 
+
+### Read in a dataframe for SPEI 12
+spei_12 <- read_csv(file.path(data_path, "spei_12_combined_countries_monthly_wide.csv")) %>%
+	mutate(index = "spei_12") %>%
+	select(X, DE, index) 
+
+### Combine data
+spi_df <- rbind(spi_3, spei_3, spi_12, spei_12)
+
+### Check data
+head(spi_df)
+tail(spi_df)
+
+```
+
+We then perform some reorganization, creating date, month, and year columns, then separate the name of index (SPI/SPEI) and the accumulation period (3,12) into separate columns before resorting. 
+
+```{r}
+### Reorganize data columns
+spi_df <- spi_df %>%
+	mutate(date = as.Date(paste0(X, "-01"))) %>%    ### Convert X column to a date by adding the first day of the month
+	mutate(month = month(date), year = year(date)) %>%	### Create month and year columns
+	separate(index, c("index_type", "index_months"), remove=FALSE) %>%   ### Split the index column
+	rename(index_val = DE) %>%	### Rename the DE column to be the droughtindex value
+	select(date, year, month, index_val, index, index_type, index_months) %>%	### Reorganize the column order
+	arrange(index, date)	### Sort by index and then date
+
+### Check results of reorganization
+head(spi_df)
+tail(spi_df)
+
+### Visual check
+ggplot(spi_df, aes(x=date, y=index_val, colour=index_type)) + geom_line() + theme_classic(8) + facet_grid(index_months ~ . )
+
+```
+
+# Cut to only Germany in July and merge impacts and drought indices
+The final data processing step is to filter the impact data to include only Germany. For simplicity, we will only consider SPI/SPEI in July, so we filter the drought indices to only month 7. This means May, June, July for the 3 month accumulation period and the entire previous year from August until July for the 12 month accumulation. The 3 and 12 month period in July was chosen to mirror the findings of Stagge et al. (). Once both tables are properly filtered, we join them using a full join. A full join will ensure that no data is lost, although it may produce NAs where there is not a corresponding value for one of the tables being joined.
+
+```{r}
+### Cut impact to only Germany
+impacts_de <- impact_df %>%
+	filter(country == "DE")
+
+### Visual check
+ggplot(impacts_de, aes(x=year, y=impact_count, colour=country)) + geom_line() + theme_classic(8)
+
+
+### Cut SPI and SPEI to only July. Our analysis will compare SPI/SPEI -3 and -12 in July with Annual Agricultural impacts
+### This was chosen to mirror the findings of Stagge et al. () without having to include a monthly term
+spi_de <- spi_df %>%
+	filter(month == 7)
+
+### Merge dataframes using a full join (i.e. all records are included, even if data is missing)
+spi_impacts <- spi_de %>%
+	full_join(impacts_de, by = "year") %>%	### Join on year
+	drop_na(impact)	### Drop rows with NA in the impact column
+
+### Check merge
+head(spi_impacts)
+tail(spi_impacts)
+```
+
+# Preliminary visual estimate of a relationship between SPI and Agricultural Impacts in Germany
+Our hypothesis is that agricultural impacts are at least partially affected by summer drought. And so, we expect that in years with low summer SPI or SPEI, there would be an increase in the likelihood of agricultural impacts. We can begin our analysis by plotting a time series of SPEI3 during our period and showing a red region when documented impacts occurred.
+
+We do this by filtering the index/impact table to include only SPEI3. To plot the red impacts, we create a new dataframe that only includes impact years and add a 1 year (+/- 0.5 year) buffer around each impact. We then plot these variables against year on the X-axis.
+
+```{r}
+### Only consider SPEI 3
+plot_df <- spi_impacts %>%
+	filter(index == "spei_3")
+
+plot_impacts <- plot_df %>%
+	select(year, impact) %>%
+	filter(impact == TRUE) %>%
+	mutate(left = year - 0.5, right = year + 0.5)
+
+### Create a time series plot
+p <- ggplot(plot_df, aes(x=year)) %>%
+	+ geom_hline(yintercept=0,  color = "grey70") %>%  ### Make a horizontal axis at y= 0
+	+ geom_rect(data = plot_impacts, aes(xmin=left, xmax=right, ymin=-Inf, ymax=+Inf), fill='pink', alpha=0.9) %>%   ### Create a pink region around the impact
+	+ geom_vline(data = plot_impacts, aes(xintercept = year), linetype="dotted", color = "red") %>%   ### Add a vertical line at the impact
+	+ geom_line( aes(y = index_val), colour="#377eb8") %>%  ### Draw the time series of SPI12
+	+ theme_classic(8) %>%
+	+ scale_x_continuous(name = "Year", breaks = seq(1950,2100,5)) %>%
+	+ scale_y_continuous(name = "SPEI-3 (July)", breaks = seq(-3,3,0.5)) 
+
+p 
+
+```
+This plot makes us suspect a relationship between SPEI3 and agricultural impacts. When SPEI3 is severely negative (approximately -2) in 1975 an impact occurs, but when SPEI3 is near -1.5, we have 2 impact years (2003, 2006) and 2 non-impact years (1989, 2008). So, it appears that at an SPEI3 of -1.5, we have approximately a 50% chance of an impact. As we approach positive SPEI3, it appears like the likelihood of a drought impact drops to near 0; note, there are no impacts when SPEI3 is positive. 
+
+Can you modify this code to plot one of the other variables like SPI12? Try on your own. Check the Github for code to show all 4 drought indices plotted against impact on a single plot.
+
+A time series figure is helpful for a preliminary check and our goal will ultimately be to create a time series of predicted impacts, but this type of figure is subjective. We would like a statistical basis. A first step towards a statistical analysis is to plot the proportion of impact/no impact in the same way we noted the number of impacts for SPEI3 near -2, -1.5 and 0 above. If we extended this to for all levels of SPEI3, we produce the following:
+
+```{r}
+### Create a meaningful column for impacts when plotted
+plot_df <-  spi_impacts %>%
+	filter(index == "spei_3") %>%
+	mutate(impact_label = case_when( impact == TRUE ~ "Impact Reported",
+		TRUE ~ "No Impact"
+		)
+	) %>%
+	mutate(impact_label = factor(impact_label, levels=c( "No Impact", "Impact Reported")))
+
+###  Create a histogram showing the count in each impact category
+p <- ggplot(plot_df, aes(x=index_val, fill = impact_label)) %>%   ### Plot with SPI on x axis and fill using impact labels
+	+ geom_histogram(binwidth = 0.5) %>%
+	+ geom_vline(xintercept=0,  color = "grey30", linetype="longdash") %>%  ### Make a vartical axis at x= 0
+	+ theme_classic(8) %>%
+	+ scale_x_continuous(name = "SPEI-3 (July)", breaks = seq(-5,5,0.5)) %>%
+	+ scale_y_continuous(name = "Count", expand = c(0,0)) %>%
+	+ scale_fill_brewer(type = "qual", palette = "Set2") %>%
+	+ theme(legend.position = c(0.9, 0.9), legend.title = element_blank())
+
+p
+
+###  Create a smoothed plot showing proportion in each category
+p <- ggplot(plot_df, aes(x=index_val, fill = impact_label)) %>%
+	+ geom_density(position = "fill") %>%
+	+ geom_vline(xintercept=0,  color = "grey30", linetype="longdash") %>%  ### Make a vartical axis at x= 0
+	+ theme_classic(8) %>%
+	+ scale_x_continuous(name = "SPEI-3 (July)", breaks = seq(-5,5,0.5)) %>%
+	+ scale_y_continuous(name = "Proportion of Years in Impact Category", labels = scales::percent_format(accuracy = 5L), expand = c(0,0)) %>%
+	+ scale_fill_brewer(type = "qual", palette = "Set2") %>%
+	+ theme(legend.position = c(0.9, 0.9), legend.title = element_blank())
+
+p
+```
+These plots show the relationship between SPEI3 (x-axis) and impact/no impact (colors), plotted as counts in the first figure and as total proportions in the second. If we performed this analysis for all 4 potential drought indices, we produce the following:
+
+```{r}
+plot_all_df <- spi_impacts %>%
+	mutate(impact_label = case_when( impact == TRUE ~ "Impact Reported",
+		TRUE ~ "No Impact"
+		)
+	) %>%
+	mutate(impact_label = factor(impact_label, levels=c( "No Impact", "Impact Reported")))
+
+###  Create a smoothed plot showing proportion in each category
+p <- ggplot(plot_all_df, aes(x=index_val, fill = impact_label)) %>%
+	+ geom_density(position = "fill") %>%
+	+ geom_vline(xintercept=0,  color = "grey30", linetype="longdash") %>%  ### Make a vartical axis at x= 0
+	+ theme_classic(8) %>%
+	+ scale_x_continuous(name = "Drought Index in July", breaks = seq(-5,5,0.5)) %>%
+	+ scale_y_continuous(name = "Proportion of Years in Impact Category", labels = scales::percent_format(accuracy = 5L), expand = c(0,0)) %>%
+	+ scale_fill_brewer(type = "qual", palette = "Set2") %>%
+	+ theme(legend.position = c(0.9, 0.9), legend.title = element_blank()) %>%
+	+ facet_wrap(~ index)
+
+
+p
+```
+
+SPEI3 appears to have the strongest relationship with impact occurence. There is a relatively consistent increase in impact proportion as SPEI-3 decreases (shifts to the left). 
+
+SPI3 has a somewhat similar relationship, but it is confounded by some values where No Impacts dominate. If we chose a wider smoothing interval, this effect might not look so severe. For the 12 month accumulation periods, the impact years appear to be scattered throughout the SPI/SPEI range, with the Impact/No Impact never falling far below 50%. Also, the proportion of impacts appears to increase at both extremes (wet and dry). The 12 month drought indices don't appear to be good (on their own) at sorting years into impact and non-impacts.
+
+# Logistic regression
+The figures were just created are simplified analogies of logistic regression, which is the statistical method for modeling the relationship bweten binary (TRUE/FALSE) data and a set of predictor variables. Please keep this visual analogy in mind as we proceed with a more formal, statistical analysis using logistic regression to relate German agricultural impacts (binary data) with drought indices (predictor variables). For more details on logistic regression, see Chapter 7.   
+
+The first step for any regression is to organize the response (impacts) and predictor (SPI/SPEI) variables into columns that correspond to individual observations. We do this using the spread command.
+
+```{r}
+### Create data for fitting, leave only SPI12
+fit_data <- spi_impacts %>%
+	select(date, year, month, index, index_val, impact) %>%
+	spread(index, index_val)
+
+### Check data
+fit_data
+
+```
+
+We then use the glm() command, which can be used to model a range of Generalized Linear Models (GLMs). For logistic regression, we must set the model family to be "binomial". In this case we include the " + 1" to force the model to include an intercept. We then check a summary and calculate confidence intervals around the estimates.
+
+
+```{r}
+### Fit simple logistic regression using SPEI-3 as a predictor variable
+### Force an intercept to be included by using + 1
+spei_3_fit <- glm(impact ~ spei_3 + 1, data = fit_data, family = "binomial")
+spei_3_fit_summary <- summary(spei_3_fit)
+
+### Check fit summary
+spei_3_fit_summary
+confint(spei_3_fit)
+
+### Plot the relationship with SPEI-3
+logistbarplot(log.fit = spei_3_fit, log.var = "spei_3")
+
+```
+We can now see the relationship between SPEI3 and the likelihood on an impact. This relationship looks quite similar to our first visual checks. As expected, the likelihood of an impact is approximately 50% for SPEI3 of -1.1, near 100% for -2 and near 0 for positive values. Make a note of the S-shape of this curve. This is important - if we had used linear regression, we might have produced likelihoods greater than 1 or less than 0. 
+
+We now have an intercept and slope for our logistic regression, but what do these mean? Remember from Chapter 7 that logistic regression converts likelihoods of a binary response into log-odds space (also called logit space). We can do this conversion in R and see our regression line by doing the following:
+
+```{r}
+
+### Create a holder dataframe 
+plot_df <- data.frame(spei_3 = seq(-3,3,0.1))
+
+### Make a prediction using this new data
+logodds_predict <- predict(spei_3_fit, plot_df,  se.fit = TRUE)
+
+### Add in prediction and confidence intervals
+plot_df <- plot_df %>%
+	mutate(logodds = logodds_predict$fit) %>%
+	mutate(logodds_upper = logodds + (qnorm(0.025) * logodds_predict$se.fit)) %>%  ### Two-tailed 95% confidence interval, or 0.025 in each tail
+	mutate(logodds_lower = logodds - (qnorm(0.025) * logodds_predict$se.fit))
+
+plot_obs <- fit_data %>%
+	mutate(pred = predict(spei_3_fit)) %>%
+	mutate(residuals = residuals(spei_3_fit)) %>%
+	mutate(obs = pred + residuals)
+
+### Plot Log-Odds
+p <- ggplot(plot_df, aes(x=spei_3)) %>%
+	+ geom_vline(xintercept=0,  color = "grey30", linetype="longdash") %>%  ### Make a vartical axis at x= 0
+	+ geom_ribbon(aes(ymin = logodds_lower, ymax = logodds_upper), alpha = 0.2, fill = "grey20") %>%
+	+ geom_line(aes(y=logodds), colour="black") %>%
+	+ geom_point(data = plot_obs, aes(y = obs, colour=impact, shape = impact)) %>%
+	+ scale_y_continuous(name = "Log-Odds") %>%
+	+ scale_x_continuous(name = "SPEI-3 (July)", breaks = seq(-5,5,0.5))  %>%
+	+ scale_colour_brewer(name = "Impact", type = "qual", palette = "Set2") %>%
+	+ scale_shape_discrete(name = "Impact") %>%
+	+ theme_classic(8) %>%
+	+ theme(legend.position = c(0.9, 0.9)) 
+
+p
+
+```
+
+The y-axis is now in log-odds space and we can see that our modeled relationship is now linear. The slope (-2.76) and intercept (-3.02) exactly descibe this line. If we exponentiate the y-axis, we can see the relationship plotted based on the "odds ratio". 
+
+
+```{r}
+### Log odds is based on the natural log, so can convert to odds ratio using exponential
+plot_df <- plot_df %>%
+	mutate(odds = exp(logodds)) %>%
+	mutate(odds_upper = exp(logodds_upper)) %>% 
+	mutate(odds_lower = exp(logodds_lower))
+
+### Plot Odds ratio (e.g. 2 means impact is 2 x more like than non-impact 2:1)
+p <- ggplot(plot_df, aes(x=spei_3)) %>%
+	+ geom_vline(xintercept=0,  color = "grey30", linetype="longdash") %>%  ### Make a vartical axis at x= 0
+	+ geom_ribbon(aes(ymin = odds_lower, ymax = odds_upper), alpha = 0.2, fill = "grey20") %>%
+	+ geom_line(aes(y=odds), colour="black") %>%
+	+ geom_point(data = plot_obs, aes(y = exp(obs), colour=impact, shape = impact)) %>%
+	+ scale_y_continuous(name = "Odds Ratio") %>%
+	+ scale_x_continuous(name = "SPEI-3 (July)", breaks = seq(-5,5,0.5))  %>%
+	+ scale_colour_brewer(name = "Impact", type = "qual", palette = "Set2") %>%
+	+ scale_shape_discrete(name = "Impact") %>%
+	+ theme_classic(8) %>%
+	+ theme(legend.position = c(0.9, 0.9))  %>%
+	+ coord_cartesian(ylim=c(0,6))
+
+p
+
+```
+
+
+Now, for an SPEI3 of -1.1, the odds ratio is 1. This means there is 1:1 chance of impact:non impact, or 50%. Once we get to an odds raio of 3 (3:1), the probability of an impact becomes 3/4 or 75%. We make this conversion using the formula $\frac{odds ratio}{1 + odds ratio}$. If we make this conversion, we arrive back at our oiginal figure presented above.
+
+```{r}
+
+### Now to convert from Odds ratio to likelihood (probability, we use the logit transform)
+### Divide odds by one plus odds
+plot_df <- plot_df %>%
+	mutate(prob = odds / (1 + odds) ) %>%
+	mutate(prob_upper = odds_upper / (1 + odds_upper)) %>% 
+	mutate(prob_lower = odds_lower / (1 + odds_lower))
+
+plot_df
+```
+
+# Making a prediction
+
+We can use this relationship now to make pedictions for new data, or we can view our fitted values using the original data. We can do this using the predict function. We can then calculate prediction and confidence intervals.
+
+```{r}
+### Use the SPEI3 regression to predict the likelihood of an impact
+### Keep the standard error for confidence intervals around prediction
+predict_ts <- predict(spei_3_fit, newdata = fit_data, type = "link", se = TRUE)
+
+### Add in prediction and confidence intervals
+predict_df <- fit_data %>%
+	mutate(predict = plogis(predict_ts$fit)) %>%
+	mutate(predict_upper = plogis(predict_ts$fit + (qnorm(0.025) * predict_ts$se.fit))) %>% 
+	mutate(predict_lower = plogis(predict_ts$fit - (qnorm(0.025) * predict_ts$se.fit))) %>%
+	select(-spi_3, -spei_12, -spi_12)
+
+head(predict_df)
+
+```
+
+Finally, we add these predictions to the original time series plot.
+
+```{r}
+### Create a time series plot
+p <- ggplot(predict_df, aes(x=year)) %>%
+	+ geom_hline(yintercept=0.5,  color = "grey70", linetype="dotted") %>%  ### Make a horizontal axis at y= 0
+	+ geom_rect(data = plot_impacts, aes(xmin=left, xmax=right, ymin=-Inf, ymax=+Inf), fill='pink', alpha=0.9) %>%   ### Create a pink region around the impact
+#	+ geom_vline(data = plot_impacts, aes(xintercept = year), linetype="dotted", color = "red") %>%   ### Add a vertical line at the impact
+	+ geom_ribbon(aes(ymin = predict_lower, ymax = predict_upper), alpha = 0.2, fill = "grey20") %>%
+	+ geom_line( aes(y = predict), colour="#377eb8") %>%  ### Draw the time series of SPI12
+	+ theme_classic(8) %>%
+	+ scale_x_continuous(name = "Year", breaks = seq(1950,2100,5)) %>%
+	+ scale_y_continuous(name = "Impact Likelihood", breaks = seq(0,1,0.1), labels = scales::percent_format(accuracy = 5L), expand=c(0,0))
+
+p
+
+```
+
+We can now see that most years, our likelihood of an agricultural impact remains below 10%. In years with low SPEI3, the likelihood quickly peaks. In 1976, our most severe drought in this period, the predicted likelihood is appoximately 90%. And, not surprisingly, there is an impact in this year. When likelihood is near 50%, we have approximately even numbers of years with impacts and those without, a sign of a good fit. Also, notice that the prediction intervals are not normally distributed around the estimate. This is becuase they are normally distributed in logit (log-odds) space. This is an important characteristic because it ensures that neither our estimate nor the interval produces impossible likelihoods (< 0 or > 1). 
+
+# Adding a predictor and checking 
+Although the 12-month drought indices did not appear to fit the data well on their own, perhaps our fit would be improved by adding them as a second predictor. To test this, we can add a second variable to the logistic regression equation.
+
+
+```{r}
+### See the value of adding a second predictor, maybe SPI12 has value when combined with SPEI3
+two_pred_fit <- glm(impact ~ spei_3 + spi_12 + 1, data = fit_data, family = "binomial")
+two_pred_fit_summary <- summary(two_pred_fit)
+
+two_pred_fit_summary
+
+### Tougher to plot 2 variables. Need to make a counterfactual plot, holding each stationary.
+logisthistplot(log.fit = two_pred_fit, log.var = "spei_3")
+logisthistplot(log.fit = two_pred_fit, log.var = "spi_12")
+
+```
+
+From this summary, we can see that the intercept and coeficient for SPEI3 are both significantly different from zero (p << 0.05). But, the coefficient for SPI12 is not significantly different from zero. We can see this with a p value of 0.43 and that the coefficient estimate of 0.65 has a 95% confidence interval that goes from -0.97 to 2.28 (calculated by multiplying the standard error by 1.96). If the relationship between SPI12 and impacts could just as easily be positive as negative, this suggests the effect is weak and highly uncertain. SPI12 probably should not be included in our model. For further confirmation, we can directly compare our 1 predictor model with our 2 predictor model.
+
+```{r}
+anova(update(spei_3_fit, ~1), spei_3_fit, two_pred_fit, test="Chisq")
+
+### Comparison with the Null model (no predictor) shows that SPEI-3 improves the model fit significantly
+### Adding SPI12 does not significantly improve the model
+
+### You can also see this by checking the AIC values, which actually increase (get worse) with addition of SPI-12
+AIC(spei_3_fit, two_pred_fit)
+
+```
+
+The Chi-Squared test confirms that adding SPEI3 produces a significant impovement over a model with only an intercept (no relationship with drought), but that adding a second predictor does not produce a significant improvment. We can further confirm using the Akaike Information Criterion (AIC), for which better fits produce lower AIC values. AIC for the 2 predictor model increases, suggesting a worse fit.
