@@ -6,8 +6,8 @@
 # ignore an entire directory
 /worked_examples/output/
 README.html
-# code for the generation of figures and tables chapter 4
-book-content/
 # R package related temporary build files
 rpkg/hydroDrought.Rcheck/
 rpkg/hydroDrought_*.tar.gz
+worked_examples/void/
+

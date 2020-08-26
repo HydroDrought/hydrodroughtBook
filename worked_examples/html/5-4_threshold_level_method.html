@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Worked example 5.4" />
+
+
+<title>Threshold level method</title>
+
+<link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
+<link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Threshold level method</h1>
+<h4 class="author">Worked example 5.4</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#threshold-selection-and-drought-events"><span class="toc-section-number">2</span> Threshold selection and drought events</a></li>
+<li><a href="#removing-minor-droughts-filtering"><span class="toc-section-number">3</span> Removing minor droughts (Filtering)</a></li>
+<li><a href="#eliminating-dependent-droughts-pooling"><span class="toc-section-number">4</span> Eliminating dependent droughts (Pooling)</a></li>
+</ul>
+</div>
+
+<p>The threshold level method can be used to derive drought events from a given time series of river flows. A drought event starts when the flow falls below a given threshold <span class="math inline">\(Q_0\)</span> and when the flow rises above the threshold the drought event ends.</p>
+<div id="loading-the-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<p>It is possible to analyse any of the series in the International Data Set (Section 4.5.1) as long as there are not too many missing values in the dataset and a meaningful threshold <span class="math inline">\(Q_0\)</span> is choosen. Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below.</p>
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought)
+
+ngaruroro &lt;- intl %&gt;%
+  filter(river == &quot;Ngaruroro&quot;) %&gt;%
+  select(data) %&gt;%
+  unnest(data) </code></pre>
+<p>Missing/unknown values (<code>NA</code>s) can neither be seen as ‘a flow below the threshold’ or ‘above the threshold’ as the flow value itself is unknown. A single missing value will cause the function <code>drought_events()</code> to terminate a dry spell (drought event) or wet spell. Subsequently most characteristics derived for this event (e.g. drought duration, drought termination, drought volume, … ) will be biased.</p>
+<p>A conservative approach would be to eliminate years with missing values completely. Instead periods of missing data can been interpolated if of short duration (e.g. &lt; 15 days), removing only years with long periods of missing values.</p>
+<pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
+  sanitize_ts(approx.missing = 14) %&gt;%
+  mutate(
+    year = water_year(time, origin = &quot;-09-01&quot;)
+  ) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 20,473 x 3
+##    time       discharge  year
+##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
+##  1 1963-09-20      30.5  1963
+##  2 1963-09-21      52.8  1963
+##  3 1963-09-22      43.6  1963
+##  4 1963-09-23      37.3  1963
+##  5 1963-09-24      32.3  1963
+##  6 1963-09-25      29.0  1963
+##  7 1963-09-26      25.3  1963
+##  8 1963-09-27      22.4  1963
+##  9 1963-09-28      19.9  1963
+## 10 1963-09-29      18.2  1963
+## # … with 20,463 more rows</code></pre>
+<pre class="r"><code>incomplete &lt;- ngaruroro %&gt;%
+  filter(!is.na(discharge)) %&gt;%
+  pull(time) %&gt;%
+  coverage_yearly(origin = &quot;-09-01&quot;) %&gt;%
+  filter(days.missing &gt; 0) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 8 x 5
+##    year days.with.data days.in.year days.missing coverage
+##   &lt;dbl&gt;          &lt;int&gt;        &lt;int&gt;        &lt;int&gt;    &lt;dbl&gt;
+## 1  1963            347          366           19    0.948
+## 2  1965            294          365           71    0.805
+## 3  1977            350          365           15    0.959
+## 4  1978            305          365           60    0.836
+## 5  1986            341          365           24    0.934
+## 6  1987            336          366           30    0.918
+## 7  2001            344          365           21    0.942
+## 8  2019             38          366          328    0.104</code></pre>
+<pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
+  anti_join(incomplete, by = &quot;year&quot;)</code></pre>
+<p>After preprocessing the time series 49 years of daily flow (1964-09-01 to 2019-08-31) will be analysed. In total eight years are omitted from the series (1963/64, 1965/66, 1977/78, 1978/79, 1986/87, 1987/88, 2001/02 and 2019/20).</p>
+<p>In this river the low flow period covers the turn of the calendar year. To avoid problems with allocating droughts to a specific calendar year because of drought events starting in one year and ending in another year, the start of the year is defined to on September 1<sup>st</sup>.</p>
+</div>
+<div id="threshold-selection-and-drought-events" class="section level1">
+<h1><span class="header-section-number">2</span> Threshold selection and drought events</h1>
+<p>A sequence of drought events is obtained from the streamflow hydrograph by considering periods with flow below a certain threshold, <span class="math inline">\(Q_0\)</span>. In this example <span class="math inline">\(Q_{90}\)</span> is used as threshold. A table of drought characteristics is derived with the function <code>drought_events()</code>.</p>
+<pre class="r"><code>q90 &lt;- lfquantile(ngaruroro$discharge, exc.freq = 0.9) %&gt;%
+  print()</code></pre>
+<pre><code>##   Q90 
+## 4.949</code></pre>
+<pre class="r"><code>droughts &lt;- ngaruroro %&gt;%
+  drought_events(threshold = q90, pooling = &quot;none&quot;) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 210 x 7
+##    event first.day  last.day   duration   volume  qmin tqmin     
+##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;drtn&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;    
+##  1     1 1967-04-23 1967-04-23  1 days     6307.  4.88 1967-04-23
+##  2     2 1967-04-26 1967-04-26  1 days     4579.  4.90 1967-04-26
+##  3     3 1967-05-09 1967-05-10  2 days    17453.  4.80 1967-05-10
+##  4     4 1967-05-13 1967-05-14  2 days    18835.  4.76 1967-05-14
+##  5     5 1967-05-23 1967-05-23  1 days     3024.  4.91 1967-05-23
+##  6     6 1968-02-07 1968-02-08  2 days    34646.  4.69 1968-02-08
+##  7     7 1968-02-17 1968-03-08 21 days  1766621.  3.44 1968-03-05
+##  8     8 1968-03-11 1968-04-02 23 days  2349562.  3.23 1968-03-26
+##  9     9 1968-04-06 1968-04-09  4 days   293933.  3.76 1968-04-08
+## 10    10 1969-03-25 1969-03-30  6 days   103766.  4.68 1969-03-26
+## # … with 200 more rows</code></pre>
+<p>The table displayed above includes:</p>
+<ul>
+<li>the start date, defined as the <code>first.day</code> below the threshold;</li>
+<li>the end date, defined as the <code>last.day</code> below the threshold;</li>
+<li>the drought <code>duration</code> (days), defined as the full drought duration (<code>last.day - first.day + 1</code>)</li>
+<li>the deficit <code>volume</code> (in m<sup>3</sup>), defined as the sum of the daily deficit flows times the duration in days;</li>
+<li>the minimum flow <code>qmin</code> (in m<sup>3</sup>s<sup>-1</sup>), defined as the minimum flow <span class="math inline">\(Q_{min}\)</span> within a drought event;</li>
+<li>and the date of the minimum flow <code>tqmin</code>.</li>
+</ul>
+</div>
+<div id="removing-minor-droughts-filtering" class="section level1">
+<h1><span class="header-section-number">3</span> Removing minor droughts (Filtering)</h1>
+<p>To reduce the problem of minor droughts two restrictions can be imposed:</p>
+<ul>
+<li><p>a minimum drought duration, <span class="math inline">\(d_{min}\)</span> that removes droughts with duration less than the specified number of days;</p></li>
+<li><p>a minimum drought deficit volume (coefficient <span class="math inline">\(\alpha\)</span>), that removes droughts with a deficit volume less than a certain fraction <span class="math inline">\(\alpha\)</span> of the maximum drought deficit volume in the complete series of drought events.</p></li>
+</ul>
+<p>We will append a logical column called <code>is.minor</code> to the table of drought events. It is <code>TRUE</code> when drought duration is less than five days and if the drought volume is less than 51<i> </i>133.25<i> </i>m<sup>3</sup> (5% of the maximum drought deficit volume).</p>
+<pre class="r"><code>droughts &lt;- droughts %&gt;%
+  mutate(is.minor = duration &lt; 5 | volume &lt; max(volume) * 0.005) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 210 x 8
+##    event first.day  last.day   duration   volume  qmin tqmin      is.minor
+##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;drtn&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;     &lt;lgl&gt;   
+##  1     1 1967-04-23 1967-04-23  1 days     6307.  4.88 1967-04-23 TRUE    
+##  2     2 1967-04-26 1967-04-26  1 days     4579.  4.90 1967-04-26 TRUE    
+##  3     3 1967-05-09 1967-05-10  2 days    17453.  4.80 1967-05-10 TRUE    
+##  4     4 1967-05-13 1967-05-14  2 days    18835.  4.76 1967-05-14 TRUE    
+##  5     5 1967-05-23 1967-05-23  1 days     3024.  4.91 1967-05-23 TRUE    
+##  6     6 1968-02-07 1968-02-08  2 days    34646.  4.69 1968-02-08 TRUE    
+##  7     7 1968-02-17 1968-03-08 21 days  1766621.  3.44 1968-03-05 FALSE   
+##  8     8 1968-03-11 1968-04-02 23 days  2349562.  3.23 1968-03-26 FALSE   
+##  9     9 1968-04-06 1968-04-09  4 days   293933.  3.76 1968-04-08 TRUE    
+## 10    10 1969-03-25 1969-03-30  6 days   103766.  4.68 1969-03-26 FALSE   
+## # … with 200 more rows</code></pre>
+<p>Due to this criteria a total number of 99 droughts are considered minor droughts.</p>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. A drought event is classified as a minor drought if the duration or the volume is below a given threshold.
+</p>
+<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-8-1.png" alt="Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. A drought event is classified as a minor drought if the duration or the volume is below a given threshold." width="672"  />
+</div>
+</div>
+<div id="eliminating-dependent-droughts-pooling" class="section level1">
+<h1><span class="header-section-number">4</span> Eliminating dependent droughts (Pooling)</h1>
+<p>The inter-event time criterion (IC) is used to pool dependent droughts which are separated by a short period of flow above the threshold. If the time between two droughts is less than a critical duration, <span class="math inline">\(t_{min}\)</span>, the two events are pooled.</p>
+<p>In this example <span class="math inline">\(t_{min}\)</span> is set equal to two days.</p>
+<pre class="r"><code>pooled &lt;- ngaruroro %&gt;%
+  drought_events(
+    threshold = q90, pooling = &quot;inter-event&quot;, 
+    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf)
+  ) %&gt;%
+  filter(duration &gt;= 5, volume &gt; max(volume) * 0.005) %&gt;%
+  arrange(desc(duration)) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 100 x 9
+##    event first.day  last.day   duration dbt       volume  qmin tqmin      pooled
+##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;drtn&gt;   &lt;drtn&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;      &lt;dbl&gt;
+##  1   166 2015-01-06 2015-03-15 69 days  69 days   1.02e7  2.17 2015-03-04      0
+##  2    37 1974-01-20 1974-03-17 57 days  56 days   6.51e6  2.88 1974-03-15      1
+##  3   138 2008-01-10 2008-03-01 52 days  51 days   6.41e6  2.64 2008-02-28      1
+##  4    30 1973-01-26 1973-03-12 46 days  46 days   6.58e6  2.66 1973-03-03      0
+##  5    50 1983-02-16 1983-04-02 46 days  46 days   7.38e6  2.46 1983-03-30      0
+##  6   148 2009-03-14 2009-04-26 44 days  43 days   6.01e6  2.53 2009-04-19      1
+##  7   157 2013-02-07 2013-03-18 40 days  40 days   7.09e6  2.38 2013-03-15      0
+##  8   124 2005-02-06 2005-03-16 39 days  38 days   4.99e6  2.68 2005-03-13      1
+##  9   139 2008-03-09 2008-04-14 37 days  36 days   5.22e6  2.65 2008-04-06      1
+## 10    59 1989-04-01 1989-04-29 29 days  29 days   2.71e6  3.3  1989-04-29      0
+## # … with 90 more rows</code></pre>
+<p>Whenever drought events were pooled the table of drought events contain two more columns:</p>
+<ul>
+<li><p>the duration below the threshold <code>dbt</code>: full drought duration minus short periods (the inter-event time) above the threshold;</p></li>
+<li><p>the number of <code>pooled</code> drought events.</p></li>
+</ul>
+<p>The drought deficit characteristics of the ten longest lasting (pooled) drought events are given in the table above.</p>
+<p>To summarise all drought events for every year one could calculate the <code>year</code> based on the year of the <code>first.day</code> of and event and derive for example the following metrics:</p>
+<pre class="r"><code>pooled %&gt;%
+  mutate(
+    year = water_year(first.day, origin = &quot;-09-01&quot;)
+  ) %&gt;%
+  group_by(year) %&gt;%
+  summarise(
+    n.droughts = n(),
+    real.duration = sum(dbt), 
+    min.flow = min(qmin)
+  )</code></pre>
+<pre><code>## # A tibble: 35 x 4
+##     year n.droughts real.duration min.flow
+##    &lt;dbl&gt;      &lt;int&gt; &lt;drtn&gt;           &lt;dbl&gt;
+##  1  1967          2  44 days          3.23
+##  2  1968          2  22 days          3.88
+##  3  1969          3  37 days          3.89
+##  4  1970          3  34 days          3.73
+##  5  1972          7 114 days          2.66
+##  6  1973          2  63 days          2.88
+##  7  1974          2  10 days          4.31
+##  8  1975          2  18 days          4.09
+##  9  1977          1  25 days          3.46
+## 10  1982          2  57 days          2.46
+## # … with 25 more rows</code></pre>
+<p>From the first table it can be seen that there are 100 drought events in total, on average 2.04 events every year. Minor droughts are dominating with 43 events lasting less than 11 days. Only 9 events lasted more than 30 days.</p>
+<p>The time series of the drought duration can be seen in Figure 5.12, and the major droughts are found in 2014, 1973, 2007, 1972, 1982 and 2008.</p>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = <span class="math inline">\(Q_{90}\)</span>, <span class="math inline">\(d_{min} = 5\)</span> days, <span class="math inline">\(\alpha = 0.005\)</span> and <span class="math inline">\(t_{min} = 2\)</span> days.
+</p>
+<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-13-1.png" alt="Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\alpha = 0.005$ and $t_{min} = 2$ days." width="672"  />
+</div>
+<p>A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed.</p>
+<pre class="r"><code>ggplot(pooled, aes(duration)) + 
+  geom_histogram(binwidth = 5, boundary = 0, closed = &quot;left&quot;, col = &quot;white&quot;) + 
+  scale_x_continuous(limits = c(0, NA)) + 
+  scale_y_continuous(breaks = integer_breaks()) + 
+  labs(x = &quot;Drought duration (days)&quot;, y = &quot;Counts&quot;)</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = <span class="math inline">\(Q_{90}\)</span>, <span class="math inline">\(d_{min} = 5\)</span> days, <span class="math inline">\(\alpha = 0.005\)</span> and <span class="math inline">\(t_{min} = 2\)</span> days.
+</p>
+<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-15-1.png" alt="Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\alpha = 0.005$ and $t_{min} = 2$ days." width="672"  />
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

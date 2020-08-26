@@ -4,7 +4,11 @@ author: "Worked example @number"
 output: 
   tufte::tufte_html:
     tufte_features: ["fonts"]
+    toc: true
+    toc_depth: 2
+    number_sections: true
     css: style.css
+    fig_caption: true
 editor_options: 
   chunk_output_type: console
 ---
@@ -21,6 +25,7 @@ library(kableExtra)
 In this example we are going to use ...
 
 ```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
 library(hydroDrought)
 ```
 

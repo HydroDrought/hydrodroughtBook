@@ -1,0 +1,93 @@
+---
+title: "Mean annual minimum flow"
+author: "Worked example 5.2"
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+# Loading the Data
+
+In this example we are again going to use river flow data from the river Ngaruroro of the `international` dataset in the package **hydroDrought**. 
+Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the $n$-day average flow for $n$ equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from **hydrological years** starting 1 September and ending 31 August. Table 5.4 lists the first flow values. 
+<!-- The first two columns show the date and the corresponding flow value, Q. -->
+
+In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function `water_year()` which appends an additional column named `year` to the dataset. 
+
+```{r, warning=FALSE}
+library(tidyverse)
+library(hydroDrought)
+
+# attribute each observation to the correct hydrological year
+# and select only the hydrological years between 1990 und 2000
+ngaruroro <- intl %>%
+  filter(river == "Ngaruroro") %>%
+  select(data) %>%
+  unnest(data) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+   ) %>%
+  filter(year >= 1990, year <= 1999)
+
+smoothed <- ngaruroro %>%
+  mutate(
+    MA1 = moving_average(discharge, n = 1),
+    MA7 = moving_average(discharge, n = 7),
+    MA30 = moving_average(discharge, n = 30)
+  )
+```
+
+```{r, echo=FALSE}
+num_in_brackets <- function(x) sub("(\\d+)", "(\\1)", x = x)
+library(kableExtra)
+smoothed %>%
+  select(-discharge, -year) %>%
+  head(31) %>%
+  mutate_if(is.numeric, round, digits = 3) %>%
+  rename_all(.funs = num_in_brackets) %>%
+  kable(caption = "Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. ") %>%
+  add_header_above(c("Data, 10-year series" = 2, "Moving average calculation" = 2), 
+                   align = "right")
+```
+
+
+```{r}
+# compute the annual minima
+am <- smoothed %>%
+  select(-discharge, -time) %>%
+  group_by(year) %>%
+  summarise_all(min, na.rm = TRUE)
+
+# average the annual minima to get the mean annual minima
+mam <- am %>% 
+  select(-year) %>%
+  summarise_all(mean)
+```
+
+```{r, echo=FALSE}
+area <- filter(international, River == "Ngaruroro") %>%
+  pull(Area)
+tbl <- tibble(n = gsub("\\D", "", names(mam)),
+              discharge = unlist(mam), 
+              rel.discharge = discharge * 1000 / area) 
+mam  %>%
+  mutate_if(is.numeric, round, digits = 3) %>%
+  rename_all(.funs = num_in_brackets) %>%
+  kable(caption = "Table 5.5 $MAM$(n-day), $n=1$ day, 7 days and 30 days") %>%
+  add_header_above(c("$Q$ in ${m^3s^{-1}}$" = 3), align = "center")
+```
+
+# Fast Track
+
+```{r}
+ngaruroro %>% 
+  select(discharge, time) %>%
+  summarise(
+    `MAM(1)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 1),
+    `MAM(7)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 7),
+    `MAM(30)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 30)
+  )
+```
+

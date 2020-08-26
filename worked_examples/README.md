@@ -9,7 +9,7 @@
     <td> <b> 1. Introduction</b> </td>
     <td> <i>Lena Tallaksen</i> </td>
     <td>  </td>
-  </tr>  
+  </tr>
   <tr>
     <td> <b> 2. Hydroclimatology</b> </td>
     <td> <i>Daniel Kingston</i> </td>
@@ -35,45 +35,38 @@
   <td colspan="3">
   <ul>
   <li>5.1 Flow duration curve: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-1_flow_duration_curve.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-1_flow_duration_curve.R">R-script</a>-->
-    <br><i>new R-script and updated time series, worked example changed accordingly</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/5-1_flow_duration_curve.html">Worked Example</a>, 
+    <br><i>new R-script and updated time series; not yet finished</i>
   </li>
 
   <li>5.2 Mean annual minimum flow: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-2_mean_annual_minimum_flow.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-2_mean_annual_minimum_flow.R">R-script</a>-->
-    <br><i>new R-script and updated time series, worked example changed accordingly</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/5-2_mean_annual_minimum_flow.html">Worked Example</a>, 
+    <br><i>new R-script and updated time series; not yet finished</i>
   </li>
 
   <li>5.3 Base Flow Index: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-3_base_flow_index.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-3_base_flow_index.R">R-script</a>-->
-    <br><i>new R-script and updated time series, worked example changed accordingly</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/5-3_base_flow_index.html">Worked Example</a>, 
+    <br><i>new R-script and updated time series; not yet finished</i>
   </li>
 
   <li>5.4 Threshold level method: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-4_threshold_level_method.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-4_threshold_level_method.R">R-script</a>-->
-    <br><i>Nizowka replaced by new R-script (+updated time series), worked example changed accordingly</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/5-4_threshold_level_method.html">Worked Example</a>, 
+    <br><i>Nizowka replaced by new R-script (+updated time series), not yet finished</i>
   </li>
 
   <li>5.5 Sequent Peak Algorithm: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-5_sequent_peak_algorithm.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-5_sequent_peak_algorithm.R">R-script</a>-->
-    <br><i>Decided to keep as the method is applied operationally by the hydropower sector. New R-script and updated time series</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/5-5_sequent_peak_algorithm.html">Worked Example</a>, 
+    <br><i>Decided to keep as the method is applied operationally by the hydropower sector. New R-script and updated time series; not yet finished</i>
   </li>
 
   <li>5.6 Standardized Groundwater Index: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-6_standardized_groundwater_index.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-6_standardized_groundwater_index.R">R-script</a>-->
-    <br><i>to be made by John in collaboration with Tobias</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/5-6_standardized_groundwater_index.html">Worked Example</a>, 
+    <br><i>new script, almost finished. </i>
   </li>
  
   <li>5.7 Rank and correlation coefficients: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-7_rank_and_correlation_coefficients.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/5-7_rank_and_correlation_coefficients.R">R-script</a>-->
-    <br><i>To be implemented in R + new regional dataset – updated by Nico –in collaboration with Tobias</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/5-7_rank_and_correlation_coefficients.html">Worked Example</a>, 
+    <br><i>To be implemented in R + new regional dataset – updated by Nico – in collaboration with Tobias. not even started... </i>
   </li>
   </ul>
   </td>
@@ -90,12 +83,12 @@
   <td colspan="3">
   <ul>
   <li>6.1 Low flow frequency analysis: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/6-1_low_flow_frequency_analysis.html">Worked Example</a>, 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/6-1_low_flow_frequency_analysis_old.html">Worked Example with dataset from first edition</a>    <br><i>new R-script, but using Ngaruroro time series from first edition, direct computation of distribution parameters differs.</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Worked Example</a>, 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/6-1_low_flow_frequency_analysis_old.html">Worked Example with dataset from first edition</a>    <br><i>new R-script, but using Ngaruroro time series from first edition, direct computation of distribution parameters differs.</i>
   </li>
 
   <li>6.2 Low flow frequency analysis: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/6-2_drought_deficit_frequency.html">Worked Example</a>, 
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/6-2_drought_deficit_frequency.html">Worked Example</a>, 
     <br><i>new R-script, estimation of combined distribution of drought volume and duration not yet implemented. </i>
   </li>
 
@@ -116,36 +109,38 @@
   <li>7.1 Linear regression and residuals: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-1_linear_regression_and_residuals.html">Worked Example</a>, 
     <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-1_linear_regression_and_residuals.R">R-script</a>-->
+    <br><i>No code online. </i>
 
   </li>
 
   <li>7.2 Multiple regression: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-2_multiple_regression.html">Worked Example</a>, 
     <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-2_multiple_regression.R">R-script</a>-->
-    <br><i>incl. variable selection</i>
+    <br><i>incl. variable selection. No code online.</i>
   </li>
 
   <li>7.3 Regression extensions: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-3_regression_extensions.html">Worked Example</a>, 
     <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-3_regression_extensions.R">R-script</a>-->
-    <br><i>logistic, poisson, GLMs</i>
+    <br><i>logistic, poisson, GLMs. No code online.</i>
   </li>
 
   <li>7.4 Trend analysis: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-4_trend_analysis.html">Worked Example</a>, 
     <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-4_trend_analysis.R">R-script</a>-->
-
+    <br><i>No code online. </i>
   </li>
 
   <li>7.5 Structural change analysis: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-5_structural_change_analysis.html">Worked Example</a>, 
     <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-5_structural_change_analysis.R">R-script</a>-->
-
+    <br><i>No code online. </i>
   </li>
 
   <li>7.6 PCA fundamentals: 
     <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-6_pca_fundamentals.html">Worked Example</a>, 
     <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/7-6_pca_fundamentals.R">R-script</a>-->
+    <br><i>No code online. </i>
   </li>
   </ul>
   </td>
@@ -188,8 +183,7 @@
   <td colspan="3">
   <ul>
   <li>10.1 Human Influences: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/10-1_human_influences.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/10-1_threshold.R">R-script</a>-->
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/10-1_human_influences.html">Worked Example</a>, 
     <br><i></i>
   </li>
 
@@ -230,9 +224,8 @@
   <td colspan="3">
   <ul>
   <li>13.1 Forecast skill: 
-    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/13-1_forecast_skill.html">Worked Example</a>, 
-    <!--<a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/files/13-1_forecast_skill.R">R-script</a>-->
-    <br><i>Lambourne catchment and will use GR4 model, calibrated using the airGR4 R toolset</i>
+    <a href="https://combinatronics.com/jstagge/hydroDrought/master/worked_examples/html/13-1_forecast_skill.html">Worked Example</a>, 
+    <br><i>Lambourne catchment, uses GR4 model, calibrated using the airGR4 R toolset. Almost finished.</i>
   </li>
   </ul>
   </td>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Worked example 5.7" />
+
+
+<title>Rank and correlation coefficients</title>
+
+<link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
+<link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Rank and correlation coefficients</h1>
+<h4 class="author">Worked example 5.7</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+</ul>
+</div>
+
+<div id="loading-the-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought) 
+
+regional</code></pre>
+<pre><code>## # A tibble: 29 x 44
+##    id    discharge river station catchment altitude   lon   lat start     
+##    &lt;chr&gt; &lt;list&gt;    &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;    
+##  1 2100… &lt;tibble … Rabn… Piring…     118.      298.  16.4  47.4 1971-01-01
+##  2 2100… &lt;tibble … Rabn… Manner…     224.      231.  16.5  47.4 1966-01-01
+##  3 2100… &lt;tibble … Stoob Oberpu…     149       237.  16.5  47.5 1966-01-01
+##  4 2100… &lt;tibble … Wulka Wulkap…     221.      162.  16.5  47.8 1966-01-01
+##  5 2102… &lt;tibble … Lafn… Dobers…     925.      234   16.1  47.0 1951-01-01
+##  6 2102… &lt;tibble … Pinka Woppen…     417.      242   16.4  47.2 1951-01-01
+##  7 2102… &lt;tibble … Tauc… Altsch…      89.2     316.  16.3  47.3 1966-01-01
+##  8 2102… &lt;tibble … Tauc… Hanner…     175.      247.  16.4  47.2 1951-01-01
+##  9 2102… &lt;tibble … Strem Güssing     316.      210.  16.3  47.1 1976-01-01
+## 10 2102… &lt;tibble … Strem Heilig…     400.      200.  16.4  47.0 1951-01-01
+## # … with 19 more rows, and 35 more variables: end &lt;date&gt;, x &lt;int&gt;, y &lt;int&gt;,
+## #   Q95s &lt;dbl&gt;, Q95w &lt;dbl&gt;, Q95 &lt;dbl&gt;, A &lt;dbl&gt;, H0 &lt;dbl&gt;, Hx &lt;dbl&gt;, Hr &lt;dbl&gt;,
+## #   Hm &lt;dbl&gt;, Sm &lt;dbl&gt;, Ssl &lt;dbl&gt;, Smo &lt;dbl&gt;, Sst &lt;dbl&gt;, P &lt;dbl&gt;, Ps &lt;dbl&gt;,
+## #   Pw &lt;dbl&gt;, Gb &lt;dbl&gt;, Gq &lt;dbl&gt;, Gt &lt;dbl&gt;, Gf &lt;dbl&gt;, Gl &lt;dbl&gt;, Gc &lt;dbl&gt;,
+## #   Ggs &lt;dbl&gt;, Ggd &lt;dbl&gt;, Gso &lt;int&gt;, Lu &lt;dbl&gt;, La &lt;dbl&gt;, Lc &lt;dbl&gt;, Lg &lt;dbl&gt;,
+## #   Lf &lt;dbl&gt;, Lr &lt;dbl&gt;, Lwa &lt;dbl&gt;, D &lt;dbl&gt;</code></pre>
+<pre class="r"><code># functions for the percentiles we want to include
+my_percentiles &lt;- function(x)
+{
+  as_tibble(as.list(lfquantile(x, exc.freq = c(0.95, 0.9, 0.7, 0.5))))
+}
+
+# functions for the mean annual minima 
+my_mams &lt;- function(discharge, time, n = c(1, 10, 30))
+{
+  names(n) &lt;- paste0(&quot;MAM(&quot;, n, &quot;)&quot;)
+  
+  long &lt;- map_df(n, ~map(list(value = mean_annual_minimum), exec, 
+                         n = .x,
+                         discharge = discharge, time = time,  
+                         origin = &quot;-09-01&quot;, na.rm = TRUE), 
+                 .id = &quot;variable&quot;)
+  
+  pivot_wider(long, names_from = variable, values_from = value)
+}
+
+
+indices &lt;- regional  %&gt;%
+  select(station, data = discharge, area = catchment) %&gt;%
+  filter(is.finite(area)) %&gt;%
+  mutate(
+    # data = map2(data, area, ~mutate(.x, discharge = discharge * 1000 / .y)),
+    Q.mean = map_dbl(data, ~mean(.$discharge, na.rm = TRUE)),
+    quantiles = map(data, ~my_percentiles(.x$discharge)),
+    mams = map(data, ~my_mams(discharge = .x$discharge, time = .x$time))
+  )  %&gt;%
+  select(-data, -area) %&gt;%
+  unnest(cols = c(quantiles, mams)) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 29 x 9
+##    station          Q.mean   Q95   Q90   Q70   Q50 `MAM(1)` `MAM(10)` `MAM(30)`
+##    &lt;chr&gt;             &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Piringsdorf       0.615 0.132 0.178 0.31  0.443    0.128     0.165     0.194
+##  2 Mannersdorf       0.913 0.257 0.311 0.49  0.68     0.254     0.293     0.330
+##  3 Oberpullendorf    0.613 0.14  0.179 0.305 0.429    0.119     0.152     0.193
+##  4 Wulkaprodersdorf  0.548 0.15  0.191 0.299 0.414    0.170     0.198     0.235
+##  5 Dobersdorf        6.47  2.44  2.83  3.86  4.91     2.29      2.63      3.03 
+##  6 Woppendorf        2.30  0.66  0.8   1.2   1.59     0.549     0.761     0.883
+##  7 Altschlaining     0.409 0.124 0.159 0.255 0.348    0.146     0.164     0.188
+##  8 Hannersdorf       0.692 0.18  0.236 0.39  0.52     0.194     0.234     0.279
+##  9 Güssing           1.08  0.167 0.216 0.368 0.513    0.155     0.186     0.240
+## 10 Heiligenbrunn     1.47  0.214 0.271 0.47  0.67     0.198     0.248     0.314
+## # … with 19 more rows</code></pre>
+<pre class="r"><code># derived indices
+indices &lt;- indices %&gt;%
+  mutate(
+    `Q90/Q50` = Q90/Q50,
+    `Q95/Q50` = Q95/Q50,
+    `MAM(30)/Q50` = `MAM(30)`/Q50,
+    `MAM(10)/Q50` = `MAM(10)`/Q50,
+    `MAM(1)/Q50` = `MAM(1)`/Q50,
+  )</code></pre>
+<pre class="r"><code># install_github(&quot;vqv/ggbiplot&quot;)
+df &lt;- indices %&gt;%
+  column_to_rownames(var = &quot;station&quot;) 
+
+pca &lt;- prcomp(df, center = TRUE, scale. = TRUE)
+
+ggbiplot::ggbiplot(pca, labels=rownames(df))</code></pre>
+<p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-5-1.png" width="672"  /></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,165 @@
+---
+title: "Flow Duration Curve"
+author: "Worked Example 5.1"
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+# Loading the Data
+
+In this example we are going to use river flow data from the river Ngaruroro which is part of the `international` dataset in the package **hydroDrought**. This dataset becomes accessible by loading the **hydroDrought** package. 
+```{r}
+library(tidyverse)
+library(hydroDrought)
+ngaruroro <- intl %>%
+  filter(river == "Ngaruroro") %>%
+  select(data) %>%
+  unnest(data) %>%
+  print()
+```
+
+All years of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct a flow duration curve based on a daily time step, $\Delta t = 1$ day. The total number of $\Delta t$ intervals is then $N = `r nrow(ngaruroro)`$ days. Table 5.1 lists the first seven flow values. The first two columns show the date and the corresponding riverflow value, $Q$.
+
+
+
+
+# Calculation of the FDC
+
+The flow duration curve is constructed following the calculation steps as given in the right part of the table:
+
+- The rank, $i$, of each value is calculated (using the `rank()` function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the $i^{th}$ largest value has rank $i$ (i.e. the largest value has rank 1).
+
+- The exceedance frequency, $EF_{Q_i}$ is calculated as: 
+$$EF_{Q_i}  = \frac{i} {N}$$ 
+which gives an estimate of the empirical exceedance frequency of the $i^{th}$ largest event. $EF_{Q_i}$ designates here the observed frequency when the flow, $Q$, is larger than the flow value with rank $i$, $Q_i$ .
+
+```{r}
+exceedance_frequency <- function(flow)
+{
+  # current rank
+  i <- rank(-flow, ties.method = "min", na.last = "keep") 
+  
+  # largest rank in sample (= number of non-missing values)
+  N <- length(na.omit(flow))
+  
+  # the exceedance frequency can be seen as the relative rank
+  return(i / N)
+}
+
+ngaruroro <- ngaruroro %>%
+  mutate(
+    rank = rank(-discharge, ties.method = "min"), 
+    freq.exc = exceedance_frequency(discharge)
+  )
+```
+
+
+```{r, echo=FALSE}
+library(kableExtra)
+ngaruroro %>%
+  mutate_if(is.numeric, round, 3) %>%
+  select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+  head(7) %>%
+  kable(caption = "Table 5.1 Calculation of a daily flow duration curve for River Ngaruroro at Kuripapango, NZ") %>%
+  add_header_above(c(" " = 1, "$Q$ in $m^3s^{-1}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+                   align = "right")
+```
+
+
+
+
+# Tabulation of the FDC
+
+- Corresponding values of riverflow ($Q$ in m<sup>3</sup>s<sup>-1</sup>) and exceedance frequency ($EF_{Q_i}$ in %) are tabulated^[Tobias: Tabulation was done implicitly in the sections before. ].
+
+- The two columns are sorted by $EF_{Q_i}$^[Tobias: Sorting is not required. I suggest to delete the section "Tabulation of the FDC" entirely.].
+
+# Plot of the FDC
+The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic. 
+
+```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", fig.margin = FALSE}
+library(scales)
+ggplot(ngaruroro, aes(x = freq.exc, y = discharge)) +
+  geom_line() +
+  scale_y_log10() +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  labs(x = "Exceedance Frequency",
+       y = expression(paste("Flow (", m^{3}, s^{-1}, ")")))
+```
+
+
+
+# Selected exceedance values
+
+```{r, echo=FALSE}
+q90 <- ngaruroro %>%
+  filter(freq.exc <= 0.9) %>%
+  arrange(desc(freq.exc)) %>%
+  head(1) %>%
+  pull(discharge)
+```
+
+Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can be obtained as the value of $Q$ corresponding to the largest value of $EF_{Q_i}$ that is less than or equal to the value of $EF_{Q_i}$ sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as `r q90`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used. 
+
+```{r include=FALSE}
+tbl <- ngaruroro %>%
+  filter(freq.exc >= 0.8999 & freq.exc <= 0.9002) %>%
+  arrange(freq.exc)
+```
+
+
+```{r echo=FALSE}
+tbl  %>%
+  mutate(discharge = round(discharge, 3), 
+         freq.exc = round(freq.exc, 5)) %>%
+  select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+  kable(caption = "Table 5.2 An extract of values corresponding to $Q_{90}$.") %>%
+  add_header_above(c(" " = 1, "$Q$ in ${m^3s^{-1}}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+                   align = "right")
+```
+
+# Fast-Track
+
+The function `lfquantile()` calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
+
+```{r}
+lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
+```
+
+
+# Standardized Flow Duration Curves
+
+Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge. 
+```{r}
+lambournRay <- intl %>%
+  filter(river %in% c("Lambourn", "Ray")) %>%
+  select(river, area = catchment, data)
+
+lambournRay <- lambournRay %>%
+  mutate(
+    data = map2(data, area, ~mutate(.x, rel.discharge = discharge * 1000 / .y))
+  ) %>%
+  print()
+
+fdc <- lambournRay %>%
+  select(river, data) %>%
+  unnest(cols = data) %>%
+  group_by(river) %>%
+  mutate(freq.exc = exceedance_frequency(rel.discharge)) %>%
+  print()
+
+
+ggplot(fdc, mapping = aes(x = freq.exc, y = rel.discharge, 
+                          size = river)) +
+  geom_step(direction = "vh") +
+  scale_size_manual(values = c(0.1, 0.75)) +
+  scale_y_log10(limits = c(0.01, NA), 
+                labels = number_format(accuracy = 0.01)) +
+  scale_x_continuous(labels = percent_format(accuracy = 1)) +
+  labs(x = "Exceedance Frequency",
+       y = expression(paste("Flow (", l, s^{-1}, km^{-2}, ")"))) 
+```
+
