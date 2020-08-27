@@ -1,6 +1,6 @@
 Package: hydroDrought
 Title: Hydrological Drought: Processes and Estimation Methods for Streamflow and Groundwater
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: c(
   person(given = "James H. Stagge", role = "cre",
          email = "stagge.11@osu.edu", 

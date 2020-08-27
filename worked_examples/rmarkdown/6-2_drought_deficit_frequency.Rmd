@@ -1,50 +1,11 @@
 ---
-title: "Drought deficit frequency"
+title: "Drought deficit frequency analysis"
 author: "Worked example 6.2"
 ---
 
 ```{r, setup, include=FALSE}
 ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-```
-
-```{r, echo=FALSE}
-library(tidyverse)
-library(hydroDrought)
-
-# remove the same years as in figure 6.9 of the first edition
-incomplete <- tibble(year = c(1965, 1978, 1986, 1987, 2000))
-
-ngaruroro <- hydroDrought:::dataFirstEdition$ng %>%
-  sanitize_ts(approx.missing = 15) %>%
-   mutate(
-    year = water_year(time, origin = "-09-01")
-    )
-
-# ngaruroro <- ng %>%
-#   mutate(
-#     year = water_year(time, origin = "-09-01")
-#   )
-# filter(year >= 1964, year < 2000) %>%
-#   print()
-
-# incomplete <- ngaruroro %>%
-#   filter(!is.na(discharge)) %>%
-#   pull(time) %>%
-#   coverage_yearly(origin = "-09-01") %>%
-#   filter(days.missing > 0) %>%
-#   print()
-
-
-# ng %>%
-#   drought_events(
-#     threshold = 5.243, pooling = "inter-event",
-#     pooling.pars = list(min.duration = 3, min.vol.ratio = Inf),
-#     full.table = TRUE
-#   ) %>%
-#   filter(duration >= 5, volume > max(volume) * 0.005) %>%
-#   transmute(start = first.day, end = last.day, def.vol = volume / 1000, av.def = def.vol / as.double(duration), real.duration = dbt, min.flow = qmin, date.min.flow = tqmin)
-
 ```
 
 River Ngaruroro at Kuripapango in New Zealand, applied for frequency
@@ -62,18 +23,39 @@ duration as defined in Worked Example 5.4.
 library(tidyverse)
 library(hydroDrought)
 
-
-# remove the same years as in figure 6.9 of the first edition
-incomplete <- tibble(year = c(1965, 1978, 1986, 1987, 2000))
-
-ng <- ngaruroro %>%
-  anti_join(incomplete, by = "year") %>%
-  filter(year >= 1964, year < 2000) 
+ngaruroro <- intl %>%
+  filter(river == "Ngaruroro") %>%
+  select(data) %>%
+  unnest(data) %>%
+  # fill gaps with a length of up to 15 days
+  sanitize_ts(approx.missing = 15) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+  ) 
 ```
+
+
+```{r}
+# remove incomplete years
+incomplete <- ngaruroro %>%
+  filter(!is.na(discharge)) %>%
+  pull(time) %>%
+  coverage_yearly(origin = "-09-01") %>%
+  filter(days.missing > 0) %>%
+  print()
+
+ngaruroro <- ngaruroro %>%
+  anti_join(incomplete, by = "year")
+```
+
+```{r, echo=FALSE}
+ng <- ngaruroro
+```
+
 
 Drought events were selected for River Ngaruroro and details of the
 selection criteria are given in Worked Example 5.4. The series cover the
-period `r min(ng$year)` to `r min(ng$year)` and the start of the year is set to 1 September. 
+period `r min(ng$year)` to `r max(ng$year)` and the start of the year is set to 1 September. 
 
 
 A total of `r hydroDrought:::numbers_english(nrow(incomplete))` years were omitted from the series, 
@@ -81,10 +63,9 @@ A total of `r hydroDrought:::numbers_english(nrow(incomplete))` years were omitt
 due to missing data.
 
 ```{r}
-# q90 <- lfquantile(ng$discharge, exc.freq = 0.9) 
-q90 <- 5.243
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
 
-droughts <- ng %>%
+droughts <- ngaruroro %>%
   drought_events(
     threshold = q90, pooling = "inter-event", 
     pooling.pars = list(min.duration = 2, min.vol.ratio = Inf), 
@@ -109,13 +90,13 @@ tbl <- droughts %>%
 ```{r echo=FALSE}
 missing <- tbl %>%
   mutate(time = first.day) %>%
-   mutate(
+  mutate(
     year = water_year(first.day, origin = "-09-01")
-   ) %>%
+  ) %>%
   pull(year) %>%
-  setdiff(x = full_seq(ng$year, period = 1))
+  setdiff(x = full_seq(ngaruroro$year, period = 1))
 
-n <- diff(range(ng$year))
+n <- diff(range(ngaruroro$year))
 ```
 
 As only events below the $Q_{90}$
@@ -180,34 +161,63 @@ modelled.
 
 
 
-```{r, eval=FALSE, echo=FALSE}
-# Absolute volume
+```{r, echo=FALSE}
 library(lmom)
 p <- 1 - c(1 / c(10, 100, 200))
-x <- as.double(droughts$volume / 1e3, unit = "days")
 
-l <- samlmu(x)
+observations <- tbl %>% 
+  select(real.duration, rel.volume, abs.volume = volume) %>%
+  mutate(across(everything(), as.numeric)) %>%
+  pivot_longer(cols = everything(), names_to = "metric") %>%
+  nest(data = value)  
 
-evplot(x)
-evdistq(quagpa, pelgpa(l))
-
-quagpa(f = p, para = pelgpa(l))
-
+fitted <- observations %>% 
+  mutate(
+    parameter = map(data, ~pelgpa(samlmu(.x$value))),
+    quantiles = map(parameter, ~tibble(p = p, quant = quagpa(p, .x))),
+    quafun = map(parameter, ~tibble(p = seq(0.01, 0.991, 0.001), quant = quagpa(p, .x)))
+  )
 ```
 
 
+```{r echo=FALSE, fig.height=8}
+reduced_var <- function (x) -log(1 - x)
 
-```{r, eval=FALSE, echo=FALSE}
-# Real Drought Duration
-p <- 1 - c(1 / c(10, 100, 200))
-x <- as.double(droughts$dbt, unit = "days")
+o <- observations %>%
+  mutate(
+    metric = factor(
+      metric, levels = c("real.duration", "rel.volume", "abs.volume"),
+      labels = c("Real duration\n(in days)", "Relative volume\n(in days)", 
+                 "Absolute volume\n(in 1000 m³)"))
+  ) %>%
+  unnest(data) %>%
+  group_by(metric) %>%
+  mutate(prob = rank(value) / (n() + 1)) 
 
-l <- samlmu(x)
+f <- fitted %>%
+  mutate(
+    metric = factor(
+      metric, levels = c("real.duration", "rel.volume", "abs.volume"),
+      labels = c("Real duration\n(in days)", "Relative volume\n(in days)", 
+                 "Absolute volume\n(in 1000 m³)"))
+  ) %>%
+  select(metric, quafun) %>%
+  unnest(quafun)
 
-evplot(x)
-evdistq(qualn3, pelln3(l))
-
-qualn3(f = p, para = pelln3(l))
+ggplot(o, aes(x = reduced_var(prob), y = value)) + 
+  geom_point(size = 0.5) + 
+  geom_line(data = f, aes(x = reduced_var(p), y = quant)) + 
+  scale_x_continuous(
+    expand = expansion(c(0.04, 0)), 
+    sec.axis = sec_axis(
+      trans = function(x) 1/ (1 - (-exp(-x) + 1)), 
+      breaks = c(1, seq(10, 80, 10), 100, 150, 200),
+      name = "Return period (in years)")
+  ) + 
+  facet_wrap(vars(metric), scales = "free_y", 
+             ncol = 1, strip.position = "left") +
+  labs(x = expression(paste("Exponential reduced variate -log(", 1, " - F(", x, "))")),
+       y = "Quantile")
 ```
 
 
@@ -218,3 +228,14 @@ Example 5.4 and $F(x)$ are given by the tabulated distribution functions in
 Nizowka. The design value for a particular return period, i.e. the T-year
 event, can be obtained from the tables for known values of $F(x)$. The
 estimated 10-, 100- and 200-year drought events are shown in Table 6.2.
+
+
+```{r, echo=FALSE}
+fitted  %>%
+  select(metric, quantiles) %>%
+  unnest(quantiles) %>%
+  pivot_wider(id_cols = p, names_from = "metric", values_from = "quant") %>%
+  mutate(return.period = 1 / p) %>%
+  select(prob = p, return.period, everything())
+```
+
