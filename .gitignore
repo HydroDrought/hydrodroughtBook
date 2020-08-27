@@ -11,3 +11,4 @@ rpkg/hydroDrought.Rcheck/
 rpkg/hydroDrought_*.tar.gz
 worked_examples/void/
 worked_examples/html/index.html
+.~lock.*

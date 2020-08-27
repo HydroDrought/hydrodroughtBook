@@ -348,7 +348,7 @@ sanitize_ts <- function(x, # approx.missing = 0,
 
     if(nrow(gaps)) {
         if (add_implicit_NA) {
-            xx <- bind_rows(xx, select(.data$gaps, .data$time, .data$value))
+            xx <- bind_rows(xx, select(gaps, .data$time, .data$value))
             action <- "Adding NA values."
             if (sort) {
                 xx <- arrange(xx, .data$time)
