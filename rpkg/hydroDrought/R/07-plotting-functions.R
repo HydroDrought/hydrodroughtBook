@@ -69,8 +69,10 @@ month_breaks <- function(limits)
   l <- c(floor_date(limits[1], unit = "month"),
          ceiling_date(limits[2], unit = "month"))
 
-  nmonths <- (as.double(l[2] - l[1], unit = "days") + 31) / 30
-  s <- l[1] + months(seq(0, nmonths))
+  s <- round_date(seq(l[1], l[2], by = "1 month"), unit = "month")
+  # omits March!
+  # nmonths <- (as.double(l[2] - l[1], unit = "days") + 31) / 30
+  # s <- l[1] + months(seq(0, nmonths))
 
   s
 }

@@ -69,26 +69,14 @@ Kuripapango (NZ)."
 ```{r, echo=FALSE, fig.cap=fig.cap}
 ggplot(am, aes(x = year, y = flow)) + 
   geom_point() + 
-  geom_smooth(method = "loess", formula = "y ~ x", span = 1, se = FALSE,
-              col = "black", size = 0.2, linetype = "dashed") + 
+  # geom_smooth(method = "loess", formula = "y ~ x", span = 1, se = FALSE,
+  #             col = "black", size = 0.2, linetype = "dashed") + 
   labs(y = expression(paste("Annual minimum flow (", m^{3}, s^{-1}, ")"))) +
   scale_y_continuous(limits = c(0, NA)) + 
   theme(axis.title.x = element_blank(), 
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank())
 ```
-
-```{r, echo=FALSE, }
-fig.cap <- "Sample annual minimum 1-day flow, AM(1), for River Ngaruroro at
-Kuripapango (NZ); histogram"
-```
-```{r, echo=FALSE, fig.cap=fig.cap}
-ggplot(am, aes(flow)) + 
-  geom_histogram(bins = 8, boundary = 0, binwidth = 0.5, col = "white") +
-  labs(x = expression(paste("Flow classes (", m^{3}, s^{-1}, ")")),
-       y = "Number of observations in each class") 
-```
-
 
 Ngaruroro has a flashy river regime, but has no observed zero flows. The
 $AM(1)$ flows are considered to come from the same population as only a
@@ -140,41 +128,31 @@ of `r empirical$rp.emp[1]`  years.
 
 # Fitting a distribution  
 Fitting the two-parameter Weibull (WEI) distribution function
-(Section A6.1.4) using the method of L-moments and the fact that
-$Y = −\ln(X)$ has a Gumbel distribution if $X$ has a WEI distribution. 
+(Section A6.1.4) using the method of L-moments. 
 ^[The direct estimation of the Weibull parameters is shown in [section Fast Track](#ft). ]
 
 
-a) The first two L-moments ($\hat\lambda_1$ and $\hat\lambda_2$) are estimated based on time series
-of $\ln(x)$. These so called sample L-moments are calculated with the function `samlmu()` from the package **lmom**.
+a) The first two L-moments ($\hat\lambda_1$ and $\hat\lambda_2$) are estimated 
+based on time series of the annual minima `am$flow`. These so called sample 
+L-moments are calculated with the function `samlmu()` from the package **lmom**.
 
 ```{r}
 library(lmom)
-moments <- samlmu(log(am$flow))
-moments 
+moments <- samlmu(am$flow)
+moments[1:2] 
 ```
 
-b) The parameter estimates of the WEI distribution (shape parameter $\kappa$, scale parameter $\alpha$) are obtained
-following Stedinger et al. (1993):
+b) The parameter estimates of the WEI distribution (scale parameter $\alpha$, shape parameter $\kappa$) are obtained
+following .... :
 
-$\hat\kappa = \frac{\ln(2)}{\hat\lambda_2}$ and $\hat\alpha = \exp\left( \hat\lambda_1 + \frac{0.5772}{\hat\kappa}\right)$ 
+$$\hat\alpha = \frac{\hat\lambda_1}{\Gamma\left( 1 + \frac{1}{\hat\kappa }\right)}$$ 
 
-```{r, echo=FALSE}
-# values of the first edition
-# kappa <- 5.776
-# alpha <- 4.441
-
-# we can reproduce the numbers from the first edition but they differ from the 
-# results by lmom-package. Especially the shape parameter kappa is off
-# with kappa <- 5.502 we would get approximately the same results as 
-```
-
-^[Tobias: The shape parameter $\hat\kappa$ differns quite a lot from the result by the lmom-package ($\hat\kappa = 5.502302$). I cannot figure out why thats the case. Susbsequently the quantile and probability estimates in section Fast-Track are also slightly off.]
+$$\hat\kappa = \frac{-\ln(2)}{\ln\left( 1 - \frac{\hat\lambda_2}{\hat\lambda_1}\right)}$$ 
 
 
 ```{r}
-kappa <- log(2) / unname(moments["l_2"])
-alpha <- exp(unname(moments["l_1"]) + 0.5772 / kappa)
+kappa <- -log(2) / log(1 - unname(moments["l_2"] / moments["l_1"]))
+alpha <- unname(moments["l_1"]) / gamma(1 + 1/kappa)
 parameter <- c(location = 0, scale = alpha, shape = kappa)
 parameter
 ```
@@ -221,10 +199,11 @@ fig.cap <- "Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull q
 # todo: in the old book, these are not quantiles! 
 ggplot(fitted, aes(x = prob.emp, y = prob.wei)) + 
   geom_point() + 
+  labs(x = "Empirical quantiles", y = "Theoretical Quantiles") + 
   geom_abline(slope = 1, intercept = 0, size = 0.2, linetype = "dashed") + 
   coord_fixed()
 ```
-^[Tobias: The plot doesn't show quantiles (as mentioned in the first edition where it is called a QQ-Plot), but probabilities... ]
+
 
 d) The data can be plotted in a probability plot and compared to the
 empirical quantiles in step 2(b) (Figure 6.10, upper). The plot shows
@@ -271,9 +250,14 @@ and $\hat x_{100} = `r format(q[2], digits = 2, nsmall = 2)`$m<sup>3</sup>s<sup>
 
 # Fast Track {#ft}
 
-To obtain L-moment estimates of the two parameter Weibull distribution the 
-lower bound (location parameter $\xi$) is set to zero otherwise a three parameter
-distribution is fitted.
+The function `samlmu()` from the package **lmom** computes the sample L-moments 
+for a given sample. These sample L-moments are independent of the distribution one
+wants to fit. They have can be transferred into the parameters of the desired
+distribution; e.g. the function `pelwei()` will return the location, scale and 
+shape parameters for a Weibull distribution. By default a three parameter Weibull
+distribution is used. To obtain L-moment estimates of the two parameter Weibull 
+distribution (where the lower bound and location parameter $\xi$ is set to zero) 
+set the argument `bound = 0`.
 ```{r}
 library(lmom)
 lmom <- samlmu(am$flow)
@@ -282,7 +266,7 @@ par.wei
 ```
 
 Quantiles for given probabilities can be calculated for many suitable 
-distribution by the corresponding `qua...()` functions. 
+distributions by the corresponding quantile function `quawei()`. 
 
 ```{r}
 quawei(f = c(0.02, 0.01), para = par.wei) %>%
@@ -319,7 +303,7 @@ a straight line given they follow the EXP distribution. Again it is
 demonstrated that the WEI distribution fits the extreme low flow
 values well, and also the upper range apart from the three largest
 values. The two-parameter EXP distribution is less suited to model the
-sample. Alternatively, $\ln(X)$ could be plotted on a Gumbel
+sample. Alternatively, $-\ln(X)$ could be plotted on a Gumbel
 probability paper, and a straight line would result provided the data
 fitted the WEI distribution.
 
@@ -339,8 +323,8 @@ d <- fitted.fast %>%
 
 ggplot(empirical, aes(x = reduced_var(prob.emp), flow)) + 
   geom_point() + 
-  geom_line(data = d, aes(x = reduced_var(probability), 
-                          col = Distribution, linetype = Distribution)) +
+  geom_line(data = d, 
+            aes(x = reduced_var(probability), linetype = Distribution)) +
   scale_x_continuous(limits = c(0.01, 4)) +
   labs(x = expression(paste("Exponential reduced variate -log(", 1, " - F(", x, "))")),
        y = expression(paste("Annual minimum flow (", m^{3}, s^{-1}, ")")))
