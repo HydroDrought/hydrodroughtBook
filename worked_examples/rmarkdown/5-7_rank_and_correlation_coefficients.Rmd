@@ -76,6 +76,7 @@ df <- indices %>%
 
 pca <- prcomp(df, center = TRUE, scale. = TRUE)
 
-ggbiplot::ggbiplot(pca, labels=rownames(df))
+# ggbiplot::ggbiplot(pca, labels=rownames(df))
+biplot(pca)
 ```
 

@@ -144,7 +144,8 @@ df &lt;- indices %&gt;%
 
 pca &lt;- prcomp(df, center = TRUE, scale. = TRUE)
 
-ggbiplot::ggbiplot(pca, labels=rownames(df))</code></pre>
+# ggbiplot::ggbiplot(pca, labels=rownames(df))
+biplot(pca)</code></pre>
 <p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-4-1.png" width="672"  /></p>
 </div>
 

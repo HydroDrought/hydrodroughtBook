@@ -32,21 +32,6 @@ logit2prop <- function(l){exp(l)/(1+exp(l))}
 ## Vertically align a list of plots.
 ###########################################################################
 ### From here:  https://stackoverflow.com/questions/41569817/align-multiple-plots-in-ggplot2-when-some-have-legends-and-others-dont
-#' Vertically align a list of plots.
-#'
-#' This function aligns the given list of plots so that the x axis are aligned.
-#' It assumes that the graphs share the same range of x data.
-#'
-#' @param ... The list of plots to align.
-#' @param globalTitle The title to assign to the newly created graph.
-#' @param keepTitles TRUE if you want to keep the titles of each individual
-#' plot.
-#' @param keepXAxisLegends TRUE if you want to keep the x axis labels of each
-#' individual plot. Otherwise, they are all removed except the one of the graph
-#' at the bottom.
-#' @param nb.columns The number of columns of the generated graph.
-#'
-#' @return The gtable containing the aligned plots.
 
 VAlignPlots <- function(...,
                        globalTitle = "",
