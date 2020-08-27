@@ -15,6 +15,7 @@
 
 <title>Base Flow Index</title>
 
+<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -59,8 +60,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <p>Three years of daily flow (1995 to 1997) from the Ray at Grendon Underwood (UK) have been selected. The base flow separation is done for the whole period, whereas the BFI is calculated for the mid-year 1996. This ensures that days at the start and end of the calculation year are included. In Table 5.7 the calculation steps are illustrated using data from the beginning of the record.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
@@ -74,8 +75,8 @@ ray &lt;- intl %&gt;%
   ) %&gt;%
   filter(year &gt;= 1995, year &lt;= 1997)</code></pre>
 </div>
-<div id="calculation" class="section level1">
-<h1><span class="header-section-number">2</span> Calculation</h1>
+<div id="calculation" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Calculation</h1>
 <ul>
 <li>The daily flows, <span class="math inline">\(Q\)</span><i> </i>m<sup>3</sup>s<sup>-1</sup>, are divided into non-overlapping blocks of five days (Column 1 and 2).</li>
 </ul>
@@ -156,7 +157,7 @@ bfi</code></pre>
 <pre><code>## [1] 0.2024139</code></pre>
 <p><!--
 <caption>--><span class="marginnote shownote">Table 5.7 Calculation of the base flow separation line from time series of daily flow; non-overlapping 5-day blocks are indicated by alternating background colors and turning points are marked bold.</span><!--</caption>--></p>
-<table class="table" style="">
+<table class="table" style>
 
 
 <thead>
@@ -783,8 +784,8 @@ Base flow
 </tbody>
 </table>
 </div>
-<div id="results" class="section level1">
-<h1><span class="header-section-number">3</span> Results</h1>
+<div id="results" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Results</h1>
 <ul>
 <li><p>The first and second turning points are found on day 1995-01-16 and day 1995-01-16 (Column 4), respectively, and a linear interpolation is used to estimate the base flow between these dates (Column 5). The daily base flow separation line is subsequently calculated for the whole period by linear interpolation between all turning points.</p></li>
 <li><p>The volume beneath the base flow line, <span class="math inline">\(V_{base}\)</span>, for 1996 is found to be 348<i> </i>494.5<i> </i>m<sup>3</sup><label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> Tobias: values shown in edition 1 are <strong>not volumes</strong>, as they are not multiplied by 86400. This is not relevant for the BFI; probably it is even more clear like this because we do not need to show such large numbers.</span>, whereas the volume of the total flow, <span class="math inline">\(V_{total}\)</span>, is 1<i> </i>721<i> </i>693<i> </i>m<sup>3</sup>. The resultant BFI is 0.2. The base flow separation line for River Ray in 1996 is shown in Figure 5.4 of the book.</p></li>

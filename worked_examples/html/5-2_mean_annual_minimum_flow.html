@@ -15,6 +15,7 @@
 
 <title>Mean annual minimum flow</title>
 
+<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -58,8 +59,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we are again going to use river flow data from the river Ngaruroro of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from <strong>hydrological years</strong> starting 1 September and ending 31 August. Table 5.4 lists the first flow values. <!-- The first two columns show the date and the corresponding flow value, Q. --></p>
 <p>In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function <code>water_year()</code> which appends an additional column named <code>year</code> to the dataset.</p>
 <pre class="r"><code>library(tidyverse)
@@ -73,7 +74,7 @@ ngaruroro &lt;- intl %&gt;%
   unnest(data) %&gt;%
   mutate(
     year = water_year(time, origin = &quot;-09-01&quot;)
-   ) %&gt;%
+  ) %&gt;%
   filter(year &gt;= 1990, year &lt;= 1999)
 
 smoothed &lt;- ngaruroro %&gt;%
@@ -602,8 +603,8 @@ MA(30)
 </tbody>
 </table>
 </div>
-<div id="fast-track" class="section level1">
-<h1><span class="header-section-number">2</span> Fast Track</h1>
+<div id="fast-track" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Fast Track</h1>
 <pre class="r"><code>ngaruroro %&gt;% 
   select(discharge, time) %&gt;%
   summarise(

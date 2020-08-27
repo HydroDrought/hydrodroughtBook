@@ -15,6 +15,7 @@
 
 <title>Rank and correlation coefficients</title>
 
+<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -56,8 +57,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought) 
 
@@ -144,7 +145,7 @@ df &lt;- indices %&gt;%
 pca &lt;- prcomp(df, center = TRUE, scale. = TRUE)
 
 ggbiplot::ggbiplot(pca, labels=rownames(df))</code></pre>
-<p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-5-1.png" width="672"  /></p>
+<p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-4-1.png" width="672"  /></p>
 </div>
 
 

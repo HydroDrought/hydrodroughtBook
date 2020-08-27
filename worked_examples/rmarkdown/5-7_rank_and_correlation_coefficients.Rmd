@@ -1,23 +1,12 @@
 ---
 title: "Rank and correlation coefficients"
 author: "Worked example 5.7"
-output: 
-  tufte::tufte_html:
-    tufte_features: ["fonts"]
-    toc: true
-    toc_depth: 2
-    number_sections: true
-    css: style.css
-    fig_caption: true
-editor_options: 
-  chunk_output_type: console
 ---
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-library(ggplot2)
-theme_set(theme_bw(base_size = 10))
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 ```
-
 
 # Loading the Data
 

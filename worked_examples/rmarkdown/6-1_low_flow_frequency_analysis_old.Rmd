@@ -60,22 +60,10 @@ ngaruroro.n <- intl %>%
 ```
 
 
-```{r, echo=FALSE}
+```{r}
 library(tidyverse)
 library(hydroDrought)
-
-ng <- read_rds("~/Documents/boku/hydroDroughtDev/data/firstEdition/global.rds") %>%
-  arrange(River) %>%
-  filter(River == "Ngaruroro") %>%
-  select(discharge) %>%
-  unnest(discharge) %>%
-  sanitize_ts()
-```
-
-
-```{r}
-library(hydroDrought)
-ngaruroro <- ng %>%
+ngaruroro <- hydroDrought:::ngFirstEdition %>%
   mutate(
     year = water_year(time, origin = "-09-01")
   ) %>%

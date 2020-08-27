@@ -15,6 +15,7 @@
 
 <title>Drought deficit frequency</title>
 
+<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -59,8 +60,8 @@ if (window.hljs) {
 </div>
 
 <p>River Ngaruroro at Kuripapango in New Zealand, applied for frequency analysis of annual minimum series in Worked Example 6.1, is here applied for frequency analysis of drought deficit characteristics. The drought events were derived using the Nizowka program (Software, CD) as described in Worked Example 5.4 (Section 5.4.1). Partial duration series (PDS) of drought events below a given threshold were selected from time series of daily discharge, and <span class="math inline">\(Q_{90}\)</span> was selected as the threshold. Two drought characteristics are analysed in the following: drought deficit volume and real drought duration as defined in Worked Example 5.4.</p>
-<div id="data" class="section level1">
-<h1><span class="header-section-number">1</span> Data</h1>
+<div id="data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Data</h1>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
 
@@ -119,12 +120,12 @@ Figure 6.12 PDS of drought deficit volume (upper) and real duration (lower) for 
 Ngaruroro at Kuripapango (NZ)." width="672"  />
 </div>
 </div>
-<div id="derivation-of-distribution-function" class="section level1">
-<h1><span class="header-section-number">2</span> Derivation of distribution function</h1>
+<div id="derivation-of-distribution-function" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Derivation of distribution function</h1>
 <p>Following Zelenhasic &amp; Salvai (1987) an estimate of the non-exceedance probability, <span class="math inline">\(F(x)\)</span>, for the largest event in each time interval is in Nizowka obtained by combining the distribution for the occurrence of events and the distribution for the magnitudes of deficit volume or duration. Here a time interval of one year is chosen. Subsequently the return period in years for a given event can be calculated. The number of drought events occurring in a time period t is commonly assumed to be Poisson distributed (Equation 6.9) with parameter <span class="math inline">\(\lambda t\)</span>. In Nizowka the binomial Pascal distribution is offered along with the Poisson distribution as described in ‘Background Information NIZOWKA’ (Software, CD). The distribution that best fitted deficit volume was the Pascal distribution for the number of droughts and the GP distribution for the deficits. For duration the Pascal distribution was chosen along with the Log-Normal distribution. The <span class="math inline">\(F(x)\)</span> is for drought deficit volume plotted in Figure 6.13 together with the observed values plotted using a plotting position. The chosen distribution describes the data well, with the exception of some values in the upper range. The maximum value is, however, satisfactorily modelled.</p>
 </div>
-<div id="calculation-of-the-t-year-event" class="section level1">
-<h1><span class="header-section-number">3</span> Calculation of the T-year event</h1>
+<div id="calculation-of-the-t-year-event" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Calculation of the T-year event</h1>
 <p>The return period of a given event is calculated following Equation 6.4. The relationship between the drought characteristics as defined in Worked Example 5.4 and <span class="math inline">\(F(x)\)</span> are given by the tabulated distribution functions in Nizowka. The design value for a particular return period, i.e. the T-year event, can be obtained from the tables for known values of <span class="math inline">\(F(x)\)</span>. The estimated 10-, 100- and 200-year drought events are shown in Table 6.2.</p>
 </div>
 

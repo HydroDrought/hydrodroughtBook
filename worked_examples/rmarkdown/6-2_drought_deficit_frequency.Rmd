@@ -15,11 +15,7 @@ library(hydroDrought)
 # remove the same years as in figure 6.9 of the first edition
 incomplete <- tibble(year = c(1965, 1978, 1986, 1987, 2000))
 
-ngaruroro <- read_rds("~/Documents/boku/hydroDroughtDev/data/firstEdition/global.rds") %>%
-  arrange(River) %>%
-  filter(River == "Ngaruroro") %>%
-  select(discharge) %>%
-  unnest(discharge) %>%
+ngaruroro <- hydroDrought:::ngFirstEdition %>%
   sanitize_ts(approx.missing = 15) %>%
    mutate(
     year = water_year(time, origin = "-09-01")
