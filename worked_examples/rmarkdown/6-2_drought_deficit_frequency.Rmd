@@ -235,7 +235,7 @@ fitted  %>%
   select(metric, quantiles) %>%
   unnest(quantiles) %>%
   pivot_wider(id_cols = p, names_from = "metric", values_from = "quant") %>%
-  mutate(return.period = 1 / p) %>%
+  mutate(return.period = 1 / (1 - p)) %>%
   select(prob = p, return.period, everything())
 ```
 

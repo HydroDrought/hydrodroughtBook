@@ -83,8 +83,8 @@
   <td colspan="3">
   <ul>
   <li>6.1 Low flow frequency analysis: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Worked Example</a>, 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis_old.html">Worked Example with dataset from first edition</a>    <br><i>new R-script, but using Ngaruroro time series from first edition, direct computation of distribution parameters differs.</i>
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Worked Example</a>
+    <br><i>new R-script, but using Ngaruroro time series from first edition, direct computation of distribution parameters differs.</i>
   </li>
 
   <li>6.2 Low flow frequency analysis: 
@@ -146,28 +146,6 @@
   </td>
   </tr>
 
-  <tr>
-    <td> <b> 8. Regionalization Procedures</b> </td>
-    <td> <i>Gregor Laaha</i> </td>
-    <td> 2 </td>
-  </tr>
-  <tr>
-  <td colspan="3">
-  <ul>
-  <li>8.1 Regional Regression: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/8-1_regional_regression.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/8-1_regional_regression.R">R-script</a>-->
-
-  </li>
-
-  <li>8.2 Top Kriging: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/8-2_top_kriging.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/8-2_top_kriging.R">R-script</a>-->
-
-  </li>
-  </ul>
-  </td>
-  </tr>
 
    <tr>
     <td> <b> 9. Process-based modelling</b> </td>
