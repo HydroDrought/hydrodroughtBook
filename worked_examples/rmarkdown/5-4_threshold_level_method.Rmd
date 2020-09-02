@@ -263,7 +263,7 @@ p <- pooled %>%
   group_by(year) %>%
   mutate(event = group_const_value(event) + 1) %>%
   select(event, duration, year) %>%
-  right_join(tibble(year = full_seq(.$year, 1)), by = "year")
+  right_join(tibble(year = setdiff(full_seq(.$year, 1), incomplete$year)), by = "year")
 
 major <- hydroDrought:::paste_with_and(head(p$year))
 ```
@@ -293,9 +293,10 @@ fig.cap <- "Figure 5.13 Histogram of drought duration for River Ngaruroro at Kur
 ```
 ```{r, echo=TRUE, fig.cap=fig.cap}
 ggplot(pooled, aes(duration)) + 
-  geom_histogram(binwidth = 5, boundary = 0, closed = "left", col = "white") + 
+  geom_histogram(binwidth = 5, boundary = 0, closed = "left", 
+                 size = 0.2, col = "black", fill = "grey90") + 
   scale_x_continuous(limits = c(0, NA)) + 
-  scale_y_continuous(breaks = integer_breaks()) + 
+  scale_y_continuous(breaks = breaks_integer()) + 
   labs(x = "Drought duration (days)", y = "Counts")
 ```
 

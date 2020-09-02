@@ -110,9 +110,12 @@ incomplete &lt;- ngaruroro %&gt;%
 <pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
     anti_join(incomplete, by = &quot;year&quot;)</code></pre>
 <pre class="r"><code># derivation of the annual minima
-am &lt;- ngaruroro %&gt;%
-  group_by(year) %&gt;%
-  summarise(flow = min(discharge)) %&gt;%
+am &lt;- annual_minima(
+  discharge = ngaruroro$discharge, 
+  time = ngaruroro$time, 
+  origin = &quot;-09-01&quot;
+  ) %&gt;%
+  rename(flow = am) %&gt;%
   arrange(flow) %&gt;%
   print()</code></pre>
 <pre><code>## # A tibble: 50 x 2

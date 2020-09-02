@@ -15,7 +15,6 @@
 
 <title>Likelihood of impact occurrence</title>
 
-<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -64,8 +63,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-impact-data" class="section level1" number="1">
-<h1 number="1"><span class="header-section-number">1</span> Loading Impact Data</h1>
+<div id="loading-impact-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading Impact Data</h1>
 <p>First, we want to read in the impact data. The impact data file has already been compiled for Agricultural impacts at the NUTS-3 resolution. After reading in, we will cut to only the relevant columns of year, NUTS id, and impact presence. We will then rename the columns and verify that the data imported correctly.</p>
 <pre class="r"><code>library(hydroDrought)
 
@@ -90,8 +89,8 @@ head(impact_df)</code></pre>
 ## 5  1974 FALSE  AT1  
 ## 6  1975 FALSE  AT1</code></pre>
 </div>
-<div id="prepare-the-agricultural-impact-data" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Prepare the agricultural impact data</h1>
+<div id="prepare-the-agricultural-impact-data" class="section level1">
+<h1><span class="header-section-number">2</span> Prepare the agricultural impact data</h1>
 <p>We will focus on agricultural impacts at the national resolution and so, we must first generate a column for country by subsetting the NUTS id to the first 2 letters. Then, to determine if there was an impact for each country/year combination, we will perform a group_by command, count the number of impacts using the summarise command and then create a new column with a TRUE whenever we have at least one impact report. Finally, we should check the resulting table output and check visually. Here, we check visually by plotting impact occurence with time for all countries. We can see that Germany has several impacts occuring between 1970 and the present, and so we don’t have a noteable temporal bias (i.e. more impacts at the end of the period than the start).</p>
 <pre class="r"><code>### Prepare to cut impacts to a country level
 ### Create a country column using the first two letters of NUTS region
@@ -129,8 +128,8 @@ head(impact_df)</code></pre>
 ggplot(impact_df, aes(x=year, y=impact, colour=country, group=country)) + geom_line() + theme_classic(8) + facet_wrap(~ country)</code></pre>
 <p><img src="12-2_likelihood_of_impact_occurrence_files/figure-html/unnamed-chunk-3-1.png" width="672"  /></p>
 </div>
-<div id="load-and-prepare-the-drought-indices" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Load and prepare the drought indices</h1>
+<div id="load-and-prepare-the-drought-indices" class="section level1">
+<h1><span class="header-section-number">3</span> Load and prepare the drought indices</h1>
 <p>Next, we read in the SPI3, SPEI3, SPI12, and SPEI12 calculated at the national scale. This gives us precipitation-only and water balance indices for short (3 month) and long (12 month) accumulation periods. To do this, we read in each CSV file, select only the relevant columns, provide a column for the index name, and combine them all into a long dataframe that contains all data.</p>
 <pre class="r"><code>### Read in SPI/SPEI for 3 and 12 month periods
 ### Cut to Germany because we will be focusing on Germany
@@ -223,8 +222,8 @@ head(spi_df)</code></pre>
 ggplot(spi_df, aes(x=date, y=index_val, colour=index_type)) + geom_line() + theme_classic(8) + facet_grid(index_months ~ . )</code></pre>
 <p><img src="12-2_likelihood_of_impact_occurrence_files/figure-html/unnamed-chunk-5-1.png" width="672"  /></p>
 </div>
-<div id="cut-to-only-germany-in-july-and-merge-impacts-and-drought-indices" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Cut to only Germany in July and merge impacts and drought indices</h1>
+<div id="cut-to-only-germany-in-july-and-merge-impacts-and-drought-indices" class="section level1">
+<h1><span class="header-section-number">4</span> Cut to only Germany in July and merge impacts and drought indices</h1>
 <p>The final data processing step is to filter the impact data to include only Germany. For simplicity, we will only consider SPI/SPEI in July, so we filter the drought indices to only month 7. This means May, June, July for the 3 month accumulation period and the entire previous year from August until July for the 12 month accumulation. The 3 and 12 month period in July was chosen to mirror the findings of Stagge et al. (). Once both tables are properly filtered, we join them using a full join. A full join will ensure that no data is lost, although it may produce NAs where there is not a corresponding value for one of the tables being joined.</p>
 <pre class="r"><code>### Cut impact to only Germany
 impacts_de &lt;- impact_df %&gt;%
@@ -267,8 +266,8 @@ head(spi_impacts)</code></pre>
 ## 6 2012-07-01  2012     7    0.520  spi_3 spi        3            DE     
 ## # … with 3 more variables: impact_count &lt;int&gt;, nuts_n &lt;int&gt;, impact &lt;lgl&gt;</code></pre>
 </div>
-<div id="preliminary-visual-estimate-of-a-relationship-between-spi-and-agricultural-impacts-in-germany" class="section level1" number="5">
-<h1 number="5"><span class="header-section-number">5</span> Preliminary visual estimate of a relationship between SPI and Agricultural Impacts in Germany</h1>
+<div id="preliminary-visual-estimate-of-a-relationship-between-spi-and-agricultural-impacts-in-germany" class="section level1">
+<h1><span class="header-section-number">5</span> Preliminary visual estimate of a relationship between SPI and Agricultural Impacts in Germany</h1>
 <p>Our hypothesis is that agricultural impacts are at least partially affected by summer drought. And so, we expect that in years with low summer SPI or SPEI, there would be an increase in the likelihood of agricultural impacts. We can begin our analysis by plotting a time series of SPEI3 during our period and showing a red region when documented impacts occurred.</p>
 <p>We do this by filtering the index/impact table to include only SPEI3. To plot the red impacts, we create a new dataframe that only includes impact years and add a 1 year (+/- 0.5 year) buffer around each impact. We then plot these variables against year on the X-axis.</p>
 <pre class="r"><code>### Only consider SPEI 3
@@ -351,8 +350,8 @@ p</code></pre>
 <p>SPEI3 appears to have the strongest relationship with impact occurence. There is a relatively consistent increase in impact proportion as SPEI-3 decreases (shifts to the left).</p>
 <p>SPI3 has a somewhat similar relationship, but it is confounded by some values where No Impacts dominate. If we chose a wider smoothing interval, this effect might not look so severe. For the 12 month accumulation periods, the impact years appear to be scattered throughout the SPI/SPEI range, with the Impact/No Impact never falling far below 50%. Also, the proportion of impacts appears to increase at both extremes (wet and dry). The 12 month drought indices don’t appear to be good (on their own) at sorting years into impact and non-impacts.</p>
 </div>
-<div id="logistic-regression" class="section level1" number="6">
-<h1 number="6"><span class="header-section-number">6</span> Logistic regression</h1>
+<div id="logistic-regression" class="section level1">
+<h1><span class="header-section-number">6</span> Logistic regression</h1>
 <p>The figures were just created are simplified analogies of logistic regression, which is the statistical method for modeling the relationship bweten binary (TRUE/FALSE) data and a set of predictor variables. Please keep this visual analogy in mind as we proceed with a more formal, statistical analysis using logistic regression to relate German agricultural impacts (binary data) with drought indices (predictor variables). For more details on logistic regression, see Chapter 7.</p>
 <p>The first step for any regression is to organize the response (impacts) and predictor (SPI/SPEI) variables into columns that correspond to individual observations. We do this using the spread command.</p>
 <pre class="r"><code>### Create data for fitting, leave only SPI12
@@ -603,8 +602,8 @@ plot_df</code></pre>
 ## 60 1.582578e-02 1.642145e-05 1.704009e-08 0.01557923
 ## 61 1.446281e-02 1.246571e-05 1.074464e-08 0.01425662</code></pre>
 </div>
-<div id="making-a-prediction" class="section level1" number="7">
-<h1 number="7"><span class="header-section-number">7</span> Making a prediction</h1>
+<div id="making-a-prediction" class="section level1">
+<h1><span class="header-section-number">7</span> Making a prediction</h1>
 <p>We can use this relationship now to make pedictions for new data, or we can view our fitted values using the original data. We can do this using the predict function. We can then calculate prediction and confidence intervals.</p>
 <pre class="r"><code>### Use the SPEI3 regression to predict the likelihood of an impact
 ### Keep the standard error for confidence intervals around prediction
@@ -643,8 +642,8 @@ p</code></pre>
 <p><img src="12-2_likelihood_of_impact_occurrence_files/figure-html/unnamed-chunk-16-1.png" width="672"  /></p>
 <p>We can now see that most years, our likelihood of an agricultural impact remains below 10%. In years with low SPEI3, the likelihood quickly peaks. In 1976, our most severe drought in this period, the predicted likelihood is appoximately 90%. And, not surprisingly, there is an impact in this year. When likelihood is near 50%, we have approximately even numbers of years with impacts and those without, a sign of a good fit. Also, notice that the prediction intervals are not normally distributed around the estimate. This is becuase they are normally distributed in logit (log-odds) space. This is an important characteristic because it ensures that neither our estimate nor the interval produces impossible likelihoods (&lt; 0 or &gt; 1).</p>
 </div>
-<div id="adding-a-predictor-and-checking" class="section level1" number="8">
-<h1 number="8"><span class="header-section-number">8</span> Adding a predictor and checking</h1>
+<div id="adding-a-predictor-and-checking" class="section level1">
+<h1><span class="header-section-number">8</span> Adding a predictor and checking</h1>
 <p>Although the 12-month drought indices did not appear to fit the data well on their own, perhaps our fit would be improved by adding them as a second predictor. To test this, we can add a second variable to the logistic regression equation.</p>
 <pre class="r"><code>### See the value of adding a second predictor, maybe SPI12 has value when combined with SPEI3
 two_pred_fit &lt;- glm(impact ~ spei_3 + spi_12 + 1, data = fit_data, family = &quot;binomial&quot;)

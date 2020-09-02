@@ -1,6 +1,8 @@
 ---
 title: "Rank and correlation coefficients"
 author: "Worked example 5.7"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, setup, include=FALSE}
@@ -14,44 +16,32 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 library(tidyverse)
 library(hydroDrought) 
 
-regional
+r <- regional %>%
+  select(id, river, station, data = discharge) %>%
+  print()
 ```
 
 
+# Indices
 ```{r, message=FALSE, warning=FALSE}
-# functions for the percentiles we want to include
-my_percentiles <- function(x)
-{
-  as_tibble(as.list(lfquantile(x, exc.freq = c(0.95, 0.9, 0.7, 0.5))))
-}
+# list of functions we applied to each station
+f <- list(
+  mean = function(x, ...) mean(x), 
+  Q50 = function(x, ...) lfquantile(x, exc.freq = 0.5),
+  `MAM(1)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 1),
+  `MAM(10)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 10),
+  `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
+  Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
+  Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7)
+)
 
-# functions for the mean annual minima 
-my_mams <- function(discharge, time, n = c(1, 10, 30))
-{
-  names(n) <- paste0("MAM(", n, ")")
-  
-  long <- map_df(n, ~map(list(value = mean_annual_minimum), exec, 
-                         n = .x,
-                         discharge = discharge, time = time,  
-                         origin = "-09-01", na.rm = TRUE), 
-                 .id = "variable")
-  
-  pivot_wider(long, names_from = variable, values_from = value)
-}
-
-
-indices <- regional  %>%
-  select(station, data = discharge, area = catchment) %>%
-  filter(is.finite(area)) %>%
-  mutate(
-    # data = map2(data, area, ~mutate(.x, discharge = discharge * 1000 / .y)),
-    Q.mean = map_dbl(data, ~mean(.$discharge, na.rm = TRUE)),
-    quantiles = map(data, ~my_percentiles(.x$discharge)),
-    mams = map(data, ~my_mams(discharge = .x$discharge, time = .x$time))
-  )  %>%
-  select(-data, -area) %>%
-  unnest(cols = c(quantiles, mams)) %>%
-  print()
+indices <- r %>%
+  transmute(
+    id, 
+    indices = map(data, ~map_df(f, exec, x = .x$discharge, t = .x$time))
+  ) %>%
+  unnest(indices) 
 ```
 
 
@@ -64,19 +54,82 @@ indices <- indices %>%
     `MAM(30)/Q50` = `MAM(30)`/Q50,
     `MAM(10)/Q50` = `MAM(10)`/Q50,
     `MAM(1)/Q50` = `MAM(1)`/Q50,
+  ) %>%
+  print()
+```
+
+#  Ranks
+```{r, fig.width=6, fig.height=6}
+long <- indices %>%
+  pivot_longer(cols = -id, names_to = "index") %>%
+  mutate(index = factor(index, levels = setdiff(colnames(indices), "id")))
+
+ranks <- long %>%
+  group_by(id) %>%
+  mutate(
+    rank = rank(value, ties.method = "min")
   )
+
+ggplot(ranks, aes(x = index, y = id, fill = rank, label = rank)) + 
+  geom_tile() + 
+  geom_text(size = 3) + 
+  scale_fill_viridis_c(alpha = 0.3) + 
+  labs(y = "Station ID") + 
+  theme(panel.grid = element_blank(), 
+        legend.position = "none",
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 
 
+```{r, warning=FALSE, message=FALSE, echo=FALSE, eval=FALSE}
+correlation <- long %>%
+  left_join(x = ., y = ., by = "id", suffix = c("", "2")) %>%
+  group_by(index, index2) %>%
+  summarise(
+    pearson = cor(x = value, y = value2, method = "pearson"),
+    spearman = cor(x = value, y = value2, method = "spearman"),
+    .groups = "drop"
+  )
 
-```{r, warning=FALSE, message=FALSE}
-# install_github("vqv/ggbiplot")
-df <- indices %>%
-  column_to_rownames(var = "station") 
 
-pca <- prcomp(df, center = TRUE, scale. = TRUE)
+ggplot(correlation, aes(x = index, y = index2, fill = pearson, label = round(pearson, 3))) + 
+  geom_tile() + 
+  geom_text() + 
+  scale_fill_viridis_c(alpha = 0.3) + 
+  theme(panel.grid = element_blank(), 
+        legend.position = "none", 
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
 
-# ggbiplot::ggbiplot(pca, labels=rownames(df))
-biplot(pca)
+#  Pearson correlation 
+```{r}
+library(corrplot)
+x <- indices %>%
+  select(-id)
+M <- cor(x, method = "pearson")
+res1 <- cor.mtest(x, method = "pearson", conf.level = .95)
+corrplot(M, type = "upper",
+         col =rep(rev(gray.colors(100))[1:60], 2),
+         tl.cex = 0.8, addCoef.col = "black",
+         p.mat = res1$p, insig = "pch", 
+         order = "hclust", addrect = 3, rect.col = "navy",
+         pch.cex = 2, 
+         number.cex = .7, tl.col = "black",
+         cl.lim = c(0, 1))
+```
+
+
+#  Spearman (rank) correlation 
+```{r}
+M <- cor(x, method = "spearman")
+res1 <- cor.mtest(x, method = "spearman", conf.level = .95)
+corrplot(M, type = "upper",
+         col =rep(rev(gray.colors(100))[1:60], 2),
+         tl.cex = 0.8, addCoef.col = "black",
+         p.mat = res1$p, insig = "pch", 
+         order = "hclust", addrect = 3, rect.col = "navy",
+         pch.cex = 2, 
+         number.cex = .7, tl.col = "black",
+         cl.lim = c(0, 1))
 ```
 

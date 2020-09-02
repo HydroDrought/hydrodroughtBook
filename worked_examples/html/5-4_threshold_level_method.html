@@ -15,7 +15,6 @@
 
 <title>Threshold level method</title>
 
-<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -61,8 +60,8 @@ if (window.hljs) {
 </div>
 
 <p>The threshold level method can be used to derive drought events from a given time series of river flows. A drought event starts when the flow falls below a given threshold <span class="math inline">\(Q_0\)</span> and when the flow rises above the threshold the drought event ends.</p>
-<div id="loading-the-data" class="section level1" number="1">
-<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>It is possible to analyse any of the series in the International Data Set (Section 4.5.1) as long as there are not too many missing values in the dataset and a meaningful threshold <span class="math inline">\(Q_0\)</span> is choosen. Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
@@ -115,8 +114,8 @@ ngaruroro &lt;- intl %&gt;%
 <p>After preprocessing the time series 49 years of daily flow (1964-09-01 to 2019-08-31) will be analysed. In total eight years are omitted from the series (1963/64, 1965/66, 1977/78, 1978/79, 1986/87, 1987/88, 2001/02 and 2019/20).</p>
 <p>In this river the low flow period covers the turn of the calendar year. To avoid problems with allocating droughts to a specific calendar year because of drought events starting in one year and ending in another year, the start of the year is defined to on September 1<sup>st</sup>.</p>
 </div>
-<div id="threshold-selection-and-drought-events" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Threshold selection and drought events</h1>
+<div id="threshold-selection-and-drought-events" class="section level1">
+<h1><span class="header-section-number">2</span> Threshold selection and drought events</h1>
 <p>A sequence of drought events is obtained from the streamflow hydrograph by considering periods with flow below a certain threshold, <span class="math inline">\(Q_0\)</span>. In this example <span class="math inline">\(Q_{90}\)</span> is used as threshold. A table of drought characteristics is derived with the function <code>drought_events()</code>.</p>
 <pre class="r"><code>q90 &lt;- lfquantile(ngaruroro$discharge, exc.freq = 0.9) %&gt;%
   print()</code></pre>
@@ -149,8 +148,8 @@ ngaruroro &lt;- intl %&gt;%
 <li>and the date of the minimum flow <code>tqmin</code>.</li>
 </ul>
 </div>
-<div id="removing-minor-droughts-filtering" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Removing minor droughts (Filtering)</h1>
+<div id="removing-minor-droughts-filtering" class="section level1">
+<h1><span class="header-section-number">3</span> Removing minor droughts (Filtering)</h1>
 <p>To reduce the problem of minor droughts two restrictions can be imposed:</p>
 <ul>
 <li><p>a minimum drought duration, <span class="math inline">\(d_{min}\)</span> that removes droughts with duration less than the specified number of days;</p></li>
@@ -182,8 +181,8 @@ Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. 
 <img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-8-1.png" alt="Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. A drought event is classified as a minor drought if the duration or the volume is below a given threshold." width="672"  />
 </div>
 </div>
-<div id="eliminating-dependent-droughts-pooling" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Eliminating dependent droughts (Pooling)</h1>
+<div id="eliminating-dependent-droughts-pooling" class="section level1">
+<h1><span class="header-section-number">4</span> Eliminating dependent droughts (Pooling)</h1>
 <p>The inter-event time criterion (IC) is used to pool dependent droughts which are separated by a short period of flow above the threshold. If the time between two droughts is less than a critical duration, <span class="math inline">\(t_{min}\)</span>, the two events are pooled.</p>
 <p>In this example <span class="math inline">\(t_{min}\)</span> is set equal to two days.</p>
 <pre class="r"><code>pooled &lt;- ngaruroro %&gt;%
@@ -249,9 +248,10 @@ Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (
 </div>
 <p>A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed.</p>
 <pre class="r"><code>ggplot(pooled, aes(duration)) + 
-  geom_histogram(binwidth = 5, boundary = 0, closed = &quot;left&quot;, col = &quot;white&quot;) + 
+  geom_histogram(binwidth = 5, boundary = 0, closed = &quot;left&quot;, 
+                 size = 0.2, col = &quot;black&quot;, fill = &quot;grey90&quot;) + 
   scale_x_continuous(limits = c(0, NA)) + 
-  scale_y_continuous(breaks = integer_breaks()) + 
+  scale_y_continuous(breaks = breaks_integer()) + 
   labs(x = &quot;Drought duration (days)&quot;, y = &quot;Counts&quot;)</code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">

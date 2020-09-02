@@ -53,19 +53,20 @@ ngaruroro <- ngaruroro %>%
   mutate(
     rank = rank(-discharge, ties.method = "min"), 
     freq.exc = exceedance_frequency(discharge)
-  )
+  ) %>%
+  print()
 ```
 
 
 ```{r, echo=FALSE}
 library(kableExtra)
-ngaruroro %>%
-  mutate_if(is.numeric, round, 3) %>%
-  select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
-  head(7) %>%
-  kable(caption = "Table 5.1 Calculation of a daily flow duration curve for River Ngaruroro at Kuripapango, NZ") %>%
-  add_header_above(c(" " = 1, "$Q$ in $m^3s^{-1}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
-                   align = "right")
+# ngaruroro %>%
+#   mutate_if(is.numeric, round, 3) %>%
+#   select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+#   head(7) %>%
+#   kable(caption = "Table 5.1 Calculation of a daily flow duration curve for River Ngaruroro at Kuripapango, NZ") %>%
+#   add_header_above(c(" " = 1, "$Q$ in $m^3s^{-1}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+#                    align = "right")
 ```
 
 
@@ -81,13 +82,13 @@ ngaruroro %>%
 The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic. 
 
 ```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", fig.margin = FALSE}
-library(scales)
-ggplot(ngaruroro, aes(x = freq.exc, y = discharge)) +
+ggplot(ngaruroro, aes(x = freq.exc * 100, y = discharge)) +
   geom_line() +
-  scale_y_log10() +
-  scale_x_continuous(labels = percent_format(accuracy = 1)) +
-  labs(x = "Exceedance Frequency",
-       y = expression(paste("Flow (", m^{3}, s^{-1}, ")")))
+  scale_y_log10(expand = expansion()) +
+  scale_x_continuous(expand = expansion()) +
+  labs(x = "Exceedance Frequency (%)",
+       y = expression(paste("Flow (", m^{3}, s^{-1}, ")"))) + 
+  theme(plot.margin = unit(c(0, 10, 0, 0), units = "pt"))
 ```
 
 
@@ -104,21 +105,23 @@ q90 <- ngaruroro %>%
 
 Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can be obtained as the value of $Q$ corresponding to the largest value of $EF_{Q_i}$ that is less than or equal to the value of $EF_{Q_i}$ sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as `r q90`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used. 
 
-```{r include=FALSE}
-tbl <- ngaruroro %>%
+
+`r tufte::margin_note("Table 5.2 An extract of values corresponding to $Q_{90}$.")`
+```{r echo=FALSE}
+ngaruroro %>%
   filter(freq.exc >= 0.8999 & freq.exc <= 0.9002) %>%
   arrange(freq.exc)
 ```
 
 
 ```{r echo=FALSE}
-tbl  %>%
-  mutate(discharge = round(discharge, 3), 
-         freq.exc = round(freq.exc, 5)) %>%
-  select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
-  kable(caption = "Table 5.2 An extract of values corresponding to $Q_{90}$.") %>%
-  add_header_above(c(" " = 1, "$Q$ in ${m^3s^{-1}}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
-                   align = "right")
+# tbl  %>%
+#   mutate(discharge = round(discharge, 3), 
+#          freq.exc = round(freq.exc, 5)) %>%
+#   select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+#   kable(caption = "Table 5.2 An extract of values corresponding to $Q_{90}$.") %>%
+#   add_header_above(c(" " = 1, "$Q$ in ${m^3s^{-1}}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+#                    align = "right")
 ```
 
 # Fast-Track
@@ -148,18 +151,22 @@ fdc <- lambournRay %>%
   select(river, data) %>%
   unnest(cols = data) %>%
   group_by(river) %>%
-  mutate(freq.exc = exceedance_frequency(rel.discharge)) %>%
+  mutate(
+    freq.exc = exceedance_frequency(rel.discharge)
+  ) %>%
   print()
+```
 
-
-ggplot(fdc, mapping = aes(x = freq.exc, y = rel.discharge, 
-                          size = river)) +
+```{r, echo=TRUE}
+ggplot(fdc, 
+       mapping = aes(x = freq.exc * 100, y = rel.discharge, size = river)) +
   geom_step(direction = "vh") +
-  scale_size_manual(values = c(0.1, 0.75)) +
-  scale_y_log10(limits = c(0.01, NA), 
-                labels = number_format(accuracy = 0.01)) +
-  scale_x_continuous(labels = percent_format(accuracy = 1)) +
-  labs(x = "Exceedance Frequency",
+  scale_x_continuous(expand = expansion()) +
+  scale_y_log10(breaks = function(x) breaks_log10_all(x, mult.base = 1),
+                minor_breaks = breaks_log10_all,
+                expand = expansion()) +
+  scale_size_manual("River", values = c(0.1, 0.75)) +
+  labs(x = "Exceedance Frequency (%)",
        y = expression(paste("Flow (", l, s^{-1}, km^{-2}, ")"))) 
 ```
 

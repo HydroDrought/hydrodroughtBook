@@ -6,6 +6,7 @@ author: "Worked example 5.6, Example of how to estimate SGI using data from Ston
 ```{r, setup, include=FALSE}
 ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+Sys.setlocale(category = "LC_TIME", locale = "en_US.utf8")
 ```
 
 In order to compare features of groundwater droughts using groundwater level data from different boreholes, Bloomfield and Marchant (2013) introduced the Standardised Groundwater level Index (SGI). The SGI uses the normal scores transform (Everitt, 2002), a nonparametric normalisation method which assigns a value to ranked observation of groundwater levels for a given month from a given hydrograph. A non-parametric approach to standardisation was favoured by Bloomfield and Marchant (2013) as they showed that no consistent parametric models could be fitted to a wide range of groundwater hydrographs, and that even when a hydrograph for a single site is considered no consistent parametric model could be fitted for all months of the year. Unlike SPI, SGI is based on a continuous variable and requires no accumulation period, however, Bloomfield and Marchant (2013) defined an SPI accumulation period ($q$, in months) that gave a maximum correlation between SPI and SGI for a given site.

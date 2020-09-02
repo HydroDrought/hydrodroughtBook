@@ -15,12 +15,10 @@
 
 <title>Mean annual minimum flow</title>
 
-<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
@@ -59,8 +57,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1" number="1">
-<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we are again going to use river flow data from the river Ngaruroro of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from <strong>hydrological years</strong> starting 1 September and ending 31 August. Table 5.4 lists the first flow values. <!-- The first two columns show the date and the corresponding flow value, Q. --></p>
 <p>In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function <code>water_year()</code> which appends an additional column named <code>year</code> to the dataset.</p>
 <pre class="r"><code>library(tidyverse)
@@ -83,476 +81,42 @@ smoothed &lt;- ngaruroro %&gt;%
     MA7 = moving_average(discharge, n = 7),
     MA30 = moving_average(discharge, n = 30)
   )</code></pre>
-<p><!--
-<caption>--><span class="marginnote shownote">Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ.</span><!--</caption>--></p>
-<table>
-
-
-<thead>
-<tr>
-<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-Data, 10-year series
-</div>
-</th>
-<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: right; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-Moving average calculation
-</div>
-</th>
-</tr>
-<tr>
-<th style="text-align:left;">
-time
-</th>
-<th style="text-align:right;">
-MA(1)
-</th>
-<th style="text-align:right;">
-MA(7)
-</th>
-<th style="text-align:right;">
-MA(30)
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-1990-09-01
-</td>
-<td style="text-align:right;">
-19.471
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-02
-</td>
-<td style="text-align:right;">
-17.885
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-03
-</td>
-<td style="text-align:right;">
-16.671
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-04
-</td>
-<td style="text-align:right;">
-17.532
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-05
-</td>
-<td style="text-align:right;">
-21.184
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-06
-</td>
-<td style="text-align:right;">
-30.750
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-07
-</td>
-<td style="text-align:right;">
-24.494
-</td>
-<td style="text-align:right;">
-21.141
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-08
-</td>
-<td style="text-align:right;">
-20.675
-</td>
-<td style="text-align:right;">
-21.313
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-09
-</td>
-<td style="text-align:right;">
-18.713
-</td>
-<td style="text-align:right;">
-21.431
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-10
-</td>
-<td style="text-align:right;">
-16.921
-</td>
-<td style="text-align:right;">
-21.467
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-11
-</td>
-<td style="text-align:right;">
-15.731
-</td>
-<td style="text-align:right;">
-21.210
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-12
-</td>
-<td style="text-align:right;">
-14.630
-</td>
-<td style="text-align:right;">
-20.273
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-13
-</td>
-<td style="text-align:right;">
-13.621
-</td>
-<td style="text-align:right;">
-17.826
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-14
-</td>
-<td style="text-align:right;">
-12.757
-</td>
-<td style="text-align:right;">
-16.150
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-15
-</td>
-<td style="text-align:right;">
-12.037
-</td>
-<td style="text-align:right;">
-14.916
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-16
-</td>
-<td style="text-align:right;">
-11.342
-</td>
-<td style="text-align:right;">
-13.863
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-17
-</td>
-<td style="text-align:right;">
-10.666
-</td>
-<td style="text-align:right;">
-12.969
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-18
-</td>
-<td style="text-align:right;">
-10.165
-</td>
-<td style="text-align:right;">
-12.174
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-19
-</td>
-<td style="text-align:right;">
-9.663
-</td>
-<td style="text-align:right;">
-11.464
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-20
-</td>
-<td style="text-align:right;">
-9.219
-</td>
-<td style="text-align:right;">
-10.836
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-21
-</td>
-<td style="text-align:right;">
-8.819
-</td>
-<td style="text-align:right;">
-10.273
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-22
-</td>
-<td style="text-align:right;">
-8.541
-</td>
-<td style="text-align:right;">
-9.774
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-23
-</td>
-<td style="text-align:right;">
-8.313
-</td>
-<td style="text-align:right;">
-9.341
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-24
-</td>
-<td style="text-align:right;">
-8.139
-</td>
-<td style="text-align:right;">
-8.980
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-25
-</td>
-<td style="text-align:right;">
-8.125
-</td>
-<td style="text-align:right;">
-8.688
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-26
-</td>
-<td style="text-align:right;">
-8.051
-</td>
-<td style="text-align:right;">
-8.458
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-27
-</td>
-<td style="text-align:right;">
-7.617
-</td>
-<td style="text-align:right;">
-8.229
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-28
-</td>
-<td style="text-align:right;">
-7.417
-</td>
-<td style="text-align:right;">
-8.029
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-29
-</td>
-<td style="text-align:right;">
-7.341
-</td>
-<td style="text-align:right;">
-7.858
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-09-30
-</td>
-<td style="text-align:right;">
-8.669
-</td>
-<td style="text-align:right;">
-7.908
-</td>
-<td style="text-align:right;">
-13.505
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-1990-10-01
-</td>
-<td style="text-align:right;">
-17.439
-</td>
-<td style="text-align:right;">
-9.237
-</td>
-<td style="text-align:right;">
-13.438
-</td>
-</tr>
-</tbody>
-</table>
+<p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length <span class="math inline">\(n\)</span> introduces <span class="math inline">\(n-1\)</span> <code>NA</code> values. </span></p>
+<pre><code>## # A tibble: 3,653 x 6
+##    time       discharge  year   MA1   MA7  MA30
+##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 1990-09-01     19.5   1990 19.5  NA     NA  
+##  2 1990-09-02     17.9   1990 17.9  NA     NA  
+##  3 1990-09-03     16.7   1990 16.7  NA     NA  
+##  4 1990-09-04     17.5   1990 17.5  NA     NA  
+##  5 1990-09-05     21.2   1990 21.2  NA     NA  
+##  6 1990-09-06     30.8   1990 30.8  NA     NA  
+##  7 1990-09-07     24.5   1990 24.5  21.1   NA  
+##  8 1990-09-08     20.7   1990 20.7  21.3   NA  
+##  9 1990-09-09     18.7   1990 18.7  21.4   NA  
+## 10 1990-09-10     16.9   1990 16.9  21.5   NA  
+## 11 1990-09-11     15.7   1990 15.7  21.2   NA  
+## 12 1990-09-12     14.6   1990 14.6  20.3   NA  
+## 13 1990-09-13     13.6   1990 13.6  17.8   NA  
+## 14 1990-09-14     12.8   1990 12.8  16.1   NA  
+## 15 1990-09-15     12.0   1990 12.0  14.9   NA  
+## 16 1990-09-16     11.3   1990 11.3  13.9   NA  
+## 17 1990-09-17     10.7   1990 10.7  13.0   NA  
+## 18 1990-09-18     10.2   1990 10.2  12.2   NA  
+## 19 1990-09-19      9.66  1990  9.66 11.5   NA  
+## 20 1990-09-20      9.22  1990  9.22 10.8   NA  
+## 21 1990-09-21      8.82  1990  8.82 10.3   NA  
+## 22 1990-09-22      8.54  1990  8.54  9.77  NA  
+## 23 1990-09-23      8.31  1990  8.31  9.34  NA  
+## 24 1990-09-24      8.14  1990  8.14  8.98  NA  
+## 25 1990-09-25      8.12  1990  8.12  8.69  NA  
+## 26 1990-09-26      8.05  1990  8.05  8.46  NA  
+## 27 1990-09-27      7.62  1990  7.62  8.23  NA  
+## 28 1990-09-28      7.42  1990  7.42  8.03  NA  
+## 29 1990-09-29      7.34  1990  7.34  7.86  NA  
+## 30 1990-09-30      8.67  1990  8.67  7.91  13.5
+## 31 1990-10-01     17.4   1990 17.4   9.24  13.4
+## # … with 3,622 more rows</code></pre>
 <pre class="r"><code># compute the annual minima
 am &lt;- smoothed %&gt;%
   select(-discharge, -time) %&gt;%
@@ -562,60 +126,34 @@ am &lt;- smoothed %&gt;%
 # average the annual minima to get the mean annual minima
 mam &lt;- am %&gt;% 
   select(-year) %&gt;%
-  summarise_all(mean)</code></pre>
-<p><!--
-<caption>--><span class="marginnote shownote">Table 5.5 <span class="math inline">\(MAM\)</span>(n-day), <span class="math inline">\(n=1\)</span> day, 7 days and 30 days</span><!--</caption>--></p>
-<table>
-
-
-<thead>
-<tr>
-<th style="border-bottom:hidden; padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-<span class="math inline">\(Q\)</span> in <span class="math inline">\({m^3s^{-1}}\)</span>
+  summarise_all(mean) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##     MA1   MA7  MA30
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  4.13  4.39  5.43</code></pre>
 </div>
-</th>
-</tr>
-<tr>
-<th style="text-align:right;">
-MA(1)
-</th>
-<th style="text-align:right;">
-MA(7)
-</th>
-<th style="text-align:right;">
-MA(30)
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
-4.13
-</td>
-<td style="text-align:right;">
-4.386
-</td>
-<td style="text-align:right;">
-5.431
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="fast-track" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Fast Track</h1>
+<div id="fast-track" class="section level1">
+<h1><span class="header-section-number">2</span> Fast Track</h1>
 <pre class="r"><code>ngaruroro %&gt;% 
   select(discharge, time) %&gt;%
   summarise(
     `MAM(1)` = mean_annual_minimum(discharge, time, origin = &quot;-09-01&quot;, n = 1),
     `MAM(7)` = mean_annual_minimum(discharge, time, origin = &quot;-09-01&quot;, n = 7),
     `MAM(30)` = mean_annual_minimum(discharge, time, origin = &quot;-09-01&quot;, n = 30)
-  )</code></pre>
-<pre><code>## # A tibble: 1 x 3
-##   `MAM(1)` `MAM(7)` `MAM(30)`
-##      &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
-## 1     4.13     4.39      5.43</code></pre>
+  ) %&gt;%
+  flatten_dbl()</code></pre>
+<pre><code>##   MAM(1)   MAM(7)  MAM(30) 
+## 4.130100 4.385514 5.430773</code></pre>
+<p>Mapping over the length of the smoothing window avoids the multiple explicit calls of the function <code>mean_annual_minimum()</code>. The results are absolutely identical but the code is can be adapted more easily and is less error-prone.</p>
+<pre class="r"><code>c(1, 7, 30) %&gt;%
+  map(
+    .f = mean_annual_minimum, 
+    discharge = ngaruroro$discharge, time = ngaruroro$time, origin = &quot;-09-01&quot;
+  ) %&gt;%
+  flatten_dbl()</code></pre>
+<pre><code>##   MAM(1)   MAM(7)  MAM(30) 
+## 4.130100 4.385514 5.430773</code></pre>
 </div>
 
 

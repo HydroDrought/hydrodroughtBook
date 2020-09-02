@@ -55,9 +55,12 @@ ngaruroro <- ngaruroro %>%
 
 ```{r}
 # derivation of the annual minima
-am <- ngaruroro %>%
-  group_by(year) %>%
-  summarise(flow = min(discharge)) %>%
+am <- annual_minima(
+  discharge = ngaruroro$discharge, 
+  time = ngaruroro$time, 
+  origin = "-09-01"
+  ) %>%
+  rename(flow = am) %>%
   arrange(flow) %>%
   print()
 ```

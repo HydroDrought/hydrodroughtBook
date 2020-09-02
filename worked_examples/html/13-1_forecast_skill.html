@@ -15,7 +15,6 @@
 
 <title>Forecast skill</title>
 
-<script src="site_libs/header-attrs-2.2/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -62,8 +61,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1" number="1">
-<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we will be calculating the <em>skill</em> of the Ensemble Streamflow Prediction (ESP) forecast method for the Lambourn catchment at Shaw gauging station in southern England (catchment area of 234.1 km<sup>2</sup>). The dataset consists of monthly-averaged river discharge observations in the second column and corresponding ESP forecasts initialised on 1<sup>st</sup> January each year for a one month lead time for 51 ensemble members, in columns 3 to 53. The dataset contains 50 observation-forecast pairs across the 1965 to 2014 hindcast periods as shown in column 1. The units for both observations and forecasts are m<sup>3</sup>s<sup>-1</sup>. More detail on how these data were generated can be found in Harrigan et al. (2018).</p>
 <p>First we load the dataset and define the observations and forecast variables:</p>
 <pre class="r"><code># Load the data 
@@ -87,16 +86,16 @@ axis(side = 1, at = 1:50, labels = fcst_dataset$Year)
 lines(obs)</code></pre>
 <p><img src="13-1_forecast_skill_files/figure-html/unnamed-chunk-1-1.png" width="672"  /></p>
 </div>
-<div id="calculate-long-term-low-flow-threshold-from-observations" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Calculate long-term low flow threshold from observations</h1>
+<div id="calculate-long-term-low-flow-threshold-from-observations" class="section level1">
+<h1><span class="header-section-number">2</span> Calculate long-term low flow threshold from observations</h1>
 <p>In this example we want to evaluate the ability of the ESP forecast to predict the probability of river discharge events below the long-term Q90 low flow threshold. We need to first calculate the long-term Q90 threshold from observations using the <code>lfquantile()</code> <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: would use the function <code>lfquantile()</code> from the package. The names of the vector are easier to interpret.</span> function:</p>
 <pre class="r"><code>obs_Q90_threshold &lt;- lfquantile(obs, exc.freq = 0.9)
 obs_Q90_threshold</code></pre>
 <pre><code>##       Q90 
 ## 0.9278767</code></pre>
 </div>
-<div id="calculate-the-brier-score-bs" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Calculate the Brier Score (BS)</h1>
+<div id="calculate-the-brier-score-bs" class="section level1">
+<h1><span class="header-section-number">3</span> Calculate the Brier Score (BS)</h1>
 <p>The forecast evaluation metric we will use is the Brier score. The Brier score is essentially the mean squared error of the probability forecasts when the observation <em>obs<sub>1</sub></em> = 1 if the event occurs, and <em>obs<sub>2</sub></em> = 0 if the event does not occur. The score averages the squared differences between pairs of forecast probabilities and the subsequent binary observations, <span class="math display">\[BS=\frac{1}{n}\sum_{k=1}^n(fcst_{k}-obs_{k})^2\]</span> where the index <em>k</em> denotes numbering of the <em>n</em> forecast-event pairs. In our example <em>n</em> = 50. Perfect forecasts will have <em>BS</em> = 0. The steps to calculate the BS are as follows:</p>
 <ul>
 <li>Create vector of binary observations <em>obs</em> with 1 when an an event is observed (i.e. below the long-term observed Q90 threshold for that year) and 0 if not</li>
@@ -126,8 +125,8 @@ BS_bench &lt;- brier(obs = obs_vec, pred = clim_vec, bins = FALSE)$bs
 BS_bench</code></pre>
 <pre><code>## [1] 0.09</code></pre>
 </div>
-<div id="calculate-the-brier-skill-score-bss" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Calculate the Brier Skill Score (BSS)</h1>
+<div id="calculate-the-brier-skill-score-bss" class="section level1">
+<h1><span class="header-section-number">4</span> Calculate the Brier Skill Score (BSS)</h1>
 <p>We can compute the <strong>Brier Skill Score</strong> of the ESP forecast for predicting Q90 low flow events compared to a simple climatology benchmark forecast using the the generic skill score formula introduced in Section 12.3.8, with the following variables:</p>
 <ul>
 <li><em>A<sub>fc</sub></em> = BS_esp</li>
