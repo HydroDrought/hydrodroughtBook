@@ -33,9 +33,8 @@ sgi <- function(x, na.rm = TRUE)
 }
 
 #' @export
-mean_annual_minimum <- function(discharge, time, origin = "-01-01", n = 1,
-                                na.rm = FALSE, omit.missing.years = TRUE)
-{
+annual_minima <- function(discharge, time, origin = "-01-01", n = 1,
+                          na.rm = FALSE, omit.missing.years = TRUE) {
   x <- tibble(
     time = time,
     year = water_year(time, origin = origin),
@@ -45,7 +44,13 @@ mean_annual_minimum <- function(discharge, time, origin = "-01-01", n = 1,
       smoothed = moving_average(.data$discharge, n = n),
       # replace NAs introduced by smoothing with Inf so they do not affect the min()
       smoothed = replace(.data$smoothed, seq_len(n - 1), Inf)
-    ) %>%
+    )
+
+  if (length(origin) == 2) {
+    x <- filter_season(x = x, range = origin)
+  }
+
+  x <- x %>%
     group_by(.data$year) %>%
     summarise(am = min(.data$smoothed, na.rm = na.rm), .groups = "drop")
 
@@ -53,6 +58,15 @@ mean_annual_minimum <- function(discharge, time, origin = "-01-01", n = 1,
     x <- x %>%
       filter(is.finite(.data$am))
   }
+}
+
+#' @export
+mean_annual_minimum <- function(discharge, time, origin = "-01-01", n = 1,
+                                na.rm = FALSE, omit.missing.years = TRUE)
+{
+
+  x <- annual_minima(discharge = discharge, time = time, origin = origin, n = n,
+                     na.rm = na.rm, omit.missing.years = omit.missing.years)
 
   x <- x %>%
     summarise(mam = mean(.data$am)) %>%

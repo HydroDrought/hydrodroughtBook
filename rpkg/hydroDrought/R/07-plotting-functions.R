@@ -29,7 +29,7 @@ coverage_yearly <- function(x, origin = "-01-01")
 remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
 {
   has.year <- "year" %in% colnames(x)
-  if (!has.year) x <- mutate(
+  if (!has.year) x <- mutate(x,
     year = water_year(.data$time, origin = origin)
   )
 
@@ -64,6 +64,7 @@ month_midpoints <- function(limits)
   s
 }
 
+#' @importFrom lubridate round_date
 month_breaks <- function(limits)
 {
   l <- c(floor_date(limits[1], unit = "month"),
@@ -257,7 +258,7 @@ plot_coverage <- function(x, title = "", origin = "-01-01")
 
 
 #' @export
-integer_breaks <- function(n = 5, ...) {
+breaks_integer <- function(n = 5, ...) {
   fxn <- function(x) {
     breaks <- floor(pretty(x, n, ...))
     names(breaks) <- attr(breaks, "labels")
@@ -288,4 +289,12 @@ inspect_spa <- function(x)
     theme(axis.title.x = element_blank())
 
   cowplot::plot_grid(discharge, storage, align = "v", ncol = 1)
+}
+
+#' @export
+breaks_log10_all <- function(lim, mult.base = 1:10)
+{
+  rng <- floor(log10(lim))
+  b <- as.vector(outer(mult.base,  1 * 10 ^(seq(rng[1], rng[2]))))
+  b[b >= lim[1] & b <= lim[2]]
 }
