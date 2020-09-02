@@ -95,7 +95,14 @@ q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) %>%
   print()
 
 droughts <- ngaruroro %>%
-  drought_events(threshold = q90, pooling = "none") %>%
+  drought_events(threshold = q90, pooling = "none") 
+```
+
+
+`r tufte::margin_note("Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ.")`
+```{r, echo=FALSE}
+droughts %>%
+  hydroDrought:::export_table(name = "Tab5.8") %>%
   print()
 ```
 
@@ -303,12 +310,6 @@ ggplot(pooled, aes(duration)) +
 
 
 
-
-```{r, echo=FALSE, eval=FALSE}
-library(kableExtra)
-pooled %>%
-  kable(caption = "Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ. ")
-```
 
 
 

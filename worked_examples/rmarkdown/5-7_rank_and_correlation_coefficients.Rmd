@@ -54,9 +54,16 @@ indices <- indices %>%
     `MAM(30)/Q50` = `MAM(30)`/Q50,
     `MAM(10)/Q50` = `MAM(10)`/Q50,
     `MAM(1)/Q50` = `MAM(1)`/Q50,
-  ) %>%
+  ) 
+```
+
+`r tufte::margin_note("Table 5.11 Flow indices for a subset of the Regional Data Set.")`
+```{r, echo=FALSE}
+indices  %>%
+  hydroDrought:::export_table(name = "Tab5.11") %>%
   print()
 ```
+
 
 #  Ranks
 ```{r, fig.width=6, fig.height=6}

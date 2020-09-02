@@ -41,7 +41,9 @@ smoothed <- ngaruroro %>%
 
 `r tufte::margin_note("Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length $n$ introduces $n-1$ <code>NA</code> values. ")`
 ```{r, echo=FALSE}
- smoothed%>%
+ smoothed %>%
+  head(31) %>%
+  hydroDrought:::export_table(name = "Tab5.4") %>%
   print(n = 31)
 ```
 

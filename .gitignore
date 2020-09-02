@@ -12,3 +12,15 @@ rpkg/hydroDrought_*.tar.gz
 worked_examples/void/
 worked_examples/html/index.html
 .~lock.*
+
+worked_examples/word/
+worked_examples/html/*.docx
+
+worked_examples/html/tables.Rdata
+worked_examples/html/tables.xlsx
+worked_examples/rmarkdown/tables.Rdata
+worked_examples/rmarkdown/tables.xlsx
+worked_examples/tables.Rdata
+worked_examples/tables.xlsx
+rpkg/hydroDrought/tables.Rdata
+rpkg/hydroDrought/tables.xlsx

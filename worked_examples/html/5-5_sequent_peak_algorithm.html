@@ -98,8 +98,8 @@ ngaruroro &lt;- intl %&gt;%
 ng &lt;- ngaruroro %&gt;%
   mutate(
     storage = storage(discharge = discharge, threshold = q90)
-    ) %&gt;%
-  print()</code></pre>
+  ) </code></pre>
+<p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)</span></p>
 <pre><code>## # A tibble: 4,383 x 4
 ##    time       discharge  year storage
 ##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
@@ -136,7 +136,7 @@ ng &lt;- ngaruroro %&gt;%
   filter(storage &gt; 0) %&gt;%
   mutate(
     event = group_const_change(time)
-    ) %&gt;%
+  ) %&gt;%
   print()</code></pre>
 <pre><code>## # A tibble: 525 x 5
 ##    time       discharge  year storage event
@@ -156,32 +156,27 @@ ng &lt;- ngaruroro %&gt;%
 <div id="selection-of-the-drought-deficit-volume-and-duration" class="section level1">
 <h1><span class="header-section-number">3</span> Selection of the drought deficit volume and duration</h1>
 <p>The deficit volume is the maximum value in an uninterrupted sequence of positive <span class="math inline">\(S_t\)</span>, and the drought duration is the time from the beginning of the depletion period to the time of the maximum depletion. The date of the maximum depletion is also displayed.</p>
-<pre class="r"><code>ng %&gt;%
+<pre class="r"><code>spa &lt;- ng %&gt;%
   group_by(event) %&gt;%
   summarise(
     volume = max(storage), 
     duration = which.max(storage),
     time = time[which.max(storage)]
   )</code></pre>
-<pre><code>## # A tibble: 41 x 4
-##    event  volume duration time      
-##    &lt;dbl&gt;   &lt;dbl&gt;    &lt;int&gt; &lt;date&gt;    
-##  1     1  0.0780        1 1989-03-14
-##  2     2 39.8          38 1989-04-29
-##  3     3  2.72          7 1989-05-24
-##  4     4 11.7          14 1990-03-09
-##  5     5  8.26         13 1990-04-24
-##  6     6 23.2          29 1991-01-24
-##  7     7  4.86          7 1991-02-17
-##  8     8  4.38         10 1991-04-08
-##  9     9  0.918         5 1991-12-23
-## 10    10  0.0590        1 1991-12-28
-## # … with 31 more rows</code></pre>
+<p><label for="tufte-mn-2" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-2" class="margin-toggle"><span class="marginnote">Table 5.10 An extract of drought deficit volumes and durations for River Ngaruroro at Kuripapango (NZ), calculated by SPA</span></p>
+<pre><code>## # A tibble: 5 x 4
+##   event  volume duration time      
+##   &lt;dbl&gt;   &lt;dbl&gt;    &lt;int&gt; &lt;date&gt;    
+## 1     1  0.0780        1 1989-03-14
+## 2     2 39.8          38 1989-04-29
+## 3     3  2.72          7 1989-05-24
+## 4     4 11.7          14 1990-03-09
+## 5     5  8.26         13 1990-04-24</code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">
 Figure x.xx Depiction of the relationship between discharge <span class="math inline">\(Q_t\)</span> and storage <span class="math inline">\(Q_t\)</span> for drought event number 3.
 </p>
-<img src="5-5_sequent_peak_algorithm_files/figure-html/unnamed-chunk-7-1.png" alt="Figure x.xx Depiction of the relationship between discharge $Q_t$ and storage $Q_t$ for drought event number 3." width="672"  />
+<img src="5-5_sequent_peak_algorithm_files/figure-html/unnamed-chunk-9-1.png" alt="Figure x.xx Depiction of the relationship between discharge $Q_t$ and storage $Q_t$ for drought event number 3." width="672"  />
 </div>
 </div>
 <div id="results" class="section level1">

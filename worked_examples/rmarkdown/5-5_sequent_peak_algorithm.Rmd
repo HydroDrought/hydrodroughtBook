@@ -26,7 +26,7 @@ ngaruroro <- intl %>%
   ) %>%
   filter(year >= 1988, year <= 1999) %>%
   print()
-  
+
 ```
 
 # Calculation
@@ -39,9 +39,21 @@ q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9)
 ng <- ngaruroro %>%
   mutate(
     storage = storage(discharge = discharge, threshold = q90)
-    ) %>%
-  print()
+  ) 
 ```
+
+`r tufte::margin_note("Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")`
+```{r, echo=FALSE}
+ng %>%
+  hydroDrought:::export_table(name = "Tab5.9") %>%
+  print()
+
+# r %>%
+#   kable(caption = "Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")  %>% 
+#   kable_styling(fixed_thead = TRUE, position = "left") %>%
+#   row_spec(which.max(r$storage), bold = TRUE)
+```
+
 
 As long as the discharge is above the threshold the storage is zero as only 
 flows below the $Q_90$ contributes to the storage. The first time that is the 
@@ -62,7 +74,7 @@ ng <- ng %>%
   filter(storage > 0) %>%
   mutate(
     event = group_const_change(time)
-    ) %>%
+  ) %>%
   print()
 ```
 
@@ -73,13 +85,22 @@ period to the time of the maximum depletion. The date of the maximum depletion
 is also displayed.
 
 ```{r}
-ng %>%
+spa <- ng %>%
   group_by(event) %>%
   summarise(
     volume = max(storage), 
     duration = which.max(storage),
     time = time[which.max(storage)]
   )
+```
+
+
+`r tufte::margin_note("Table 5.10 An extract of drought deficit volumes and durations for River Ngaruroro at Kuripapango (NZ), calculated by SPA")`
+```{r, echo=FALSE}
+spa  %>%
+  head(5)  %>%
+  hydroDrought:::export_table(name = "Tab5.10") %>%
+  print()
 ```
 
 
@@ -104,28 +125,7 @@ sample.event %>%
 ```
 
 
-```{r, echo=FALSE, eval=FALSE}
-r <- sample.event  %>%
-  # mutate(day = row_number()) %>%
-  select(time, discharge, volume, storage) %>% 
-  head(30) 
-
-r %>%
-  kable(caption = "Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")  %>% 
-  kable_styling(fixed_thead = TRUE, position = "left") %>%
-  row_spec(which.max(r$storage), bold = TRUE)
-```
-
-
-
 # Results
-
-```{r, echo=FALSE, eval=FALSE}
-droughts %>%
-  head(7) %>%
-  kable(caption = "Table 5.10 An extract of drought deficit volumes and durations for River Ngaruroro at Kuripapango (NZ), calculated by SPA") 
-```
-
 
 An extract of the drought duration and deficit volumes for the 10-year series 
 is given in the output below. Even though the SPA procedure is pooling minor and
@@ -133,6 +133,7 @@ dependent droughts, the obtained time series of events still contains a number
 of minor drought events.
 
 # Fast Track
+
 ```{r}
 ngaruroro %>%
   drought_events(threshold = q90, pooling = "sequent-peak") 

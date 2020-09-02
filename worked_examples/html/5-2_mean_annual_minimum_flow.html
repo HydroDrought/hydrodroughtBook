@@ -82,7 +82,7 @@ smoothed &lt;- ngaruroro %&gt;%
     MA30 = moving_average(discharge, n = 30)
   )</code></pre>
 <p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length <span class="math inline">\(n\)</span> introduces <span class="math inline">\(n-1\)</span> <code>NA</code> values. </span></p>
-<pre><code>## # A tibble: 3,653 x 6
+<pre><code>## # A tibble: 31 x 6
 ##    time       discharge  year   MA1   MA7  MA30
 ##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ##  1 1990-09-01     19.5   1990 19.5  NA     NA  
@@ -115,8 +115,7 @@ smoothed &lt;- ngaruroro %&gt;%
 ## 28 1990-09-28      7.42  1990  7.42  8.03  NA  
 ## 29 1990-09-29      7.34  1990  7.34  7.86  NA  
 ## 30 1990-09-30      8.67  1990  8.67  7.91  13.5
-## 31 1990-10-01     17.4   1990 17.4   9.24  13.4
-## # … with 3,622 more rows</code></pre>
+## 31 1990-10-01     17.4   1990 17.4   9.24  13.4</code></pre>
 <pre class="r"><code># compute the annual minima
 am &lt;- smoothed %&gt;%
   select(-discharge, -time) %&gt;%

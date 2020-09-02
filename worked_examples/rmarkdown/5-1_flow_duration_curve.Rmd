@@ -53,7 +53,14 @@ ngaruroro <- ngaruroro %>%
   mutate(
     rank = rank(-discharge, ties.method = "min"), 
     freq.exc = exceedance_frequency(discharge)
-  ) %>%
+  ) 
+```
+
+`r tufte::margin_note("Table 5.1 Calculation of daily flow duration curve for River Ngaruroro at Kuripapango, NZ")`
+```{r, echo=FALSE}
+ngaruroro %>%
+  head(7) %>%
+  hydroDrought:::export_table(name = "Tab5.1") %>%
   print()
 ```
 
@@ -108,9 +115,11 @@ Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can
 
 `r tufte::margin_note("Table 5.2 An extract of values corresponding to $Q_{90}$.")`
 ```{r echo=FALSE}
-ngaruroro %>%
+tbl <- ngaruroro %>%
   filter(freq.exc >= 0.8999 & freq.exc <= 0.9002) %>%
-  arrange(freq.exc)
+  arrange(freq.exc) %>%
+  hydroDrought:::export_table(name = "Tab5.2") %>%
+  print()
 ```
 
 

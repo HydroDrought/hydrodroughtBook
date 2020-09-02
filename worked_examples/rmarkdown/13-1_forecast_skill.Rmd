@@ -1,6 +1,7 @@
 ---
 title: "Forecast skill"
 author: "Worked example 13.1"
+always_allow_html: true
 ---
 
 ```{r, setup, include=FALSE}

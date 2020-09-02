@@ -1,6 +1,7 @@
 ---
 title: "Base Flow Index"
 author: "Worked example 5.3"
+always_allow_html: true
 ---
 
 ```{r, setup, include=FALSE}
@@ -108,9 +109,8 @@ tbl <- tbl  %>%
          # Qmin.red = text_spec(Qmin.red, format = "html", bold = bold)
   ) 
 
-tbl %>%
+tbl2 <- tbl %>%
   select(Date = time, `Daily flow` = discharge, Qmin, `0.9 * Qmin` = Qmin.red, `Base flow` = baseflow) %>%
-  
   kable(#escape = F, 
     caption = "Table 5.7 Calculation of the base flow separation line from time series of daily flow; non-overlapping 5-day blocks are indicated by alternating background colors and turning points are marked bold.") %>%
   # add_header_above(c(" " = 1, 

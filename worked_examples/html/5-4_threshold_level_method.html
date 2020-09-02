@@ -122,8 +122,8 @@ ngaruroro &lt;- intl %&gt;%
 <pre><code>##   Q90 
 ## 4.949</code></pre>
 <pre class="r"><code>droughts &lt;- ngaruroro %&gt;%
-  drought_events(threshold = q90, pooling = &quot;none&quot;) %&gt;%
-  print()</code></pre>
+  drought_events(threshold = q90, pooling = &quot;none&quot;) </code></pre>
+<p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ.</span></p>
 <pre><code>## # A tibble: 210 x 7
 ##    event first.day  last.day   duration   volume  qmin tqmin     
 ##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;drtn&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;    
@@ -178,7 +178,7 @@ ngaruroro &lt;- intl %&gt;%
 <p class="caption marginnote shownote">
 Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. A drought event is classified as a minor drought if the duration or the volume is below a given threshold.
 </p>
-<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-8-1.png" alt="Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. A drought event is classified as a minor drought if the duration or the volume is below a given threshold." width="672"  />
+<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-9-1.png" alt="Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. A drought event is classified as a minor drought if the duration or the volume is below a given threshold." width="672"  />
 </div>
 </div>
 <div id="eliminating-dependent-droughts-pooling" class="section level1">
@@ -244,7 +244,7 @@ Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016. 
 <p class="caption marginnote shownote">
 Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = <span class="math inline">\(Q_{90}\)</span>, <span class="math inline">\(d_{min} = 5\)</span> days, <span class="math inline">\(\alpha = 0.005\)</span> and <span class="math inline">\(t_{min} = 2\)</span> days.
 </p>
-<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-13-1.png" alt="Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\alpha = 0.005$ and $t_{min} = 2$ days." width="672"  />
+<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-14-1.png" alt="Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\alpha = 0.005$ and $t_{min} = 2$ days." width="672"  />
 </div>
 <p>A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed.</p>
 <pre class="r"><code>ggplot(pooled, aes(duration)) + 
@@ -257,7 +257,7 @@ Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (
 <p class="caption marginnote shownote">
 Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = <span class="math inline">\(Q_{90}\)</span>, <span class="math inline">\(d_{min} = 5\)</span> days, <span class="math inline">\(\alpha = 0.005\)</span> and <span class="math inline">\(t_{min} = 2\)</span> days.
 </p>
-<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-15-1.png" alt="Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\alpha = 0.005$ and $t_{min} = 2$ days." width="672"  />
+<img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-16-1.png" alt="Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\alpha = 0.005$ and $t_{min} = 2$ days." width="672"  />
 </div>
 </div>
 

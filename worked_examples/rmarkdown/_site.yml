@@ -10,6 +10,11 @@ output:
     css: style.css
     fig_caption: true
 
+  word_document:
+    toc: true
+    toc_depth: 2
+    fig_caption: true
+
 new_session: true
 
 editor_options:
