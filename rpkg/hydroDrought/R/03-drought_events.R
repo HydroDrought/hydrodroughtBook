@@ -10,6 +10,8 @@ drought_events <- function(x, threshold,
 {
   pooling <- match.arg(pooling)
 
+  # todo: call sanitize_ts() without warnings to insert NAs for removed years!
+
   # find drought events, compute columns
   # volume, storage (zero when not using sequent peak algorithm),
   # below.threshold, under.drought, event
