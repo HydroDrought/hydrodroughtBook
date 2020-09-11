@@ -5,7 +5,7 @@
 #' @export
 monthDay <- function(x, origin = "-01-01")
 {
-    x <- as.Date(x)
+    x <- as.Date(x, origin = "1969-12-31")
     origin <- regmatches(origin, regexpr("-.*", origin))
 
     # origin must exist in non-leap years
