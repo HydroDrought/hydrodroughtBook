@@ -17,20 +17,22 @@ coverage_yearly <- function(x, origin = "-01-01")
       year = water_year(.data$time, origin = origin)
     ) %>%
     count(.data$year, name = "days.with.data") %>%
-    mutate(
+    transmute(
+      year,
       days.in.year = days_in_year(.data$year, origin = origin),
+      days.with.data,
       days.missing = .data$days.in.year - .data$days.with.data,
       coverage = .data$days.with.data / .data$days.in.year
     ) %>%
     arrange(.data$year)
 }
 
-
+#' @export
 remove_incomplete_first_last <- function(x, percent = 0.99, origin = "-01-01")
 {
   has.year <- "year" %in% colnames(x)
   if (!has.year) x <- mutate(x,
-    year = water_year(.data$time, origin = origin)
+                             year = water_year(.data$time, origin = origin)
   )
 
   coverage <- x %>%
@@ -80,24 +82,25 @@ month_breaks <- function(limits)
 
 
 #' @importFrom lubridate month
-month_localized <- function(x, locale = "en_US.utf8")
+month_localized <- function(x, locale = "en_US.utf8", nletters = 3)
 {
-  month(x, label = TRUE, abbr = TRUE, locale = locale)
+  m <- month(x, label = TRUE, abbr = TRUE, locale = locale)
+  substr(m, 1L, nletters)
 }
 
 #' @export
-scale_x_month <- function(..., locale = "en_US.utf8")
+scale_x_month <- function(..., locale = "en_US.utf8", nletters = 3)
 {
   scale_x_date(breaks = month_midpoints,
-               labels = function(x) month_localized(x, locale = locale),
+               labels = function(x) month_localized(x, locale = locale, nletters = nletters),
                minor_breaks = month_breaks, ...)
 }
 
 #' @export
-scale_x_datetime_month <- function(..., locale = "en_US.utf8")
+scale_x_datetime_month <- function(..., locale = "en_US.utf8", nletters = 3)
 {
   scale_x_datetime(breaks = month_midpoints,
-                   labels = function(x) month_localized(x, locale = locale),
+                   labels = function(x) month_localized(x, locale = locale, nletters = nletters),
                    minor_breaks = month_breaks, ...)
 }
 
@@ -292,9 +295,30 @@ inspect_spa <- function(x)
 }
 
 #' @export
-breaks_log10_all <- function(lim, mult.base = 1:10)
+breaks_log10_all <- function(lim, mult.base = 1:10) {
+  function(l = lim, mult = mult.base)
+  {
+    rng <- floor(log10(l))
+    b <- as.vector(outer(mult,  1 * 10 ^(seq(rng[1], rng[2]))))
+    b[b >= l[1] & b <= l[2]]
+  }
+}
+
+
+#' @importFrom ggplot2 %+replace% theme_light element_text rel margin element_text unit
+theme_hd <- function (base_size = 8, base_family = "")
 {
-  rng <- floor(log10(lim))
-  b <- as.vector(outer(mult.base,  1 * 10 ^(seq(rng[1], rng[2]))))
-  b[b >= lim[1] & b <= lim[2]]
+  half_line <- base_size/2
+
+  # default family is sans (which is Helvetica)
+  # explicit definition does not work with postscript() device
+  theme_light(base_size = base_size, base_family = base_family)  %+replace%
+    theme(
+      strip.background = element_rect(
+        fill = NA, colour = "grey70"),
+      strip.text = element_text(
+        colour = "grey30", size = rel(0.8),
+        margin = margin(rep(0.8 * half_line, 4))
+      )
+    )
 }

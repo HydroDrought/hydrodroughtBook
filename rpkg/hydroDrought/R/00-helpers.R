@@ -492,8 +492,8 @@ paste_with_and <- function(x , sep = ", ", final = " and ")
 
 filter_season <- function(x, range)
 {
-    range <- yday(.origin(range))
-    jday <- yday(x$time)
+    range <- lubridate::yday(.origin(range))
+    jday <- lubridate::yday(x$time)
 
     if (range[1] < range[2]) {
         mask <- jday >= range[1] & jday <= range[2]

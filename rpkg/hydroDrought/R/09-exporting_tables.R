@@ -16,7 +16,7 @@ export_table <- function(x, name,
   library(writexl)
   d <- dirname(xls)
   dir.create(d, recursive = T, showWarnings = F)
-  write_xlsx(tables, path = xls)
+  writexl::write_xlsx(tables, path = xls)
 
   message("Tables written to  ", d)
   return(invisible(x))

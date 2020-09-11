@@ -1,4 +1,32 @@
+# todo
 
+# 0) append desired groups
+# - major = min(minor)
+# - minor = day, week, month, season
+# check compatibility of minor and major interval
+
+#!! 1) treat NAs drop = c("keep", "drop_values", "drop_group", "drop_minor", "drop_major"),
+# 2) compute spells
+#!! 3) treat spells spanning several groups
+#- rule = c("cut", "duplicate", "onset", "termination"),
+
+# pooling of events
+
+# functions aggregation spells need default values
+# e.g. duration = 0 for "no-flow" in case there is always flow in a given year
+# the default default value could be NA
+# f.spell <- lst(
+#   duration = list(
+#     fun = function(x) length(x),
+#     column = "time",
+#     default = 0),
+#   # interval = list(function(x) interval(min(x), max(x)), "time"),
+#   # first.day = function(x) min(x$time),
+#   # last.day = function(x) max(x$time),
+#   # duration = list(function(x) diff(range(x)), "time"),
+#   # min.flow = list(min, "discharge"),
+#   # max.flow = function(x) max(x$discharge)
+# )
 
 .simplify_output <- function(data, simplify = TRUE)
 {
@@ -11,13 +39,15 @@
   return(data)
 }
 
+#' @importFrom rlang exec
+#' @importFrom purrr map2
 .summarize_and_enframe <- function(data, funs, name, default_col = "value")
 {
   if (all(lengths(funs) == 1)) {
     col <- default_col
   } else {
-    col <- map(funs, 2)
-    funs <- map(funs, 1)
+    col <- purrr::map(funs, 2)
+    funs <- purrr::map(funs, 1)
   }
 
   # hack in order to operate on vectors and on lists
@@ -26,7 +56,8 @@
   tibble(!!name := names(funs), value = l)
 }
 
-
+#' @importFrom purrr map_lgl
+#' @importFrom tidyselect any_of
 #' @export
 # agg.spell aggregates all values with the same spell id
 # after aggregation there will be one value for every spell
@@ -46,8 +77,9 @@ ires_metric <- function(time, flow, threshold = 0.001,
     mutate(
       group = group_const_value(paste(major, minor)) + 1,
       state = factor(flow <= threshold,
-                     levels = c(TRUE, FALSE), labels = c("no-flow", "flow")),
-      state = fct_explicit_na(state, "no data"),
+                     exclude = character(),
+                     levels = c(TRUE, FALSE, NA),
+                     labels = c("no-flow", "flow", "no data")),
       spell = group_const_value(state) + 1
     ) %>%
     select(time, flow, spell, group, minor, major, state)
@@ -67,7 +99,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
     "major" = agg.major,
     "total" = agg.total
   ) %>%
-    enframe(name = "level", value = "fun") %>%
+    tibble::enframe(name = "level", value = "fun") %>%
     mutate(name = paste0("fun.", level))
 
   # never skip time and flow
@@ -83,7 +115,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
   for (l in which(rows)) {
     if (!is.null(agg$fun[[l]])) {
       result <- result %>%
-        nest(data = any_of(c(head(agg$level, l - 1), "data", "value"))) %>%
+        nest(data = any_of(c(utils::head(agg$level, l - 1), "data", "value"))) %>%
         mutate(
           metric = map(data, .summarize_and_enframe,
                        funs = agg$fun[[l]], name = agg$name[l])
@@ -97,13 +129,23 @@ ires_metric <- function(time, flow, threshold = 0.001,
 }
 
 
-
+#' Checking for flow intermittency
 #' @export
+#' @examples
+#' \dontrun{
+#' library(dplyr)
+#' library(purrr)
+#'
+#' international %>%
+#' select(river, data) %>%
+#'   mutate(
+#'     is.intermittent = map_lgl(data, ~is_intermittent(.x$time, .x$discharge))
+#'   )}
 is_intermittent <- function(time, flow, threshold = 0.001,
                             ndays = 5, consecutive = TRUE) {
 
   # shortcut
-  if(all(na.omit(flow) > threshold)) return(FALSE)
+  if(all(stats::na.omit(flow) > threshold)) return(FALSE)
 
 
   f.major <- if(consecutive) lst(max) else lst(sum)
@@ -116,38 +158,8 @@ is_intermittent <- function(time, flow, threshold = 0.001,
 }
 
 
-#' @examples
-#' add(1, 1)
-#' add(10, 1)
-
-# 0) append desired groups
-# - major = min(minor)
-# - minor = day, week, month, season
-# check compatibility of minor and major interval
-
-#!! 1) treat NAs drop = c("keep", "drop_values", "drop_group", "drop_minor", "drop_major"),
-# 2) compute spells
-#!! 3) treat spells spanning several groups
-#- rule = c("cut", "duplicate", "onset", "termination"),
-
-# pooling of events
 
 
-# functions aggregation spells need default values
-# e.g. duration = 0 for "no-flow" in case there is always flow in a given year
-# the default default value could be NA
-f.spell <- lst(
-  duration = list(
-    fun = function(x) length(x),
-    column = "time",
-    default = 0),
-  # interval = list(function(x) interval(min(x), max(x)), "time"),
-  # first.day = function(x) min(x$time),
-  # last.day = function(x) max(x$time),
-  # duration = list(function(x) diff(range(x)), "time"),
-  # min.flow = list(min, "discharge"),
-  # max.flow = function(x) max(x$discharge)
-)
 
 .duration <- lst(
   duration = list(
@@ -158,19 +170,16 @@ f.spell <- lst(
 
 
 # Metrics -----
-
-
 cv <- function(x) {
   x <- as.double(x)
-  sd(x) / mean(x)
+  stats::sd(x) / base::mean(x)
 }
 
-
-
-
+#' @importFrom rlang set_names
+#' @export
 no_flow_years <- function(time, flow, threshold = 0.001,
-                          name = "proportion of no flow years") {
-
+                          name = "proportion of no flow years")
+{
   f.major <- lst(
     "no flow year" = list(
       fun = function(x)  {browser(); any(x == "no-flow")},
@@ -190,7 +199,7 @@ no_flow_years <- function(time, flow, threshold = 0.001,
   return(result)
 }
 
-
+#' @export
 MAN <- function(time, flow, threshold = 0.001, name = "MAN")
 {
   m <- ires_metric(time, flow, threshold,
@@ -203,6 +212,7 @@ MAN <- function(time, flow, threshold = 0.001, name = "MAN")
   return(result)
 }
 
+#' @export
 CVAN <- function(time, flow, threshold = 0.001, name = "CVAN")
 {
   m <- ires_metric(time, flow, threshold,
@@ -215,6 +225,7 @@ CVAN <- function(time, flow, threshold = 0.001, name = "CVAN")
   return(result)
 }
 
+#' @export
 FAN <- function(time, flow, threshold = 0.001)
 {
   m <- ires_metric(time, flow, threshold,
@@ -228,8 +239,7 @@ FAN <- function(time, flow, threshold = 0.001)
   return(result)
 }
 
-
-
+#' @export
 MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 {
   m <- ires_metric(time, flow, threshold,
@@ -273,8 +283,9 @@ MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 #   return(result)
 # }
 
-
-tau0 <- function(time, flow, threshold = 0.001, name = "mean onset") {
+#' @export
+tau0 <- function(time, flow, threshold = 0.001, name = "mean onset")
+{
 
   f.spell <- lst(
     onset = list(
@@ -294,8 +305,9 @@ tau0 <- function(time, flow, threshold = 0.001, name = "mean onset") {
   return(result)
 }
 
-
-tauE <- function(time, flow, threshold = 0.001, name = "mean termination") {
+#' @export
+tauE <- function(time, flow, threshold = 0.001, name = "mean termination")
+{
 
   f.spell <- lst(
     termination = list(
@@ -317,7 +329,6 @@ tauE <- function(time, flow, threshold = 0.001, name = "mean termination") {
 
 
 # Circular statistics ----
-
 .circular_stats <- function(x, lwr = 0, upr = 365) {
   if(any(x < lwr | x > upr))
     stop("input data not in range [", lwr, ", ", upr, "]")
@@ -364,52 +375,52 @@ mean_day <- function(x, lwr = 0, upr = 365)
 
 # class jday ----
 
-.ordinal_suffix <- function(x) {
-  unit.pos <- x %% 10
-
-  # suffix for values > 10 has to be th
-  decade <- (x %% 100) %/% 10
-
-  suffix <- rep_len("th", length(x))
-  mask <- unit.pos %in% 1:3 & decade != 1
-  suffix[mask] <- c("st", "nd", "rd")[unit.pos[mask]]
-
-  return(suffix)
-}
-
-
-print.jday <- function(x, ...)
-{
-  y <- format.jday(x)
-  y <- ifelse(is.na(y),  y <- NA_character_, y)
-  print(y)
-}
-
-
-format.jday <- function(x, ...)
-{
-  nam <- names(x)
-  if(is.numeric(x)) {
-    if(all(x > 0 & x < 366)){
-      x <- as.Date(as.numeric(x) - 1, origin = "1970-01-01")
-    } else {
-      stop("Argument `x` must be either date or an integer inside [1, 365].")
-    }
-  }
-
-  x <- as.Date(x)
-  month <- month.abb[as.numeric(format(x, "%m"))]
-
-  day <- as.numeric(format(x, "%d"))
-  suffix <- .ordinal_suffix(day)
-  day <- format(paste0(day, suffix), width = 4, justify = "right")
-
-  y <- paste0(month, " ", day, " (day ",
-              format(as.numeric(format(x, "%j")), width = 3, justify = "right"), ")")
-  names(y) <- nam
-
-  return(y)
-}
+# .ordinal_suffix <- function(x) {
+#   unit.pos <- x %% 10
+#
+#   # suffix for values > 10 has to be th
+#   decade <- (x %% 100) %/% 10
+#
+#   suffix <- rep_len("th", length(x))
+#   mask <- unit.pos %in% 1:3 & decade != 1
+#   suffix[mask] <- c("st", "nd", "rd")[unit.pos[mask]]
+#
+#   return(suffix)
+# }
+#
+#
+# print.jday <- function(x, ...)
+# {
+#   y <- format.jday(x)
+#   y <- ifelse(is.na(y),  y <- NA_character_, y)
+#   print(y)
+# }
+#
+#
+# format.jday <- function(x, ...)
+# {
+#   nam <- names(x)
+#   if(is.numeric(x)) {
+#     if(all(x > 0 & x < 366)){
+#       x <- as.Date(as.numeric(x) - 1, origin = "1970-01-01")
+#     } else {
+#       stop("Argument `x` must be either date or an integer inside [1, 365].")
+#     }
+#   }
+#
+#   x <- as.Date(x)
+#   month <- month.abb[as.numeric(format(x, "%m"))]
+#
+#   day <- as.numeric(format(x, "%d"))
+#   suffix <- .ordinal_suffix(day)
+#   day <- format(paste0(day, suffix), width = 4, justify = "right")
+#
+#   y <- paste0(month, " ", day, " (day ",
+#               format(as.numeric(format(x, "%j")), width = 3, justify = "right"), ")")
+#   names(y) <- nam
+#
+#   return(y)
+# }
 
 # ensures that x is always between 1 and 365 by shifting all dates in a leap
 # year after Feb 28 by -1
@@ -427,7 +438,6 @@ format.jday <- function(x, ...)
 
   return(x)
 }
-
 
 .is_leapyear <- function(x)
 {

@@ -118,9 +118,9 @@ gaps <- flowdata %>%
     mutate(gap.no = order(gap.no))
 
 # combine data and meta data
-intl <- flowdata %>%
+international <- flowdata %>%
     full_join(meta, by = "river") %>%
-    full_join(meta.computed, by = "river") %>%
+     full_join(meta.computed, by = "river") %>%
     select(-id)
 
-usethis::use_data(intl, overwrite = TRUE)
+usethis::use_data(international, overwrite = TRUE)
