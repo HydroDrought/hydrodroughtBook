@@ -1,30 +1,14 @@
 ---
-title: "Threshold level method"
-author: "Worked example 5.4"
+title: "Worked example 5.4: Threshold level method"
 ---
 
 ```{r, setup, include=FALSE}
 ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+fmt_date <- function(x) trimws(format(x, format = "%e %B %Y"))
 ```
 
-```{r, echo=FALSE, eval=FALSE}
-# filter(year >= 1964, year <= 1999) # original filter
-```
-
-The threshold level method can be used to derive drought events from a given 
-time series of river flows. A drought event starts when the flow falls below a 
-given threshold $Q_0$ and when the flow rises above the threshold the drought
-event ends. 
-
-# Loading the Data
-It is possible to analyse any of the series in 
-the International Data Set (Section 4.5.1) as long as there are not too many
-missing values in the dataset and a meaningful threshold $Q_0$ is choosen. 
-Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the 
-procedure in the example below. 
-
-```{r}
+```{r, loadingData, echo=FALSE}
 library(tidyverse)
 library(hydroDrought)
 
@@ -35,36 +19,50 @@ ngaruroro <- intl %>%
 ```
 
 
-Missing/unknown values (`NA`s) can neither be seen as 'a flow below the threshold' or 
+
+It is possible to analyze any time series of river flow as long as there are not too many missing values in the dataset and a meaningful $Q_0$  threshold is chosen. Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below.
+
+# Loading the Data
+`r round(as.double(diff(range(ngaruroro$time)), "days") / 365.25, 1)`  years of 
+daily flow (`r fmt_date(min(ngaruroro$time))` to `r fmt_date(max(ngaruroro$time))`)
+are analysed. In this river the low flow period covers the turn of the calendar 
+year. To avoid problems with allocating droughts to a specific calendar year 
+because of drought events starting in one year and ending in another year, the 
+start of the year is defined to be 1 September. An event is attributed to the 
+year it starts. 
+
+```{r, loadingData, eval=TRUE, echo=TRUE}
+```
+
+# Preprocessing
+The time series, Ngaruroro, contains missing values.  We do not know if a missing 
+value (`NA`) is 'a flow below the threshold' or 
 'above the threshold' as the flow value itself is unknown. A single missing value 
 will cause the function `drought_events()` to terminate a dry spell (drought event) 
 or wet spell. Subsequently most characteristics derived for this event (e.g. drought 
-duration, drought termination, drought volume, ... ) will be biased. 
+duration, drought termination, drought volume, ... ) will not be correct. 
 
-A conservative approach would be to eliminate years with missing values completely. 
-Instead periods of missing data can been interpolated if of short duration 
-(e.g. < 15 days), removing only years with long periods of missing values. 
-
-```{r}
+```{r, preprocessing, echo=FALSE}
 ngaruroro <- ngaruroro %>%
   sanitize_ts(approx.missing = 14) %>%
   mutate(
     year = water_year(time, origin = "-09-01")
-  ) %>%
-  print()
+  )
 
-incomplete <- ngaruroro %>%
+coverage <- ngaruroro %>%
   filter(!is.na(discharge)) %>%
   pull(time) %>%
-  coverage_yearly(origin = "-09-01") %>%
-  filter(days.missing > 0) %>%
-  print()
+  coverage_yearly(origin = "-09-01")
+
+incomplete <- coverage %>%
+  filter(days.missing > 0) 
+
+complete <- coverage %>%
+  filter(days.missing == 0)
 
 ngaruroro <- ngaruroro %>%
   anti_join(incomplete, by = "year")
 ```
-
-
 
 ```{r, properties-dataset, echo=FALSE}
 nyear <- length(unique(ngaruroro$year))
@@ -75,14 +73,29 @@ years.removed <- hydroDrought:::paste_with_and(paste(
 )
 ```
 
-After preprocessing the time series `r nyear` years of daily flow
-(`r min(ngaruroro$time)` to `r max(ngaruroro$time)`) will be analysed. 
-In total `r nremoved` years are omitted from the series (`r years.removed`). 
 
-In this river the low flow period covers the turn of the calendar year. 
-To avoid problems with allocating droughts to a specific calendar year 
-because of drought events starting in one year and ending in another year, 
-the start of the year is defined to on September 1<sup>st</sup>. 
+A conservative approach would be to eliminate years with missing values completely.
+Instead, to avoid loosing too many years of observation, periods of missing data 
+can be interpolated if they are of short duration. Here periods of missing data 
+have been interpolated if of short duration (< 15 days), whereas years containing
+long periods of missing values (≥ 15 days) have been removed. After preprocessing 
+the time series, `r nyear` years of daily flow (`r fmt_date(min(ngaruroro$time))` 
+to `r fmt_date(max(ngaruroro$time))`) will be analysed. In total 
+`r nremoved` years are omitted from the series (`r years.removed`). 
+
+
+```{r, preprocessing, echo=TRUE, eval=FALSE}
+```
+
+
+The table below displays the year removed, the total number of days in the year
+(365 or 366 for leap years), the number of days with flow observations, 
+the number of `NA`-values (days with missing data) and the remaining fraction of days.
+
+```{r}
+print(incomplete)
+```
+
 
 #	Threshold selection and drought events
 A sequence of drought events is obtained from the streamflow hydrograph by 
@@ -137,7 +150,9 @@ We will append a logical column called `is.minor` to the table of drought events
 It is `TRUE` when drought duration is less than five days and if the drought 
 volume is less than 
 `r format(vmin, big.mark = "<i>&nbsp;</i>")`<i>&nbsp;</i>m<sup>3</sup> 
-(5% of the maximum drought deficit volume). 
+(5% of the maximum drought deficit volume). Due to this criteria a total number 
+of `r sum(droughts$is.minor)` droughts are considered minor droughts.
+
 
 ```{r}
 droughts <- droughts %>%
@@ -145,70 +160,7 @@ droughts <- droughts %>%
   print()
 ```
 
-Due to this criteria a total number of `r sum(droughts$is.minor)` droughts 
-are considered minor droughts.
 
-```{r, echo=FALSE, }
-fig.cap <- paste(
-  "Figure x.x: Drought duration and drought deficit volume for years 2010 to 2016.",
-  "A drought event is classified as a minor drought if the duration or the volume is",
-  "below a given threshold."
-)
-```
-```{r, echo=FALSE, fig.cap=fig.cap}
-thres <- droughts %>%
-  summarise(duration = 5, volume = max(volume) * 0.005) %>%
-  pivot_longer(cols = everything(), names_to = "variable")
-
-d <- droughts %>%
-  mutate(
-    year = water_year(first.day, origin = "-09-01"),
-    minor = if_else(duration < 5 | volume < min(volume) * 0.005, "minor drought", "drought"),
-    # label = factor(event, event, labels = sprintf("%i (%i)", event, year)),
-    duration = as.double(duration, units = "days"),
-    # duration = if_else(duration == 1, 1.051, duration),
-    event = factor(event)
-  ) %>%
-  filter(year >= 2010) %>%
-  select(event, minor, duration, volume, year) %>%
-  pivot_longer(cols = c(duration, volume), names_to = "variable")
-
-library(cowplot)
-p1 <- d %>%
-  filter(variable == "duration") %>%
-  ggplot(aes(event, value, fill = minor)) + 
-  geom_col() + 
-  geom_hline(data = filter(thres, variable == "duration"), 
-             aes(yintercept = value), 
-             linetype = "dashed", size = 0.2) + 
-  labs(y = "Drought duration in days") + 
-  # scale_y_log10() + 
-  scale_fill_manual("", values = c(drought = "grey30", "minor drought" = "grey70")) + 
-  facet_grid(rows = vars(variable), cols = vars(year), scales = "free", space = "free_x") + 
-  theme(axis.title.x = element_blank(), #element_text(angle = 90, hjust = 1, vjust = 0.5), 
-        legend.position = "top",
-        panel.grid = element_blank(), 
-        strip.text.y = element_blank())
-
-p2 <- d %>%
-  filter(variable == "volume") %>%
-  ggplot(aes(event, value, fill = minor)) + 
-  geom_col() + 
-  geom_hline(data = filter(thres, variable == "volume"), 
-             aes(yintercept = value), 
-             linetype = "dashed", size = 0.2) + 
-  labs(x = "Drought event number", y = "Drought deficit volume in m³") + 
-  scale_y_log10() + 
-  scale_fill_manual("", values = c(drought = "grey30", "minor drought" = "grey70")) + 
-  facet_grid(rows = vars(variable), cols = vars(year), scales = "free", space = "free_x") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), 
-        legend.position = "none", 
-        panel.grid = element_blank(), 
-        strip.text.y = element_blank())
-
-p <- plot_grid(p1, p2, align = "v", axis = "x", ncol = 1)
-p
-```
 
 
 #	Eliminating dependent droughts (Pooling)
@@ -268,9 +220,13 @@ p <- pooled %>%
     year = water_year(first.day, origin = "-09-01")
   ) %>%
   group_by(year) %>%
-  mutate(event = group_const_value(event) + 1) %>%
+  mutate(
+    event = group_const_value(event) + 1
+  ) %>%
+  ungroup() %>%
   select(event, duration, year) %>%
-  right_join(tibble(year = setdiff(full_seq(.$year, 1), incomplete$year)), by = "year")
+  right_join(complete %>% select(year), by = "year") %>%
+  arrange(year)
 
 major <- hydroDrought:::paste_with_and(head(p$year))
 ```

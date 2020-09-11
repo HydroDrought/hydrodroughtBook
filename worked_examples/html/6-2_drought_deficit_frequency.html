@@ -52,291 +52,120 @@ if (window.hljs) {
 
 <div id="TOC">
 <ul>
-<li><a href="#data"><span class="toc-section-number">1</span> Data</a><ul>
-<li><a href="#derivation-of-pds-and-annual-maxima-series"><span class="toc-section-number">1.1</span> Derivation of PDS and annual maxima series</a></li>
-<li><a href="#fitting"><span class="toc-section-number">1.2</span> Fitting</a></li>
-</ul></li>
+<li><a href="#data"><span class="toc-section-number">1</span> Data</a></li>
 <li><a href="#derivation-of-distribution-function"><span class="toc-section-number">2</span> Derivation of distribution function</a></li>
 <li><a href="#calculation-of-the-t-year-event"><span class="toc-section-number">3</span> Calculation of the T-year event</a></li>
-<li><a href="#extremes-package-with-bootstrapped-confidence-intervals"><span class="toc-section-number">4</span> extRemes package (with bootstrapped confidence intervals)</a><ul>
-<li><a href="#hack-1"><span class="toc-section-number">4.1</span> Hack 1</a></li>
-<li><a href="#hack-2"><span class="toc-section-number">4.2</span> Hack 2</a></li>
-</ul></li>
-<li><a href="#manual-computation-without-confidence-intervals"><span class="toc-section-number">5</span> Manual computation (without confidence intervals)</a></li>
+<li><a href="#manual-computation"><span class="toc-section-number">4</span> Manual computation</a></li>
 </ul>
 </div>
 
-<p>River Ngaruroro at Kuripapango in New Zealand, applied for frequency analysis of annual minimum series in Worked Example 6.1, is here applied for frequency analysis of drought deficit characteristics. The drought events were derived using the Nizowka program (Software, CD) as described in Worked Example 5.4 (Section 5.4.1). Partial duration series (PDS) of drought events below a given threshold were selected from time series of daily discharge, and <span class="math inline">\(Q_{90}\)</span> was selected as the threshold. Two drought characteristics are analysed in the following: drought deficit volume and real drought duration as defined in Worked Example 5.4.</p>
 <div id="data" class="section level1">
 <h1><span class="header-section-number">1</span> Data</h1>
+<p>River Ngaruroro at Kuripapango in New Zealand, applied for frequency analysis of annual minimum series in Worked Example 6.1, is here applied for frequency analysis of drought deficit characteristics.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
-library(lubridate)
 
-ngaruroro &lt;- intl %&gt;%
-  filter(river == &quot;Ngaruroro&quot;) %&gt;%
-  select(data) %&gt;%
-  unnest(data) %&gt;%
-  # fill gaps with a length of up to 15 days
-  sanitize_ts(approx.missing = 15) %&gt;%
-  mutate(
-    year = water_year(time, origin = &quot;-09-01&quot;)
-  ) </code></pre>
-<pre class="r"><code># remove incomplete years
-coverage &lt;- ngaruroro %&gt;%
-  filter(!is.na(discharge)) %&gt;%
-  pull(time) %&gt;%
-  coverage_yearly(origin = &quot;-09-01&quot;)
-
-incomplete &lt;- coverage %&gt;%
-  filter(days.missing &gt; 0) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 7 x 5
-##    year days.with.data days.in.year days.missing coverage
-##   &lt;dbl&gt;          &lt;int&gt;        &lt;int&gt;        &lt;int&gt;    &lt;dbl&gt;
-## 1  1963            347          366           19    0.948
-## 2  1965            294          365           71    0.805
-## 3  1978            305          365           60    0.836
-## 4  1986            341          365           24    0.934
-## 5  1987            336          366           30    0.918
-## 6  2001            344          365           21    0.942
-## 7  2019             38          366          328    0.104</code></pre>
-<pre class="r"><code>complete &lt;- coverage %&gt;%
-  filter(days.missing == 0)
-
-ngaruroro &lt;- ngaruroro %&gt;%
-  anti_join(incomplete, by = &quot;year&quot;)</code></pre>
+pooled</code></pre>
+<pre><code>## # A tibble: 100 x 5
+##    event  year first.day  duration volume
+##    &lt;int&gt; &lt;dbl&gt; &lt;date&gt;        &lt;dbl&gt;  &lt;dbl&gt;
+##  1     7  1967 1968-02-17       21  1767.
+##  2     8  1967 1968-03-11       23  2350.
+##  3    10  1968 1969-03-25        9   197.
+##  4    11  1968 1969-04-06       13   786.
+##  5    13  1969 1969-11-17        6   241.
+##  6    15  1969 1970-01-25       14   578.
+##  7    16  1969 1970-02-28       17   981.
+##  8    17  1970 1970-12-08        7   130.
+##  9    24  1970 1972-02-03        7   297.
+## 10    25  1970 1972-02-13       20  1394.
+## # … with 90 more rows</code></pre>
+<p>The pooled drought events obtained in Worked Example 5.4 (Section 5.4.1) can be concieved as a partial duration series (PDS) because after removing 77 minor droughts only 100 events above and equal to the following thresholds remained in the series.</p>
+<pre class="r"><code>threshold </code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   metric   threshold
+##   &lt;chr&gt;        &lt;dbl&gt;
+## 1 duration         5
+## 2 volume          51</code></pre>
+<p>Two drought characteristics are analysed in the following: drought deficit volume and real drought duration as defined in Worked Example 5.4.</p>
 <p>Drought events were selected for River Ngaruroro and details of the selection criteria are given in Worked Example 5.4. The series cover the period 1964 to 2018 and the start of the year is set to 1 September.</p>
-<p>A total of seven years were omitted from the series, 1963/64, 1965/66, 1978/79, 1986/87, 1987/88, 2001/02 and 2019/20, due to missing data.</p>
-<pre class="r"><code>q90 &lt;- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
-
-droughts &lt;- ngaruroro %&gt;%
-  drought_events(
-    threshold = q90, pooling = &quot;inter-event&quot;, 
-    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf), 
-    full.table = TRUE
-  ) %&gt;%
-  mutate(
-    year = water_year(first.day, origin = &quot;-09-01&quot;),
-    #year = factor(year, levels = full_seq(ngaruroro$year, 1))
-  )
-
-tbl &lt;- droughts %&gt;%
-  transmute(
-    event, year, first.day, last.day, 
-    duration = as.double(duration, units = &quot;days&quot;),
-    real.duration = dbt, 
-    volume = volume / 1e3,
-    rel.volume = volume / (17.30839 * 86.4),
-    # rel.volume = as.difftime(round(rel.volume, 2), unit = &quot;days&quot;), 
-    average.deficit = volume / duration
-  ) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 172 x 9
-##    event  year first.day  last.day   duration real.duration  volume rel.volume
-##    &lt;int&gt; &lt;dbl&gt; &lt;date&gt;     &lt;date&gt;        &lt;dbl&gt; &lt;drtn&gt;          &lt;dbl&gt;      &lt;dbl&gt;
-##  1     1  1966 1967-04-23 1967-04-23        1  1 days       3.54e+0   0.00237 
-##  2     2  1966 1967-04-26 1967-04-26        1  1 days       1.81e+0   0.00121 
-##  3     3  1966 1967-05-09 1967-05-10        2  2 days       1.19e+1   0.00797 
-##  4     4  1966 1967-05-14 1967-05-14        1  1 days       1.39e+1   0.00930 
-##  5     5  1966 1967-05-23 1967-05-23        1  1 days       2.59e-1   0.000173
-##  6     6  1967 1968-02-07 1968-02-08        2  2 days       2.91e+1   0.0195  
-##  7     7  1967 1968-02-18 1968-03-08       20 20 days       1.71e+3   1.14    
-##  8     8  1967 1968-03-11 1968-04-02       23 23 days       2.29e+3   1.53    
-##  9     9  1967 1968-04-06 1968-04-09        4  4 days       2.83e+2   0.189   
-## 10    10  1968 1969-03-25 1969-04-03       10  9 days       1.72e+2   0.115   
-## # … with 162 more rows, and 1 more variable: average.deficit &lt;dbl&gt;</code></pre>
+<p>A total of eight years were omitted from the series, 1963/64, 1965/66, 1977/78, 1978/79, 1986/87, 1987/88, 2001/02 and 2019/20, due to missing data. As a result 49 years remained in the dataset.</p>
 <p>As only events below the <span class="math inline">\(Q_{90}\)</span> percentile are selected, it might happen that the flow never becomes less than the threshold in a year (non-drought year).</p>
-<p>A total of five out of the 40 years with observations did not experience a drought (20%). The PDS series of drought deficit volume and real duration are plotted in Figure 6.12. Less severe values are found in the second half of the observation period for both deficit volume (upper) and duration (lower). The data are still treated as one sample as the number of observations is considered insufficient for a separate analysis of two periods. It should further be noted that a similar trend towards less severe droughts is not as pronounced for the <span class="math inline">\(AM(1)\)</span> values (Worked Example 6.1). This is likely a result of the high base flow contribution in the catchment (Figure 6.6).</p>
+<p>A total of five out of the 49 years with observations did not experience a drought (34.7%). The PDS series of drought deficit volume and real duration are plotted in Figure 6.12. Less severe values are found in the second half of the observation period for both deficit volume (upper) and duration (lower). The data are still treated as one sample as the number of observations is considered insufficient for a separate analysis of two periods. It should further be noted that a similar trend towards less severe droughts is not as pronounced for the <span class="math inline">\(AM(1)\)</span> values (Worked Example 6.1). This is likely a result of the high base flow contribution in the catchment (Figure 6.6).</p>
 <div class="figure">
 <p class="caption marginnote shownote">
 Figure 6.12 PDS of drought deficit volume (upper) and real duration (lower) for River Ngaruroro at Kuripapango (NZ).
 </p>
-<img src="6-2_drought_deficit_frequency_files/figure-html/unnamed-chunk-7-1.png" alt="Figure 6.12 PDS of drought deficit volume (upper) and real duration (lower) for River
+<img src="6-2_drought_deficit_frequency_files/figure-html/unnamed-chunk-5-1.png" alt="Figure 6.12 PDS of drought deficit volume (upper) and real duration (lower) for River
 Ngaruroro at Kuripapango (NZ)." width="672"  />
 </div>
-<div id="derivation-of-pds-and-annual-maxima-series" class="section level2">
-<h2><span class="header-section-number">1.1</span> Derivation of PDS and annual maxima series</h2>
-<p><label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Comment Tobias: Threshold of 10 is just a suggestion. This way the length of PDS and AMS do not differ very much. </span></p>
-<pre class="r"><code>threshold &lt;- 10
-pds &lt;- tbl %&gt;%
-  select(event, year, duration, first.day, last.day) %&gt;%
-  filter(duration &gt; threshold) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 58 x 5
-##    event  year duration first.day  last.day  
-##    &lt;int&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;date&gt;    
-##  1     7  1967       20 1968-02-18 1968-03-08
-##  2     8  1967       23 1968-03-11 1968-04-02
-##  3    11  1968       13 1969-04-06 1969-04-18
-##  4    14  1969       15 1970-01-25 1970-02-08
-##  5    15  1969       17 1970-02-28 1970-03-16
-##  6    24  1971       21 1972-02-13 1972-03-04
-##  7    27  1972       22 1972-12-18 1973-01-08
-##  8    29  1972       46 1973-01-26 1973-03-12
-##  9    31  1972       15 1973-03-19 1973-04-02
-## 10    32  1972       16 1973-04-05 1973-04-20
-## # … with 48 more rows</code></pre>
-<pre class="r"><code>ams &lt;- tbl %&gt;%
-  select(event, year, duration, first.day, last.day) %&gt;%
-  group_by(year) %&gt;%
-  slice_max(duration, with_ties = FALSE) %&gt;%
-  right_join(complete %&gt;% select(year), by = &quot;year&quot;) %&gt;%
-  ungroup() %&gt;%
-  replace_na(replace = list(duration = 0)) %&gt;%
-  arrange(year) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 50 x 5
-##    event  year duration first.day  last.day  
-##    &lt;int&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;date&gt;    
-##  1    NA  1964        0 NA         NA        
-##  2     3  1966        2 1967-05-09 1967-05-10
-##  3     8  1967       23 1968-03-11 1968-04-02
-##  4    11  1968       13 1969-04-06 1969-04-18
-##  5    15  1969       17 1970-02-28 1970-03-16
-##  6    16  1970        7 1970-12-08 1970-12-14
-##  7    24  1971       21 1972-02-13 1972-03-04
-##  8    29  1972       46 1973-01-26 1973-03-12
-##  9    35  1973       57 1974-01-20 1974-03-17
-## 10    36  1974        5 1975-02-21 1975-02-25
-## # … with 40 more rows</code></pre>
 </div>
-<div id="fitting" class="section level2">
-<h2><span class="header-section-number">1.2</span> Fitting</h2>
+<div id="derivation-of-distribution-function" class="section level1">
+<h1><span class="header-section-number">2</span> Derivation of distribution function</h1>
 <p>in the <a href="https://www.jstatsoft.org/index.php/jss/article/view/v072i08/v72i08.pdf">Journal of Statistical Software</a> there is an article describing the extremes package.</p>
 <p>Their approach is identical to Equation 6.11 in the first edition of the book.</p>
 <blockquote>
-<p>The quantiles of the GP df are easily obtained by setting Equation 5 equal to <span class="math inline">\(1 - p\)</span> and inverting. However, the quantiles of the GP df cannot be as readily interpreted as return levels because the data no longer derive from specific blocks of equal length. Instead, an estimate of the probability of exceeding the threshold, e.g., called <span class="math inline">\(\zeta_u\)</span> , is required. Then, the value <span class="math inline">\(x_m\)</span> that is exceeded on average once every <span class="math inline">\(m\)</span> observations (i.e., an estimated return level) is</p>
+<p>“The quantiles of the GP df are easily obtained by setting Equation 5 equal to <span class="math inline">\(1 - p\)</span> and inverting. However, the quantiles of the GP df cannot be as readily interpreted as return levels because the data no longer derive from specific blocks of equal length. Instead, an estimate of the probability of exceeding the threshold, e.g., called <span class="math inline">\(\zeta_u\)</span> , is required. Then, the value <span class="math inline">\(x_m\)</span> that is exceeded on average once every <span class="math inline">\(m\)</span> observations (i.e., an estimated return level) is”</p>
 </blockquote>
 <p><span class="math display">\[ x_m = u + \frac{\sigma_u}{\xi} \left[ (m \zeta_u)^\xi - 1\right] \]</span> with <span class="math inline">\(m\)</span> being the return period and <span class="math inline">\(\zeta_u\)</span> the overall exceedance rate (= average number of exceedances per year). So the return period is just multiplied with the exceedance rate. <span class="math inline">\(u\)</span> is the location parameter of the GPA (= threshold), <span class="math inline">\(\sigma_u\)</span> is scale and <span class="math inline">\(\xi\)</span> is shape. In our case <span class="math inline">\(\zeta_u = \frac{\text{length of PDS}}{\text{record length in years}}\)</span>.</p>
 <p>This transformation will introduce return periods of less than a year (or negative probabilities) for values <span class="math inline">\(P_{PDS} &lt; 1 + \zeta_u\)</span>. Return periods for PDS of less than a year just imply that such an event occurs on average several times a year.</p>
 <p><span class="math display">\[P_{annual} = 1 - \frac{(1 - P_{PDS})}{\zeta_u}\]</span></p>
 <p>I’ve seen PDS return periods &lt; 1 for example in <a href="https://iwaponline.com/hr/article/8/1/57/1454/Return-Periods-of-Hydrological-EventsPaper">Return Periods of Hydrological Events, Rojsberg 1976</a>. I’ve also looked at his approach of relating PDS and AMS. But for return periods &gt; 10 years quantiles of the AMS and PDS are practically identical, irrespective of the exceedance rate.</p>
-<p>The following plots are just to demonstrate what is going on. Using a Gumbel distribution for a conditional probability model is probably a poor choice because we cannot specify a lower bound.</p>
-<div class="figure">
-<p class="caption marginnote shownote">
-Linear probability scale on x-Axis.
-</p>
-<img src="6-2_drought_deficit_frequency_files/figure-html/unnamed-chunk-12-1.png" alt="Linear probability scale on x-Axis. " width="672"  />
-</div>
-<div class="figure">
-<p class="caption marginnote shownote">
-Same plot as above but with reduced variate.
-</p>
-<img src="6-2_drought_deficit_frequency_files/figure-html/unnamed-chunk-13-1.png" alt="Same plot as above but with reduced variate." width="672"  />
-</div>
-</div>
-</div>
-<div id="derivation-of-distribution-function" class="section level1">
-<h1><span class="header-section-number">2</span> Derivation of distribution function</h1>
 <p>Following Zelenhasic &amp; Salvai (1987) an estimate of the non-exceedance probability, <span class="math inline">\(F(x)\)</span>, for the largest event in each time interval is in Nizowka obtained by combining the distribution for the occurrence of events and the distribution for the magnitudes of deficit volume or duration. Here a time interval of one year is chosen. Subsequently the return period in years for a given event can be calculated. The number of drought events occurring in a time period t is commonly assumed to be Poisson distributed (Equation 6.9) with parameter <span class="math inline">\(\lambda t\)</span>. In Nizowka the binomial Pascal distribution is offered along with the Poisson distribution as described in ‘Background Information NIZOWKA’ (Software, CD). The distribution that best fitted deficit volume was the Pascal distribution for the number of droughts and the GP distribution for the deficits. For duration the Pascal distribution was chosen along with the Log-Normal distribution. The <span class="math inline">\(F(x)\)</span> is for drought deficit volume plotted in Figure 6.13 together with the observed values plotted using a plotting position. The chosen distribution describes the data well, with the exception of some values in the upper range. The maximum value is, however, satisfactorily modelled.</p>
-<p><img src="6-2_drought_deficit_frequency_files/figure-html/unnamed-chunk-15-1.png" width="672"  /></p>
+<pre class="r"><code>library(lmom)
+rp &lt;- c(10, 100, 200)
+prob.annual &lt;- 1 - c(1 / rp)
+
+annual2pds &lt;- function(prob.annual, exc.per.year) {
+  1 - (1 - prob.annual)/exc.per.year
+}
+
+pds2annual &lt;- function(prob.pds, exc.per.year) {
+  1 - (1 - prob.pds) * exc.per.year
+}
+
+observations &lt;- pooled %&gt;% 
+  select(duration, volume) %&gt;%
+  mutate(across(everything(), as.numeric)) %&gt;%
+  pivot_longer(cols = everything(), names_to = &quot;metric&quot;) %&gt;%
+  nest(data = value)  %&gt;%
+  left_join(threshold, by = &quot;metric&quot;) 
+
+fitted &lt;- observations %&gt;% 
+  mutate(
+    rate = map2_dbl(data, data, ~(nrow(.x) / nrow(complete))), 
+    parameter = map2(data, threshold, ~pelgpa(samlmu(.x$value), bound = .y))
+    ) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 2 x 5
+##   metric   data               threshold  rate parameter
+##   &lt;chr&gt;    &lt;list&gt;                 &lt;dbl&gt; &lt;dbl&gt; &lt;list&gt;   
+## 1 duration &lt;tibble [100 × 1]&gt;         5  2.04 &lt;dbl [3]&gt;
+## 2 volume   &lt;tibble [100 × 1]&gt;        51  2.04 &lt;dbl [3]&gt;</code></pre>
+<p><img src="6-2_drought_deficit_frequency_files/figure-html/unnamed-chunk-7-1.png" width="672"  /></p>
 </div>
 <div id="calculation-of-the-t-year-event" class="section level1">
 <h1><span class="header-section-number">3</span> Calculation of the T-year event</h1>
 <p>The return period of a given event is calculated following Equation 6.4. The relationship between the drought characteristics as defined in Worked Example 5.4 and <span class="math inline">\(F(x)\)</span> are given by the tabulated distribution functions in Nizowka. The design value for a particular return period, i.e. the T-year event, can be obtained from the tables for known values of <span class="math inline">\(F(x)\)</span>. The estimated 10-, 100- and 200-year drought events are shown in Table 6.2.</p>
-<pre class="r"><code>fitted %&gt;%
-  select(metric, quantiles) %&gt;%
-  unnest(quantiles)</code></pre>
-<pre><code>## # A tibble: 10 x 4
-##    metric            p p.adj   quant
-##    &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-##  1 real.duration 0.95  0.955    52.9
-##  2 real.duration 0.98  0.982    66.9
-##  3 real.duration 0.987 0.988    73.4
-##  4 real.duration 0.99  0.991    78.1
-##  5 real.duration 0.995 0.995    89.8
-##  6 abs.volume    0.95  0.976  7326. 
-##  7 abs.volume    0.98  0.991 11362. 
-##  8 abs.volume    0.987 0.994 13649. 
-##  9 abs.volume    0.99  0.995 15499. 
-## 10 abs.volume    0.995 0.998 20882.</code></pre>
+<pre><code>## # A tibble: 3 x 6
+##   prob.annual rp.annual rp.pds prob.pds duration volume
+##         &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+## 1       0.9         10.   20.4    0.951     42.1  4841.
+## 2       0.99       100.  204.     0.995     91.7 15995.
+## 3       0.995      200.  408.     0.998    112.  22159.</code></pre>
 </div>
-<div id="extremes-package-with-bootstrapped-confidence-intervals" class="section level1">
-<h1><span class="header-section-number">4</span> extRemes package (with bootstrapped confidence intervals)</h1>
-<pre class="r"><code># the drought durations
-x &lt;- as.numeric(tbl$duration)</code></pre>
-<p>Unfortunately we cannot suggest the use of <strong>extRemes</strong> package directly because it doesn’t fit distributions to already derived PDS. It computes the PDS internally but doesn’t allow for a specification of initial record length.</p>
-<div id="hack-1" class="section level2">
-<h2><span class="header-section-number">4.1</span> Hack 1</h2>
-<p>Hack 1 would be to extend the time series of drought durations with zeros to match the length of the discharge time series. This way the internal procedure computes excess rate correctly.</p>
-<pre class="r"><code>xx &lt;- rep(0, round(nrow(complete) * 365.25))
-xx[seq_along(x)] &lt;- x
-head(xx, 500)</code></pre>
-<pre><code>##   [1]  1  1  2  1  1  2 20 23  4 10 13  6  1 15 17  7  2  4  3  3  3  3  7 21  5
-##  [26]  6 22  3 46  2 15 16  5  9 57  5  1  1  5  3  1  7  4 11 24 64 25 12 46  1
-##  [51]  1  4  7  8 17 11  6 29  5 13 12 26  6  9  2  1  2  3  2  3 15  9  9  9 16
-##  [76] 17  2  1  5  5  1  1 17  3 22  2 16  5 10  1 10  3  4  8  7  5  3  5 28  3
-## [101]  9  2  1  2  1  4 22  5  9  2 20  7  1  5  5  9 13 18  1  3  4 39  3 19  4
-## [126] 17  3 26  5 22 15 13 14  4 52 36  4  2  5  1 28  4  2 44 23  6 11  3 27 11
-## [151]  1 26 40 27  3  1  2  3  4 25 10 69 21  1  9  2 10 17 25  2  2  1  0  0  0
-## [176]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [201]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [226]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [251]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [276]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [301]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [326]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [351]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [376]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [401]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [426]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [451]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-## [476]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0</code></pre>
-<pre class="r"><code>rp &lt;- c(20, 50, 75, 100, 200)
+<div id="manual-computation" class="section level1">
+<h1><span class="header-section-number">4</span> Manual computation</h1>
+<p>Tobias: pearhaps mention that one should not forget to set the lower bound of the GPA (location parameter) equal to the threshold.</p>
+<pre class="r"><code>(parameter &lt;- pelgpa(samlmu(pooled$duration), bound = 5))</code></pre>
+<pre><code>##         xi      alpha          k 
+##  5.0000000  8.7770258 -0.2128228</code></pre>
+<pre class="r"><code>prob.annual &lt;- 1 - 1/ c(10, 100, 200)
+prob.pds &lt;- annual2pds(prob.annual, exc.per.year = 100 / 49)
 
-library(extRemes)
-fit &lt;- fevd(xx, threshold = threshold, type = &quot;GP&quot;, method = &quot;Lmoments&quot;,
-            time.units = &quot;days&quot;)
-
-ci(fit, return.period = rp)</code></pre>
-<pre><code>## fevd(x = xx, threshold = threshold, type = &quot;GP&quot;, method = &quot;Lmoments&quot;, 
-##     time.units = &quot;days&quot;)
-## 
-## [1] &quot;Parametric Bootstrap&quot;
-## 502  iterations
-## 
-##              2.5% Estimate     97.5%
-## 20-year  41.27576 51.80202  63.62330
-## 50-year  46.12754 61.32064  81.15220
-## 75-year  47.52220 65.21283  90.05744
-## 100-year 48.41688 67.86277  96.35552
-## 200-year 50.30245 73.88735 113.40440</code></pre>
-</div>
-<div id="hack-2" class="section level2">
-<h2><span class="header-section-number">4.2</span> Hack 2</h2>
-<p>Hack 2 would be to alter the object created by <code>fevd()</code> to use the correct rate <span class="math inline">\(\zeta_u\)</span>.</p>
-<pre class="r"><code>rate &lt;- sum(x &gt; threshold) / nrow(complete)
-fit &lt;- fevd(x, threshold = threshold, type = &quot;GP&quot;, method = &quot;Lmoments&quot;,
-            time.units = &quot;years&quot;)
-fit$rate &lt;- rate
-ci(fit, return.period = rp)</code></pre>
-<pre><code>## fevd(x = x, threshold = threshold, type = &quot;GP&quot;, method = &quot;Lmoments&quot;, 
-##     time.units = &quot;years&quot;)
-## 
-## [1] &quot;Parametric Bootstrap&quot;
-## 502  iterations
-## 
-##              2.5% Estimate     97.5%
-## 20-year  40.78311 51.80172  64.15715
-## 50-year  45.20142 61.32037  81.52313
-## 75-year  46.61339 65.21258  89.98588
-## 100-year 47.46870 67.86253  96.22533
-## 200-year 48.98597 73.88712 115.98268</code></pre>
-</div>
-</div>
-<div id="manual-computation-without-confidence-intervals" class="section level1">
-<h1><span class="header-section-number">5</span> Manual computation (without confidence intervals)</h1>
-<pre class="r"><code>library(lmom)
-
-adjust_prob_pds &lt;- function(prob, exc.per.year) {
-  1 - (1 - prob)/exc.per.year
-}
-
-prob &lt;- 1 - 1/rp
-parameter &lt;- pelgpa(samlmu(x[x &gt; threshold]), bound = threshold)
-quagpa(adjust_prob_pds(prob, rate), parameter)</code></pre>
-<pre><code>## [1] 51.80172 61.32037 65.21258 67.86253 73.88712</code></pre>
+# Quantiles of the GPA 
+quagpa(f = prob.pds, para = parameter)</code></pre>
+<pre><code>## [1]  42.11736  91.67007 112.00200</code></pre>
 </div>
 
 

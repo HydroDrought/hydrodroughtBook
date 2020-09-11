@@ -8,18 +8,7 @@ ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 ```
 
-River Ngaruroro at Kuripapango in New Zealand, applied for frequency
-analysis of annual minimum series in Worked Example 6.1, is here applied
-for frequency analysis of drought deficit characteristics. The drought events
-were derived using the Nizowka program (Software, CD) as described in
-Worked Example 5.4 (Section 5.4.1). Partial duration series (PDS) of drought
-events below a given threshold were selected from time series of daily
-discharge, and $Q_{90}$ was selected as the threshold. Two drought characteristics
-are analysed in the following: drought deficit volume and real drought
-duration as defined in Worked Example 5.4.
-
-# Data
-```{r}
+```{r, echo = FALSE}
 library(tidyverse)
 library(hydroDrought)
 library(lubridate)
@@ -27,87 +16,106 @@ library(lubridate)
 ngaruroro <- intl %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
-  unnest(data) %>%
-  # fill gaps with a length of up to 15 days
-  sanitize_ts(approx.missing = 15) %>%
+  unnest(data) 
+
+ngaruroro <- ngaruroro %>%
+  sanitize_ts(approx.missing = 14) %>%
   mutate(
     year = water_year(time, origin = "-09-01")
   ) 
-```
 
-
-```{r}
-# remove incomplete years
 coverage <- ngaruroro %>%
   filter(!is.na(discharge)) %>%
   pull(time) %>%
   coverage_yearly(origin = "-09-01")
 
 incomplete <- coverage %>%
-  filter(days.missing > 0) %>%
-  print()
+  filter(days.missing > 0) 
 
 complete <- coverage %>%
   filter(days.missing == 0)
 
 ngaruroro <- ngaruroro %>%
   anti_join(incomplete, by = "year")
+
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
+
+pooled1 <- ngaruroro %>%
+  drought_events(
+    threshold = q90, pooling = "inter-event", 
+    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf)
+  ) %>%
+  mutate(
+    duration = as.double(dbt, units = "days"),
+    volume = volume / 1e3
+  )
+
+threshold <- tibble(
+  metric = c("duration", "volume"),
+  threshold = c(5, round(max(pooled1$volume) * 0.005))
+)
+
+filtered <- pooled1 %>%
+  filter(
+    duration >= threshold %>% filter(metric == "duration") %>% pull(threshold),
+    volume >= threshold %>% filter(metric == "volume") %>% pull(threshold) 
+  ) %>%
+  mutate(
+    year = water_year(first.day, origin = "-09-01"),
+  ) 
+
+pooled <- filtered %>%
+  select(event, year, first.day, duration, volume) 
+
+no_drought <- complete %>%
+  anti_join(pooled, by = "year")
 ```
 
-```{r, echo=FALSE}
-ng <- ngaruroro
+# Data
+River Ngaruroro at Kuripapango in New Zealand, applied for frequency
+analysis of annual minimum series in Worked Example 6.1, is here applied
+for frequency analysis of drought deficit characteristics.
+
+```{r}
+library(tidyverse)
+library(hydroDrought)
+
+pooled
 ```
+
+The pooled drought events obtained in Worked Example 5.4 (Section 5.4.1) can be
+concieved as a partial duration series (PDS) 
+because after removing `r nrow(pooled1) - nrow(filtered)` minor droughts only 
+`r nrow(pooled)` events above and equal to the following thresholds remained
+in the series. 
+
+```{r}
+threshold 
+```
+
+
+Two drought characteristics are analysed in the following: drought deficit 
+volume and real drought duration as defined in Worked Example 5.4.
+
 
 
 Drought events were selected for River Ngaruroro and details of the
 selection criteria are given in Worked Example 5.4. The series cover the
-period `r min(ng$year)` to `r max(ng$year)` and the start of the year is set to 1 September. 
+period `r min(ngaruroro$year)` to `r max(ngaruroro$year)` and the start of the 
+year is set to 1 September. 
 
 
 A total of `r hydroDrought:::numbers_english(nrow(incomplete))` years were omitted from the series, 
 `r hydroDrought:::paste_with_and(paste(incomplete$year, substr(incomplete$year + 1, 3L, 4L), sep = "/"))`, 
-due to missing data.
-
-```{r}
-q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
-
-droughts <- ngaruroro %>%
-  drought_events(
-    threshold = q90, pooling = "inter-event", 
-    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf), 
-    full.table = TRUE
-  ) %>%
-  mutate(
-    year = water_year(first.day, origin = "-09-01"),
-    #year = factor(year, levels = full_seq(ngaruroro$year, 1))
-  )
-
-tbl <- droughts %>%
-  transmute(
-    event, year, first.day, last.day, 
-    duration = as.double(duration, units = "days"),
-    real.duration = dbt, 
-    volume = volume / 1e3,
-    rel.volume = volume / (17.30839 * 86.4),
-    # rel.volume = as.difftime(round(rel.volume, 2), unit = "days"), 
-    average.deficit = volume / duration
-  ) %>%
-  print()
-```
-
-
-```{r echo=FALSE}
-missing <- complete %>%
-  anti_join(tbl, by = "year")
-```
+due to missing data. As a result `r nrow(complete)` years remained in the dataset. 
 
 As only events below the $Q_{90}$
 percentile are selected, it might happen that the flow never becomes less
 than the threshold in a year (non-drought year). 
 
-A total of `r hydroDrought:::numbers_english(length(missing))` out of the 
-`r nrow(complete) - nrow(missing)` years with observations did not experience a drought 
-(`r round(100 * nrow(missing) / nrow(complete), 1)`%). The PDS
+A total of `r hydroDrought:::numbers_english(length(no_drought))` out of the 
+`r nrow(complete)` years with observations did not experience a drought 
+(`r round(100 * nrow(no_drought) / nrow(complete), 1)`%). The PDS
 series of drought deficit volume and real duration are plotted in
 Figure 6.12. Less severe values are found in the second half of the
 observation period for both deficit volume (upper) and duration (lower).
@@ -118,23 +126,27 @@ pronounced for the $AM(1)$ values (Worked Example 6.1). This is likely a
 result of the high base flow contribution in the catchment (Figure 6.6).
 
 
+
+
 ```{r, echo=FALSE}
 fig.cap <- "Figure 6.12 PDS of drought deficit volume (upper) and real duration (lower) for River
 Ngaruroro at Kuripapango (NZ)."
 ```
 ```{r, echo=FALSE, fig.cap=fig.cap}
 library(cowplot)
-p1 <- ggplot(tbl, aes(x = first.day, y = average.deficit)) +
-  geom_point() + 
+p1 <- ggplot(pooled, aes(x = first.day, y = volume)) +
+  geom_point(alpha = 0.4) + 
   scale_x_date(expand = expansion(mult = 0.01), date_minor_breaks = "1 year") +
-  scale_y_continuous(limits = c(0, 200), expand = expansion()) + 
-  labs(y = expression(paste("Average deficit volume (", 10^{3}, m^{3}, ")"))) +
+  scale_y_continuous(limits = c(0, NA), 
+                     expand = expansion(mult = c(0.01, 0.04))) + 
+  labs(y = expression(paste("Deficit volume (", 10^{3}, m^{3}, ")"))) +
   theme(axis.title.x = element_blank())
 
-p2 <- ggplot(tbl, aes(x = first.day, y = as.double(real.duration))) +
-  geom_point() + 
+p2 <- ggplot(pooled, aes(x = first.day, y = as.double(duration))) +
+  geom_point(alpha = 0.4) + 
   scale_x_date(expand = expansion(mult = 0.01), date_minor_breaks = "1 year") +
-  scale_y_continuous(limits = c(0, 70), expand = expansion()) +
+  scale_y_continuous(limits = c(0, NA), 
+                     expand = expansion(mult = c(0, 0.04))) +
   labs(y = "Real duration (days)") + 
   theme(axis.title.x = element_blank())
 
@@ -143,43 +155,18 @@ cowplot::plot_grid(p1, p2, align = "v", axis = "x", ncol = 1)
 
 
 
-## Derivation of PDS and annual maxima series
-
-^[Comment Tobias: Threshold of 10 is just a suggestion. This way the length of PDS and AMS do not differ very much. ]
-```{r}
-threshold <- 10
-pds <- tbl %>%
-  select(event, year, duration, first.day, last.day) %>%
-  filter(duration > threshold) %>%
-  print()
-```
-
-
-```{r}
-ams <- tbl %>%
-  select(event, year, duration, first.day, last.day) %>%
-  group_by(year) %>%
-  slice_max(duration, with_ties = FALSE) %>%
-  right_join(complete %>% select(year), by = "year") %>%
-  ungroup() %>%
-  replace_na(replace = list(duration = 0)) %>%
-  arrange(year) %>%
-  print()
-```
-
-## Fitting 
-
+# Derivation of distribution function
 
 in the [Journal of Statistical Software](https://www.jstatsoft.org/index.php/jss/article/view/v072i08/v72i08.pdf) there is an article describing the extremes package. 
 
 Their approach is identical to Equation 6.11 in the first edition of the book. 
 
-> The quantiles of the GP df are easily obtained by setting Equation 5 equal to
+> "The quantiles of the GP df are easily obtained by setting Equation 5 equal to
 $1 - p$ and inverting. However, the quantiles of the GP df cannot be as readily interpreted as
 return levels because the data no longer derive from specific blocks of equal length. Instead,
 an estimate of the probability of exceeding the threshold, e.g., called $\zeta_u$ , is required. Then,
 the value $x_m$ that is exceeded on average once every $m$ observations (i.e., an estimated return
-level) is 
+level) is "
 
 $$ x_m = u + \frac{\sigma_u}{\xi} \left[ (m \zeta_u)^\xi - 1\right] $$
 with $m$ being the return period and $\zeta_u$ the overall exceedance rate (= average number of exceedances 
@@ -195,181 +182,8 @@ $$P_{annual} = 1 - \frac{(1 - P_{PDS})}{\zeta_u}$$
 
 I've seen PDS return periods < 1 for example in [Return Periods of Hydrological Events, Rojsberg 1976](https://iwaponline.com/hr/article/8/1/57/1454/Return-Periods-of-Hydrological-EventsPaper). I've also looked at his approach of relating PDS and AMS. But for return periods > 10 years quantiles of the AMS and PDS are practically identical, irrespective of the exceedance rate.   
 
-```{r, echo=FALSE}
-# prob_annual <- function(prob.pds, events.per.year)
-# {
-#   x <- (1 - (1 - prob.pds) / events.per.year )^events.per.year
-#   
-#   bad <- 1 - prob.pds > events.per.year
-#   if (any(bad)) {
-#     warning("1 - prob.pds must be <= events.per.year")
-#     x[bad] <- NA
-#   }
-#   
-#   return(x)
-# }
-
-adjust_prob_pds <- function(prob, exc.per.year) {
-  1 - (1 - prob)/exc.per.year
-}
-
-adjust_prob_pds_inv <- function(prob.adj, exc.per.year) {
-  1 - (1 - prob.adj) * exc.per.year
-}
 
 
-fit_distr <- function(x, dist, bound = NULL, correct.prob = FALSE)
-{
-  if (!correct.prob) correct.prob <- 1
-  library(lmom)
-  zeros <- x == 0
-  freq.zeros <- sum(zeros) / length(x)
-  if(dist %in% c("gpa", "ln3", "wak", "wei")) {
-    par <- match.fun(paste0("pel", dist))(samlmu(x[!zeros], nmom = 5), bound = bound)  
-  } else {
-    par <- match.fun(paste0("pel", dist))(samlmu(x[!zeros], nmom = 5))
-  }
-  
-  cdf <- match.fun(paste0("cdf", dist))
-  qua <- match.fun(paste0("qua", dist))
-  
-  
-  .cdf <- function(x, cdf, par, zeros, correct.prob = 1)
-  {
-    freq.zeros <- sum(zeros) / length(x)
-    prob <- numeric(length(x))
-    p1 <- cdf(x[!zeros], par)
-    prob[!zeros] <- p1 * (1 - freq.zeros) + freq.zeros
-    prob[zeros] <- seq(0, freq.zeros, length.out = sum(zeros))
-    
-    prob <- adjust_prob_pds(prob, exc.per.year = correct.prob)
-    return(prob)
-  }
-  
-  .qua <- function(p, qua = qua, par, freq.zeros, correct.prob = 1)
-  {
-    quant <- numeric(length(p))
-    zeros <- !is.na(p) & p <= freq.zeros
-    p <- adjust_prob_pds(p, exc.per.year = correct.prob)
-    quant[zeros] <- 0
-    p1 <- (p[!zeros] - freq.zeros) / (1 - freq.zeros)
-    quant[!zeros] <- qua(f = p1, para = par)
-    return(quant)
-  }
-  
-  list(
-    cdf = function(x) .cdf(x, cdf = cdf, par = par, zeros = zeros, 
-                           correct.prob = correct.prob),
-    qua = function(x) .qua(x, qua = qua, par = par, 
-                           freq.zeros = freq.zeros,
-                           correct.prob = correct.prob),
-    par = par, 
-    zeros = zeros)
-}
-```
-
-
-```{r, echo=FALSE}
-data <- tibble(
-  series = c("AMS", "PDS", "PDS-corrected"),
-  events.per.year = c(1, 1, nrow(pds) / nrow(complete)),
-  bound = list(NULL, threshold, threshold),
-  distribution = c("gum", "gpa", "gpa"),
-  observations = list(ams$duration, 
-                      pds$duration, 
-                      pds$duration)
-) %>%
-  mutate(
-    series = paste0(series, " (", distribution, ")"),
-    observations = map2(observations, events.per.year, 
-                        ~tibble(
-                          value = .x, 
-                          prob.emp = adjust_prob_pds_inv(rank(value, ties.method = "random") / (length(value) + 1), .y),
-                          rp.emp = (length(value) + 1) / rank(-value)  * .y
-                        )
-    ),
-    fit = pmap(list(x = map(observations, "value"), 
-                    dist = distribution, 
-                    bound = bound,
-                    correct.prob = events.per.year),
-               fit_distr),
-    fitted = map(fit, ~tibble(
-      prob = seq(0.01, 1, 0.005),
-      value = .x$qua(prob)
-    )),
-    quantiles = map(fit, ~tibble(
-      rp = c(20, 50, 75, 100, 200),
-      prob = 1 - 1/rp,
-      value = .x$qua(prob)
-    ))
-  )
-```
-
-The following plots are just to demonstrate what is going on. Using a Gumbel 
-distribution for a conditional probability model is probably a poor choice because 
-we cannot specify a lower bound. 
-
-```{r, echo=FALSE, fig.cap="Linear probability scale on x-Axis. "}
-reduced_var <- function (x) -log(1 - x)
-
-obs <- data %>%
-  select(series, observations) %>%
-  unnest(observations) 
-
-fitted <- data %>%
-  select(series, fitted) %>%
-  unnest(fitted) 
-
-rp.breaks <- c(1:5, 10, 100)
-
-ggplot(fitted, aes(y = value, col = series)) + 
-  geom_line(aes(x = (prob))) + 
-  geom_point(aes(x = (prob.emp)), data = obs, size = 0.5) +
-  geom_vline(xintercept = (1 - 1/breaks_log10_all(c(1, 100))), 
-             col = "lightgrey", size = 0.1) + 
-  scale_x_continuous(
-    expand = expansion(c(0.04, 0)), 
-    sec.axis = sec_axis(
-      trans = function(x) 1 / ( 1 - x), 
-      breaks = rp.breaks,
-      name = "Return period (in years)")
-  ) + 
-  labs(x = "Probability ? F(x)",
-       y = expression(paste("Quantile (", m^{3}, s^{-1}, ")"))) + 
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        legend.position = c(0, 1), 
-        legend.justification = c(-0.2, 1.2))
-```
-
-
-```{r, echo=FALSE, fig.cap="Same plot as above but with reduced variate."}
-
-
-rp.breaks <- c(1:8, seq(10, 80, 10), 100, 150, 200)
-
-ggplot(fitted, aes(y = value, col = series)) + 
-  geom_line(aes(x = reduced_var(prob))) + 
-  geom_point(aes(x = reduced_var(prob.emp)), data = obs, size = 0.5) +
-  geom_vline(xintercept = reduced_var(1 - 1/breaks_log10_all(c(1, 100))),  
-             col = "lightgrey", size = 0.1) + 
-  scale_x_continuous(
-    expand = expansion(c(0.04, 0)), 
-    sec.axis = sec_axis(
-      trans = function(x) 1/ (1 - (-exp(-x) + 1)), 
-      breaks = rp.breaks,
-      name = "Return period (in years)")
-  ) + 
-  labs(x = expression(paste("Exponential reduced variate -log(", 1, " - F(", x, "))")),
-       y = expression(paste("Quantile (", m^{3}, s^{-1}, ")"))) + 
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        legend.position = c(0, 1), 
-        legend.justification = c(-0.2, 1.2))
-```
-
-
-# Derivation of distribution function
 Following Zelenhasic & Salvai (1987) an estimate of the non-exceedance
 probability, $F(x)$, for the largest event in each time interval is in Nizowka
 obtained by combining the distribution for the occurrence of events and
@@ -391,61 +205,58 @@ modelled.
 
 
 
-```{r, echo=FALSE}
+```{r}
 library(lmom)
-rp <- c(20, 50, 75, 100, 200)
-p <- 1 - c(1 / rp)
+rp <- c(10, 100, 200)
+prob.annual <- 1 - c(1 / rp)
 
-thresh <- tribble( 
-  ~metric, ~threshold,
-  "real.duration", 10,
-  "abs.volume", 100
-)
+annual2pds <- function(prob.annual, exc.per.year) {
+  1 - (1 - prob.annual)/exc.per.year
+}
 
-observations <- tbl %>% 
-  select(real.duration, abs.volume = volume) %>%
+pds2annual <- function(prob.pds, exc.per.year) {
+  1 - (1 - prob.pds) * exc.per.year
+}
+
+observations <- pooled %>% 
+  select(duration, volume) %>%
   mutate(across(everything(), as.numeric)) %>%
   pivot_longer(cols = everything(), names_to = "metric") %>%
   nest(data = value)  %>%
-  left_join(thresh, by = "metric") %>%
-  mutate(pds = map2(data, threshold, ~tibble(value = .x[.x>.y])))
+  left_join(threshold, by = "metric") 
 
 fitted <- observations %>% 
   mutate(
-    rate = map2_dbl(pds, data, ~(nrow(.x) / nrow(complete))), 
-    parameter = map(pds, ~pelgpa(samlmu(.x$value))),
-    quantiles = map2(parameter, rate, ~tibble(
-      p = p, 
-      p.adj = adjust_prob_pds(p, .y),
-      quant = quagpa(p.adj, .x))
-    ),
-    quafun = map2(parameter, rate, ~tibble(
-      p = seq(0.01, 0.991, 0.001),
-      p.adj = adjust_prob_pds(p, .y),
-      quant = quagpa(p.adj, .x)
-      ))
-  )
+    rate = map2_dbl(data, data, ~(nrow(.x) / nrow(complete))), 
+    parameter = map2(data, threshold, ~pelgpa(samlmu(.x$value), bound = .y))
+    ) %>%
+  print()
 ```
 
 
-```{r echo=FALSE, fig.height=8}
+```{r echo=FALSE}
 reduced_var <- function (x) -log(1 - x)
 
 o <- fitted %>%
   mutate(
     metric = factor(
-      metric, levels = c("real.duration", "abs.volume"),
+      metric, levels = c("duration", "volume"),
       labels = c("Real duration\n(in days)", 
                  "Absolute volume\n(in 1000 m³)"))
   ) %>%
-  unnest(pds) %>%
+  unnest(data) %>%
   group_by(metric) %>%
-  mutate(prob = adjust_prob_pds_inv(rank(value) / (n() + 1), rate[1])) 
+  mutate(prob.annual = pds2annual(rank(value, ties.method = "random") / (n() + 1), rate[1])) 
 
 f <- fitted %>%
   mutate(
+    quafun = map2(parameter, rate, ~tibble(
+      prob.pds = seq(0, 0.998, 0.001), 
+      prob.annual = pds2annual(prob.pds, .y),
+      quant = quagpa(prob.pds, .x)
+    )),
     metric = factor(
-      metric, levels = c("real.duration", "abs.volume"),
+      metric, levels = c("duration", "volume"),
       labels = c("Real duration\n(in days)", 
                  "Absolute volume\n(in 1000 m³)"))
   ) %>%
@@ -454,11 +265,11 @@ f <- fitted %>%
 
 rp.breaks <- c(1:8, seq(10, 80, 10), 100, 150, 200)
 
-ggplot(o, aes(x = reduced_var(prob), y = value)) + 
+ggplot(o, aes(x = reduced_var(prob.annual), y = value)) + 
   geom_vline(xintercept = reduced_var(1 - 1/breaks_log10_all(c(1, 100))),
              col = "lightgrey", size = 0.1) + 
   geom_point(size = 0.5) + 
-  geom_line(data = f, aes(x = reduced_var(p), y = quant), size = 0.2) + 
+  geom_line(data = f, aes(x = reduced_var(prob.annual), y = quant), size = 0.2) + 
   scale_x_continuous(
     expand = expansion(c(0.04, 0)), 
     sec.axis = sec_axis(
@@ -466,6 +277,7 @@ ggplot(o, aes(x = reduced_var(prob), y = value)) +
       breaks = c(1, seq(10, 80, 10), 100, 150, 200),
       name = "Return period (in years)")
   ) + 
+  scale_y_continuous(limits = c(0, NA)) + 
   facet_wrap(vars(metric), scales = "free_y", 
              ncol = 1, strip.position = "left") +
   labs(x = expression(paste("Exponential reduced variate -log(", 1, " - F(", x, "))")),
@@ -484,80 +296,33 @@ event, can be obtained from the tables for known values of $F(x)$. The
 estimated 10-, 100- and 200-year drought events are shown in Table 6.2.
 
 
-```{r}
+```{r, echo = FALSE}
 fitted %>%
+  mutate(
+    quantiles = map2(parameter, rate, ~tibble(
+      prob.annual, 
+      prob.pds = annual2pds(prob.annual, .y),
+      quant = quagpa(prob.pds, .x)))
+  ) %>%
   select(metric, quantiles) %>%
-  unnest(quantiles)
+  unnest(quantiles) %>%
+  pivot_wider(id_cols = c(prob.annual, prob.pds), 
+              names_from = "metric", values_from = "quant") %>%
+  mutate(rp.annual = 1 / (1 - prob.annual), rp.pds = 1 / (1 - prob.pds)) %>%
+  select(prob.annual, rp.annual, rp.pds, prob.pds, duration, volume)
 ```
 
+# Manual computation 
 
-```{r, echo=FALSE}
-# fitted  %>%
-#   select(metric, quantiles) %>%
-#   unnest(quantiles) %>%
-#   pivot_wider(id_cols = p, names_from = "metric", values_from = "quant") %>%
-#   mutate(return.period = 1 / (1 - p)) %>%
-#   select(prob = p, return.period, everything())
-```
-
-
-
-# extRemes package (with bootstrapped confidence intervals)
+Tobias: pearhaps mention that one should not forget to set the lower bound of the GPA (location parameter) equal to the threshold.
 
 ```{r}
-# the drought durations
-x <- as.numeric(tbl$duration)
-```
+(parameter <- pelgpa(samlmu(pooled$duration), bound = 5))
 
+prob.annual <- 1 - 1/ c(10, 100, 200)
+prob.pds <- annual2pds(prob.annual, exc.per.year = 100 / 49)
 
-Unfortunately we cannot suggest the use of **extRemes** package directly 
-because it doesn't fit distributions to already derived PDS. It computes the
-PDS internally but doesn't allow for a specification of initial record length.  
-
-## Hack 1
-Hack 1 would be to extend the time series of drought durations with zeros to match 
-the length of the discharge time series. This way the internal procedure computes 
-excess rate correctly. 
-
-```{r}
-xx <- rep(0, round(nrow(complete) * 365.25))
-xx[seq_along(x)] <- x
-head(xx, 500)
-
-rp <- c(20, 50, 75, 100, 200)
-
-library(extRemes)
-fit <- fevd(xx, threshold = threshold, type = "GP", method = "Lmoments",
-            time.units = "days")
-
-ci(fit, return.period = rp)
-```
-
-
-## Hack 2
-Hack 2 would be to alter the object created by `fevd()` to use the correct rate 
-$\zeta_u$. 
-
-```{r}
-rate <- sum(x > threshold) / nrow(complete)
-fit <- fevd(x, threshold = threshold, type = "GP", method = "Lmoments",
-            time.units = "years")
-fit$rate <- rate
-ci(fit, return.period = rp)
-```
-
-# Manual computation (without confidence intervals)
-
-```{r}
-library(lmom)
-
-adjust_prob_pds <- function(prob, exc.per.year) {
-  1 - (1 - prob)/exc.per.year
-}
-
-prob <- 1 - 1/rp
-parameter <- pelgpa(samlmu(x[x > threshold]), bound = threshold)
-quagpa(adjust_prob_pds(prob, rate), parameter)
-
+# Quantiles of the GPA 
+quagpa(f = prob.pds, para = parameter)
 ```
 
