@@ -24,7 +24,7 @@ library(tidyverse)
 library(hydroDrought)
 library(lubridate)
 
-ngaruroro <- intl %>%
+ngaruroro <- international %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) %>%

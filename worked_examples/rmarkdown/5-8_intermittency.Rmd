@@ -1,0 +1,106 @@
+---
+title: "Worked example 5.8: Intermittency"
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+options("width" =  100)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# filter(year >= 1964, year <= 1999) # original filter
+```
+
+# Loading the Data
+
+```{r}
+library(hydroDrought)
+library(tidyverse)
+
+rivers <- international %>%
+  select(river, data) 
+```
+
+
+# Finding intermittent rivers
+
+Streamflow is on at least 5 days below the threshold of 0.001m<sup>3</sup>s<sup>-1</sup>. 
+Removing incomplete first and last years. 
+
+```{r}
+intermittent <- rivers %>%
+  mutate(
+    is.intermittent = map_lgl(data, ~is_intermittent(.x$time, .x$discharge)),
+    clipped = map(data, remove_incomplete_first_last)
+  ) %>% 
+  filter(is.intermittent)
+```
+
+# Visualising streamflow permanence (spells)
+
+```{r}
+intermittent <- intermittent %>%
+  mutate(
+    spells = map(data, ~ires_metric(.x$time, .x$discharge))
+  ) 
+
+spells <-intermittent %>%
+  select(river, spells) %>%
+  unnest(spells) %>%
+  mutate(
+    year = water_year(time),
+    day = monthDay(time)
+  ) 
+
+ggplot(spells, aes(monthDay(time), year, fill = state)) +
+  geom_tile() +
+  scale_x_month(expand = expansion(), nletters = 1) +
+  scale_y_continuous(expand = expansion()) +
+  scale_fill_manual("Spell", values = c("no-flow" = "grey80", "flow" = "grey60", 
+                                        "no-data" = "NA")) +
+  labs(title = "Streamflow permanence") +
+  facet_wrap(vars(river), scales = "free_y") +
+  guides(fill = guide_legend(override.aes = list(col = 1))) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.ontop = TRUE,
+        panel.background = element_rect(fill = NA),
+        axis.title = element_blank())
+```
+
+
+# Computing metrics
+
+```{r}
+f <- list("frac nf years" = no_flow_years,
+          "MAN" = MAN, "CVAN" = CVAN, "no flow days" = FAN,
+          "MAMD" = MAMD,
+          "mean onset" = tau0, "mean termin." = tauE)
+
+metrics <- intermittent %>%
+  transmute(
+    river,
+    metrics = map(clipped, ~map(f, exec, time = .x$time, flow = .x$discharge))
+  ) %>%
+  unnest_wider(metrics) %>%
+  print()
+```
+
+
+```{r}
+metrics %>%
+  select(river, n.days = `no flow days`) %>%
+  unnest(n.days) %>%
+  ggplot(aes(n.days)) +
+  geom_histogram(binwidth = 31, boundary = 0,
+                 fill = "grey90", col = "black", size = 0.2) +
+  facet_wrap(vars(river)) +
+  scale_y_continuous(breaks = breaks_integer()) +
+  scale_x_continuous(expand = expansion(add = 7)) +
+  labs(x = "Number of no flow days per year", y = "Count") +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank())
+```

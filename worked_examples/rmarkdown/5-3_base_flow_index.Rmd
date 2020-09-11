@@ -19,7 +19,7 @@ library(tidyverse)
 library(lubridate)
 library(hydroDrought)
 
-ray <- intl %>%
+ray <- international %>%
   filter(river == "Ray") %>%
   select(data) %>%
   unnest(data) %>%

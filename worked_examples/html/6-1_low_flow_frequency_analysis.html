@@ -66,7 +66,7 @@ if (window.hljs) {
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
 
-ngaruroro &lt;- intl %&gt;%
+ngaruroro &lt;- international %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
   select(data) %&gt;%
   unnest(data) %&gt;%
@@ -98,15 +98,15 @@ incomplete &lt;- ngaruroro %&gt;%
   filter(days.missing &gt; 0) %&gt;%
   print()</code></pre>
 <pre><code>## # A tibble: 7 x 5
-##    year days.with.data days.in.year days.missing coverage
-##   &lt;dbl&gt;          &lt;int&gt;        &lt;int&gt;        &lt;int&gt;    &lt;dbl&gt;
-## 1  1963            347          366           19    0.948
-## 2  1965            294          365           71    0.805
-## 3  1978            305          365           60    0.836
-## 4  1986            341          365           24    0.934
-## 5  1987            336          366           30    0.918
-## 6  2001            344          365           21    0.942
-## 7  2019             38          366          328    0.104</code></pre>
+##    year days.in.year days.with.data days.missing coverage
+##   &lt;dbl&gt;        &lt;int&gt;          &lt;int&gt;        &lt;int&gt;    &lt;dbl&gt;
+## 1  1963          366            347           19    0.948
+## 2  1965          365            294           71    0.805
+## 3  1978          365            305           60    0.836
+## 4  1986          365            341           24    0.934
+## 5  1987          366            336           30    0.918
+## 6  2001          365            344           21    0.942
+## 7  2019          366             38          328    0.104</code></pre>
 <pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
     anti_join(incomplete, by = &quot;year&quot;)</code></pre>
 <pre class="r"><code># derivation of the annual minima

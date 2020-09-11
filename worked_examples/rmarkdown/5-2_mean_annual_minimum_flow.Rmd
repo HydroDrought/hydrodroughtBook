@@ -1,6 +1,5 @@
 ---
-title: "Mean annual minimum flow"
-author: "Worked example 5.2"
+title: "Worked example 5.2: Mean annual minimum n-day flow"
 ---
 
 ```{r, setup, include=FALSE}
@@ -10,19 +9,26 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 # Loading the Data
 
-In this example we are again going to use river flow data from the river Ngaruroro of the `international` dataset in the package **hydroDrought**. 
-Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the $n$-day average flow for $n$ equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from **hydrological years** starting 1 September and ending 31 August. Table 5.4 lists the first flow values. 
-<!-- The first two columns show the date and the corresponding flow value, Q. -->
+In this example we are again going to use river flow data from the river Ngaruroro
+at Kuripapango (NZ) of the International Data Set in the package **hydroDrought**. 
+Ten years of daily data are used as an example, as in Worked Example 5.1, to 
+estimate mean annual minimum of the $n$-day average flow for $n$ equal to 1, 7 
+and 30 days. For this station the lowest flows are observed around the turn of 
+the calendar year. Therefore the annual minima are selected from years starting 
+1 September and ending 31 August. Table 5.4 lists the first flow values. 
+The first two columns show the date and the corresponding flow value, $Q$.
 
-In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function `water_year()` which appends an additional column named `year` to the dataset. 
+In order to calculate the mean annual minimum each observation will be attributed 
+to a year according to the date of the observation using the function `water_year()` 
+which appends an additional column named `year` to the dataset. 
 
 ```{r, warning=FALSE}
 library(tidyverse)
 library(hydroDrought)
 
-# attribute each observation to the correct hydrological year
-# and select only the hydrological years between 1990 und 2000
-ngaruroro <- intl %>%
+# attribute each observation to the correct year
+# and select only the years between 1990/91 and 2000/01
+ngaruroro <- international %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) %>%
@@ -39,7 +45,7 @@ smoothed <- ngaruroro %>%
   )
 ```
 
-`r tufte::margin_note("Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length $n$ introduces $n-1$ <code>NA</code> values. ")`
+`r tufte::margin_note("Table 5.4 Calculation of $n$-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length $n$ introduces $n-1$ missing values (<code>NA</code> values). ")`
 ```{r, echo=FALSE}
  smoothed %>%
   head(31) %>%
@@ -62,7 +68,12 @@ smoothed <- ngaruroro %>%
 ```
 
 
-```{r}
+# Calculation
+First the annual minimum values are extracted and then the mean annual minimum 
+values, $MAM(1)$, $MAM(7)$ and $MAM(30)$ are calculated by averaging the 
+annual minimum time series. The results are tabulated in Table 5.5.
+
+```{r, mam}
 # compute the annual minima
 am <- smoothed %>%
   select(-discharge, -time) %>%
@@ -72,9 +83,14 @@ am <- smoothed %>%
 # average the annual minima to get the mean annual minima
 mam <- am %>% 
   select(-year) %>%
-  summarise_all(mean) %>%
-  print()
+  summarise_all(mean) 
 ```
+
+`r tufte::margin_note("Table 5.5 $MAM(n-day)$, $n=1$ day, 7 days and 30 days (m<sup>3</sup>s<sup>-1</sup>). ")`
+```{r, echo=FALSE}
+print(mam)
+```
+
 
 ```{r, echo=FALSE}
 # mam  %>%
@@ -85,8 +101,12 @@ mam <- am %>%
 ```
 
 # Fast Track
+Mapping over the length of the smoothing window avoids the multiple explicit
+calls of the function `mean_annual_minimum()`. The results are absolutely 
+identical but the code is can be adapted more easily and is less error-prone.
 
 ```{r}
+# calculating each column explicitly
 ngaruroro %>% 
   select(discharge, time) %>%
   summarise(
@@ -97,12 +117,11 @@ ngaruroro %>%
   flatten_dbl()
 ```
 
-Mapping over the length of the smoothing window avoids the multiple explicit
-calls of the function `mean_annual_minimum()`. The results are absolutely 
-identical but the code is can be adapted more easily and is less error-prone.
+
 
 
 ```{r}
+# Applying the function mean_annual_minimum() to each element of the vector
 c(1, 7, 30) %>%
   map(
     .f = mean_annual_minimum, 

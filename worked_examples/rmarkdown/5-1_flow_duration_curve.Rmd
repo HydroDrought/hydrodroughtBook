@@ -1,6 +1,5 @@
 ---
-title: "Flow Duration Curve"
-author: "Worked Example 5.1"
+title: "Worked Example 5.1: Flow Duration Curve"
 ---
 
 ```{r, setup, include=FALSE}
@@ -10,29 +9,37 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 # Loading the Data
 
-In this example we are going to use river flow data from the river Ngaruroro which is part of the `international` dataset in the package **hydroDrought**. This dataset becomes accessible by loading the **hydroDrought** package. 
+In this example we are going to use river flow data from the river Ngaruroro which is part of the International Data Set in the package **hydroDrought**. The dataset becomes accessible by loading the **hydroDrought** package. 
 ```{r}
 library(tidyverse)
 library(hydroDrought)
-ngaruroro <- intl %>%
+ngaruroro <- international %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
-  unnest(data) %>%
-  print()
+  unnest(data) 
 ```
 
-All years of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct a flow duration curve based on a daily time step, $\Delta t = 1$ day. The total number of $\Delta t$ intervals is then $N = `r nrow(ngaruroro)`$ days. Table 5.1 lists the first seven flow values. The first two columns show the date and the corresponding riverflow value, $Q$.
+```{r, properties-dataset, echo=FALSE}
+fmt_date <- function(x) trimws(format(x, format = "%e %B %Y"))
+```
 
-
+The complete record (`r fmt_date(min(ngaruroro$time))` to `r fmt_date(max(ngaruroro$time))`) 
+of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct 
+a flow duration curve (FDC) based on a daily time step, $\Delta t = 1$ day. The 
+total number of $\Delta t$ intervals is $N = `r nrow(ngaruroro)`$ days. 
+Table 5.1 lists the first ten flow values. The first three columns show the 
+date and the corresponding riverflow value, $Q$.
 
 
 # Calculation of the FDC
 
-The flow duration curve is constructed following the calculation steps as given in the right part of the table:
+The flow duration curve is constructed following the calculation steps as seen 
+in the right part of the Table 5.1:
 
-- The rank, $i$, of each value is calculated (using the `rank()` function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the $i^{th}$ largest value has rank $i$ (i.e. the largest value has rank 1).
+- The rank, $i$, of each value (column four in Table 5.1) is calculated (using
+the `rank()` function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the $i^{th}$ largest value has rank $i$ (i.e. the largest value has rank 1).
 
-- The exceedance frequency, $EF_{Q_i}$ is calculated as: 
+- The exceedance frequency (column five in Table 5.1), $EF_{Q_i}$ is calculated as: 
 $$EF_{Q_i}  = \frac{i} {N}$$ 
 which gives an estimate of the empirical exceedance frequency of the $i^{th}$ largest event. $EF_{Q_i}$ designates here the observed frequency when the flow, $Q$, is larger than the flow value with rank $i$, $Q_i$ .
 
@@ -77,14 +84,6 @@ library(kableExtra)
 ```
 
 
-
-
-# Tabulation of the FDC
-
-- Corresponding values of riverflow ($Q$ in m<sup>3</sup>s<sup>-1</sup>) and exceedance frequency ($EF_{Q_i}$ in %) are tabulated^[Tobias: Tabulation was done implicitly in the sections before. ].
-
-- The two columns are sorted by $EF_{Q_i}$^[Tobias: Sorting is not required. I suggest to delete the section "Tabulation of the FDC" entirely.].
-
 # Plot of the FDC
 The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic. 
 
@@ -110,7 +109,7 @@ q90 <- ngaruroro %>%
   pull(discharge)
 ```
 
-Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can be obtained as the value of $Q$ corresponding to the largest value of $EF_{Q_i}$ that is less than or equal to the value of $EF_{Q_i}$ sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as `r q90`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used. 
+Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can be obtained as the value of $Q$ corresponding to the largest value of $EF_{Q_i}$ that is less than or equal to the value of $EF_{Q_i}$ sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as `r round(q90, 1)`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used. 
 
 
 `r tufte::margin_note("Table 5.2 An extract of values corresponding to $Q_{90}$.")`
@@ -135,18 +134,23 @@ tbl <- ngaruroro %>%
 
 # Fast-Track
 
-The function `lfquantile()` calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
+The function `lfquantile()` calculates percentiles (quantiles) directly. The 
+exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
 
 ```{r}
 lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
 ```
 
+The retrieved value for $Q_{90}$ is 
+`r lfquantile(ngaruroro$discharge, exc.freq = c(0.9))`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>, 
+approximated to 
+`r round(lfquantile(ngaruroro$discharge, exc.freq = c(0.9)), 2)`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>.
 
 # Standardized Flow Duration Curves
 
 Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge. 
 ```{r}
-lambournRay <- intl %>%
+lambournRay <- international %>%
   filter(river %in% c("Lambourn", "Ray")) %>%
   select(river, area = catchment, data)
 
@@ -162,8 +166,7 @@ fdc <- lambournRay %>%
   group_by(river) %>%
   mutate(
     freq.exc = exceedance_frequency(rel.discharge)
-  ) %>%
-  print()
+  ) 
 ```
 
 ```{r, echo=TRUE}
@@ -171,8 +174,8 @@ ggplot(fdc,
        mapping = aes(x = freq.exc * 100, y = rel.discharge, size = river)) +
   geom_step(direction = "vh") +
   scale_x_continuous(expand = expansion()) +
-  scale_y_log10(breaks = function(x) breaks_log10_all(x, mult.base = 1),
-                minor_breaks = breaks_log10_all,
+  scale_y_log10(breaks = breaks_log10_all(mult.base = 1),
+                minor_breaks = breaks_log10_all(),
                 expand = expansion()) +
   scale_size_manual("River", values = c(0.1, 0.75)) +
   labs(x = "Exceedance Frequency (%)",

@@ -13,7 +13,7 @@ library(tidyverse)
 library(hydroDrought)
 library(lubridate)
 
-ngaruroro <- intl %>%
+ngaruroro <- international %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) 
@@ -266,7 +266,7 @@ f <- fitted %>%
 rp.breaks <- c(1:8, seq(10, 80, 10), 100, 150, 200)
 
 ggplot(o, aes(x = reduced_var(prob.annual), y = value)) + 
-  geom_vline(xintercept = reduced_var(1 - 1/breaks_log10_all(c(1, 100))),
+  geom_vline(xintercept = reduced_var(1 - 1/breaks_log10_all()(c(1, 100))),
              col = "lightgrey", size = 0.1) + 
   geom_point(size = 0.5) + 
   geom_line(data = f, aes(x = reduced_var(prob.annual), y = quant), size = 0.2) + 

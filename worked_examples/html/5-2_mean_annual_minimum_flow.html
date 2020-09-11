@@ -10,10 +10,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<meta name="author" content="Worked example 5.2" />
 
 
-<title>Mean annual minimum flow</title>
+<title>Worked example 5.2: Mean annual minimum n-day flow</title>
 
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
@@ -46,27 +45,27 @@ if (window.hljs) {
 
 
 
-<h1 class="title toc-ignore">Mean annual minimum flow</h1>
-<h4 class="author">Worked example 5.2</h4>
+<h1 class="title toc-ignore">Worked example 5.2: Mean annual minimum n-day flow</h1>
 
 
 <div id="TOC">
 <ul>
 <li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
-<li><a href="#fast-track"><span class="toc-section-number">2</span> Fast Track</a></li>
+<li><a href="#calculation"><span class="toc-section-number">2</span> Calculation</a></li>
+<li><a href="#fast-track"><span class="toc-section-number">3</span> Fast Track</a></li>
 </ul>
 </div>
 
 <div id="loading-the-data" class="section level1">
 <h1><span class="header-section-number">1</span> Loading the Data</h1>
-<p>In this example we are again going to use river flow data from the river Ngaruroro of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from <strong>hydrological years</strong> starting 1 September and ending 31 August. Table 5.4 lists the first flow values. <!-- The first two columns show the date and the corresponding flow value, Q. --></p>
-<p>In order to calculate the mean annual minimum each observation will be attributed to a hydrological year according to the date of the observation using the function <code>water_year()</code> which appends an additional column named <code>year</code> to the dataset.</p>
+<p>In this example we are again going to use river flow data from the river Ngaruroro at Kuripapango (NZ) of the International Data Set in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from years starting 1 September and ending 31 August. Table 5.4 lists the first flow values. The first two columns show the date and the corresponding flow value, <span class="math inline">\(Q\)</span>.</p>
+<p>In order to calculate the mean annual minimum each observation will be attributed to a year according to the date of the observation using the function <code>water_year()</code> which appends an additional column named <code>year</code> to the dataset.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
 
-# attribute each observation to the correct hydrological year
-# and select only the hydrological years between 1990 und 2000
-ngaruroro &lt;- intl %&gt;%
+# attribute each observation to the correct year
+# and select only the years between 1990/91 and 2000/01
+ngaruroro &lt;- international %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
   select(data) %&gt;%
   unnest(data) %&gt;%
@@ -81,7 +80,7 @@ smoothed &lt;- ngaruroro %&gt;%
     MA7 = moving_average(discharge, n = 7),
     MA30 = moving_average(discharge, n = 30)
   )</code></pre>
-<p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length <span class="math inline">\(n\)</span> introduces <span class="math inline">\(n-1\)</span> <code>NA</code> values. </span></p>
+<p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.4 Calculation of <span class="math inline">\(n\)</span>-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length <span class="math inline">\(n\)</span> introduces <span class="math inline">\(n-1\)</span> missing values (<code>NA</code> values). </span></p>
 <pre><code>## # A tibble: 31 x 6
 ##    time       discharge  year   MA1   MA7  MA30
 ##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
@@ -116,6 +115,10 @@ smoothed &lt;- ngaruroro %&gt;%
 ## 29 1990-09-29      7.34  1990  7.34  7.86  NA  
 ## 30 1990-09-30      8.67  1990  8.67  7.91  13.5
 ## 31 1990-10-01     17.4   1990 17.4   9.24  13.4</code></pre>
+</div>
+<div id="calculation" class="section level1">
+<h1><span class="header-section-number">2</span> Calculation</h1>
+<p>First the annual minimum values are extracted and then the mean annual minimum values, <span class="math inline">\(MAM(1)\)</span>, <span class="math inline">\(MAM(7)\)</span> and <span class="math inline">\(MAM(30)\)</span> are calculated by averaging the annual minimum time series. The results are tabulated in Table 5.5.</p>
 <pre class="r"><code># compute the annual minima
 am &lt;- smoothed %&gt;%
   select(-discharge, -time) %&gt;%
@@ -125,16 +128,18 @@ am &lt;- smoothed %&gt;%
 # average the annual minima to get the mean annual minima
 mam &lt;- am %&gt;% 
   select(-year) %&gt;%
-  summarise_all(mean) %&gt;%
-  print()</code></pre>
+  summarise_all(mean) </code></pre>
+<p><label for="tufte-mn-2" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-2" class="margin-toggle"><span class="marginnote">Table 5.5 <span class="math inline">\(MAM(n-day)\)</span>, <span class="math inline">\(n=1\)</span> day, 7 days and 30 days (m<sup>3</sup>s<sup>-1</sup>). </span></p>
 <pre><code>## # A tibble: 1 x 3
 ##     MA1   MA7  MA30
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1  4.13  4.39  5.43</code></pre>
 </div>
 <div id="fast-track" class="section level1">
-<h1><span class="header-section-number">2</span> Fast Track</h1>
-<pre class="r"><code>ngaruroro %&gt;% 
+<h1><span class="header-section-number">3</span> Fast Track</h1>
+<p>Mapping over the length of the smoothing window avoids the multiple explicit calls of the function <code>mean_annual_minimum()</code>. The results are absolutely identical but the code is can be adapted more easily and is less error-prone.</p>
+<pre class="r"><code># calculating each column explicitly
+ngaruroro %&gt;% 
   select(discharge, time) %&gt;%
   summarise(
     `MAM(1)` = mean_annual_minimum(discharge, time, origin = &quot;-09-01&quot;, n = 1),
@@ -144,8 +149,8 @@ mam &lt;- am %&gt;%
   flatten_dbl()</code></pre>
 <pre><code>##   MAM(1)   MAM(7)  MAM(30) 
 ## 4.130100 4.385514 5.430773</code></pre>
-<p>Mapping over the length of the smoothing window avoids the multiple explicit calls of the function <code>mean_annual_minimum()</code>. The results are absolutely identical but the code is can be adapted more easily and is less error-prone.</p>
-<pre class="r"><code>c(1, 7, 30) %&gt;%
+<pre class="r"><code># Applying the function mean_annual_minimum() to each element of the vector
+c(1, 7, 30) %&gt;%
   map(
     .f = mean_annual_minimum, 
     discharge = ngaruroro$discharge, time = ngaruroro$time, origin = &quot;-09-01&quot;

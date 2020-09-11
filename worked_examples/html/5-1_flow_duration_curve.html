@@ -10,10 +10,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<meta name="author" content="Worked Example 5.1" />
 
 
-<title>Flow Duration Curve</title>
+<title>Worked Example 5.1: Flow Duration Curve</title>
 
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
@@ -46,54 +45,37 @@ if (window.hljs) {
 
 
 
-<h1 class="title toc-ignore">Flow Duration Curve</h1>
-<h4 class="author">Worked Example 5.1</h4>
+<h1 class="title toc-ignore">Worked Example 5.1: Flow Duration Curve</h1>
 
 
 <div id="TOC">
 <ul>
 <li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
 <li><a href="#calculation-of-the-fdc"><span class="toc-section-number">2</span> Calculation of the FDC</a></li>
-<li><a href="#tabulation-of-the-fdc"><span class="toc-section-number">3</span> Tabulation of the FDC</a></li>
-<li><a href="#plot-of-the-fdc"><span class="toc-section-number">4</span> Plot of the FDC</a></li>
-<li><a href="#selected-exceedance-values"><span class="toc-section-number">5</span> Selected exceedance values</a></li>
-<li><a href="#fast-track"><span class="toc-section-number">6</span> Fast-Track</a></li>
-<li><a href="#standardized-flow-duration-curves"><span class="toc-section-number">7</span> Standardized Flow Duration Curves</a></li>
+<li><a href="#plot-of-the-fdc"><span class="toc-section-number">3</span> Plot of the FDC</a></li>
+<li><a href="#selected-exceedance-values"><span class="toc-section-number">4</span> Selected exceedance values</a></li>
+<li><a href="#fast-track"><span class="toc-section-number">5</span> Fast-Track</a></li>
+<li><a href="#standardized-flow-duration-curves"><span class="toc-section-number">6</span> Standardized Flow Duration Curves</a></li>
 </ul>
 </div>
 
 <div id="loading-the-data" class="section level1">
 <h1><span class="header-section-number">1</span> Loading the Data</h1>
-<p>In this example we are going to use river flow data from the river Ngaruroro which is part of the <code>international</code> dataset in the package <strong>hydroDrought</strong>. This dataset becomes accessible by loading the <strong>hydroDrought</strong> package.</p>
+<p>In this example we are going to use river flow data from the river Ngaruroro which is part of the International Data Set in the package <strong>hydroDrought</strong>. The dataset becomes accessible by loading the <strong>hydroDrought</strong> package.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
-ngaruroro &lt;- intl %&gt;%
+ngaruroro &lt;- international %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
   select(data) %&gt;%
-  unnest(data) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 20,473 x 2
-##    time       discharge
-##    &lt;date&gt;         &lt;dbl&gt;
-##  1 1963-09-20      30.5
-##  2 1963-09-21      52.8
-##  3 1963-09-22      43.6
-##  4 1963-09-23      37.3
-##  5 1963-09-24      32.3
-##  6 1963-09-25      29.0
-##  7 1963-09-26      25.3
-##  8 1963-09-27      22.4
-##  9 1963-09-28      19.9
-## 10 1963-09-29      18.2
-## # … with 20,463 more rows</code></pre>
-<p>All years of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct a flow duration curve based on a daily time step, <span class="math inline">\(\Delta t = 1\)</span> day. The total number of <span class="math inline">\(\Delta t\)</span> intervals is then <span class="math inline">\(N = 20473\)</span> days. Table 5.1 lists the first seven flow values. The first two columns show the date and the corresponding riverflow value, <span class="math inline">\(Q\)</span>.</p>
+  unnest(data) </code></pre>
+<p>The complete record (20 September 1963 to 8 Oktober 2019) of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct a flow duration curve (FDC) based on a daily time step, <span class="math inline">\(\Delta t = 1\)</span> day. The total number of <span class="math inline">\(\Delta t\)</span> intervals is <span class="math inline">\(N = 20473\)</span> days. Table 5.1 lists the first ten flow values. The first three columns show the date and the corresponding riverflow value, <span class="math inline">\(Q\)</span>.</p>
 </div>
 <div id="calculation-of-the-fdc" class="section level1">
 <h1><span class="header-section-number">2</span> Calculation of the FDC</h1>
-<p>The flow duration curve is constructed following the calculation steps as given in the right part of the table:</p>
+<p>The flow duration curve is constructed following the calculation steps as seen in the right part of the Table 5.1:</p>
 <ul>
-<li><p>The rank, <span class="math inline">\(i\)</span>, of each value is calculated (using the <code>rank()</code> function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the <span class="math inline">\(i^{th}\)</span> largest value has rank <span class="math inline">\(i\)</span> (i.e. the largest value has rank 1).</p></li>
-<li><p>The exceedance frequency, <span class="math inline">\(EF_{Q_i}\)</span> is calculated as: <span class="math display">\[EF_{Q_i}  = \frac{i} {N}\]</span> which gives an estimate of the empirical exceedance frequency of the <span class="math inline">\(i^{th}\)</span> largest event. <span class="math inline">\(EF_{Q_i}\)</span> designates here the observed frequency when the flow, <span class="math inline">\(Q\)</span>, is larger than the flow value with rank <span class="math inline">\(i\)</span>, <span class="math inline">\(Q_i\)</span> .</p></li>
+<li><p>The rank, <span class="math inline">\(i\)</span>, of each value (column four in Table 5.1) is calculated (using the <code>rank()</code> function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the <span class="math inline">\(i^{th}\)</span> largest value has rank <span class="math inline">\(i\)</span> (i.e. the largest value has rank 1).</p></li>
+<li><p>The exceedance frequency (column five in Table 5.1), <span class="math inline">\(EF_{Q_i}\)</span> is calculated as: <span class="math display">\[EF_{Q_i}  = \frac{i} {N}\]</span> which gives an estimate of the empirical exceedance frequency of the <span class="math inline">\(i^{th}\)</span> largest event. <span class="math inline">\(EF_{Q_i}\)</span> designates here the observed frequency when the flow, <span class="math inline">\(Q\)</span>, is larger than the flow value with rank <span class="math inline">\(i\)</span>, <span class="math inline">\(Q_i\)</span> .</p></li>
 </ul>
 <pre class="r"><code>exceedance_frequency &lt;- function(flow)
 {
@@ -124,15 +106,8 @@ ngaruroro &lt;- ngaruroro %&gt;%
 ## 6 1963-09-25      29.0  2736   0.135 
 ## 7 1963-09-26      25.3  3482   0.172</code></pre>
 </div>
-<div id="tabulation-of-the-fdc" class="section level1">
-<h1><span class="header-section-number">3</span> Tabulation of the FDC</h1>
-<ul>
-<li><p>Corresponding values of riverflow (<span class="math inline">\(Q\)</span> in m<sup>3</sup>s<sup>-1</sup>) and exceedance frequency (<span class="math inline">\(EF_{Q_i}\)</span> in %) are tabulated<label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: Tabulation was done implicitly in the sections before. </span>.</p></li>
-<li><p>The two columns are sorted by <span class="math inline">\(EF_{Q_i}\)</span><label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> Tobias: Sorting is not required. I suggest to delete the section “Tabulation of the FDC” entirely.</span>.</p></li>
-</ul>
-</div>
 <div id="plot-of-the-fdc" class="section level1">
-<h1><span class="header-section-number">4</span> Plot of the FDC</h1>
+<h1><span class="header-section-number">3</span> Plot of the FDC</h1>
 <p>The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic.</p>
 <pre class="r"><code>ggplot(ngaruroro, aes(x = freq.exc * 100, y = discharge)) +
   geom_line() +
@@ -149,8 +124,8 @@ Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.
 </div>
 </div>
 <div id="selected-exceedance-values" class="section level1">
-<h1><span class="header-section-number">5</span> Selected exceedance values</h1>
-<p>Values for a particular frequency, for example the 90-percentile (<span class="math inline">\(Q_{90}\)</span>), can be obtained as the value of <span class="math inline">\(Q\)</span> corresponding to the largest value of <span class="math inline">\(EF_{Q_i}\)</span> that is less than or equal to the value of <span class="math inline">\(EF_{Q_i}\)</span> sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as 4.936<i> </i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used.</p>
+<h1><span class="header-section-number">4</span> Selected exceedance values</h1>
+<p>Values for a particular frequency, for example the 90-percentile (<span class="math inline">\(Q_{90}\)</span>), can be obtained as the value of <span class="math inline">\(Q\)</span> corresponding to the largest value of <span class="math inline">\(EF_{Q_i}\)</span> that is less than or equal to the value of <span class="math inline">\(EF_{Q_i}\)</span> sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as 4.9<i> </i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used.</p>
 <p><label for="tufte-mn-2" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-2" class="margin-toggle"><span class="marginnote">Table 5.2 An extract of values corresponding to <span class="math inline">\(Q_{90}\)</span>.</span></p>
 <pre><code>## # A tibble: 9 x 4
 ##   time       discharge  rank freq.exc
@@ -166,16 +141,17 @@ Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.
 ## 9 2002-03-26      4.93 18207    0.900</code></pre>
 </div>
 <div id="fast-track" class="section level1">
-<h1><span class="header-section-number">6</span> Fast-Track</h1>
-<p>The function <code>lfquantile()</code> calculates low-flow/riverflow quantiles directly. The exact (interpolated) values for <span class="math inline">\(Q_{95}\)</span>, <span class="math inline">\(Q_{90}\)</span> and <span class="math inline">\(Q_{80}\)</span> would be:</p>
+<h1><span class="header-section-number">5</span> Fast-Track</h1>
+<p>The function <code>lfquantile()</code> calculates percentiles (quantiles) directly. The exact (interpolated) values for <span class="math inline">\(Q_{95}\)</span>, <span class="math inline">\(Q_{90}\)</span> and <span class="math inline">\(Q_{80}\)</span> would be:</p>
 <pre class="r"><code>lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))</code></pre>
 <pre><code>##     Q95     Q90     Q80 
 ## 4.10925 4.93600 6.46200</code></pre>
+<p>The retrieved value for <span class="math inline">\(Q_{90}\)</span> is 4.936<i> </i>m<sup>3</sup>s<sup>-1</sup>, approximated to 4.94<i> </i>m<sup>3</sup>s<sup>-1</sup>.</p>
 </div>
 <div id="standardized-flow-duration-curves" class="section level1">
-<h1><span class="header-section-number">7</span> Standardized Flow Duration Curves</h1>
+<h1><span class="header-section-number">6</span> Standardized Flow Duration Curves</h1>
 <p>Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge.</p>
-<pre class="r"><code>lambournRay &lt;- intl %&gt;%
+<pre class="r"><code>lambournRay &lt;- international %&gt;%
   filter(river %in% c(&quot;Lambourn&quot;, &quot;Ray&quot;)) %&gt;%
   select(river, area = catchment, data)
 
@@ -195,29 +171,13 @@ lambournRay &lt;- lambournRay %&gt;%
   group_by(river) %&gt;%
   mutate(
     freq.exc = exceedance_frequency(rel.discharge)
-  ) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 41,427 x 5
-## # Groups:   river [2]
-##    river time       discharge rel.discharge freq.exc
-##    &lt;fct&gt; &lt;date&gt;         &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;
-##  1 Ray   1962-10-01     0.082         4.32     0.216
-##  2 Ray   1962-10-02     0.059         3.11     0.261
-##  3 Ray   1962-10-03     0.025         1.32     0.396
-##  4 Ray   1962-10-04     0.014         0.737    0.486
-##  5 Ray   1962-10-05     0.008         0.421    0.553
-##  6 Ray   1962-10-06     0.006         0.316    0.584
-##  7 Ray   1962-10-07     0.006         0.316    0.584
-##  8 Ray   1962-10-08     0.006         0.316    0.584
-##  9 Ray   1962-10-09     0.003         0.158    0.664
-## 10 Ray   1962-10-10     0.003         0.158    0.664
-## # … with 41,417 more rows</code></pre>
+  ) </code></pre>
 <pre class="r"><code>ggplot(fdc, 
        mapping = aes(x = freq.exc * 100, y = rel.discharge, size = river)) +
   geom_step(direction = &quot;vh&quot;) +
   scale_x_continuous(expand = expansion()) +
-  scale_y_log10(breaks = function(x) breaks_log10_all(x, mult.base = 1),
-                minor_breaks = breaks_log10_all,
+  scale_y_log10(breaks = breaks_log10_all(mult.base = 1),
+                minor_breaks = breaks_log10_all(),
                 expand = expansion()) +
   scale_size_manual(&quot;River&quot;, values = c(0.1, 0.75)) +
   labs(x = &quot;Exceedance Frequency (%)&quot;,

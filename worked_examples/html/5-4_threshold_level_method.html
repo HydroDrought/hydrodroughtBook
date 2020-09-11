@@ -65,7 +65,7 @@ if (window.hljs) {
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
 
-ngaruroro &lt;- intl %&gt;%
+ngaruroro &lt;- international %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
   select(data) %&gt;%
   unnest(data) </code></pre>
@@ -109,7 +109,7 @@ ngaruroro &lt;- ngaruroro %&gt;%
 </div>
 <div id="threshold-selection-and-drought-events" class="section level1">
 <h1><span class="header-section-number">3</span> Threshold selection and drought events</h1>
-<p>A sequence of drought events is obtained from the streamflow hydrograph by considering periods with flow below a certain threshold, <span class="math inline">\(Q_0\)</span>. In this example <span class="math inline">\(Q_{90}\)</span> is used as threshold. A table of drought characteristics is derived with the function <code>drought_events()</code>.</p>
+<p>A sequence of drought events is obtained from the streamflow hydrograph by considering periods with flow below a certain threshold, <span class="math inline">\(Q_0\)</span>. In this example <span class="math inline">\(Q_{90} = 4.95\)</span> m<sup>3</sup>s<sup>-1</sup> is used as threshold. A table of drought characteristics is derived with the function <code>drought_events()</code>.</p>
 <pre class="r"><code>q90 &lt;- lfquantile(ngaruroro$discharge, exc.freq = 0.9) %&gt;%
   print()</code></pre>
 <pre><code>##   Q90 
@@ -133,25 +133,25 @@ ngaruroro &lt;- ngaruroro %&gt;%
 ## # … with 200 more rows</code></pre>
 <p>The table displayed above includes:</p>
 <ul>
-<li>the start date, defined as the <code>first.day</code> below the threshold;</li>
-<li>the end date, defined as the <code>last.day</code> below the threshold;</li>
-<li>the drought <code>duration</code> (days), defined as the full drought duration (<code>last.day - first.day + 1</code>)</li>
-<li>the deficit <code>volume</code> (in m<sup>3</sup>), defined as the sum of the daily deficit flows times the duration in days;</li>
-<li>the minimum flow <code>qmin</code> (in m<sup>3</sup>s<sup>-1</sup>), defined as the minimum flow <span class="math inline">\(Q_{min}\)</span> within a drought event;</li>
-<li>and the date of the minimum flow <code>tqmin</code>.</li>
+<li><code>first.day</code>: the start date, defined as the first day below the threshold;</li>
+<li><code>last.day</code>: the end date, defined as the last day below the threshold;</li>
+<li><code>duration</code>: the drought duration (days), defined as <code>last.day - first.day + 1</code></li>
+<li><code>volume</code>: the deficit volume in m<sup>3</sup>, defined as the sum of the daily deficit flows times the duration in days;</li>
+<li><code>qmin</code>: the minimum flow in m<sup>3</sup>s<sup>-1</sup>, defined as the minimum flow <span class="math inline">\(Q_{min}\)</span> within a drought event;</li>
+<li><code>tqmin</code>: the date of the minimum flow.</li>
 </ul>
 </div>
 <div id="removing-minor-droughts-filtering" class="section level1">
 <h1><span class="header-section-number">4</span> Removing minor droughts (Filtering)</h1>
-<p>To reduce the problem of minor droughts two restrictions can be imposed:</p>
+<p>Several minor droughts, lasting for a few days only, can be observed. To reduce the problem of minor droughts two restrictions are imposed:</p>
 <ul>
 <li><p>a minimum drought duration, <span class="math inline">\(d_{min}\)</span> that removes droughts with duration less than the specified number of days;</p></li>
 <li><p>a minimum drought deficit volume (coefficient <span class="math inline">\(\alpha\)</span>), that removes droughts with a deficit volume less than a certain fraction <span class="math inline">\(\alpha\)</span> of the maximum drought deficit volume in the complete series of drought events.</p></li>
 </ul>
-<p>We will append a logical column called <code>is.minor</code> to the table of drought events. It is <code>TRUE</code> when drought duration is less than five days and if the drought volume is less than 51<i> </i>133.25<i> </i>m<sup>3</sup> (5% of the maximum drought deficit volume). Due to this criteria a total number of 0 droughts are considered minor droughts.</p>
+<p>We will append a logical column called <code>is.minor</code> to the table of drought events. It is <code>TRUE</code> when drought duration is less than five days or if the drought volume is less than 51<i> </i>133.25<i> </i>m<sup>3</sup> (0.5% of the maximum drought deficit volume). Due to this criteria a total number of 99 droughts are considered minor droughts.</p>
 <pre class="r"><code>droughts &lt;- droughts %&gt;%
-  mutate(is.minor = duration &lt; 5 | volume &lt; max(volume) * 0.005) %&gt;%
-  print()</code></pre>
+  mutate(is.minor = duration &lt; 5 | volume &lt; max(volume) * 0.005) </code></pre>
+<pre class="r"><code>print(droughts)</code></pre>
 <pre><code>## # A tibble: 210 x 8
 ##    event first.day  last.day   duration   volume  qmin tqmin      is.minor
 ##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;drtn&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;     &lt;lgl&gt;   
@@ -193,13 +193,13 @@ ngaruroro &lt;- ngaruroro %&gt;%
 ##  9   139 2008-03-09 2008-04-14 37 days  36 days   5.22e6  2.65 2008-04-06      1
 ## 10    59 1989-04-01 1989-04-29 29 days  29 days   2.71e6  3.3  1989-04-29      0
 ## # … with 90 more rows</code></pre>
-<p>Whenever drought events were pooled the table of drought events contain two more columns:</p>
+<p>When drought events were pooled the table of drought events contain two more columns:</p>
 <ul>
-<li><p>the duration below the threshold <code>dbt</code>: full drought duration minus short periods (the inter-event time) above the threshold;</p></li>
-<li><p>the number of <code>pooled</code> drought events.</p></li>
+<li><p><code>dbt</code>: the duration below the threshold, i.e. the drought duration minus short period(s) above the threshold;</p></li>
+<li><p><code>pooled</code>: the number of drought events.</p></li>
 </ul>
-<p>The drought deficit characteristics of the ten longest lasting (pooled) drought events are given in the table above.</p>
-<p>To summarise all drought events for every year one could calculate the <code>year</code> based on the year of the <code>first.day</code> of and event and derive for example the following metrics:</p>
+<p>The drought deficit characteristics of the ten longest (pooled) drought events are given in the table above. In total there are 100 drought events, on average 2.04 events per year.</p>
+<p>To summarize all drought events for every year one could calculate the <code>year</code> based on the year of the <code>first.day</code> of and event and derive for example the following metrics, the number of droughts in a year, the total drought duration in a year and minimum flow in a year:</p>
 <pre class="r"><code>pooled %&gt;%
   mutate(
     year = water_year(first.day, origin = &quot;-09-01&quot;)
@@ -224,15 +224,14 @@ ngaruroro &lt;- ngaruroro %&gt;%
 ##  9  1977          1  25 days          3.46
 ## 10  1982          2  57 days          2.46
 ## # … with 25 more rows</code></pre>
-<p>From the first table it can be seen that there are 100 drought events in total, on average 2.04 events every year. Minor droughts are dominating with 43 events lasting less than 11 days. Only 9 events lasted more than 30 days.</p>
-<p>The time series of the drought duration can be seen in Figure 5.12, and the major droughts are found in 1964, 1966, 1967, 1967, 1968 and 1968.</p>
+<p>The time series of the drought duration can be seen in Figure 5.12, and the major droughts are found in 1972, 1973, 1982, 2007, 2008 and 2014.</p>
 <div class="figure">
 <p class="caption marginnote shownote">
 Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = <span class="math inline">\(Q_{90}\)</span>, <span class="math inline">\(d_{min} = 5\)</span> days, <span class="math inline">\(\alpha = 0.005\)</span> and <span class="math inline">\(t_{min} = 2\)</span> days.
 </p>
 <img src="5-4_threshold_level_method_files/figure-html/unnamed-chunk-10-1.png" alt="Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\alpha = 0.005$ and $t_{min} = 2$ days." width="672"  />
 </div>
-<p>A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed.</p>
+<p>A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed. Minor droughts are dominating with 43 events lasting less than 11 days. Only 9 events lasted more than 30 days.</p>
 <pre class="r"><code>ggplot(pooled, aes(duration)) + 
   geom_histogram(binwidth = 5, boundary = 0, closed = &quot;left&quot;, 
                  size = 0.2, col = &quot;black&quot;, fill = &quot;grey90&quot;) + 

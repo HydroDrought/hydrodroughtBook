@@ -12,7 +12,7 @@ fmt_date <- function(x) trimws(format(x, format = "%e %B %Y"))
 library(tidyverse)
 library(hydroDrought)
 
-ngaruroro <- intl %>%
+ngaruroro <- international %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) 
@@ -100,7 +100,7 @@ print(incomplete)
 #	Threshold selection and drought events
 A sequence of drought events is obtained from the streamflow hydrograph by 
 considering periods with flow below a certain threshold, $Q_0$. In this 
-example $Q_{90}$ is used as threshold. A table of drought characteristics 
+example $Q_{90} = `r round(lfquantile(ngaruroro$discharge, exc.freq = 0.9), 2)`$m<sup>3</sup>s<sup>-1</sup> is used as threshold. A table of drought characteristics 
 is derived with the function `drought_events()`. 
 
 ```{r}
@@ -121,18 +121,17 @@ droughts %>%
 
 The table displayed above includes:
 
-* the start date, defined as the `first.day` below the threshold;
-* the end date, defined as the `last.day` below the threshold; 
-* the drought `duration` (days), defined as the full drought duration 
-(`last.day - first.day + 1`) 
-* the deficit `volume` (in m<sup>3</sup>), defined as the sum of the daily
+* `first.day`: the start date, defined as the first day below the threshold;
+* `last.day`: the end date, defined as the last day below the threshold; 
+* `duration`: the drought duration (days), defined as `last.day - first.day + 1`
+* `volume`: the deficit volume in m<sup>3</sup>, defined as the sum of the daily
 deficit flows times the duration in days;
-* the minimum flow `qmin` (in m<sup>3</sup>s<sup>-1</sup>), defined as the minimum flow $Q_{min}$ within a drought event;
-* and the date of the minimum flow `tqmin`.
+* `qmin`: the minimum flow in m<sup>3</sup>s<sup>-1</sup>, defined as the minimum flow $Q_{min}$ within a drought event;
+* `tqmin`: the date of the minimum flow.
 
 
 # 	Removing minor droughts (Filtering)
-To reduce the problem of minor droughts two restrictions can be imposed:
+Several minor droughts, lasting for a few days only, can be observed. To reduce the problem of minor droughts two restrictions are imposed:
 
 * a minimum drought duration, $d_{min}$ that removes droughts with duration less 
 than the specified number of days;
@@ -145,19 +144,23 @@ drought deficit volume in the complete series of drought events.
 vmin <- max(droughts$volume) * 0.005
 ```
 
+```{r, minorDroughts, echo = FALSE}
+droughts <- droughts %>%
+  mutate(is.minor = duration < 5 | volume < max(volume) * 0.005) 
+```
 
 We will append a logical column called `is.minor` to the table of drought events.
-It is `TRUE` when drought duration is less than five days and if the drought 
+It is `TRUE` when drought duration is less than five days or if the drought 
 volume is less than 
 `r format(vmin, big.mark = "<i>&nbsp;</i>")`<i>&nbsp;</i>m<sup>3</sup> 
-(5% of the maximum drought deficit volume). Due to this criteria a total number 
+(0.5% of the maximum drought deficit volume). Due to this criteria a total number 
 of `r sum(droughts$is.minor)` droughts are considered minor droughts.
 
 
+```{r, minorDroughts, echo = TRUE, eval=FALSE}
+```
 ```{r}
-droughts <- droughts %>%
-  mutate(is.minor = duration < 5 | volume < max(volume) * 0.005) %>%
-  print()
+print(droughts)
 ```
 
 
@@ -181,20 +184,20 @@ pooled <- ngaruroro %>%
   print()
 ```
 
-Whenever drought events were pooled the table of drought events contain two 
+When drought events were pooled the table of drought events contain two 
 more columns:
 
-* the duration below the threshold `dbt`: full drought duration minus short 
-periods (the inter-event time) above the threshold; 
+* `dbt`: the duration below the threshold, i.e. the drought duration minus short 
+period(s) above the threshold; 
 
-* the number of `pooled` drought events. 
+* `pooled`: the number of drought events. 
 
-The drought deficit characteristics of the ten longest lasting (pooled) drought 
-events are given in the table above. 
+The drought deficit characteristics of the ten longest (pooled) drought events are given in the table above. In total there are `r nrow(pooled)` drought 
+events, on average `r round(nrow(pooled) / nyear, 2)` events per year. 
 
-To summarise all drought events for every year one could calculate
+To summarize all drought events for every year one could calculate
 the `year` based on the year of the `first.day` of and event and derive for
-example the following metrics: 
+example the following metrics, the number of droughts in a year, the total drought duration in a year and minimum flow in a year:
 
 ```{r}
 pooled %>%
@@ -209,10 +212,6 @@ pooled %>%
   )
 ```
 
-From the first table it can be seen that there are `r nrow(pooled)` drought 
-events in total, on average `r round(nrow(pooled) / nyear, 2)` events every year. 
-Minor droughts are dominating with `r sum(pooled$duration <= 10)` events lasting 
-less than 11 days. Only `r sum(pooled$duration > 30)` events lasted more than 30 days. 
 
 ```{r, echo=FALSE}
 p <- pooled %>%
@@ -225,10 +224,9 @@ p <- pooled %>%
   ) %>%
   ungroup() %>%
   select(event, duration, year) %>%
-  right_join(complete %>% select(year), by = "year") %>%
-  arrange(year)
+  right_join(complete %>% select(year), by = "year") 
 
-major <- hydroDrought:::paste_with_and(head(p$year))
+major <- hydroDrought:::paste_with_and(sort(head(p$year)))
 ```
 
 
@@ -248,8 +246,8 @@ ggplot(p, aes(x = event, y = as.double(duration))) +
 ```
 
 
-A histogram of the drought duration is seen in 
-Figure 5.13, and a very skewed distribution is revealed.
+A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed. Minor droughts are dominating with `r sum(pooled$duration <= 10)` events lasting 
+less than 11 days. Only `r sum(pooled$duration > 30)` events lasted more than 30 days. 
 
 ```{r, echo=FALSE, }
 fig.cap <- "Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\\alpha = 0.005$ and $t_{min} = 2$ days."

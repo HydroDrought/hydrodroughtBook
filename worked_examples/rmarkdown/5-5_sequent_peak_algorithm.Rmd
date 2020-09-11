@@ -17,7 +17,7 @@ are used as an example.
 library(tidyverse)
 library(hydroDrought)
 
-ngaruroro <- intl %>%
+ngaruroro <- international %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) %>%
