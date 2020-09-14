@@ -31,7 +31,7 @@
 {
   if(simplify) {
     if (length(unique(map(data$value, class))) == 1) {
-      data <- unnest(data, value)
+      data <- unnest(data, .data$value)
     }
   }
 
@@ -82,7 +82,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
     flow,
     year = group.year,
     minor = group.minor,
-    group = group_const_value(paste(year, minor)) + 1
+    group = group_const_value(paste(.data$year, .data$minor)) + 1
   )  %>%
     treat_missing_values(na = na)
 
@@ -92,7 +92,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
                      exclude = character(),
                      levels = c(TRUE, FALSE, NA),
                      labels = c("no-flow", "flow", "no data")),
-      spell = group_const_value(state) + 1
+      spell = group_const_value(.data$state) + 1
     )
 
   if(all(spells$state != "no-flow")) warning("Every flow value < threshold. River is not intermittent.")
@@ -135,7 +135,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
       c("data", "value")
 
     complete.vars <- agg %>%
-      filter(!map_lgl(fun, is.null), level > !!level) %>%
+      filter(!map_lgl(.dat$fun, is.null), level > !!level) %>%
       pull(level) %>%
       as.character()
 
@@ -145,7 +145,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
         metric = map(data, .summarize_and_enframe,
                      funs = agg$fun[[l]], name = agg$name[l])
       ) %>%
-      unnest(metric) %>%
+      unnest(.data$metric) %>%
       .complete_spells(group = as.character(level), funs = agg$fun[[l]],
                        complete = complete.vars) %>%
       .simplify_output()
@@ -159,7 +159,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
   fun.name <- paste0("fun.",group)
   complete.vars <- c(rlang::ensyms(fun.name), rlang::syms(complete))
 
-  defaults <- enframe(map(funs, "default"), name = fun.name, value = "default")
+  defaults <- tibble::enframe(map(funs, "default"), name = fun.name, value = "default")
 
   x <- x %>%
     complete(!!!complete.vars, fill = list(value = list(NULL))) %>%
@@ -198,7 +198,7 @@ allocate_spell <- function(x, rule = c("cut", "duplicate", "onset", "termination
   # find spells spanning several intervals
   spanning <- x %>%
     count(spell, .data[[group]], name = "n.obs") %>%
-    add_count(spell, wt = n()) %>%
+    dplyr::add_count(spell, wt = n()) %>%
     filter(n > 1) %>%
     select(spell, !!group) %>%
     group_by(spell)
@@ -240,7 +240,7 @@ allocate_spell <- function(x, rule = c("cut", "duplicate", "onset", "termination
   }
 
   res <- x %>%
-    full_join(s, by = if(rule == "duplicate") "spell" else c("spell", group)) %>%
+    dplyr::full_join(s, by = if(rule == "duplicate") "spell" else c("spell", group)) %>%
     mutate(
       !!group := if_else(!is.na(group.new), group.new, .data[[group]])
     ) %>%
@@ -259,13 +259,13 @@ treat_missing_values <- function(x, na = c("none", "fill", "drop_group", "drop_m
   }
 
   if (na == "fill")  {
-    x <- fill(x, -time, .direction = "down")
+    x <- tidyr::fill(x, -time, .direction = "down")
   } else {
     drop <- stringr::str_remove(na, "drop_")
 
     incomplete <- x %>%
-      filter(is.na(flow)) %>%
-      select(one_of(drop))
+      filter(is.na(.data$flow)) %>%
+      select(tidyselect::one_of(drop))
 
     x <- x %>%
       anti_join(incomplete, by = drop)
@@ -500,7 +500,7 @@ strength_day <- function(x, lwr = 0, upr = 365, na.rm = TRUE)
 {
   if (all(is.na(x))) return(NA)
   if (anyNA(x)) {
-    if (na.rm) x <- na.omit(x) else return(NA)
+    if (na.rm) x <- stats::na.omit(x) else return(NA)
   }
 
   if (inherits(Sys.Date(), c("Date", "POSIXct"))) {
@@ -515,7 +515,7 @@ mean_day <- function(x, lwr = 0, upr = 365, na.rm = TRUE)
 
   if (all(is.na(x))) return(NA)
   if (anyNA(x)) {
-    if (na.rm) x <- na.omit(x) else return(NA)
+    if (na.rm) x <- stats::na.omit(x) else return(NA)
   }
 
   if (inherits(Sys.Date(), c("Date", "POSIXct"))) {

@@ -94,7 +94,8 @@ f &lt;- list(
   `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
   Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
   Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
-  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7)
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7),
+  ALPHA = function(x, t, ...) recession(time = t, discharge = x)
 )
 
 indices &lt;- r %&gt;%
@@ -113,20 +114,20 @@ indices &lt;- indices %&gt;%
     `MAM(1)/Q50` = `MAM(1)`/Q50,
   ) </code></pre>
 <p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.11 Flow indices for a subset of the Regional Data Set.</span></p>
-<pre><code>## # A tibble: 29 x 14
-##    id     mean   Q50 `MAM(1)` `MAM(10)` `MAM(30)`   Q95   Q90   Q70 `Q90/Q50`
-##    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
-##  1 2100… 0.615 0.443    0.144     0.179     0.220 0.132 0.178 0.31      0.402
-##  2 2100… 0.913 0.68     0.274     0.320     0.373 0.257 0.311 0.49      0.457
-##  3 2100… 0.613 0.429    0.129     0.164     0.216 0.14  0.179 0.305     0.417
-##  4 2100… 0.548 0.414    0.197     0.227     0.262 0.15  0.191 0.299     0.461
-##  5 2102… 6.47  4.91     2.43      2.75      3.08  2.44  2.83  3.86      0.576
-##  6 2102… 2.30  1.59     0.596     0.804     0.939 0.66  0.8   1.2       0.503
-##  7 2102… 0.409 0.348    0.166     0.183     0.201 0.124 0.159 0.255     0.457
-##  8 2102… 0.692 0.52     0.209     0.246     0.293 0.18  0.236 0.39      0.454
-##  9 2102… 1.08  0.513    0.168     0.199     0.263 0.167 0.216 0.368     0.421
-## 10 2102… 1.47  0.67     0.211     0.262     0.334 0.214 0.271 0.47      0.404
-## # … with 19 more rows, and 4 more variables: `Q95/Q50` &lt;dbl&gt;,
+<pre><code>## # A tibble: 29 x 15
+##    id     mean   Q50 `MAM(1)` `MAM(10)` `MAM(30)`   Q95   Q90   Q70 ALPHA
+##    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 2100… 0.615 0.443    0.144     0.179     0.220 0.132 0.178 0.31  0.248
+##  2 2100… 0.913 0.68     0.274     0.320     0.373 0.257 0.311 0.49  0.545
+##  3 2100… 0.613 0.429    0.129     0.164     0.216 0.14  0.179 0.305 0.472
+##  4 2100… 0.548 0.414    0.197     0.227     0.262 0.15  0.191 0.299 0.419
+##  5 2102… 6.47  4.91     2.43      2.75      3.08  2.44  2.83  3.86  0.261
+##  6 2102… 2.30  1.59     0.596     0.804     0.939 0.66  0.8   1.2   0.388
+##  7 2102… 0.409 0.348    0.166     0.183     0.201 0.124 0.159 0.255 0.196
+##  8 2102… 0.692 0.52     0.209     0.246     0.293 0.18  0.236 0.39  0.401
+##  9 2102… 1.08  0.513    0.168     0.199     0.263 0.167 0.216 0.368 0.748
+## 10 2102… 1.47  0.67     0.211     0.262     0.334 0.214 0.271 0.47  0.597
+## # … with 19 more rows, and 5 more variables: `Q90/Q50` &lt;dbl&gt;, `Q95/Q50` &lt;dbl&gt;,
 ## #   `MAM(30)/Q50` &lt;dbl&gt;, `MAM(10)/Q50` &lt;dbl&gt;, `MAM(1)/Q50` &lt;dbl&gt;</code></pre>
 </div>
 <div id="ranks" class="section level1">
@@ -158,14 +159,18 @@ x &lt;- indices %&gt;%
   select(-id)
 M &lt;- cor(x, method = &quot;pearson&quot;)
 res1 &lt;- cor.mtest(x, method = &quot;pearson&quot;, conf.level = .95)
+
+col2 &lt;- colorRampPalette(c(&quot;#67001F&quot;, &quot;#B2182B&quot;, &quot;#D6604D&quot;, &quot;#F4A582&quot;,
+                           &quot;#FDDBC7&quot;, &quot;#FFFFFF&quot;, &quot;#D1E5F0&quot;, &quot;#92C5DE&quot;,
+                           &quot;#4393C3&quot;, &quot;#2166AC&quot;, &quot;#053061&quot;))
+
 corrplot(M, type = &quot;upper&quot;,
-         col =rep(rev(gray.colors(100))[1:60], 2),
-         tl.cex = 0.8, addCoef.col = &quot;black&quot;,
+         col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = &quot;grey10&quot;,
          p.mat = res1$p, insig = &quot;pch&quot;, 
          order = &quot;hclust&quot;, addrect = 3, rect.col = &quot;navy&quot;,
          pch.cex = 2, 
-         number.cex = .7, tl.col = &quot;black&quot;,
-         cl.lim = c(0, 1))</code></pre>
+         number.cex = .7, tl.col = &quot;black&quot;)</code></pre>
 <p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-7-1.png" width="672"  /></p>
 </div>
 <div id="spearman-rank-correlation" class="section level1">
@@ -173,13 +178,12 @@ corrplot(M, type = &quot;upper&quot;,
 <pre class="r"><code>M &lt;- cor(x, method = &quot;spearman&quot;)
 res1 &lt;- cor.mtest(x, method = &quot;spearman&quot;, conf.level = .95)
 corrplot(M, type = &quot;upper&quot;,
-         col =rep(rev(gray.colors(100))[1:60], 2),
-         tl.cex = 0.8, addCoef.col = &quot;black&quot;,
+          col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = &quot;grey10&quot;,
          p.mat = res1$p, insig = &quot;pch&quot;, 
          order = &quot;hclust&quot;, addrect = 3, rect.col = &quot;navy&quot;,
          pch.cex = 2, 
-         number.cex = .7, tl.col = &quot;black&quot;,
-         cl.lim = c(0, 1))</code></pre>
+         number.cex = .7, tl.col = &quot;black&quot;)</code></pre>
 <p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-8-1.png" width="672"  /></p>
 </div>
 

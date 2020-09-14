@@ -33,7 +33,8 @@ f <- list(
   `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
   Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
   Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
-  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7)
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7),
+  ALPHA = function(x, t, ...) recession(time = t, discharge = x)
 )
 
 indices <- r %>%
@@ -115,14 +116,18 @@ x <- indices %>%
   select(-id)
 M <- cor(x, method = "pearson")
 res1 <- cor.mtest(x, method = "pearson", conf.level = .95)
+
+col2 <- colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582",
+                           "#FDDBC7", "#FFFFFF", "#D1E5F0", "#92C5DE",
+                           "#4393C3", "#2166AC", "#053061"))
+
 corrplot(M, type = "upper",
-         col =rep(rev(gray.colors(100))[1:60], 2),
-         tl.cex = 0.8, addCoef.col = "black",
+         col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = "grey10",
          p.mat = res1$p, insig = "pch", 
          order = "hclust", addrect = 3, rect.col = "navy",
          pch.cex = 2, 
-         number.cex = .7, tl.col = "black",
-         cl.lim = c(0, 1))
+         number.cex = .7, tl.col = "black")
 ```
 
 
@@ -131,12 +136,11 @@ corrplot(M, type = "upper",
 M <- cor(x, method = "spearman")
 res1 <- cor.mtest(x, method = "spearman", conf.level = .95)
 corrplot(M, type = "upper",
-         col =rep(rev(gray.colors(100))[1:60], 2),
-         tl.cex = 0.8, addCoef.col = "black",
+          col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = "grey10",
          p.mat = res1$p, insig = "pch", 
          order = "hclust", addrect = 3, rect.col = "navy",
          pch.cex = 2, 
-         number.cex = .7, tl.col = "black",
-         cl.lim = c(0, 1))
+         number.cex = .7, tl.col = "black")
 ```
 

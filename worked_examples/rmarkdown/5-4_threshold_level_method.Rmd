@@ -253,7 +253,9 @@ less than 11 days. Only `r sum(pooled$duration > 30)` events lasted more than 30
 fig.cap <- "Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\\alpha = 0.005$ and $t_{min} = 2$ days."
 ```
 ```{r, echo=TRUE, fig.cap=fig.cap}
-ggplot(pooled, aes(duration)) + 
+p %>%
+  # replace_na(list(duration = 0)) %>%
+  ggplot(aes(duration)) + 
   geom_histogram(binwidth = 5, boundary = 0, closed = "left", 
                  size = 0.2, col = "black", fill = "grey90") + 
   scale_x_continuous(limits = c(0, NA)) + 
