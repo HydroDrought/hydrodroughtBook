@@ -1,0 +1,115 @@
+---
+title: "Worked example 5.8: No-flow indices"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+options("width" =  98)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# filter(year >= 1964, year <= 1999) # original filter
+```
+
+# Loading the Data
+
+```{r}
+library(hydroDrought)
+library(tidyverse)
+
+rivers <- international %>%
+  select(river, data) 
+```
+
+
+# Finding intermittent rivers
+
+Streamflow is on at least 5 days below the threshold of 0.001m<sup>3</sup>s<sup>-1</sup>. 
+Removing incomplete first and last years. 
+
+```{r}
+intermittent <- rivers %>%
+  mutate(
+    is.intermittent = map_lgl(data, ~is_intermittent(.x$time, .x$discharge))
+  ) %>% 
+  filter(is.intermittent) %>%
+  mutate(
+    clipped = map(data, remove_incomplete_first_last),
+    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = "drop_year"))
+  ) 
+```
+
+
+
+# Computing metrics
+
+```{r}
+f <- list("frac nf years" = no_flow_years ,
+          "MAN" = MAN, "CVAN" = CVAN, "no flow days" = FAN,
+          "MAMD" = MAMD,
+          "onset" = tau0, "sd onset" = tau0r, "term." = tauE)
+
+metrics <- intermittent %>%
+  transmute(
+    river,
+    metrics = map(clipped, ~map(f, exec, time = .x$time, flow = .x$discharge))
+  ) %>%
+  unnest_wider(metrics) %>%
+  print()
+```
+
+
+```{r}
+metrics %>%
+  select(river, n.days = `no flow days`) %>%
+  unnest(n.days) %>%
+  ggplot(aes(n.days)) +
+  geom_histogram(binwidth = 31, boundary = 0,
+                 fill = "grey90", col = "black", size = 0.2) +
+  facet_wrap(vars(river)) +
+  scale_y_continuous(breaks = breaks_integer()) +
+  scale_x_continuous(expand = expansion(add = 7)) +
+  labs(x = "Number of no flow days per year", y = "Count") +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank())
+```
+
+# Visualising streamflow permanence (spells)
+
+```{r}
+spells <-intermittent %>%
+  select(river, spells) %>%
+  unnest(spells) %>%
+  mutate(
+    year = water_year(time),
+    day = monthDay(time)
+  ) 
+
+onoff <- metrics %>%
+  select(river, "mean onset" = onset, "mean termination" = `term.`) %>%
+  pivot_longer(-river, names_to = "Timing")
+
+ggplot(spells, aes(monthDay(time), year, fill = state)) +
+  geom_tile() +
+  geom_vline(data = onoff, aes(xintercept = value, linetype = Timing), 
+             col = "red", size = 0.2) + 
+  scale_x_month(expand = expansion(), nletters = 1) +
+  scale_y_continuous(expand = expansion(), breaks = breaks_integer()) +
+  scale_fill_manual("Spell", values = c("no-flow" = "grey80", "flow" = "grey60", 
+                                        "no-data" = "NA"), 
+                    drop = FALSE) +
+  labs(title = "Streamflow permanence") +
+  facet_wrap(vars(river), scales = "free_y") +
+  guides(fill = guide_legend(override.aes = list(col = 1))) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.ontop = TRUE,
+        panel.background = element_rect(fill = NA),
+        axis.title = element_blank())
+```
+

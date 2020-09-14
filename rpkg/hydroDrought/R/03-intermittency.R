@@ -1,11 +1,10 @@
 # todo
 
 # 0) append desired groups
-# - major = min(minor)
+# - year = min(minor)
 # - minor = day, week, month, season
-# check compatibility of minor and major interval
+# check compatibility of minor and year interval
 
-#!! 1) treat NAs drop = c("keep", "drop_values", "drop_group", "drop_minor", "drop_major"),
 # 2) compute spells
 #!! 3) treat spells spanning several groups
 #- rule = c("cut", "duplicate", "onset", "termination"),
@@ -41,14 +40,10 @@
 
 #' @importFrom rlang exec
 #' @importFrom purrr map2
-.summarize_and_enframe <- function(data, funs, name, default_col = "value")
+.summarize_and_enframe <- function(data, funs, name)
 {
-  if (all(lengths(funs) == 1)) {
-    col <- default_col
-  } else {
-    col <- purrr::map(funs, 2)
-    funs <- purrr::map(funs, 1)
-  }
+  col <- purrr::map(funs, "column")
+  funs <- purrr::map(funs, "fun")
 
   # hack in order to operate on vectors and on lists
   l <- map2(col, funs, function(column, fun) fun(exec(c, !!!data[[column]])))
@@ -56,76 +51,227 @@
   tibble(!!name := names(funs), value = l)
 }
 
+agg_fun <- function(fun, name = deparse(substitute(fun)), column = "value", default = NA)
+{
+  # todo: check that default and return value of fun are of same type
+  # eg. when using time NA_Date
+  lst(!!name := lst(fun, column, default))
+}
+
+.duration <- agg_fun(function(x) length(x),
+                     name = "duration", column = "time", default = 0L)
+
 #' @importFrom purrr map_lgl
 #' @importFrom tidyselect any_of
 #' @export
 # agg.spell aggregates all values with the same spell id
 # after aggregation there will be one value for every spell
 ires_metric <- function(time, flow, threshold = 0.001,
-                        group.major = water_year(time),
+                        na = c("none", "fill", "drop_group", "drop_minor", "drop_year"),
+                        rule = c("cut", "duplicate", "onset", "termination", "majority"),
+                        group.year = water_year(time),
                         group.minor = month(time, label = TRUE, abbr = TRUE),
                         agg.spell = NULL, agg.group = NULL, agg.minor = NULL,
-                        agg.major = NULL, agg.total= NULL)
+                        agg.year = NULL, agg.total= NULL)
 {
+  na <- match.arg(na)
+  rule <- match.arg(rule)
 
-  spells <- tibble(
+  x <- tibble(
     time,
     flow,
-    major = group.major,
-    minor = group.minor
-  ) %>%
+    year = group.year,
+    minor = group.minor,
+    group = group_const_value(paste(year, minor)) + 1
+  )  %>%
+    treat_missing_values(na = na)
+
+  spells <- x %>%
     mutate(
-      group = group_const_value(paste(major, minor)) + 1,
       state = factor(flow <= threshold,
                      exclude = character(),
                      levels = c(TRUE, FALSE, NA),
                      labels = c("no-flow", "flow", "no data")),
       spell = group_const_value(state) + 1
-    ) %>%
-    select(time, flow, spell, group, minor, major, state)
+    )
 
-  # ggplot(spells, aes(monthDay(time), major, fill = state)) + geom_tile()
+  if(all(spells$state != "no-flow")) warning("Every flow value < threshold. River is not intermittent.")
 
-  # todo:  agg.spell must not be NULL
-  # todo: check all agg functions must be named lists
+  spells <- spells %>%
+    allocate_spell(rule = rule) %>%
+    select(time, flow, spell, group, minor, year, state)
 
-  # holds the hierarchy of the aggregation process
+  # ggplot(spells, aes(monthDay(time), year, fill = state)) + geom_tile()
+
+   # holds the hierarchy of the aggregation process
   agg <- list(
     "time" = NULL,
     "flow" = NULL,
     "spell" = agg.spell,
     "group" = agg.group,
     "minor" = agg.minor,
-    "major" = agg.major,
-    "total" = agg.total
+    "year" = agg.year,
+    # last group is equal to aggregating per state
+    "state" = agg.total
   ) %>%
     tibble::enframe(name = "level", value = "fun") %>%
-    mutate(name = paste0("fun.", level))
+    mutate(
+      name = paste0("fun.", level), #  if_else(level == "state", "total", level)),
+      level = factor(level, levels = level, ordered = T)
+    )
 
-  # never skip time and flow
-  remove <- setdiff(agg$level[map_lgl(agg$fun, is.null)], c("time", "flow"))
+  # remove columns we do not aggregate over, never skip time and flow
+  remove <- setdiff(agg$level[map_lgl(agg$fun, is.null)], c("time", "flow", "state", "spell"))
 
-  # remove columns we do not aggregate over
   result <- spells %>%
     select(-any_of(remove))
 
-  # todo: implement default value for first aggregation
+  rows <- which(!(agg$level %in% c("time", "flow") | map_lgl(agg$fun, is.null)))
+  for (l in rows) {
+    level <- agg$level[l]
+    nest.vars <- filter(agg, level < !!level) %>%
+      pull(level) %>%
+      as.character() %>%
+      c("data", "value")
 
-  rows <- !(agg$level %in% c("time", "flow") | map_lgl(agg$fun, is.null))
-  for (l in which(rows)) {
-    if (!is.null(agg$fun[[l]])) {
-      result <- result %>%
-        nest(data = any_of(c(utils::head(agg$level, l - 1), "data", "value"))) %>%
-        mutate(
-          metric = map(data, .summarize_and_enframe,
-                       funs = agg$fun[[l]], name = agg$name[l])
-        ) %>%
-        unnest(metric) %>%
-        .simplify_output()
-    }
+    complete.vars <- agg %>%
+      filter(!map_lgl(fun, is.null), level > !!level) %>%
+      pull(level) %>%
+      as.character()
+
+    result <- result %>%
+      nest(data = any_of(nest.vars)) %>%
+      mutate(
+        metric = map(data, .summarize_and_enframe,
+                     funs = agg$fun[[l]], name = agg$name[l])
+      ) %>%
+      unnest(metric) %>%
+      .complete_spells(group = as.character(level), funs = agg$fun[[l]],
+                       complete = complete.vars) %>%
+      .simplify_output()
   }
 
   return(result)
+}
+
+.complete_spells <- function(x, group, funs, complete)
+{
+  fun.name <- paste0("fun.",group)
+  complete.vars <- c(rlang::ensyms(fun.name), rlang::syms(complete))
+
+  defaults <- enframe(map(funs, "default"), name = fun.name, value = "default")
+
+  x <- x %>%
+    complete(!!!complete.vars, fill = list(value = list(NULL))) %>%
+    left_join(defaults, by = fun.name) %>%
+    mutate(
+      #value = modify2(value, default, ~(if(is.null(.x)) .y else .x))
+      value = if_else(map_lgl(value, is.null), default, value)
+    ) %>%
+    select(-default) %>%
+    filter(!(state == "no data" & is.na(.data[[group]])))
+
+  return(x)
+}
+
+allocate_spell <- function(x, rule = c("cut", "duplicate", "onset", "termination", "majority"))
+{
+  rule <- match.arg(rule)
+
+  # todo: only one group can have rule = "cut" because it modifies
+  # the spell number, not the group
+
+  # todo: allocating minor is not meaningful, as minor is cyclic (repetitive)
+  # always use group instead?
+  if (length(rule) == 1) rule <- rep(rule, 3)
+
+  x <- .allocate_spell_to_group(x, rule = rule[1], group = "year")
+  x <- .allocate_spell_to_group(x, rule = rule[2], group = "minor")
+  x <- .allocate_spell_to_group(x, rule = rule[3], group = "group")
+
+  return(x)
+}
+
+.allocate_spell_to_group <- function(x, rule, group)
+{
+
+  # find spells spanning several intervals
+  spanning <- x %>%
+    count(spell, .data[[group]], name = "n.obs") %>%
+    add_count(spell, wt = n()) %>%
+    filter(n > 1) %>%
+    select(spell, !!group) %>%
+    group_by(spell)
+
+  if(nrow(spanning) == 0) return(x)
+
+  # rule = "cut" is the default behavior because we group on
+  # spell, group, minor, year before computing the metric
+  # we could just do return(x)
+  # but to demonstrate the behavior more explicitly add fractions to spell no
+  if (rule == "cut") {
+    # s <- mutate(spanning, spell.new = spell + (row_number() - 1) / n())
+    #
+    # res <- x %>%
+    #   full_join(s, by = c("spell", group)) %>%
+    #   mutate(
+    #     spell = if_else(!is.na(spell.new), spell.new, spell)
+    #   ) %>%
+    #   select(-spell.new)
+    #
+    # # here we are modifying the spell.no thats why we return early
+    # return(res)
+
+    return(x)
+
+  } else if(rule == "duplicate") {
+    s <- rename(spanning, group.new = !!group)
+  } else if(rule == "onset") {
+    s <- mutate(spanning, group.new = first(.data[[group]]))
+  } else if(rule == "termination") {
+    s <- mutate(spanning, group.new = last(.data[[group]]))
+  } else if(rule == "majority") {
+    Mode <- function(x) {
+      ux <- unique(x)
+      ux[which.max(tabulate(match(x, ux)))]
+    }
+
+    s <- mutate(spanning, group.new = Mode(.data[[group]]))
+  }
+
+  res <- x %>%
+    full_join(s, by = if(rule == "duplicate") "spell" else c("spell", group)) %>%
+    mutate(
+      !!group := if_else(!is.na(group.new), group.new, .data[[group]])
+    ) %>%
+    select(-group.new)
+
+  return(res)
+}
+
+treat_missing_values <- function(x, na = c("none", "fill", "drop_group", "drop_minor", "drop_year") )
+{
+  if( all(!is.na(x$flow))) return(x)
+
+  if (na == "none") {
+    warning("NA flow values found. Derived metrics may be wrong.\n Consider using 'na = \"drop_year\"'.")
+    return(x)
+  }
+
+  if (na == "fill")  {
+    x <- fill(x, -time, .direction = "down")
+  } else {
+    drop <- stringr::str_remove(na, "drop_")
+
+    incomplete <- x %>%
+      filter(is.na(flow)) %>%
+      select(one_of(drop))
+
+    x <- x %>%
+      anti_join(incomplete, by = drop)
+  }
+
+  return(x)
 }
 
 
@@ -148,9 +294,9 @@ is_intermittent <- function(time, flow, threshold = 0.001,
   if(all(stats::na.omit(flow) > threshold)) return(FALSE)
 
 
-  f.major <- if(consecutive) lst(max) else lst(sum)
+  f.year <- if(consecutive) agg_fun(max) else agg_fun(sum)
   tbl <- ires_metric(time, flow, threshold, agg.spell = .duration,
-                     agg.major = f.major) %>%
+                     agg.year = f.year) %>%
     filter(state == "no-flow")
 
   any(tbl$value >= ndays)
@@ -161,12 +307,7 @@ is_intermittent <- function(time, flow, threshold = 0.001,
 
 
 
-.duration <- lst(
-  duration = list(
-    fun = function(x) length(x),
-    column = "time",
-    default = 0)
-)
+
 
 
 # Metrics -----
@@ -180,17 +321,9 @@ cv <- function(x) {
 no_flow_years <- function(time, flow, threshold = 0.001,
                           name = "proportion of no flow years")
 {
-  f.major <- lst(
-    "no flow year" = list(
-      fun = function(x)  {browser(); any(x == "no-flow")},
-      column = "state",
-      default = NA)
-  )
+  tbl <- ires_metric(time, flow, threshold, agg.year = .duration)
 
-
-  tbl <- ires_metric(time, flow, threshold, agg.major = .duration)
-
-  nyears <- length(unique(tbl$major))
+  nyears <- length(unique(tbl$year))
   noflowyears <- tbl %>% filter(state == "no-flow", value > 0) %>% nrow()
 
   result <- noflowyears / nyears %>%
@@ -202,8 +335,8 @@ no_flow_years <- function(time, flow, threshold = 0.001,
 #' @export
 MAN <- function(time, flow, threshold = 0.001, name = "MAN")
 {
-  m <- ires_metric(time, flow, threshold,
-                   agg.major = .duration, agg.total = lst(mean))
+  m <- ires_metric(time, flow, threshold, na = "drop_year",
+                   agg.year = .duration, agg.total = agg_fun(mean))
 
   result <- filter(m, state == "no-flow") %>%
     pull(value) %>%
@@ -215,8 +348,8 @@ MAN <- function(time, flow, threshold = 0.001, name = "MAN")
 #' @export
 CVAN <- function(time, flow, threshold = 0.001, name = "CVAN")
 {
-  m <- ires_metric(time, flow, threshold,
-                   agg.major = .duration, agg.total = lst(cv))
+  m <- ires_metric(time, flow, threshold, na = "drop_year",
+                   agg.year = .duration, agg.total = agg_fun(cv))
 
   result <- filter(m, state == "no-flow") %>%
     pull(value) %>%
@@ -228,13 +361,13 @@ CVAN <- function(time, flow, threshold = 0.001, name = "CVAN")
 #' @export
 FAN <- function(time, flow, threshold = 0.001)
 {
-  m <- ires_metric(time, flow, threshold,
-                   agg.major = .duration)
+  m <- ires_metric(time, flow, threshold, na = "drop_year",
+                   agg.year = .duration)
 
   tbl <- filter(m, state == "no-flow")
 
   result <- tbl$value %>%
-    set_names(tbl$major)
+    set_names(tbl$year)
 
   return(result)
 }
@@ -242,9 +375,9 @@ FAN <- function(time, flow, threshold = 0.001)
 #' @export
 MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 {
-  m <- ires_metric(time, flow, threshold,
-                   agg.spell = .duration, agg.major = lst(max),
-                   agg.total = lst(mean))
+  m <- ires_metric(time, flow, threshold, na = "drop_year",
+                   agg.spell = .duration, agg.year = agg_fun(max),
+                   agg.total = agg_fun(mean))
 
   result <- filter(m, state == "no-flow") %>%
     pull(value) %>%
@@ -264,7 +397,7 @@ MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 #
 #   if(all(!is.na(flow))) {
 #     m <- ires_metric(time, flow, threshold,
-#                      agg.major =  list(
+#                      agg.year =  list(
 #                        recession = list(fun = function(x) r(x),
 #                                         column = "flow",
 #                                         default = 0)
@@ -286,17 +419,27 @@ MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 #' @export
 tau0 <- function(time, flow, threshold = 0.001, name = "mean onset")
 {
+  f.spell <- agg_fun(min, name = "onset", column = "time", default = as.Date(NA))
 
-  f.spell <- lst(
-    onset = list(
-      fun = function(x) min(x),
-      column = "time",
-      default = 0)
-  )
-
-  m <- ires_metric(time, flow, threshold,
+  m <- ires_metric(time, flow, threshold, na = "drop_year",
                    agg.spell = f.spell,
-                   agg.major = lst(first), agg.total = lst(mean_day))
+                   agg.year = agg_fun(first), agg.total = agg_fun(mean_day))
+
+  result <- filter(m, state == "no-flow") %>%
+    pull(value) %>%
+    set_names(name)
+
+  return(result)
+}
+
+#' @export
+tau0r <- function(time, flow, threshold = 0.001, name = "strength onset")
+{
+  f.spell <- agg_fun(min, name = "onset", column = "time", default = as.Date(NA))
+
+  m <- ires_metric(time, flow, threshold, na = "drop_year",
+                   agg.spell = f.spell,
+                   agg.year = agg_fun(first), agg.total = agg_fun(strength_day))
 
   result <- filter(m, state == "no-flow") %>%
     pull(value) %>%
@@ -308,17 +451,11 @@ tau0 <- function(time, flow, threshold = 0.001, name = "mean onset")
 #' @export
 tauE <- function(time, flow, threshold = 0.001, name = "mean termination")
 {
+  f.spell <- agg_fun(max, name = "termination", column = "time", default = as.Date(NA))
 
-  f.spell <- lst(
-    termination = list(
-      fun = function(x) max(x),
-      column = "time",
-      default = 0)
-  )
-
-  m <- ires_metric(time, flow, threshold,
+  m <- ires_metric(time, flow, threshold, na = "drop_year",
                    agg.spell = f.spell,
-                   agg.major = lst(first = first), agg.total = lst(mean_day))
+                   agg.year = agg_fun(first), agg.total = agg_fun(mean_day))
 
   result <- filter(m, state == "no-flow") %>%
     pull(value) %>%
@@ -359,9 +496,28 @@ circular_r <- function(x, lwr = 0, upr = 365)
 circular_sd <- function(x, lwr = 0, upr = 365)
   .circular_stats(x = x, lwr = lwr, upr = upr)["sd"]
 
-
-mean_day <- function(x, lwr = 0, upr = 365)
+strength_day <- function(x, lwr = 0, upr = 365, na.rm = TRUE)
 {
+  if (all(is.na(x))) return(NA)
+  if (anyNA(x)) {
+    if (na.rm) x <- na.omit(x) else return(NA)
+  }
+
+  if (inherits(Sys.Date(), c("Date", "POSIXct"))) {
+    x <- lubridate::yday(.correct_leapyear(x))
+  }
+
+  d <- circular_sd(x = x, lwr = lwr, upr = upr)
+}
+
+mean_day <- function(x, lwr = 0, upr = 365, na.rm = TRUE)
+{
+
+  if (all(is.na(x))) return(NA)
+  if (anyNA(x)) {
+    if (na.rm) x <- na.omit(x) else return(NA)
+  }
+
   if (inherits(Sys.Date(), c("Date", "POSIXct"))) {
     x <- lubridate::yday(.correct_leapyear(x))
   }

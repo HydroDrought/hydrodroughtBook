@@ -69,8 +69,8 @@
     <br><i>To be implemented in R -- updated by Nico – in collaboration with Tobias. Numbers a d figures ready, text is missing </i>
   </li> 
   
-  <li>5.8 Intermittency: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-8_intermittency.html">Worked Example</a>, 
+  <li>5.8 No-flow indices: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-8_no_flow_indices.html">Worked Example</a>, 
     <br><i>No text yet </i>
   </li>
   </ul>

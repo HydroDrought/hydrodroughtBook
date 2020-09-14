@@ -33,3 +33,5 @@ Imports:
     ggrepel,
     cowplot,
     lubridate
+Suggests: 
+    testthat

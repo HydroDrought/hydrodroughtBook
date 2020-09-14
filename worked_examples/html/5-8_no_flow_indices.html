@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Worked example 5.8: No-flow indices</title>
+
+<script src="site_libs/header-attrs-2.3/header-attrs.js"></script>
+<link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
+<link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Worked example 5.8: No-flow indices</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#finding-intermittent-rivers"><span class="toc-section-number">2</span> Finding intermittent rivers</a></li>
+<li><a href="#computing-metrics"><span class="toc-section-number">3</span> Computing metrics</a></li>
+<li><a href="#visualising-streamflow-permanence-spells"><span class="toc-section-number">4</span> Visualising streamflow permanence (spells)</a></li>
+</ul>
+</div>
+
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
+<pre class="r"><code>library(hydroDrought)
+library(tidyverse)
+
+rivers &lt;- international %&gt;%
+  select(river, data) </code></pre>
+</div>
+<div id="finding-intermittent-rivers" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Finding intermittent rivers</h1>
+<p>Streamflow is on at least 5 days below the threshold of 0.001m<sup>3</sup>s<sup>-1</sup>. Removing incomplete first and last years.</p>
+<pre class="r"><code>intermittent &lt;- rivers %&gt;%
+  mutate(
+    is.intermittent = map_lgl(data, ~is_intermittent(.x$time, .x$discharge))
+  ) %&gt;% 
+  filter(is.intermittent) %&gt;%
+  mutate(
+    clipped = map(data, remove_incomplete_first_last),
+    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = &quot;drop_year&quot;))
+  ) </code></pre>
+</div>
+<div id="computing-metrics" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Computing metrics</h1>
+<pre class="r"><code>f &lt;- list(&quot;frac nf years&quot; = no_flow_years ,
+          &quot;MAN&quot; = MAN, &quot;CVAN&quot; = CVAN, &quot;no flow days&quot; = FAN,
+          &quot;MAMD&quot; = MAMD,
+          &quot;mean onset&quot; = tau0, &quot;mean termin.&quot; = tauE)
+
+metrics &lt;- intermittent %&gt;%
+  transmute(
+    river,
+    metrics = map(clipped, ~map(f, exec, time = .x$time, flow = .x$discharge))
+  ) %&gt;%
+  unnest_wider(metrics) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 6 x 8
+##   river          `frac nf years`   MAN   CVAN `no flow days`   MAMD `mean onset` `mean termin.`
+##   &lt;fct&gt;                    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt;       &lt;date&gt;         &lt;date&gt;
+## 1 Sabar                    1     185.  0.239  &lt;int [29]&gt;     168.         -05-12         -11-29
+## 2 Upper Guadiana           0.116  65   0.728  &lt;int [5]&gt;        7.56       -08-12         -10-14
+## 3 Dawib                    1     337.  0.0782 &lt;int [14]&gt;     291.         -01-06         -01-16
+## 4 Elands                   0.214  27.4 1.12   &lt;int [5]&gt;        2.79       -09-30         -10-05
+## 5 Ray                      0.945  95.1 0.598  &lt;int [51]&gt;      36.5        -05-19         -05-24
+## 6 Arroyo Seco              0.441  88.5 0.466  &lt;int [52]&gt;      38.3        -07-30         -10-24</code></pre>
+<pre class="r"><code>metrics %&gt;%
+  select(river, n.days = `no flow days`) %&gt;%
+  unnest(n.days) %&gt;%
+  ggplot(aes(n.days)) +
+  geom_histogram(binwidth = 31, boundary = 0,
+                 fill = &quot;grey90&quot;, col = &quot;black&quot;, size = 0.2) +
+  facet_wrap(vars(river)) +
+  scale_y_continuous(breaks = breaks_integer()) +
+  scale_x_continuous(expand = expansion(add = 7)) +
+  labs(x = &quot;Number of no flow days per year&quot;, y = &quot;Count&quot;) +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank())</code></pre>
+<p><img src="5-8_no_flow_indices_files/figure-html/unnamed-chunk-5-1.png" width="672"  /></p>
+</div>
+<div id="visualising-streamflow-permanence-spells" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Visualising streamflow permanence (spells)</h1>
+<pre class="r"><code>spells &lt;-intermittent %&gt;%
+  select(river, spells) %&gt;%
+  unnest(spells) %&gt;%
+  mutate(
+    year = water_year(time),
+    day = monthDay(time)
+  ) 
+
+onoff &lt;- metrics %&gt;%
+  select(river, `mean onset`, &quot;mean termination&quot; = `mean termin.`) %&gt;%
+  pivot_longer(-river, names_to = &quot;Timing&quot;)
+
+ggplot(spells, aes(monthDay(time), year, fill = state)) +
+  geom_tile() +
+  geom_vline(data = onoff, aes(xintercept = value, linetype = Timing), 
+             col = &quot;red&quot;, size = 0.2) + 
+  scale_x_month(expand = expansion(), nletters = 1) +
+  scale_y_continuous(expand = expansion(), breaks = breaks_integer()) +
+  scale_fill_manual(&quot;Spell&quot;, values = c(&quot;no-flow&quot; = &quot;grey80&quot;, &quot;flow&quot; = &quot;grey60&quot;, 
+                                        &quot;no-data&quot; = &quot;NA&quot;), 
+                    drop = FALSE) +
+  labs(title = &quot;Streamflow permanence&quot;) +
+  facet_wrap(vars(river), scales = &quot;free_y&quot;) +
+  guides(fill = guide_legend(override.aes = list(col = 1))) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.ontop = TRUE,
+        panel.background = element_rect(fill = NA),
+        axis.title = element_blank())</code></pre>
+<p><img src="5-8_no_flow_indices_files/figure-html/unnamed-chunk-6-1.png" width="672"  /></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

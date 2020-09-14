@@ -13,6 +13,8 @@ worked_examples/void/
 worked_examples/html/index.html
 .~lock.*
 
+cache/
+
 worked_examples/word/
 worked_examples/html/*.docx
 
