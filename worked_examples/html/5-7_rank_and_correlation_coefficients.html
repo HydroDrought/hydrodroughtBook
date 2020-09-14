@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Worked example 5.7" />
+
+
+<title>Rank and correlation coefficients</title>
+
+<link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
+<link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Rank and correlation coefficients</h1>
+<h4 class="author">Worked example 5.7</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#indices"><span class="toc-section-number">2</span> Indices</a></li>
+<li><a href="#ranks"><span class="toc-section-number">3</span> Ranks</a></li>
+<li><a href="#pearson-correlation"><span class="toc-section-number">4</span> Pearson correlation</a></li>
+<li><a href="#spearman-rank-correlation"><span class="toc-section-number">5</span> Spearman (rank) correlation</a></li>
+</ul>
+</div>
+
+<div id="loading-the-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought) 
+
+r &lt;- regional %&gt;%
+  select(id, river, station, data = discharge) %&gt;%
+  print()</code></pre>
+<pre><code>## # A tibble: 29 x 4
+##    id     river       station          data                 
+##    &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;            &lt;list&gt;               
+##  1 210039 Rabnitz     Piringsdorf      &lt;tibble [16,436 × 2]&gt;
+##  2 210054 Rabnitz     Mannersdorf      &lt;tibble [18,262 × 2]&gt;
+##  3 210062 Stoob       Oberpullendorf   &lt;tibble [18,262 × 2]&gt;
+##  4 210088 Wulka       Wulkaprodersdorf &lt;tibble [18,262 × 2]&gt;
+##  5 210211 Lafnitz     Dobersdorf       &lt;tibble [23,741 × 2]&gt;
+##  6 210237 Pinka       Woppendorf       &lt;tibble [23,741 × 2]&gt;
+##  7 210245 Tauchenbach Altschlaining    &lt;tibble [18,262 × 2]&gt;
+##  8 210252 Tauchenbach Hannersdorf      &lt;tibble [23,741 × 2]&gt;
+##  9 210286 Strem       Güssing          &lt;tibble [14,610 × 2]&gt;
+## 10 210294 Strem       Heiligenbrunn    &lt;tibble [23,741 × 2]&gt;
+## # … with 19 more rows</code></pre>
+</div>
+<div id="indices" class="section level1">
+<h1><span class="header-section-number">2</span> Indices</h1>
+<pre class="r"><code># list of functions we applied to each station
+f &lt;- list(
+  mean = function(x, ...) mean(x), 
+  Q50 = function(x, ...) lfquantile(x, exc.freq = 0.5),
+  `MAM(1)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 1),
+  `MAM(10)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 10),
+  `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
+  Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
+  Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7),
+  ALPHA = function(x, t, ...) recession(time = t, discharge = x)
+)
+
+indices &lt;- r %&gt;%
+  transmute(
+    id, 
+    indices = map(data, ~map_df(f, exec, x = .x$discharge, t = .x$time))
+  ) %&gt;%
+  unnest(indices) </code></pre>
+<pre class="r"><code># derived indices
+indices &lt;- indices %&gt;%
+  mutate(
+    `Q90/Q50` = Q90/Q50,
+    `Q95/Q50` = Q95/Q50,
+    `MAM(30)/Q50` = `MAM(30)`/Q50,
+    `MAM(10)/Q50` = `MAM(10)`/Q50,
+    `MAM(1)/Q50` = `MAM(1)`/Q50,
+  ) </code></pre>
+<p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.11 Flow indices for a subset of the Regional Data Set.</span></p>
+<pre><code>## # A tibble: 29 x 15
+##    id     mean   Q50 `MAM(1)` `MAM(10)` `MAM(30)`   Q95   Q90   Q70 ALPHA
+##    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 2100… 0.615 0.443    0.144     0.179     0.220 0.132 0.178 0.31  0.248
+##  2 2100… 0.913 0.68     0.274     0.320     0.373 0.257 0.311 0.49  0.545
+##  3 2100… 0.613 0.429    0.129     0.164     0.216 0.14  0.179 0.305 0.472
+##  4 2100… 0.548 0.414    0.197     0.227     0.262 0.15  0.191 0.299 0.419
+##  5 2102… 6.47  4.91     2.43      2.75      3.08  2.44  2.83  3.86  0.261
+##  6 2102… 2.30  1.59     0.596     0.804     0.939 0.66  0.8   1.2   0.388
+##  7 2102… 0.409 0.348    0.166     0.183     0.201 0.124 0.159 0.255 0.196
+##  8 2102… 0.692 0.52     0.209     0.246     0.293 0.18  0.236 0.39  0.401
+##  9 2102… 1.08  0.513    0.168     0.199     0.263 0.167 0.216 0.368 0.748
+## 10 2102… 1.47  0.67     0.211     0.262     0.334 0.214 0.271 0.47  0.597
+## # … with 19 more rows, and 5 more variables: `Q90/Q50` &lt;dbl&gt;, `Q95/Q50` &lt;dbl&gt;,
+## #   `MAM(30)/Q50` &lt;dbl&gt;, `MAM(10)/Q50` &lt;dbl&gt;, `MAM(1)/Q50` &lt;dbl&gt;</code></pre>
+</div>
+<div id="ranks" class="section level1">
+<h1><span class="header-section-number">3</span> Ranks</h1>
+<pre class="r"><code>long &lt;- indices %&gt;%
+  pivot_longer(cols = -id, names_to = &quot;index&quot;) %&gt;%
+  mutate(index = factor(index, levels = setdiff(colnames(indices), &quot;id&quot;)))
+
+ranks &lt;- long %&gt;%
+  group_by(id) %&gt;%
+  mutate(
+    rank = rank(value, ties.method = &quot;min&quot;)
+  )
+
+ggplot(ranks, aes(x = index, y = id, fill = rank, label = rank)) + 
+  geom_tile() + 
+  geom_text(size = 3) + 
+  scale_fill_viridis_c(alpha = 0.3) + 
+  labs(y = &quot;Station ID&quot;) + 
+  theme(panel.grid = element_blank(), 
+        legend.position = &quot;none&quot;,
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))</code></pre>
+<p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-5-1.png" width="576"  /></p>
+</div>
+<div id="pearson-correlation" class="section level1">
+<h1><span class="header-section-number">4</span> Pearson correlation</h1>
+<pre class="r"><code>library(corrplot)
+x &lt;- indices %&gt;%
+  select(-id)
+M &lt;- cor(x, method = &quot;pearson&quot;)
+res1 &lt;- cor.mtest(x, method = &quot;pearson&quot;, conf.level = .95)
+
+col2 &lt;- colorRampPalette(c(&quot;#67001F&quot;, &quot;#B2182B&quot;, &quot;#D6604D&quot;, &quot;#F4A582&quot;,
+                           &quot;#FDDBC7&quot;, &quot;#FFFFFF&quot;, &quot;#D1E5F0&quot;, &quot;#92C5DE&quot;,
+                           &quot;#4393C3&quot;, &quot;#2166AC&quot;, &quot;#053061&quot;))
+
+corrplot(M, type = &quot;upper&quot;,
+         col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = &quot;grey10&quot;,
+         p.mat = res1$p, insig = &quot;pch&quot;, 
+         order = &quot;hclust&quot;, addrect = 3, rect.col = &quot;navy&quot;,
+         pch.cex = 2, 
+         number.cex = .7, tl.col = &quot;black&quot;)</code></pre>
+<p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-7-1.png" width="672"  /></p>
+</div>
+<div id="spearman-rank-correlation" class="section level1">
+<h1><span class="header-section-number">5</span> Spearman (rank) correlation</h1>
+<pre class="r"><code>M &lt;- cor(x, method = &quot;spearman&quot;)
+res1 &lt;- cor.mtest(x, method = &quot;spearman&quot;, conf.level = .95)
+corrplot(M, type = &quot;upper&quot;,
+          col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = &quot;grey10&quot;,
+         p.mat = res1$p, insig = &quot;pch&quot;, 
+         order = &quot;hclust&quot;, addrect = 3, rect.col = &quot;navy&quot;,
+         pch.cex = 2, 
+         number.cex = .7, tl.col = &quot;black&quot;)</code></pre>
+<p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-8-1.png" width="672"  /></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
