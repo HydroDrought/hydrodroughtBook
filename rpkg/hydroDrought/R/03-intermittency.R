@@ -135,7 +135,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
       c("data", "value")
 
     complete.vars <- agg %>%
-      filter(!map_lgl(.dat$fun, is.null), level > !!level) %>%
+      filter(!map_lgl(.data$fun, is.null), level > !!level) %>%
       pull(level) %>%
       as.character()
 
@@ -198,7 +198,7 @@ allocate_spell <- function(x, rule = c("cut", "duplicate", "onset", "termination
   # find spells spanning several intervals
   spanning <- x %>%
     count(spell, .data[[group]], name = "n.obs") %>%
-    dplyr::add_count(spell, wt = n()) %>%
+    dplyr::add_count(spell) %>%
     filter(n > 1) %>%
     select(spell, !!group) %>%
     group_by(spell)
@@ -389,21 +389,19 @@ MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 # k <- function(time, flow, threshold = 0.001, name = "k")
 # {
 #   r <- function(...) {
-#     x <-  smires:::recession(...)
-#     if (is.null(x)| length(x) == 0) x <- NA_real_
+#     x <-  recession(...)
+#     if (is.null(x) | length(x) == 0) x <- NA_real_
 #
 #     return(x)
 #   }
 #
 #   if(all(!is.na(flow))) {
+#
 #     m <- ires_metric(time, flow, threshold,
-#                      agg.year =  list(
-#                        recession = list(fun = function(x) r(x),
-#                                         column = "flow",
-#                                         default = 0)
-#                      ),
-#                      agg.total = list(mean = function(x) mean(x, na.rm = TRUE))
-#     )
+#                      # using two columns does not work
+#                      agg.year = agg_fun(fun = r, name = "recession", column = c("time", "flow")),
+#                      agg.total = agg_fun(fun = function(x) mean(x, na.rm = TRUE), name = "mean", default = NA_real_)
+#                      )
 #
 #     result <- filter(m, state == "flow")$value
 #
@@ -411,7 +409,10 @@ MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 #     result <- NA_real_
 #   }
 #
-#     names(result) <- name
+#   browser()
+#   result <- filter(m, state == "no-flow") %>%
+#     pull(value) %>%
+#     set_names(name)
 #
 #   return(result)
 # }

@@ -10,8 +10,8 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 # Loading the Data
 
-Ten years of daily data without missing values from River Ngaruroro at Kuripapango (NZ) 
-are used as an example. 
+Twelve years of daily data without missing values from River Ngaruroro at Kuripapango (NZ) 
+are used as an example (1988 – 1999). 
 
 ```{r}
 library(tidyverse)
@@ -30,8 +30,12 @@ ngaruroro <- international %>%
 ```
 
 # Calculation
-The storage $S_t$ is appended as new column to the time series using the function 
-`storage()` with the discharges and the threshold as input values. 
+
+(@) Define the value of the desired yield (equals the threshold value). Here $Q_{90}$ is used.
+
+(@) Calculate the storage $S_t$ according to Equation 5.5. Storage is appended as 
+a new column to the time series tibble using the function `storage()` with 
+discharge and the threshold as input values ([Table 5.9](#table)).
 
 ```{r}
 q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
@@ -42,7 +46,7 @@ ng <- ngaruroro %>%
   ) 
 ```
 
-`r tufte::margin_note("Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")`
+`r tufte::margin_note("<a name=\"table\"></a>Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")`
 ```{r, echo=FALSE}
 ng %>%
   hydroDrought:::export_table(name = "Tab5.9") %>%
@@ -55,9 +59,8 @@ ng %>%
 ```
 
 
-As long as the discharge is above the threshold the storage is zero as only 
-flows below the $Q_90$ contributes to the storage. The first time that is the 
-case is on on `r ng$time[ng$storage > 0][1]`.
+As long as the discharge is above, or equal to, the threshold, the storage is zero as only 
+flows below the $Q_90$ contributes to the storage. This happens the first time on `r ng$time[ng$storage > 0][1]` and lasts only two days.
 
 ```{r}
 ng %>%
@@ -66,7 +69,7 @@ ng %>%
 
 
 Filtering for `storage > 0` and assigning new `event` numbers when the time increment
-in the (filtered) time series suddenly changes allows us to identify 
+in the (filtered) time series suddenly changes allows us to identify a
 series of uninterrupted sequences of positive $S_t$. 
 
 ```{r}
@@ -81,8 +84,8 @@ ng <- ng %>%
 # Selection of the drought deficit volume and duration
 The deficit volume is the maximum value in an uninterrupted sequence of positive 
 $S_t$, and the drought duration is the time from the beginning of the depletion 
-period to the time of the maximum depletion. The date of the maximum depletion 
-is also displayed.
+period to the time of the maximum depletion. Accordingly, the duration of the first 
+event is only one day. The date of the maximum depletion is also displayed.
 
 ```{r}
 spa <- ng %>%
@@ -105,7 +108,7 @@ spa  %>%
 
 
 ```{r, echo=FALSE, }
-fig.cap <- "Figure x.xx Depiction of the relationship between discharge $Q_t$ and storage $Q_t$ for drought event number 3."
+fig.cap <- "Figure x.xx Depiction of the relationship between discharge $Q_t$ and storage $Q_t$ for the third drought event starting 1989-05-24."
 ```
 ```{r,fig.cap=fig.cap, echo = FALSE}
 raw <- ngaruroro %>%
@@ -127,10 +130,7 @@ sample.event %>%
 
 # Results
 
-An extract of the drought duration and deficit volumes for the 10-year series 
-is given in the output below. Even though the SPA procedure is pooling minor and
-dependent droughts, the obtained time series of events still contains a number 
-of minor drought events.
+An extract of the drought duration and deficit volumes for the 12-year series is given in the output below. Note that the time series starts with a flow value less than the threshold (not knowing the previous flow values), thus the first event should be omitted from the analysis. Even though the SPA procedure is pooling minor and dependent droughts, the obtained time series of events still contains a number of minor drought events.
 
 # Fast Track
 
