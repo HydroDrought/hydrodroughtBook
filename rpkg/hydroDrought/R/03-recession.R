@@ -105,3 +105,34 @@ recession <- function(time, discharge, qref = lfquantile(discharge, 0.7),
   return(unname(alpha))
 }
 
+# # todo: refactor function like this
+# .recession <- function(discharge, time = NULL,
+#                       dt = if(is.null(time)) 1 else median(diff(time)),
+#                       qref = lfquantile(discharge, 0.7),
+#                       smooth = 0, zeroslope = 0, minlen = 5, remove = 2,
+#                       weight.length = ~x^2 NA,
+#                       fit.segment = c("individual", "all"))
+# {
+#   fit.segment <- match.arg(fit.segment) # individual = IRC, all = MRC
+#
+#   # todo plot: also show segments above qref, but grey
+#   # secondary y axis with lowflow quantiles
+#
+#   res <- list(
+#     value = c(k = k, C = C, alpha = alpha),
+#     fun,
+#     plot,
+#     segments
+#   )
+#   return(res)
+# }
+#
+# recession <- function(parameter = c("k", "C", "alpha"), ...)
+# {
+#   parameter <- match.arg(parameter)
+#   recession(...)$value[parameter]
+# }
+
+
+
+

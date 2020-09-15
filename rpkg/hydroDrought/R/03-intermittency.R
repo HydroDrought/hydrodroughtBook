@@ -40,16 +40,62 @@
 
 #' @importFrom rlang exec
 #' @importFrom purrr map2
-.summarize_and_enframe <- function(data, funs, name)
+.summarize_and_enframe <- function(data, funs, level)
 {
+  fun.level <-  paste0("fun.", level)
+
   col <- purrr::map(funs, "column")
   funs <- purrr::map(funs, "fun")
 
   # hack in order to operate on vectors and on lists
   l <- map2(col, funs, function(column, fun) fun(exec(c, !!!data[[column]])))
 
-  tibble(!!name := names(funs), value = l)
+  tibble(!!fun.level := names(funs), value = l)
 }
+
+# x <- tibble(
+#   vec1 = c(NA, 1:10),
+#   vec2= c(as.Date(NA), Sys.Date() + lubridate::days(1:10)),
+#   list1 = as.list(vec1),
+#   list2 = as.list(vec2),
+#   # list3 = c(list(NULL), tail(list1, -1))
+# ) %>%
+#   print()
+#
+# f <- function(x) x[3]
+# f <- function(x) max(x, na.rm = TRUE)
+#
+# x %>%
+#   mutate(across(where(is.list), unlist, use.names = F)) %>%
+#   summarize(across(everything(), f))
+
+
+# x <- tibble(
+#   time = 1:10,
+#   discharge = -1:-10,
+#   state = sample(c("flow", "no-flow"), 10, replace = T),
+#   value = 101:110
+# )
+#
+# a_fun <- function(fun) {
+#   fun <- rlang::enexpr(fun)
+#
+#   # if supplied without argument use "value" as default argument
+#   if (!rlang::is_call(fun)) fun <- rlang::call2(fun, rlang::expr(value))
+#
+#   return(fun)
+# }
+#
+# # becoming function (x) mean(x$value)
+# eval_tidy(a_fun(mean), as_data_mask(x))
+#
+# # becoming function (x) mean(x$discharge)
+# eval_tidy(a_fun(mean(discharge)), as_data_mask(x))
+#
+# # becoming function (x) complex_fun(t = x$time, q = x$discharge)
+# complex_fun <- function(x, y) x * y
+# eval_tidy(a_fun(complex_fun(time, discharge)), as_data_mask(x))
+#
 
 agg_fun <- function(fun, name = deparse(substitute(fun)), column = "value", default = NA)
 {
@@ -116,7 +162,6 @@ ires_metric <- function(time, flow, threshold = 0.001,
   ) %>%
     tibble::enframe(name = "level", value = "fun") %>%
     mutate(
-      name = paste0("fun.", level), #  if_else(level == "state", "total", level)),
       level = factor(level, levels = level, ordered = T)
     )
 
@@ -143,10 +188,10 @@ ires_metric <- function(time, flow, threshold = 0.001,
       nest(data = any_of(nest.vars)) %>%
       mutate(
         metric = map(data, .summarize_and_enframe,
-                     funs = agg$fun[[l]], name = agg$name[l])
+                     funs = agg$fun[[l]], level = as.character(level))
       ) %>%
       unnest(.data$metric) %>%
-      .complete_spells(group = as.character(level), funs = agg$fun[[l]],
+      .complete_spells(level = as.character(level), funs = agg$fun[[l]],
                        complete = complete.vars) %>%
       .simplify_output()
   }
@@ -154,9 +199,9 @@ ires_metric <- function(time, flow, threshold = 0.001,
   return(result)
 }
 
-.complete_spells <- function(x, group, funs, complete)
+.complete_spells <- function(x, level, funs, complete)
 {
-  fun.name <- paste0("fun.",group)
+  fun.name <- paste0("fun.", level)
   complete.vars <- c(rlang::ensyms(fun.name), rlang::syms(complete))
 
   defaults <- tibble::enframe(map(funs, "default"), name = fun.name, value = "default")
@@ -169,7 +214,7 @@ ires_metric <- function(time, flow, threshold = 0.001,
       value = if_else(map_lgl(value, is.null), default, value)
     ) %>%
     select(-default) %>%
-    filter(!(state == "no data" & is.na(.data[[group]])))
+    filter(!(state == "no data" & is.na(.data[[level]])))
 
   return(x)
 }
@@ -178,29 +223,29 @@ allocate_spell <- function(x, rule = c("cut", "duplicate", "onset", "termination
 {
   rule <- match.arg(rule)
 
-  # todo: only one group can have rule = "cut" because it modifies
-  # the spell number, not the group
+  # todo: only one level can have rule = "cut" because it modifies
+  # the spell number, not the level
 
   # todo: allocating minor is not meaningful, as minor is cyclic (repetitive)
   # always use group instead?
   if (length(rule) == 1) rule <- rep(rule, 3)
 
-  x <- .allocate_spell_to_group(x, rule = rule[1], group = "year")
-  x <- .allocate_spell_to_group(x, rule = rule[2], group = "minor")
-  x <- .allocate_spell_to_group(x, rule = rule[3], group = "group")
+  x <- .allocate_spell_to_level(x, rule = rule[1], level = "year")
+  x <- .allocate_spell_to_level(x, rule = rule[2], level = "minor")
+  x <- .allocate_spell_to_level(x, rule = rule[3], level = "group")
 
   return(x)
 }
 
-.allocate_spell_to_group <- function(x, rule, group)
+.allocate_spell_to_level <- function(x, rule, level)
 {
 
   # find spells spanning several intervals
   spanning <- x %>%
-    count(spell, .data[[group]], name = "n.obs") %>%
+    count(spell, .data[[level]], name = "n.obs") %>%
     dplyr::add_count(spell) %>%
     filter(n > 1) %>%
-    select(spell, !!group) %>%
+    select(spell, !!level) %>%
     group_by(spell)
 
   if(nrow(spanning) == 0) return(x)
@@ -213,7 +258,7 @@ allocate_spell <- function(x, rule = c("cut", "duplicate", "onset", "termination
     # s <- mutate(spanning, spell.new = spell + (row_number() - 1) / n())
     #
     # res <- x %>%
-    #   full_join(s, by = c("spell", group)) %>%
+    #   full_join(s, by = c("spell", level)) %>%
     #   mutate(
     #     spell = if_else(!is.na(spell.new), spell.new, spell)
     #   ) %>%
@@ -225,26 +270,26 @@ allocate_spell <- function(x, rule = c("cut", "duplicate", "onset", "termination
     return(x)
 
   } else if(rule == "duplicate") {
-    s <- rename(spanning, group.new = !!group)
+    s <- rename(spanning, level.new = !!level)
   } else if(rule == "onset") {
-    s <- mutate(spanning, group.new = first(.data[[group]]))
+    s <- mutate(spanning, level.new = first(.data[[level]]))
   } else if(rule == "termination") {
-    s <- mutate(spanning, group.new = last(.data[[group]]))
+    s <- mutate(spanning, level.new = last(.data[[level]]))
   } else if(rule == "majority") {
     Mode <- function(x) {
       ux <- unique(x)
       ux[which.max(tabulate(match(x, ux)))]
     }
 
-    s <- mutate(spanning, group.new = Mode(.data[[group]]))
+    s <- mutate(spanning, level.new = Mode(.data[[level]]))
   }
 
   res <- x %>%
-    dplyr::full_join(s, by = if(rule == "duplicate") "spell" else c("spell", group)) %>%
+    dplyr::full_join(s, by = if(rule == "duplicate") "spell" else c("spell", level)) %>%
     mutate(
-      !!group := if_else(!is.na(group.new), group.new, .data[[group]])
+      !!level := if_else(!is.na(level.new), level.new, .data[[level]])
     ) %>%
-    select(-group.new)
+    select(-level.new)
 
   return(res)
 }
