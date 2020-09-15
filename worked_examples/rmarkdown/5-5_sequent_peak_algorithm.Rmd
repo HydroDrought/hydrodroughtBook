@@ -60,7 +60,7 @@ ng %>%
 
 
 As long as the discharge is above, or equal to, the threshold, the storage is zero as only 
-flows below the $Q_90$ contributes to the storage. This happens the first time on `r ng$time[ng$storage > 0][1]` and lasts only two days.
+flows below the $Q_{90}$ contributes to the storage. This happens the first time on `r ng$time[ng$storage > 0][1]` and lasts only two days.
 
 ```{r}
 ng %>%
@@ -108,7 +108,7 @@ spa  %>%
 
 
 ```{r, echo=FALSE, }
-fig.cap <- "Figure x.xx Depiction of the relationship between discharge $Q_t$ and storage $Q_t$ for the third drought event starting 1989-05-24."
+fig.cap <- "Figure x.xx The relationship between between discharge $Q_t$ and storage $Q_t$ for the third drought event starting 1989-05-24."
 ```
 ```{r,fig.cap=fig.cap, echo = FALSE}
 raw <- ngaruroro %>%

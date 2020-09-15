@@ -117,7 +117,7 @@ ng &lt;- ngaruroro %&gt;%
 ##  9 1988-09-09      56.1  1988       0
 ## 10 1988-09-10      43.1  1988       0
 ## # … with 4,373 more rows</code></pre>
-<p>As long as the discharge is above, or equal to, the threshold, the storage is zero as only flows below the <span class="math inline">\(Q_90\)</span> contributes to the storage. This happens the first time on 1989-03-14 and lasts only two days.</p>
+<p>As long as the discharge is above, or equal to, the threshold, the storage is zero as only flows below the <span class="math inline">\(Q_{90}\)</span> contributes to the storage. This happens the first time on 1989-03-14 and lasts only two days.</p>
 <pre class="r"><code>ng %&gt;%
   filter(storage &gt; 0)</code></pre>
 <pre><code>## # A tibble: 525 x 4
@@ -177,9 +177,9 @@ ng &lt;- ngaruroro %&gt;%
 ## 5     5  8.26         13 1990-04-24</code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">
-Figure x.xx Depiction of the relationship between discharge <span class="math inline">\(Q_t\)</span> and storage <span class="math inline">\(Q_t\)</span> for the third drought event starting 1989-05-24.
+Figure x.xx The relationship between between discharge <span class="math inline">\(Q_t\)</span> and storage <span class="math inline">\(Q_t\)</span> for the third drought event starting 1989-05-24.
 </p>
-<img src="5-5_sequent_peak_algorithm_files/figure-html/unnamed-chunk-9-1.png" alt="Figure x.xx Depiction of the relationship between discharge $Q_t$ and storage $Q_t$ for the third drought event starting 1989-05-24." width="672"  />
+<img src="5-5_sequent_peak_algorithm_files/figure-html/unnamed-chunk-9-1.png" alt="Figure x.xx The relationship between between discharge $Q_t$ and storage $Q_t$ for the third drought event starting 1989-05-24." width="672"  />
 </div>
 </div>
 <div id="results" class="section level1">

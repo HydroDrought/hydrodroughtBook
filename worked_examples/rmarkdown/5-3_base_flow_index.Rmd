@@ -60,8 +60,7 @@ points <- ray %>%
     ```{r}
 tp <- points %>%
   filter(is.turning.point) %>%
-  select(time, Qmin) %>%
-  print()
+  select(time, Qmin) 
 
 baseflow <- ray %>%
   mutate(
@@ -71,7 +70,7 @@ baseflow <- ray %>%
     ```
 
 
-(@) Calculate the volume of water ($V_{base}$) beneath the base flow hydrograph between the first and last date of interest. The volume (m<sup>3</sup>) is simply derived as the sum of the daily base flow values multiplied by `r fmt_number(86400)` (the number of seconds per day = `r fmt_number(86400)`).
+(@) Calculate the volume of water ($V_{base}$) beneath the base flow hydrograph between the first and last date of interest. The volume (m<sup>3</sup>) is simply derived as the sum of the daily base flow values multiplied by `r fmt_number(86400)` (the number of seconds per day). 
 
 (@) Calculate the corresponding volume of water beneath the recorded hydrograph ($V_{total}$). The volume  (m<sup>3</sup>) is obtained by summing the daily flow values between the first and the last dates inclusive. 
 
@@ -99,7 +98,6 @@ tbl <- points %>%
   select(-block, -year) %>%
   right_join(baseflow, by = "time") %>% 
   arrange(time)
-
 
 tbl <- tbl  %>%
   filter(time <= as.Date("1995-02-09")) %>%
@@ -137,7 +135,7 @@ tbl2
 
 
 # Fast Track
-The base flow for a given time series can also be calculated directely using the 
+The base flow for a given time series can also be calculated directly using the 
 function `baseflow()`, optionally with a different choice of the block length ($N = x$ days) or 
 the turning point factor or parameter ($TP$) for the central value. The default 
 values are `tp.factor = 0.9` and `block.len = 5`, which can be adopted to the 
