@@ -43,69 +43,34 @@
 .summarize_and_enframe <- function(data, funs, level)
 {
   fun.level <-  paste0("fun.", level)
-
-  col <- purrr::map(funs, "column")
   funs <- purrr::map(funs, "fun")
 
-  # hack in order to operate on vectors and on lists
-  l <- map2(col, funs, function(column, fun) fun(exec(c, !!!data[[column]])))
+  mask <- data %>%
+    # column value could be a list column or not
+    # first aggregation level: input is vector, later on list-column
+    mutate(across(where(is.list) & any_of("value"), reduce, c)) %>%
+    rlang::as_data_mask()
+
+  l <- map(funs, rlang::eval_tidy, data = mask)
 
   tibble(!!fun.level := names(funs), value = l)
 }
 
-# x <- tibble(
-#   vec1 = c(NA, 1:10),
-#   vec2= c(as.Date(NA), Sys.Date() + lubridate::days(1:10)),
-#   list1 = as.list(vec1),
-#   list2 = as.list(vec2),
-#   # list3 = c(list(NULL), tail(list1, -1))
-# ) %>%
-#   print()
-#
-# f <- function(x) x[3]
-# f <- function(x) max(x, na.rm = TRUE)
-#
-# x %>%
-#   mutate(across(where(is.list), unlist, use.names = F)) %>%
-#   summarize(across(everything(), f))
 
-
-# x <- tibble(
-#   time = 1:10,
-#   discharge = -1:-10,
-#   state = sample(c("flow", "no-flow"), 10, replace = T),
-#   value = 101:110
-# )
-#
-# a_fun <- function(fun) {
-#   fun <- rlang::enexpr(fun)
-#
-#   # if supplied without argument use "value" as default argument
-#   if (!rlang::is_call(fun)) fun <- rlang::call2(fun, rlang::expr(value))
-#
-#   return(fun)
-# }
-#
-# # becoming function (x) mean(x$value)
-# eval_tidy(a_fun(mean), as_data_mask(x))
-#
-# # becoming function (x) mean(x$discharge)
-# eval_tidy(a_fun(mean(discharge)), as_data_mask(x))
-#
-# # becoming function (x) complex_fun(t = x$time, q = x$discharge)
-# complex_fun <- function(x, y) x * y
-# eval_tidy(a_fun(complex_fun(time, discharge)), as_data_mask(x))
-#
-
-agg_fun <- function(fun, name = deparse(substitute(fun)), column = "value", default = NA)
+agg_fun <- function(fun, name = rlang::expr_text(fun), default = logical())
 {
+  # if supplied without argument use "value" as default argument
+  fun <- rlang::enexpr(fun)
+  if (!rlang::is_call(fun)) fun <- rlang::call2(fun, rlang::expr(value))
+  fun <- rlang::new_quosure(expr = fun)
+
   # todo: check that default and return value of fun are of same type
   # eg. when using time NA_Date
-  lst(!!name := lst(fun, column, default))
+  lst(!!name := lst(fun, default))
 }
 
-.duration <- agg_fun(function(x) length(x),
-                     name = "duration", column = "time", default = 0L)
+
+.duration <- agg_fun(length(time), default = 0L)
 
 #' @importFrom purrr map_lgl
 #' @importFrom tidyselect any_of
@@ -144,12 +109,11 @@ ires_metric <- function(time, flow, threshold = 0.001,
   if(all(spells$state != "no-flow")) warning("Every flow value < threshold. River is not intermittent.")
 
   spells <- spells %>%
-    allocate_spell(rule = rule) %>%
-    select(time, flow, spell, group, minor, year, state)
+    allocate_spell(rule = rule)
 
   # ggplot(spells, aes(monthDay(time), year, fill = state)) + geom_tile()
 
-   # holds the hierarchy of the aggregation process
+  # holds the hierarchy of the aggregation process
   agg <- list(
     "time" = NULL,
     "flow" = NULL,
@@ -179,30 +143,45 @@ ires_metric <- function(time, flow, threshold = 0.001,
       as.character() %>%
       c("data", "value")
 
-    complete.vars <- agg %>%
-      filter(!map_lgl(.data$fun, is.null), level > !!level) %>%
-      pull(level) %>%
-      as.character()
-
     result <- result %>%
       nest(data = any_of(nest.vars)) %>%
       mutate(
-        metric = map(data, .summarize_and_enframe,
-                     funs = agg$fun[[l]], level = as.character(level))
+        metric = map(data, .summarize_and_enframe, funs = agg$fun[[l]],
+                     level = as.character(level))
       ) %>%
-      unnest(.data$metric) %>%
-      .complete_spells(level = as.character(level), funs = agg$fun[[l]],
-                       complete = complete.vars) %>%
-      .simplify_output()
+      unnest(.data$metric)
+
+    # complete spells on first aggregation
+    if(l == rows[1]) {
+      result <- result %>%
+        .complete_spells(level = as.character(level), funs = agg$fun[[l]],
+                         hierachy = agg)
+    }
   }
+
+  ord <- c("data", paste0(c("fun.", ""), rep(agg$level, each = 2)), "value")
+  result <- select(result, any_of(ord)) %>%
+    .simplify_output()
+
+  arr <- setdiff(colnames(result), c("data", "flow", "value"))
+  result <- arrange(result, across(any_of(arr)))
 
   return(result)
 }
 
-.complete_spells <- function(x, level, funs, complete)
+.complete_spells <- function(x, level, funs, hierachy)
 {
+  # never complete spell, all levels above and equal to current,
+  # where we have to aggregate over (agg.fun present), and always state
+
+  complete.vars <- hierachy %>%
+    filter((level > "spell" & level >= !!level & !map_lgl(.data$fun, is.null)) |
+             level == "state") %>%
+    pull(level) %>%
+    as.character()
+
   fun.name <- paste0("fun.", level)
-  complete.vars <- c(rlang::ensyms(fun.name), rlang::syms(complete))
+  complete.vars <- c(rlang::ensyms(fun.name), rlang::syms(complete.vars))
 
   defaults <- tibble::enframe(map(funs, "default"), name = fun.name, value = "default")
 
@@ -211,10 +190,10 @@ ires_metric <- function(time, flow, threshold = 0.001,
     left_join(defaults, by = fun.name) %>%
     mutate(
       #value = modify2(value, default, ~(if(is.null(.x)) .y else .x))
-      value = if_else(map_lgl(value, is.null), default, value)
+      value = if_else(map_lgl(value, is.null), default, value),
     ) %>%
-    select(-default) %>%
-    filter(!(state == "no data" & is.na(.data[[level]])))
+    select(-default) # %>%
+  # filter(!(state == "no data" & is.na(.data[[level]])))
 
   return(x)
 }
@@ -465,7 +444,7 @@ MAMD <- function(time, flow, threshold = 0.001, name = "MAMD")
 #' @export
 tau0 <- function(time, flow, threshold = 0.001, name = "mean onset")
 {
-  f.spell <- agg_fun(min, name = "onset", column = "time", default = as.Date(NA))
+  f.spell <- agg_fun(min(time), default = as.Date(NA))
 
   m <- ires_metric(time, flow, threshold, na = "drop_year",
                    agg.spell = f.spell,
@@ -481,7 +460,7 @@ tau0 <- function(time, flow, threshold = 0.001, name = "mean onset")
 #' @export
 tau0r <- function(time, flow, threshold = 0.001, name = "strength onset")
 {
-  f.spell <- agg_fun(min, name = "onset", column = "time", default = as.Date(NA))
+  f.spell <- agg_fun(min(time), default = as.Date(NA))
 
   m <- ires_metric(time, flow, threshold, na = "drop_year",
                    agg.spell = f.spell,
@@ -497,7 +476,7 @@ tau0r <- function(time, flow, threshold = 0.001, name = "strength onset")
 #' @export
 tauE <- function(time, flow, threshold = 0.001, name = "mean termination")
 {
-  f.spell <- agg_fun(max, name = "termination", column = "time", default = as.Date(NA))
+  f.spell <- agg_fun(max(time), default = as.Date(NA))
 
   m <- ires_metric(time, flow, threshold, na = "drop_year",
                    agg.spell = f.spell,
@@ -544,34 +523,37 @@ circular_sd <- function(x, lwr = 0, upr = 365)
 
 strength_day <- function(x, lwr = 0, upr = 365, na.rm = TRUE)
 {
-  if (all(is.na(x))) return(NA)
-  if (anyNA(x)) {
-    if (na.rm) x <- stats::na.omit(x) else return(NA)
+  if (all(is.na(x)) | (anyNA(x) & !na.rm)) {
+    res <- NA_real_
+  } else {
+    x <- stats::na.omit(x)
+
+    if (inherits(Sys.Date(), c("Date", "POSIXct"))) {
+      x <- lubridate::yday(.correct_leapyear(x))
+    }
+
+    res <- circular_sd(x = x, lwr = lwr, upr = upr)
   }
 
-  if (inherits(Sys.Date(), c("Date", "POSIXct"))) {
-    x <- lubridate::yday(.correct_leapyear(x))
-  }
-
-  d <- circular_sd(x = x, lwr = lwr, upr = upr)
+  return(res)
 }
 
 mean_day <- function(x, lwr = 0, upr = 365, na.rm = TRUE)
 {
+  if (all(is.na(x)) | (anyNA(x) & !na.rm)) {
+    res <- NA_real_
+  } else {
+    x <- stats::na.omit(x)
 
-  if (all(is.na(x))) return(NA)
-  if (anyNA(x)) {
-    if (na.rm) x <- stats::na.omit(x) else return(NA)
+    if (inherits(Sys.Date(), c("Date", "POSIXct"))) {
+      x <- lubridate::yday(.correct_leapyear(x))
+    }
+
+    d <- circular_mean(x = x, lwr = lwr, upr = upr)
+    res <- round(d)
   }
 
-  if (inherits(Sys.Date(), c("Date", "POSIXct"))) {
-    x <- lubridate::yday(.correct_leapyear(x))
-  }
-
-  d <- circular_mean(x = x, lwr = lwr, upr = upr)
-  d <- monthDay(round(d))
-
-  return(d)
+  return(monthDay(res))
 }
 
 

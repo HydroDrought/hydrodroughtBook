@@ -38,7 +38,6 @@ intermittent <- rivers %>%
   filter(is.intermittent) %>%
   mutate(
     clipped = map(data, remove_incomplete_first_last),
-    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = "drop_year"))
   ) 
 ```
 
@@ -79,8 +78,11 @@ metrics %>%
 
 # Visualising streamflow permanence (spells)
 
-```{r}
-spells <-intermittent %>%
+```{r, echo = FALSE}
+spells <- intermittent %>%
+  mutate(
+    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = "drop_year"))
+  ) %>%
   select(river, spells) %>%
   unnest(spells) %>%
   mutate(

@@ -75,7 +75,6 @@ rivers &lt;- international %&gt;%
   filter(is.intermittent) %&gt;%
   mutate(
     clipped = map(data, remove_incomplete_first_last),
-    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = &quot;drop_year&quot;))
   ) </code></pre>
 </div>
 <div id="computing-metrics" class="section level1">
@@ -93,14 +92,14 @@ metrics &lt;- intermittent %&gt;%
   unnest_wider(metrics) %&gt;%
   print()</code></pre>
 <pre><code>## # A tibble: 6 x 9
-##   river        `frac nf years`   MAN    CVAN `no flow days`   MAMD     onset `sd onset`     term.
-##   &lt;fct&gt;                  &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt; &lt;month-d&gt;      &lt;dbl&gt; &lt;month-d&gt;
-## 1 Sabar                  1     185.  0.239   &lt;int [29]&gt;     168.      -05-12       60.0    -11-29
-## 2 Upper Guadi…           0.116  65   0.728   &lt;int [5]&gt;        8.12    -08-12       25.8    -10-14
-## 3 Dawib                  1     361.  0.00830 &lt;int [6]&gt;      298.      -01-01        0      -01-27
-## 4 Elands                 0.214  43.3 0.699   &lt;int [3]&gt;        7.89    -08-22       83.6    -09-04
-## 5 Ray                    0.945  98.2 0.576   &lt;int [46]&gt;      40.2     -05-14       52.8    -05-20
-## 6 Arroyo Seco            0.441  88.5 0.466   &lt;int [52]&gt;      38.3     -07-30       24.7    -10-24</code></pre>
+##   river       `frac nf years`    MAN    CVAN `no flow days`   MAMD     onset `sd onset`     term.
+##   &lt;fct&gt;                 &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt; &lt;month-d&gt;      &lt;dbl&gt; &lt;month-d&gt;
+## 1 Sabar                 1     185.   0.239   &lt;int [29]&gt;     168.      -05-12       60.0    -11-29
+## 2 Upper Guad…           0.116   8.12 3.26    &lt;int [40]&gt;       8.12    -08-12       25.8    -10-14
+## 3 Dawib                 1     361.   0.00830 &lt;int [6]&gt;      298.      -01-01        0      -01-27
+## 4 Elands                0.214  14.4  1.83    &lt;int [9]&gt;        7.89    -08-22       83.6    -09-04
+## 5 Ray                   0.945  98.2  0.576   &lt;int [46]&gt;      40.2     -05-14       52.8    -05-20
+## 6 Arroyo Seco           0.441  39.0  1.33    &lt;int [118]&gt;     38.3     -07-30       24.7    -10-24</code></pre>
 <pre class="r"><code>metrics %&gt;%
   select(river, n.days = `no flow days`) %&gt;%
   unnest(n.days) %&gt;%
@@ -117,37 +116,6 @@ metrics &lt;- intermittent %&gt;%
 </div>
 <div id="visualising-streamflow-permanence-spells" class="section level1">
 <h1><span class="header-section-number">4</span> Visualising streamflow permanence (spells)</h1>
-<pre class="r"><code>spells &lt;-intermittent %&gt;%
-  select(river, spells) %&gt;%
-  unnest(spells) %&gt;%
-  mutate(
-    year = water_year(time),
-    day = monthDay(time)
-  ) 
-
-onoff &lt;- metrics %&gt;%
-  select(river, &quot;mean onset&quot; = onset, &quot;mean termination&quot; = `term.`) %&gt;%
-  pivot_longer(-river, names_to = &quot;Timing&quot;)
-
-ggplot(spells, aes(monthDay(time), year, fill = state)) +
-  geom_tile() +
-  geom_vline(data = onoff, aes(xintercept = value, linetype = Timing), 
-             col = &quot;red&quot;, size = 0.2) + 
-  scale_x_month(expand = expansion(), nletters = 1) +
-  scale_y_continuous(expand = expansion(), breaks = breaks_integer()) +
-  scale_fill_manual(&quot;Spell&quot;, values = c(&quot;no-flow&quot; = &quot;grey80&quot;, &quot;flow&quot; = &quot;grey60&quot;, 
-                                        &quot;no-data&quot; = &quot;NA&quot;), 
-                    drop = FALSE) +
-  labs(title = &quot;Streamflow permanence&quot;) +
-  facet_wrap(vars(river), scales = &quot;free_y&quot;) +
-  guides(fill = guide_legend(override.aes = list(col = 1))) +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        axis.ticks.x = element_blank(),
-        panel.ontop = TRUE,
-        panel.background = element_rect(fill = NA),
-        axis.title = element_blank())</code></pre>
 <p><img src="5-8_no_flow_indices_files/figure-html/unnamed-chunk-6-1.png" width="672"  /></p>
 </div>
 
