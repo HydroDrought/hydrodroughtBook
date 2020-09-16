@@ -215,7 +215,7 @@ drought_events <- function(x, threshold,
   while (row <= nrow(x) - 1) {
     # iterate over pairs of drought event and the
     # anteceding non-drought event
-    x$pool[c(row, row + 1)] <- p
+    x$pool[c(row:nrow(x))] <- p
 
     ie.time <- x$duration[row + 1]
 
