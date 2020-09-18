@@ -1,0 +1,328 @@
+---
+title: "Drought deficit frequency analysis"
+author: "Worked example 6.2"
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(hydroDrought)
+library(lubridate)
+
+ngaruroro <- international %>%
+  filter(river == "Ngaruroro") %>%
+  select(data) %>%
+  unnest(data) 
+
+ngaruroro <- ngaruroro %>%
+  sanitize_ts(approx.missing = 14) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+  ) 
+
+coverage <- ngaruroro %>%
+  filter(!is.na(discharge)) %>%
+  pull(time) %>%
+  coverage_yearly(origin = "-09-01")
+
+incomplete <- coverage %>%
+  filter(days.missing > 0) 
+
+complete <- coverage %>%
+  filter(days.missing == 0)
+
+ngaruroro <- ngaruroro %>%
+  anti_join(incomplete, by = "year")
+
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
+
+pooled1 <- ngaruroro %>%
+  drought_events(
+    threshold = q90, pooling = "inter-event", 
+    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf)
+  ) %>%
+  mutate(
+    duration = as.double(dbt, units = "days"),
+    volume = volume / 1e3
+  )
+
+threshold <- tibble(
+  metric = c("duration", "volume"),
+  threshold = c(5, round(max(pooled1$volume) * 0.005))
+)
+
+filtered <- pooled1 %>%
+  filter(
+    duration >= threshold %>% filter(metric == "duration") %>% pull(threshold),
+    volume >= threshold %>% filter(metric == "volume") %>% pull(threshold) 
+  ) %>%
+  mutate(
+    year = water_year(first.day, origin = "-09-01"),
+  ) 
+
+pooled <- filtered %>%
+  select(event, year, first.day, duration, volume) 
+
+no_drought <- complete %>%
+  anti_join(pooled, by = "year")
+```
+
+# Data
+River Ngaruroro at Kuripapango in New Zealand, applied for frequency
+analysis of annual minimum series in Worked Example 6.1, is here applied
+for frequency analysis of drought deficit characteristics.
+
+```{r}
+library(tidyverse)
+library(hydroDrought)
+
+pooled
+```
+
+The pooled drought events obtained in Worked Example 5.4 (Section 5.4.1) can be
+concieved as a partial duration series (PDS) 
+because after removing `r nrow(pooled1) - nrow(filtered)` minor droughts only 
+`r nrow(pooled)` events above and equal to the following thresholds remained
+in the series. 
+
+```{r}
+threshold 
+```
+
+
+Two drought characteristics are analysed in the following: drought deficit 
+volume and real drought duration as defined in Worked Example 5.4.
+
+
+
+Drought events were selected for River Ngaruroro and details of the
+selection criteria are given in Worked Example 5.4. The series cover the
+period `r min(ngaruroro$year)` to `r max(ngaruroro$year)` and the start of the 
+year is set to 1 September. 
+
+
+A total of `r hydroDrought:::numbers_english(nrow(incomplete))` years were omitted from the series, 
+`r hydroDrought:::paste_with_and(paste(incomplete$year, substr(incomplete$year + 1, 3L, 4L), sep = "/"))`, 
+due to missing data. As a result `r nrow(complete)` years remained in the dataset. 
+
+As only events below the $Q_{90}$
+percentile are selected, it might happen that the flow never becomes less
+than the threshold in a year (non-drought year). 
+
+A total of `r hydroDrought:::numbers_english(length(no_drought))` out of the 
+`r nrow(complete)` years with observations did not experience a drought 
+(`r round(100 * nrow(no_drought) / nrow(complete), 1)`%). The PDS
+series of drought deficit volume and real duration are plotted in
+Figure 6.12. Less severe values are found in the second half of the
+observation period for both deficit volume (upper) and duration (lower).
+The data are still treated as one sample as the number of observations is
+considered insufficient for a separate analysis of two periods. It should
+further be noted that a similar trend towards less severe droughts is not as
+pronounced for the $AM(1)$ values (Worked Example 6.1). This is likely a
+result of the high base flow contribution in the catchment (Figure 6.6).
+
+
+
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 6.12 PDS of drought deficit volume (upper) and real duration (lower) for River
+Ngaruroro at Kuripapango (NZ)."
+```
+```{r, echo=FALSE, fig.cap=fig.cap}
+library(cowplot)
+p1 <- ggplot(pooled, aes(x = first.day, y = volume)) +
+  geom_point(alpha = 0.4) + 
+  scale_x_date(expand = expansion(mult = 0.01), date_minor_breaks = "1 year") +
+  scale_y_continuous(limits = c(0, NA), 
+                     expand = expansion(mult = c(0.01, 0.04))) + 
+  labs(y = expression(paste("Deficit volume (", 10^{3}, m^{3}, ")"))) +
+  theme(axis.title.x = element_blank())
+
+p2 <- ggplot(pooled, aes(x = first.day, y = as.double(duration))) +
+  geom_point(alpha = 0.4) + 
+  scale_x_date(expand = expansion(mult = 0.01), date_minor_breaks = "1 year") +
+  scale_y_continuous(limits = c(0, NA), 
+                     expand = expansion(mult = c(0, 0.04))) +
+  labs(y = "Real duration (days)") + 
+  theme(axis.title.x = element_blank())
+
+cowplot::plot_grid(p1, p2, align = "v", axis = "x", ncol = 1)
+```
+
+
+
+# Derivation of distribution function
+
+in the [Journal of Statistical Software](https://www.jstatsoft.org/index.php/jss/article/view/v072i08/v72i08.pdf) there is an article describing the extremes package. 
+
+Their approach is identical to Equation 6.11 in the first edition of the book. 
+
+> "The quantiles of the GP df are easily obtained by setting Equation 5 equal to
+$1 - p$ and inverting. However, the quantiles of the GP df cannot be as readily interpreted as
+return levels because the data no longer derive from specific blocks of equal length. Instead,
+an estimate of the probability of exceeding the threshold, e.g., called $\zeta_u$ , is required. Then,
+the value $x_m$ that is exceeded on average once every $m$ observations (i.e., an estimated return
+level) is "
+
+$$ x_m = u + \frac{\sigma_u}{\xi} \left[ (m \zeta_u)^\xi - 1\right] $$
+with $m$ being the return period and $\zeta_u$ the overall exceedance rate (= average number of exceedances 
+per year). So the return period is just multiplied with the exceedance rate. 
+$u$ is the location parameter of the GPA (= threshold), $\sigma_u$ is scale and $\xi$ is shape.
+In our case $\zeta_u = \frac{\text{length of PDS}}{\text{record length in years}}$. 
+
+This transformation will introduce return periods of less than a year (or negative 
+probabilities) for values $P_{PDS} < 1 + \zeta_u$. Return periods for PDS of less 
+than a year just imply that such an event occurs on average several times a year. 
+
+$$P_{annual} = 1 - \frac{(1 - P_{PDS})}{\zeta_u}$$
+
+I've seen PDS return periods < 1 for example in [Return Periods of Hydrological Events, Rojsberg 1976](https://iwaponline.com/hr/article/8/1/57/1454/Return-Periods-of-Hydrological-EventsPaper). I've also looked at his approach of relating PDS and AMS. But for return periods > 10 years quantiles of the AMS and PDS are practically identical, irrespective of the exceedance rate.   
+
+
+
+Following Zelenhasic & Salvai (1987) an estimate of the non-exceedance
+probability, $F(x)$, for the largest event in each time interval is in Nizowka
+obtained by combining the distribution for the occurrence of events and
+the distribution for the magnitudes of deficit volume or duration. Here a
+time interval of one year is chosen. Subsequently the return period in
+years for a given event can be calculated. The number of drought events
+occurring in a time period t is commonly assumed to be Poisson
+distributed (Equation 6.9) with parameter $\lambda t$. In Nizowka the binomial
+Pascal distribution is offered along with the Poisson distribution as
+described in ‘Background Information NIZOWKA’ (Software, CD). The
+distribution that best fitted deficit volume was the Pascal distribution for
+the number of droughts and the GP distribution for the deficits. For
+duration the Pascal distribution was chosen along with the Log-Normal
+distribution. The $F(x)$ is for drought deficit volume plotted in Figure 6.13
+together with the observed values plotted using a plotting position. The
+chosen distribution describes the data well, with the exception of some
+values in the upper range. The maximum value is, however, satisfactorily
+modelled.
+
+
+
+```{r}
+library(lmom)
+rp <- c(10, 100, 200)
+prob.annual <- 1 - c(1 / rp)
+
+annual2pds <- function(prob.annual, exc.per.year) {
+  1 - (1 - prob.annual)/exc.per.year
+}
+
+pds2annual <- function(prob.pds, exc.per.year) {
+  1 - (1 - prob.pds) * exc.per.year
+}
+
+observations <- pooled %>% 
+  select(duration, volume) %>%
+  mutate(across(everything(), as.numeric)) %>%
+  pivot_longer(cols = everything(), names_to = "metric") %>%
+  nest(data = value)  %>%
+  left_join(threshold, by = "metric") 
+
+fitted <- observations %>% 
+  mutate(
+    rate = map2_dbl(data, data, ~(nrow(.x) / nrow(complete))), 
+    parameter = map2(data, threshold, ~pelgpa(samlmu(.x$value), bound = .y))
+    ) %>%
+  print()
+```
+
+
+```{r echo=FALSE}
+reduced_var <- function (x) -log(1 - x)
+
+o <- fitted %>%
+  mutate(
+    metric = factor(
+      metric, levels = c("duration", "volume"),
+      labels = c("Real duration\n(in days)", 
+                 "Absolute volume\n(in 1000 m³)"))
+  ) %>%
+  unnest(data) %>%
+  group_by(metric) %>%
+  mutate(prob.annual = pds2annual(rank(value, ties.method = "random") / (n() + 1), rate[1])) 
+
+f <- fitted %>%
+  mutate(
+    quafun = map2(parameter, rate, ~tibble(
+      prob.pds = seq(0, 0.998, 0.001), 
+      prob.annual = pds2annual(prob.pds, .y),
+      quant = quagpa(prob.pds, .x)
+    )),
+    metric = factor(
+      metric, levels = c("duration", "volume"),
+      labels = c("Real duration\n(in days)", 
+                 "Absolute volume\n(in 1000 m³)"))
+  ) %>%
+  select(metric, quafun) %>%
+  unnest(quafun)
+
+rp.breaks <- c(1:8, seq(10, 80, 10), 100, 150, 200)
+
+ggplot(o, aes(x = reduced_var(prob.annual), y = value)) + 
+  geom_vline(xintercept = reduced_var(1 - 1/breaks_log10_all()(c(1, 100))),
+             col = "lightgrey", size = 0.1) + 
+  geom_point(size = 0.5) + 
+  geom_line(data = f, aes(x = reduced_var(prob.annual), y = quant), size = 0.2) + 
+  scale_x_continuous(
+    expand = expansion(c(0.04, 0)), 
+    sec.axis = sec_axis(
+      trans = function(x) 1/ (1 - (-exp(-x) + 1)), 
+      breaks = c(1, seq(10, 80, 10), 100, 150, 200),
+      name = "Return period (in years)")
+  ) + 
+  scale_y_continuous(limits = c(0, NA)) + 
+  facet_wrap(vars(metric), scales = "free_y", 
+             ncol = 1, strip.position = "left") +
+  labs(x = expression(paste("Exponential reduced variate -log(", 1, " - F(", x, "))")),
+       y = "Quantile") + 
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+```
+
+
+# Calculation of the T-year event
+The return period of a given event is calculated following Equation 6.4.
+The relationship between the drought characteristics as defined in Worked
+Example 5.4 and $F(x)$ are given by the tabulated distribution functions in
+Nizowka. The design value for a particular return period, i.e. the T-year
+event, can be obtained from the tables for known values of $F(x)$. The
+estimated 10-, 100- and 200-year drought events are shown in Table 6.2.
+
+
+```{r, echo = FALSE}
+fitted %>%
+  mutate(
+    quantiles = map2(parameter, rate, ~tibble(
+      prob.annual, 
+      prob.pds = annual2pds(prob.annual, .y),
+      quant = quagpa(prob.pds, .x)))
+  ) %>%
+  select(metric, quantiles) %>%
+  unnest(quantiles) %>%
+  pivot_wider(id_cols = c(prob.annual, prob.pds), 
+              names_from = "metric", values_from = "quant") %>%
+  mutate(rp.annual = 1 / (1 - prob.annual), rp.pds = 1 / (1 - prob.pds)) %>%
+  select(prob.annual, rp.annual, rp.pds, prob.pds, duration, volume)
+```
+
+# Manual computation 
+
+Tobias: pearhaps mention that one should not forget to set the lower bound of the GPA (location parameter) equal to the threshold.
+
+```{r}
+(parameter <- pelgpa(samlmu(pooled$duration), bound = 5))
+
+prob.annual <- 1 - 1/ c(10, 100, 200)
+prob.pds <- annual2pds(prob.annual, exc.per.year = 100 / 49)
+
+# Quantiles of the GPA 
+quagpa(f = prob.pds, para = parameter)
+```
+
