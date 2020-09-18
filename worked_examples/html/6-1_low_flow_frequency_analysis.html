@@ -15,6 +15,7 @@
 
 <title>Low flow frequency analysis</title>
 
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -60,8 +61,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <p>River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been selected for frequency analysis of annual minimum 1-day values, <span class="math inline">\(AM(1)\)</span>, using the Weibull (WEI) distribution. In mid-latitudes in the Northern Hemisphere the calendar year can often be used to select the annual minimum flows. This is a suitable period for the selection of independent events as the drought or low flow period commonly occurs during the summer months. In the Southern Hemisphere the low flow season occurs at the opposite time of the year, and for Ngaruroro the lowest flows are typically found in the period November to May. As a result <span class="math inline">\(AM(1)\)</span> flows were selected for a hydrological year starting at the 1<sup>st</sup> September.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
@@ -141,8 +142,8 @@ Kuripapango (NZ)." width="672"  />
 </div>
 <p>Ngaruroro has a flashy river regime, but has no observed zero flows. The <span class="math inline">\(AM(1)\)</span> flows are considered to come from the same population as only a minor part of the catchment is influenced by snow in winter. The observations cover the period 1964 to 1964 and with the omission of 7 years (1963, 1965, 1978, 1986, 1987, 2001 and 2019) with missing data a total of 50 values results. A histogram of the values is shown in Figure 6.3 (upper left). To test the assumption of stationarity the <span class="math inline">\(AM(1)\)</span> values are plotted against time in Figure 6.9. No trend can be detected in the series and the data are therefore assumed to fulfil the requirement of independent and identically distributed data (iid).</p>
 </div>
-<div id="derivation-of-an-empirical-distribution-function" class="section level1">
-<h1><span class="header-section-number">2</span> Derivation of an empirical distribution function</h1>
+<div id="derivation-of-an-empirical-distribution-function" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Derivation of an empirical distribution function</h1>
 <pre class="r"><code>empirical &lt;- am %&gt;%
   mutate(
     rank = rank(flow),
@@ -172,8 +173,8 @@ Kuripapango (NZ)." width="672"  />
 <li><p>The return period (column <code>rp.emp</code>) of the smallest event can be calculated following Equation 6.5. The non-exceedance frequency, <span class="math inline">\(F(x)\)</span>, of the smallest event equals 0.02 according to step 2(b), which gives a return period of 51 years.</p></li>
 </ol>
 </div>
-<div id="fitting-a-distribution" class="section level1">
-<h1><span class="header-section-number">3</span> Fitting a distribution</h1>
+<div id="fitting-a-distribution" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Fitting a distribution</h1>
 <p>Fitting the two-parameter Weibull (WEI) distribution function (Section A6.1.4) using the method of L-moments. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> The direct estimation of the Weibull parameters is shown in <a href="#ft">section Fast Track</a>. </span></p>
 <ol style="list-style-type: lower-alpha">
 <li>The first two L-moments (<span class="math inline">\(\hat\lambda_1\)</span> and <span class="math inline">\(\hat\lambda_2\)</span>) are estimated based on time series of the annual minima <code>am$flow</code>. These so called sample L-moments are calculated with the function <code>samlmu()</code> from the package <strong>lmom</strong>.</li>
@@ -251,8 +252,8 @@ round(q, 2)</code></pre>
 <pre><code>## [1] 1.79 1.53</code></pre>
 <p>which gives: <span class="math inline">\(\hat x_{50} = 1.79\)</span>m<sup>3</sup>s<sup>-1</sup> and <span class="math inline">\(\hat x_{100} = 1.53\)</span>m<sup>3</sup>s<sup>-1</sup>.</p>
 </div>
-<div id="ft" class="section level1">
-<h1><span class="header-section-number">4</span> Fast Track</h1>
+<div id="ft" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Fast Track</h1>
 <p>The function <code>samlmu()</code> from the package <strong>lmom</strong> computes the sample L-moments for a given sample. These sample L-moments are independent of the distribution one wants to fit. They have can be transferred into the parameters of the desired distribution; e.g. the function <code>pelwei()</code> will return the location, scale and shape parameters for a Weibull distribution. By default a three parameter Weibull distribution is used. To obtain L-moment estimates of the two parameter Weibull distribution (where the lower bound and location parameter <span class="math inline">\(\xi\)</span> is set to zero) set the argument <code>bound = 0</code>.</p>
 <pre class="r"><code>library(lmom)
 lmom &lt;- samlmu(am$flow)
@@ -265,8 +266,8 @@ par.wei</code></pre>
   round(digits = 2)</code></pre>
 <pre><code>## [1] 1.79 1.53</code></pre>
 </div>
-<div id="probability-plot-using-the-exponential-reduced-variate" class="section level1">
-<h1><span class="header-section-number">5</span> Probability plot using the exponential reduced variate</h1>
+<div id="probability-plot-using-the-exponential-reduced-variate" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Probability plot using the exponential reduced variate</h1>
 <pre class="r"><code>fitted.fast &lt;- am %&gt;%
   mutate(
     prob.emp = rank(flow) / (n() + 1),

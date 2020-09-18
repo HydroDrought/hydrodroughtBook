@@ -15,6 +15,7 @@
 
 <title>Quantifying effect of human influences</title>
 
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -67,8 +68,8 @@ if (window.hljs) {
 <li><p>Calculate drought characteristics for the <strong>human-influenced</strong> time series, using the <strong>benchmark</strong> threshold</p></li>
 <li><p>Compare drought characteristics between the <strong>benchmark</strong> &amp; <strong>human-influenced</strong> time series</p></li>
 </ol>
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the data</h1>
 <p>As an example we here use the Upper-Guadiana dataset with the two time series: the <strong>benchmark</strong> time series and the <strong>human-influenced</strong> time series.</p>
 <pre class="r"><code>library(tidyverse)
 library(lubridate)
@@ -134,8 +135,8 @@ print(guadiana)</code></pre>
 ## 10 1960-01-10     0.133  1960
 ## # … with 15,239 more rows</code></pre>
 </div>
-<div id="threshold-calculation" class="section level1">
-<h1><span class="header-section-number">2</span> Threshold calculation</h1>
+<div id="threshold-calculation" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Threshold calculation</h1>
 <p>Here we are taking the <code>benchmark</code> time series. First we are smoothing the column <code>discharge</code> with a 30-day moving average. The threshold itself is calculated as a daily varying <span class="math inline">\(Q_{95}\)</span> yielding a dataset with a row for each day of the year and the appropriate <span class="math inline">\(Q_{95}\)</span> in the column named <code>threshold</code>.</p>
 <pre class="r"><code>threshold &lt;- benchmark %&gt;%
   # applying a 30-day moving average smoother
@@ -149,24 +150,24 @@ print(guadiana)</code></pre>
 
 print(threshold)</code></pre>
 <pre><code>## # A tibble: 366 x 2
-##            day threshold
-##    &lt;month-day&gt;     &lt;dbl&gt;
-##  1      -01-01   0.0103 
-##  2      -01-02   0.0100 
-##  3      -01-03   0.00966
-##  4      -01-04   0.00943
-##  5      -01-05   0.00941
-##  6      -01-06   0.00943
-##  7      -01-07   0.00944
-##  8      -01-08   0.00943
-##  9      -01-09   0.00942
-## 10      -01-10   0.0094 
+##       day threshold
+##    &lt;date&gt;     &lt;dbl&gt;
+##  1 -01-01   0.0103 
+##  2 -01-02   0.0100 
+##  3 -01-03   0.00966
+##  4 -01-04   0.00943
+##  5 -01-05   0.00941
+##  6 -01-06   0.00943
+##  7 -01-07   0.00944
+##  8 -01-08   0.00943
+##  9 -01-09   0.00942
+## 10 -01-10   0.0094 
 ## # … with 356 more rows</code></pre>
 <p><label for="tufte-sn-3" class="margin-toggle sidenote-number">3</label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">3</span> Tobias: These plots are just to show data coverage and the handling of leap-years. If you want to have some of them in the Worked Example should print the code producing them. </span></p>
 <p><img src="10-1_human_influences_files/figure-html/unnamed-chunk-6-1.png" width="672"  /></p>
 </div>
-<div id="benchmark-drought-characteristics" class="section level1">
-<h1><span class="header-section-number">3</span> Benchmark Drought characteristics</h1>
+<div id="benchmark-drought-characteristics" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Benchmark Drought characteristics</h1>
 <p><label for="tufte-sn-4" class="margin-toggle sidenote-number">4</label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">4</span> Tobias: I think this Worked Example could be easier to follow if we fist compute the drought events for both time series and in a separate section the drought characteristics. So section 2 could become “Drought Events”, Section 3 “Drought Characteristics”.</span></p>
 <pre class="r"><code># initialize empty list for events
 events &lt;- list(benchmark = NULL, influenced = NULL)
@@ -215,8 +216,8 @@ drought.char$benchmark &lt;- summarize_dc(events$benchmark)</code></pre>
 ## 16    26 1995-09-29 1995-11-16  49 days  49 days  6.58e3 0     1995-09-29      0
 ## 17    27 2000-02-29 2000-03-22  23 days  22 days  1.33e3 0.011 2000-03-18      1</code></pre>
 </div>
-<div id="human-influenced-drought-characteristics" class="section level1">
-<h1><span class="header-section-number">4</span> Human-influenced drought characteristics</h1>
+<div id="human-influenced-drought-characteristics" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Human-influenced drought characteristics</h1>
 <p>Extent the <strong>benchmark</strong> threshold calculated in step 1 to the period of the <strong>human-influenced</strong> time series. Note that this can be a different time period than was used to calculate the <strong>benchmark</strong> threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).<label for="tufte-sn-5" class="margin-toggle sidenote-number">5</label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">5</span> Tobias: this paragraph doesn’t make sense here. This is probably my fault but I think you don’t need it at all.</span></p>
 <p><label for="tufte-sn-6" class="margin-toggle sidenote-number">6</label><input type="checkbox" id="tufte-sn-6" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">6</span> Tobias: These plots just explain why I used the Q95. With Q80 the droughts would not terminate within a year. Again: if you want to keep one or all of these plots we should show the code producing them. </span></p>
 <p><img src="10-1_human_influences_files/figure-html/unnamed-chunk-10-1.png" width="768"  /></p>
@@ -231,8 +232,8 @@ events$influenced &lt;- influenced %&gt;%
 # calculate the drought characteristics for the human influenced time series
 drought.char$influenced &lt;- summarize_dc(events$influenced)</code></pre>
 </div>
-<div id="comparison-of-drought-characteristics" class="section level1">
-<h1><span class="header-section-number">5</span> Comparison of drought characteristics</h1>
+<div id="comparison-of-drought-characteristics" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Comparison of drought characteristics</h1>
 <p>For the Upper-Guadiana, these would be the drought characteristics:</p>
 <pre class="r"><code>drought.char</code></pre>
 <pre><code>## $benchmark
@@ -241,12 +242,12 @@ drought.char$influenced &lt;- summarize_dc(events$influenced)</code></pre>
 ## 
 ## $influenced
 ## mean.duration  mean.deficit 
-##      161.8333    56151.0880</code></pre>
+##      175.4118    59454.0932</code></pre>
 <p>Calculate the percentage difference between the <strong>benchmark</strong> and <strong>human-influenced</strong> drought characteristics.</p>
 <p><span class="math display">\[\Delta DC = \frac{DCHI - DCBM}{DCBM} \cdot 100\]</span> where <span class="math inline">\(\Delta DC\)</span> is the percentage change in drought characteristics (<span class="math inline">\(DC\)</span>) between the <strong>human-influenced</strong> (<span class="math inline">\(DCHI\)</span>) and <strong>benchmark</strong> (<span class="math inline">\(DCBM\)</span>) time series. For the Upper-Guadiana, these would be the differences in drought characteristics:</p>
 <pre class="r"><code>(drought.char$influenced - drought.char$benchmark) / drought.char$benchmark * 100</code></pre>
 <pre><code>## mean.duration  mean.deficit 
-##      159.0552      241.8199</code></pre>
+##       180.791       261.927</code></pre>
 </div>
 
 

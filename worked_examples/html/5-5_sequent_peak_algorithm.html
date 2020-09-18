@@ -15,6 +15,7 @@
 
 <title>Sequent Peak Algorithm</title>
 
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -60,8 +61,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <p>Twelve years of daily data without missing values from River Ngaruroro at Kuripapango (NZ) are used as an example (1988 – 1999).</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
@@ -90,8 +91,8 @@ ngaruroro &lt;- international %&gt;%
 ## 10 1988-09-10      43.1  1988
 ## # … with 4,373 more rows</code></pre>
 </div>
-<div id="calculation" class="section level1">
-<h1><span class="header-section-number">2</span> Calculation</h1>
+<div id="calculation" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Calculation</h1>
 <ol class="example" style="list-style-type: decimal">
 <li><p>Define the value of the desired yield (equals the threshold value). Here <span class="math inline">\(Q_{90}\)</span> is used.</p></li>
 <li><p>Calculate the storage <span class="math inline">\(S_t\)</span> according to Equation 5.5. Storage is appended as a new column to the time series tibble using the function <code>storage()</code> with discharge and the threshold as input values (<a href="#table">Table 5.9</a>).</p></li>
@@ -156,8 +157,8 @@ ng &lt;- ngaruroro %&gt;%
 ## 10 1989-03-30      5.11  1988  2.29       2
 ## # … with 515 more rows</code></pre>
 </div>
-<div id="selection-of-the-drought-deficit-volume-and-duration" class="section level1">
-<h1><span class="header-section-number">3</span> Selection of the drought deficit volume and duration</h1>
+<div id="selection-of-the-drought-deficit-volume-and-duration" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Selection of the drought deficit volume and duration</h1>
 <p>The deficit volume is the maximum value in an uninterrupted sequence of positive <span class="math inline">\(S_t\)</span>, and the drought duration is the time from the beginning of the depletion period to the time of the maximum depletion. Accordingly, the duration of the first event is only one day. The date of the maximum depletion is also displayed.</p>
 <pre class="r"><code>spa &lt;- ng %&gt;%
   group_by(event) %&gt;%
@@ -182,12 +183,12 @@ Figure x.xx The relationship between between discharge <span class="math inline"
 <img src="5-5_sequent_peak_algorithm_files/figure-html/unnamed-chunk-9-1.png" alt="Figure x.xx The relationship between between discharge $Q_t$ and storage $Q_t$ for the third drought event starting 1989-05-24." width="672"  />
 </div>
 </div>
-<div id="results" class="section level1">
-<h1><span class="header-section-number">4</span> Results</h1>
+<div id="results" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Results</h1>
 <p>An extract of the drought duration and deficit volumes for the 12-year series is given in the output below. Note that the time series starts with a flow value less than the threshold (not knowing the previous flow values), thus the first event should be omitted from the analysis. Even though the SPA procedure is pooling minor and dependent droughts, the obtained time series of events still contains a number of minor drought events.</p>
 </div>
-<div id="fast-track" class="section level1">
-<h1><span class="header-section-number">5</span> Fast Track</h1>
+<div id="fast-track" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Fast Track</h1>
 <pre class="r"><code>ngaruroro %&gt;%
   drought_events(threshold = q90, pooling = &quot;sequent-peak&quot;) </code></pre>
 <pre><code>## # A tibble: 41 x 8

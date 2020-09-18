@@ -14,6 +14,7 @@
 
 <title>Worked example 5.2: Mean annual minimum n-day flow</title>
 
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -56,8 +57,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we are again going to use river flow data from the river Ngaruroro at Kuripapango (NZ) of the International Data Set in the package <strong>hydroDrought</strong>. Ten years of daily data are used as an example, as in Worked Example 5.1, to estimate mean annual minimum of the <span class="math inline">\(n\)</span>-day average flow for <span class="math inline">\(n\)</span> equal to 1, 7 and 30 days. For this station the lowest flows are observed around the turn of the calendar year. Therefore the annual minima are selected from years starting 1 September and ending 31 August. Table 5.4 lists the first flow values. The first two columns show the date and the corresponding flow value, <span class="math inline">\(Q\)</span>.</p>
 <p>In order to calculate the mean annual minimum each observation will be attributed to a year according to the date of the observation using the function <code>water_year()</code> which appends an additional column named <code>year</code> to the dataset.</p>
 <pre class="r"><code>library(tidyverse)
@@ -116,8 +117,8 @@ smoothed &lt;- ngaruroro %&gt;%
 ## 30 1990-09-30      8.67  1990  8.67  7.91  13.5
 ## 31 1990-10-01     17.4   1990 17.4   9.24  13.4</code></pre>
 </div>
-<div id="calculation" class="section level1">
-<h1><span class="header-section-number">2</span> Calculation</h1>
+<div id="calculation" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Calculation</h1>
 <p>First the annual minimum values are extracted and then the mean annual minimum values, <span class="math inline">\(MAM(1)\)</span>, <span class="math inline">\(MAM(7)\)</span> and <span class="math inline">\(MAM(30)\)</span> are calculated by averaging the annual minimum time series. The results are tabulated in Table 5.5.</p>
 <pre class="r"><code># compute the annual minima
 am &lt;- smoothed %&gt;%
@@ -135,8 +136,8 @@ mam &lt;- am %&gt;%
 ##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1  4.13  4.39  5.43</code></pre>
 </div>
-<div id="fast-track" class="section level1">
-<h1><span class="header-section-number">3</span> Fast Track</h1>
+<div id="fast-track" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Fast Track</h1>
 <p>Mapping over the length of the smoothing window avoids the multiple explicit calls of the function <code>mean_annual_minimum()</code>. The results are absolutely identical but the code is can be adapted more easily and is less error-prone.</p>
 <pre class="r"><code># calculating each column explicitly
 ngaruroro %&gt;% 

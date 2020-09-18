@@ -15,6 +15,7 @@
 
 <title>Rank and correlation coefficients</title>
 
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -60,8 +61,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought) 
 
@@ -83,8 +84,8 @@ r &lt;- regional %&gt;%
 ## 10 210294 Strem       Heiligenbrunn    &lt;tibble [23,741 × 2]&gt;
 ## # … with 19 more rows</code></pre>
 </div>
-<div id="indices" class="section level1">
-<h1><span class="header-section-number">2</span> Indices</h1>
+<div id="indices" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Indices</h1>
 <pre class="r"><code># list of functions we applied to each station
 f &lt;- list(
   mean = function(x, ...) mean(x), 
@@ -130,8 +131,8 @@ indices &lt;- indices %&gt;%
 ## # … with 19 more rows, and 5 more variables: `Q90/Q50` &lt;dbl&gt;, `Q95/Q50` &lt;dbl&gt;,
 ## #   `MAM(30)/Q50` &lt;dbl&gt;, `MAM(10)/Q50` &lt;dbl&gt;, `MAM(1)/Q50` &lt;dbl&gt;</code></pre>
 </div>
-<div id="ranks" class="section level1">
-<h1><span class="header-section-number">3</span> Ranks</h1>
+<div id="ranks" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Ranks</h1>
 <pre class="r"><code>long &lt;- indices %&gt;%
   pivot_longer(cols = -id, names_to = &quot;index&quot;) %&gt;%
   mutate(index = factor(index, levels = setdiff(colnames(indices), &quot;id&quot;)))
@@ -152,8 +153,8 @@ ggplot(ranks, aes(x = index, y = id, fill = rank, label = rank)) +
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))</code></pre>
 <p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-5-1.png" width="576"  /></p>
 </div>
-<div id="pearson-correlation" class="section level1">
-<h1><span class="header-section-number">4</span> Pearson correlation</h1>
+<div id="pearson-correlation" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Pearson correlation</h1>
 <pre class="r"><code>library(corrplot)
 x &lt;- indices %&gt;%
   select(-id)
@@ -173,8 +174,8 @@ corrplot(M, type = &quot;upper&quot;,
          number.cex = .7, tl.col = &quot;black&quot;)</code></pre>
 <p><img src="5-7_rank_and_correlation_coefficients_files/figure-html/unnamed-chunk-7-1.png" width="672"  /></p>
 </div>
-<div id="spearman-rank-correlation" class="section level1">
-<h1><span class="header-section-number">5</span> Spearman (rank) correlation</h1>
+<div id="spearman-rank-correlation" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Spearman (rank) correlation</h1>
 <pre class="r"><code>M &lt;- cor(x, method = &quot;spearman&quot;)
 res1 &lt;- cor.mtest(x, method = &quot;spearman&quot;, conf.level = .95)
 corrplot(M, type = &quot;upper&quot;,

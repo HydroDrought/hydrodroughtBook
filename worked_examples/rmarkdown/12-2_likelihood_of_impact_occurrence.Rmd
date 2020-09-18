@@ -20,6 +20,11 @@ We begin by loading the agricultural drought impact data, collected annually, an
 library(tidyverse)
 library(hydroDrought)
 
+
+## Push these into the function
+library(gridExtra)
+library(grid)
+
 spi_de <- spi_de %>%
 	filter(month == 7)
 

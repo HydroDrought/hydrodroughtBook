@@ -14,6 +14,7 @@
 
 <title>Worked example 5.4: Threshold level method</title>
 
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -59,9 +60,9 @@ if (window.hljs) {
 </div>
 
 <p>The threshold level method can be used to select drought events from time series of river flow as long as there are not too many missing values in the dataset and a meaningful threshold <span class="math inline">\(Q_0\)</span> is chosen. Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below.</p>
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
-<p>56 years of daily flow (20 September 1963 to 8 Oktober 2019) are analysed. In this river the low flow period covers the turn of the calendar year. To avoid problems with allocating droughts to a specific calendar year because of drought events starting in one year and ending in another year, the start of the year is set to 1 September. An event is attributed to the year it starts.</p>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
+<p>56 years of daily flow (20 September 1963 to 8 October 2019) are analysed. In this river the low flow period covers the turn of the calendar year. To avoid problems with allocating droughts to a specific calendar year because of drought events starting in one year and ending in another year, the start of the year is set to 1 September. An event is attributed to the year it starts.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
 
@@ -70,8 +71,8 @@ ngaruroro &lt;- international %&gt;%
   select(data) %&gt;%
   unnest(data) </code></pre>
 </div>
-<div id="missing-values" class="section level1">
-<h1><span class="header-section-number">2</span> Missing values</h1>
+<div id="missing-values" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Missing values</h1>
 <p>The time series, Ngaruroro, contains missing values. We do not know if a missing value (<code>NA</code>) represents a flow below the threshold or above the threshold, as the flow value itself is unknown. A single missing value will cause the function <code>drought_events()</code> to terminate a dry spell (drought event) or similar, a wet spell. Accordingly, most characteristics derived for this event (e.g. drought duration, drought termination, drought volume, etc.) will not be correct.</p>
 <p>A conservative approach would be to eliminate years with missing values completely. Instead, to avoid losing too many years of observations, we filled periods of missing data with linear interpolation if they are of short duration. Here short duration is defined as periods &lt; 15 days, whereas years containing long periods of missing values (≥15 days) have been removed. This results in 49 years of daily flow (1 September 1964 to 31 August 2019). In total eight years are omitted from the series (1963/64, 1965/66, 1977/78, 1978/79, 1986/87, 1987/88, 2001/02 and 2019/20).</p>
 <pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
@@ -107,8 +108,8 @@ ngaruroro &lt;- ngaruroro %&gt;%
 ## 7  2001          365            344           21    0.942
 ## 8  2019          366             38          328    0.104</code></pre>
 </div>
-<div id="threshold-selection-and-drought-events" class="section level1">
-<h1><span class="header-section-number">3</span> Threshold selection and drought events</h1>
+<div id="threshold-selection-and-drought-events" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Threshold selection and drought events</h1>
 <p>A sequence of drought events is obtained from the streamflow hydrograph by considering periods with flow below a certain threshold, <span class="math inline">\(Q_0\)</span>. In this example <span class="math inline">\(Q_{90} = 4.95\)</span>m<sup>3</sup>s<sup>-1</sup> is used as threshold. A table of drought characteristics is derived with the function <code>drought_events()</code>.</p>
 <pre class="r"><code>q90 &lt;- lfquantile(ngaruroro$discharge, exc.freq = 0.9) %&gt;%
   print()</code></pre>
@@ -141,8 +142,8 @@ ngaruroro &lt;- ngaruroro %&gt;%
 <li><code>tqmin</code>: the date of the minimum flow.</li>
 </ul>
 </div>
-<div id="removing-minor-droughts-filtering" class="section level1">
-<h1><span class="header-section-number">4</span> Removing minor droughts (Filtering)</h1>
+<div id="removing-minor-droughts-filtering" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Removing minor droughts (Filtering)</h1>
 <p>Several minor droughts, lasting for a few days only, can be observed. To reduce the problem of minor droughts two restrictions are imposed:</p>
 <ul>
 <li><p>a minimum drought duration, <span class="math inline">\(d_{min}\)</span> which removes droughts with duration less than a specified number of days;</p></li>
@@ -167,8 +168,8 @@ ngaruroro &lt;- ngaruroro %&gt;%
 ## 10    10 1969-03-25 1969-03-30  6 days   103766.  4.68 1969-03-26 FALSE   
 ## # … with 200 more rows</code></pre>
 </div>
-<div id="eliminating-dependent-droughts-pooling" class="section level1">
-<h1><span class="header-section-number">5</span> Eliminating dependent droughts (Pooling)</h1>
+<div id="eliminating-dependent-droughts-pooling" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Eliminating dependent droughts (Pooling)</h1>
 <p>The inter-event time criterion (IC) is used to pool dependent droughts, which are droughts separated by a short period of flow above the threshold. If the time between two droughts is less than a critical duration, <span class="math inline">\(t_{min}\)</span>, the two events are pooled.</p>
 <p>In this example <span class="math inline">\(t_{min}\)</span> is set equal to two days.</p>
 <pre class="r"><code>pooled &lt;- ngaruroro %&gt;%

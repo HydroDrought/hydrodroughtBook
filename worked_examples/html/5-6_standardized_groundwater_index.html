@@ -15,6 +15,7 @@
 
 <title>The Standardised Groundwater drought Index (SGI)</title>
 
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -61,8 +62,8 @@ if (window.hljs) {
 
 <p>In order to compare features of groundwater droughts using groundwater level data from different boreholes, Bloomfield and Marchant (2013) introduced the Standardised Groundwater level Index (SGI). The SGI uses the normal scores transform (Everitt, 2002), a nonparametric normalisation method which assigns a value to ranked observation of groundwater levels for a given month from a given hydrograph. A non-parametric approach to standardisation was favoured by Bloomfield and Marchant (2013) as they showed that no consistent parametric models could be fitted to a wide range of groundwater hydrographs, and that even when a hydrograph for a single site is considered no consistent parametric model could be fitted for all months of the year. Unlike SPI, SGI is based on a continuous variable and requires no accumulation period, however, Bloomfield and Marchant (2013) defined an SPI accumulation period (<span class="math inline">\(q\)</span>, in months) that gave a maximum correlation between SPI and SGI for a given site.</p>
 <p>There is no commonly agreed definition of groundwater drought status based on SGI. However, recently Bloomfield et al. (2019) defined any month with an SGI of −1 or less as being a groundwater drought month and periods of continuously negative SGI reach a monthly intensity of −1 or less was defined as an episode of groundwater by analogy with the World Meteorological Organisation definition of an SPI drought (WMO, 2012).</p>
-<div id="load-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Load the data</h1>
+<div id="load-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Load the data</h1>
 <p>Here we illustrate how to estimate SGI from a groundwater level time series using data from a well at Stonor Park, UK, previously described in Chapter 3. It is recommended that the standardisation is applied to data from a period of at least 30 years and that when comparing SGI from more than one site that standardisation is undertaken over a common time period. In this case, groundwater level data for Stonor Park is available for a 40 year period.</p>
 <pre class="r"><code>library(tidyverse)
 library(lubridate)
@@ -83,8 +84,8 @@ stonor </code></pre>
 ## 10 1970-03-01  74.5
 ## # … with 2,014 more rows</code></pre>
 </div>
-<div id="create-a-regular-times-series-of-monthly-data" class="section level1">
-<h1><span class="header-section-number">2</span> Create a regular times series of monthly data</h1>
+<div id="create-a-regular-times-series-of-monthly-data" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Create a regular times series of monthly data</h1>
 <ul>
 <li>Step 0: The estimation of SGI requires data to be on a regular time step, in this case we will be using monthly data. The level data (recorded as metres above sea level, m aSL) from Stonor Park is already approximately on a monthly basis so we have linearly interpolated the levels to the first day of each month. Use your interpolation method of choice, or if you have more frequent observations, such as those produced by data logging systems, to sub-set the data onto a monthly time step.</li>
 </ul>
@@ -113,8 +114,8 @@ stonor.monthly</code></pre>
 ## 10 1970-10-01  72.8 October  
 ## # … with 470 more rows</code></pre>
 </div>
-<div id="calculate-an-sgi-values" class="section level1">
-<h1><span class="header-section-number">3</span> Calculate an SGI values</h1>
+<div id="calculate-an-sgi-values" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Calculate an SGI values</h1>
 <ul>
 <li><p>Step 1: Extract the level data for an individual month from the full groundwater level time series. For example, in the spreadsheet example we have extracted the groundwater levels for each January in the Stonor Park record.</p></li>
 <li><p>Step 2: Order the level data for a given month from lowest to highest and estimate the standardised rank for each level, i.e. rank/number of observations in a given month + 1.</p></li>
@@ -170,8 +171,8 @@ x</code></pre>
 </ul>
 <p><img src="5-6_standardized_groundwater_index_files/figure-html/unnamed-chunk-5-1.png" width="672"  /></p>
 </div>
-<div id="fast-track" class="section level1">
-<h1><span class="header-section-number">4</span> Fast-Track</h1>
+<div id="fast-track" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Fast-Track</h1>
 <pre class="r"><code>stonor.monthly %&gt;% 
   group_by(month) %&gt;%
   mutate(sgi = sgi(level))</code></pre>
