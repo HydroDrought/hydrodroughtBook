@@ -13,13 +13,13 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been
 selected for frequency analysis of annual minimum 1-day values, $AM(1)$,
 using the Weibull (WEI) distribution. In mid-latitudes in the Northern
-Hemisphere the calendar year can often be used to select the annual
+Hemisphere, the calendar year is often used to select the annual
 minimum flows. This is a suitable period for the selection of independent
 events as the drought or low flow period commonly occurs during the
 summer months. In the Southern Hemisphere the low flow season occurs at
 the opposite time of the year, and for Ngaruroro the lowest flows are
 typically found in the period November to May. As a result $AM(1)$ flows
-were selected for a hydrological year starting at the 1<sup>st</sup> September.
+were selected for a hydrological year starting at 1 September.
 
 
 ```{r}
@@ -30,7 +30,8 @@ ngaruroro <- international %>%
   filter(river == "Ngaruroro") %>%
   select(data) %>%
   unnest(data) %>%
-  # fill gaps with a length of up to 15 days
+  # linear interpolation of periods of missing values 
+  # with a duration of up to 15 days
   sanitize_ts(approx.missing = 15) %>%
    mutate(
     year = water_year(time, origin = "-09-01")
@@ -81,35 +82,37 @@ ggplot(am, aes(x = year, y = flow)) +
         panel.grid.minor.x = element_blank())
 ```
 
-Ngaruroro has a flashy river regime, but has no observed zero flows. The
-$AM(1)$ flows are considered to come from the same population as only a
-minor part of the catchment is influenced by snow in winter. The
-observations cover the period `r min(am$year)` to `r min(am$year)` and with the omission of 
-`r nrow(incomplete)` 
-years (`r hydroDrought:::paste_with_and(incomplete$year)`) with missing data a total of `r nrow(am)` values results. A histogram of the
-values is shown in Figure 6.3 (upper left). To test the assumption of
-stationarity the $AM(1)$ values are plotted against time in Figure 6.9. No
-trend can be detected in the series and the data are therefore assumed to
-fulfil the requirement of independent and identically distributed data (iid).
+Ngaruroro has a flashy river regime, but has no observed zero flows. The  flows 
+are considered to come from the same population as only a minor part of the 
+catchment is influenced by snow in winter. The observations (daily flow series) 
+cover the period `r trimws(format(min(ngaruroro$time), format = "%e %B %Y"))` to 
+`r trimws(format(max(ngaruroro$time), format = "%e %B %Y"))`. With the omission 
+of `r nrow(incomplete)` 
+years (`r hydroDrought:::paste_with_and(incomplete$year)`) with missing data, a 
+total of `r nrow(am)` annual minimum values results. The procedure used for 
+interpolation of missing data is the same as in WE5.4. A histogram of the values 
+is shown in Figure 6.3 (upper left). To test the assumption of stationarity, 
+the  values are plotted against time in Figure 6.9. No trend can be detected 
+in the series and the data are therefore assumed to fulfil the requirement of 
+independent and identically distributed data (iid).
 
 
 # Derivation of an empirical distribution function
 
-```{r}
+```{r, empirical, echo=FALSE}
 empirical <- am %>%
   mutate(
     rank = rank(flow),
     prob.emp = rank / (n() + 1),
     rp.emp = 1 / prob.emp
   ) %>%
-  arrange(rank)  %>%
-  print()
+  arrange(rank)  
 ```
 
 a) The $x$ values, AM(1), are sorted in ascending order and the rank of
 each value is calculated. The smallest value equals `r min(am$flow)` in m<sup>3</sup>s<sup>-1</sup> and is given rank 1.
 
-b) The non-exceedance probability, $F(x) = p$, (column `prob.emp`) is calculated for each $x$
+b) The non-exceedance probability, $F(x) = p$, (`'prob.emp'` in the tibble below) is calculated for each $x$
 value using the Weibull plotting position formula $p_i = i / (n + 1)$ (Equation 6.6).
 
 c) A probability plot for the $AM(1)$ values is obtained by plotting the
@@ -118,66 +121,82 @@ staircase pattern of several nearly equal values is observed. (Note that
 the $AM(1)$ values now are plotted on the $y$-axis as compared to
 Figure 6.3, lower).
 
-```{r, echo = FALSE}
-# ggplot(empirical, aes(x = prob.emp, y = flow)) + 
-#   geom_point()
-```
 
-d) The return period (column `rp.emp`) of the smallest event can be calculated following
+
+d) The return period (`'rp.emp'`) of the smallest event can be calculated following
 Equation 6.5. The non-exceedance frequency, $F(x)$, of the smallest
 event equals `r round(empirical$prob.emp[1], 3)` according to step 2(b), which gives a return period
 of `r empirical$rp.emp[1]`  years.
 
+```{r, empirical, eval=TRUE, echo=TRUE}
+```
+```{r}
+print(empirical)
+```
 
 # Fitting a distribution  
 Fitting the two-parameter Weibull (WEI) distribution function
-(Section A6.1.4) using the method of L-moments. 
-^[The direct estimation of the Weibull parameters is shown in [section Fast Track](#ft). ]
+(Section A6.1.4) (assuming the location parameter $\xi$ is zero) using the method of L-moments. 
+^[A direct estimation of the Weibull parameters is shown in the [Fast Track](#ft) section. ]
 
 
 a) The first two L-moments ($\hat\lambda_1$ and $\hat\lambda_2$) are estimated 
 based on time series of the annual minima `am$flow`. These so called sample 
 L-moments are calculated with the function `samlmu()` from the package **lmom**.
 
-```{r}
+    ```{r}
 library(lmom)
 moments <- samlmu(am$flow)
 moments[1:2] 
-```
+    ```
 
-b) The parameter estimates of the WEI distribution (scale parameter $\alpha$, shape parameter $\kappa$) are obtained
-following .... :
+b) The parameter estimates of the WEI distribution (scale parameter $\alpha$, 
+shape parameter $\kappa$) are obtained following Equation A6.144:
 
-$$\hat\alpha = \frac{\hat\lambda_1}{\Gamma\left( 1 + \frac{1}{\hat\kappa }\right)}$$ 
+    $$\hat\alpha = \frac{\hat\lambda_1}{\Gamma\left( 1 + \frac{1}{\hat\kappa }\right)}$$ 
 
-$$\hat\kappa = \frac{-\ln(2)}{\ln\left( 1 - \frac{\hat\lambda_2}{\hat\lambda_1}\right)}$$ 
+    $$\hat\kappa = \frac{-\ln(2)}{\ln\left( 1 - \frac{\hat\lambda_2}{\hat\lambda_1}\right)}$$ 
 
 
-```{r}
+    ```{r}
 kappa <- -log(2) / log(1 - unname(moments["l_2"] / moments["l_1"]))
 alpha <- unname(moments["l_1"]) / gamma(1 + 1/kappa)
 parameter <- c(location = 0, scale = alpha, shape = kappa)
 parameter
-```
+    ```
 
 c) $F(x)$ for the WEI distribution is obtained following Equation A6.1.33
-(recalling that location parameter $\xi$ is set to zero):
+(recalling that the location parameter $\xi$ is set to zero):
 
-$$ F(x) = 1 - \exp\left[-\left(\frac{x}{\alpha}\right)^\kappa\right]$$
-```{r}
+    $$ F(x) = 1 - \exp\left[-\left(\frac{x}{\alpha}\right)^\kappa\right]$$
+    
+    ```{r}
 fitted <- empirical %>%
   select(year, flow, prob.emp) %>%
   mutate(
     prob.wei = 1 - exp(-(flow / alpha)^kappa),
     rp.wei = 1 / prob.wei
   ) 
-```
+    ```
 
+d) The data can be plotted in a probability plot and compared to the
+empirical quantiles in step 2(b) (Figure 6.10, upper). The plot shows
+that the WEI distribution is well adjusted to the low flow extreme
+values, whereas deviation in the upper range may suggest that the
+three highest values do not belong to the low flow population
+(Section 6.3.3). In Figure 6.10 (lower) the empirical quantiles are
+plotted against the estimated distribution quantiles (QQ-plot). The
+points should be close to the unit diagonal if the data fit the WEI
+distribution well. The use of a plotting position implies that the
+ordered sample is plotted in regularly spaced positions. As
+demonstrated in the figure, the observed jumps in $AM(1)$ values are
+reflected in the estimated Weibull quantiles, but not in the empirical
+quantiles.
 
 ```{r, echo=FALSE}
 fig.cap <- "Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River
-Ngaruroro at Kuripapango (NZ); probability plot showing the Weibull distribution
-(curve)."
+Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution
+(curve) to the sample data."
 ```
 ```{r, echo=FALSE, fig.cap=fig.cap}
 # quant.theo = qweibull(empirical, shape = kappa, scale = alpha),
@@ -195,6 +214,7 @@ ggplot(fitted, aes(prob.emp, flow)) +
 ```
 
 
+
 ```{r, echo=FALSE}
 fig.cap <- "Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles"
 ```
@@ -208,19 +228,8 @@ ggplot(fitted, aes(x = prob.emp, y = prob.wei)) +
 ```
 
 
-d) The data can be plotted in a probability plot and compared to the
-empirical quantiles in step 2(b) (Figure 6.10, upper). The plot shows
-that the WEI distribution is well adjusted to the low flow extreme
-values, whereas the deviation in the upper range might suggest that the
-three highest values do not belong to the low flow population
-(Section 6.3.3). In Figure 6.10 (lower) the empirical quantiles are
-plotted against the estimated distribution quantiles (qq-plot). The
-points should be close to the unit diagonal if the data fit the WEI
-distribution well. The use of a plotting position implies that the
-ordered sample is plotted in regularly spaced positions. As
-demonstrated in the figure, the observed jumps in $AM(1)$ values are
-reflected in the estimated Weibull quantiles, but not in the empirical
-quantiles.
+
+# Estimation of T-year events
 
 e) The non-exceedance frequency of the smallest value equals 
 `r round(fitted$prob.wei[1], 4)` (Equation A6.1.33), which gives a return period of 
@@ -228,27 +237,33 @@ e) The non-exceedance frequency of the smallest value equals
 This is `r round(empirical$rp.emp[1] - fitted$rp.wei[1], 1)` 
 years less that the empirical estimate derived in step 2(d).
 
-```{r}
+    ```{r}
 fitted
-```
+    ```
 
 
 f) The 50 and 100-year events can be estimated from Equation A6.1.34:
 $$ x_p = \xi + \alpha \left[-\ln( 1 - p ) \right]^{1/\kappa} $$
 
-```{r}
+```{r, quantiles, echo=FALSE}
 quantile_weibull <- function(prob, location = 0, scale, shape) {
   location + scale * (-log(1 - prob))^(1/shape)
 }
 
 return.period <- c(50, 100)
 q <- quantile_weibull(prob = 1/return.period, scale = alpha, shape = kappa) 
-
-round(q, 2)
 ```
 
 which gives: $\hat x_{50} = `r format(q[1], digits = 2, nsmall = 2)`$m<sup>3</sup>s<sup>-1</sup> 
 and $\hat x_{100} = `r format(q[2], digits = 2, nsmall = 2)`$m<sup>3</sup>s<sup>-1</sup>. 
+
+
+```{r, quantiles, echo=TRUE}
+```
+```{r}
+round(q, 2)
+```
+
 
 
 # Fast Track {#ft}
@@ -277,6 +292,10 @@ quawei(f = c(0.02, 0.01), para = par.wei) %>%
 ```
 
 # Probability plot using the exponential reduced variate
+
+The two-parameter EXP (Equation A6.1.64) and the WEI distribution are compared
+using the exponential reduced variable (Box 6.4). 
+
 ```{r}
 fitted.fast <- am %>%
   mutate(
@@ -288,12 +307,10 @@ fitted.fast <- am %>%
   print()
 ```
 
-a) For comparison of the two-parameter EXP (Equation A6.1.64) and
-WEI distribution the exponential reduced variable is applied
-(Box 6.4). By substituting $y$ into the expression for $F(x)$, $y$ can be
+a) By substituting $y$ into the expression for $F(x)$, $y$ can be
 expressed as $-\ln(1 - F(x))$ (Equation B6.4.6). The parameters of the
 EXP distribution are estimated using L-moments (Equation A6.1.72)
-and used to calculate $y$ and subsequently $F(x)$.
+and used to calculate $y$ and subsequently, $F(x)$.
 
 b) The non-exceedance probability $F(x)$ for the observations is
 determined using the Weibull plotting position formula
@@ -311,7 +328,7 @@ probability paper, and a straight line would result provided the data
 fitted the WEI distribution.
 
 ```{r, echo=FALSE}
-fig.cap <- "Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations marked as points, the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line)."
+fig.cap <- "Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations (marked as points), the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line)."
 ```
 
 

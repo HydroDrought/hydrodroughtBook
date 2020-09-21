@@ -15,7 +15,6 @@
 
 <title>Low flow frequency analysis</title>
 
-<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
@@ -56,14 +55,15 @@ if (window.hljs) {
 <li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
 <li><a href="#derivation-of-an-empirical-distribution-function"><span class="toc-section-number">2</span> Derivation of an empirical distribution function</a></li>
 <li><a href="#fitting-a-distribution"><span class="toc-section-number">3</span> Fitting a distribution</a></li>
-<li><a href="#ft"><span class="toc-section-number">4</span> Fast Track</a></li>
-<li><a href="#probability-plot-using-the-exponential-reduced-variate"><span class="toc-section-number">5</span> Probability plot using the exponential reduced variate</a></li>
+<li><a href="#estimation-of-t-year-events"><span class="toc-section-number">4</span> Estimation of T-year events</a></li>
+<li><a href="#ft"><span class="toc-section-number">5</span> Fast Track</a></li>
+<li><a href="#probability-plot-using-the-exponential-reduced-variate"><span class="toc-section-number">6</span> Probability plot using the exponential reduced variate</a></li>
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1" number="1">
-<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
-<p>River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been selected for frequency analysis of annual minimum 1-day values, <span class="math inline">\(AM(1)\)</span>, using the Weibull (WEI) distribution. In mid-latitudes in the Northern Hemisphere the calendar year can often be used to select the annual minimum flows. This is a suitable period for the selection of independent events as the drought or low flow period commonly occurs during the summer months. In the Southern Hemisphere the low flow season occurs at the opposite time of the year, and for Ngaruroro the lowest flows are typically found in the period November to May. As a result <span class="math inline">\(AM(1)\)</span> flows were selected for a hydrological year starting at the 1<sup>st</sup> September.</p>
+<div id="loading-the-data" class="section level1">
+<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<p>River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been selected for frequency analysis of annual minimum 1-day values, <span class="math inline">\(AM(1)\)</span>, using the Weibull (WEI) distribution. In mid-latitudes in the Northern Hemisphere, the calendar year is often used to select the annual minimum flows. This is a suitable period for the selection of independent events as the drought or low flow period commonly occurs during the summer months. In the Southern Hemisphere the low flow season occurs at the opposite time of the year, and for Ngaruroro the lowest flows are typically found in the period November to May. As a result <span class="math inline">\(AM(1)\)</span> flows were selected for a hydrological year starting at 1 September.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
 
@@ -71,7 +71,8 @@ ngaruroro &lt;- international %&gt;%
   filter(river == &quot;Ngaruroro&quot;) %&gt;%
   select(data) %&gt;%
   unnest(data) %&gt;%
-  # fill gaps with a length of up to 15 days
+  # linear interpolation of periods of missing values 
+  # with a duration of up to 15 days
   sanitize_ts(approx.missing = 15) %&gt;%
    mutate(
     year = water_year(time, origin = &quot;-09-01&quot;)
@@ -140,18 +141,24 @@ Figure 6.9 Time series of annual minimum 1-day flow, AM(1), for River Ngaruroro 
 <img src="6-1_low_flow_frequency_analysis_files/figure-html/unnamed-chunk-5-1.png" alt="Figure 6.9 Time series of annual minimum 1-day flow, AM(1), for River Ngaruroro at
 Kuripapango (NZ)." width="672"  />
 </div>
-<p>Ngaruroro has a flashy river regime, but has no observed zero flows. The <span class="math inline">\(AM(1)\)</span> flows are considered to come from the same population as only a minor part of the catchment is influenced by snow in winter. The observations cover the period 1964 to 1964 and with the omission of 7 years (1963, 1965, 1978, 1986, 1987, 2001 and 2019) with missing data a total of 50 values results. A histogram of the values is shown in Figure 6.3 (upper left). To test the assumption of stationarity the <span class="math inline">\(AM(1)\)</span> values are plotted against time in Figure 6.9. No trend can be detected in the series and the data are therefore assumed to fulfil the requirement of independent and identically distributed data (iid).</p>
+<p>Ngaruroro has a flashy river regime, but has no observed zero flows. The flows are considered to come from the same population as only a minor part of the catchment is influenced by snow in winter. The observations (daily flow series) cover the period 1 September 1964 to 31 August 2019. With the omission of 7 years (1963, 1965, 1978, 1986, 1987, 2001 and 2019) with missing data, a total of 50 annual minimum values results. The procedure used for interpolation of missing data is the same as in WE5.4. A histogram of the values is shown in Figure 6.3 (upper left). To test the assumption of stationarity, the values are plotted against time in Figure 6.9. No trend can be detected in the series and the data are therefore assumed to fulfil the requirement of independent and identically distributed data (iid).</p>
 </div>
-<div id="derivation-of-an-empirical-distribution-function" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Derivation of an empirical distribution function</h1>
+<div id="derivation-of-an-empirical-distribution-function" class="section level1">
+<h1><span class="header-section-number">2</span> Derivation of an empirical distribution function</h1>
+<ol style="list-style-type: lower-alpha">
+<li><p>The <span class="math inline">\(x\)</span> values, AM(1), are sorted in ascending order and the rank of each value is calculated. The smallest value equals 2.175 in m<sup>3</sup>s<sup>-1</sup> and is given rank 1.</p></li>
+<li><p>The non-exceedance probability, <span class="math inline">\(F(x) = p\)</span>, (<code>'prob.emp'</code> in the tibble below) is calculated for each <span class="math inline">\(x\)</span> value using the Weibull plotting position formula <span class="math inline">\(p_i = i / (n + 1)\)</span> (Equation 6.6).</p></li>
+<li><p>A probability plot for the <span class="math inline">\(AM(1)\)</span> values is obtained by plotting the flow values against <span class="math inline">\(F(x)\)</span> as demonstrated in Figure 6.10 (upper). A staircase pattern of several nearly equal values is observed. (Note that the <span class="math inline">\(AM(1)\)</span> values now are plotted on the <span class="math inline">\(y\)</span>-axis as compared to Figure 6.3, lower).</p></li>
+<li><p>The return period (<code>'rp.emp'</code>) of the smallest event can be calculated following Equation 6.5. The non-exceedance frequency, <span class="math inline">\(F(x)\)</span>, of the smallest event equals 0.02 according to step 2(b), which gives a return period of 51 years.</p></li>
+</ol>
 <pre class="r"><code>empirical &lt;- am %&gt;%
   mutate(
     rank = rank(flow),
     prob.emp = rank / (n() + 1),
     rp.emp = 1 / prob.emp
   ) %&gt;%
-  arrange(rank)  %&gt;%
-  print()</code></pre>
+  arrange(rank)  </code></pre>
+<pre class="r"><code>print(empirical)</code></pre>
 <pre><code>## # A tibble: 50 x 5
 ##     year  flow  rank prob.emp rp.emp
 ##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
@@ -166,27 +173,18 @@ Kuripapango (NZ)." width="672"  />
 ##  9  1973  2.88     9   0.176    5.67
 ## 10  2003  2.99    10   0.196    5.1 
 ## # … with 40 more rows</code></pre>
-<ol style="list-style-type: lower-alpha">
-<li><p>The <span class="math inline">\(x\)</span> values, AM(1), are sorted in ascending order and the rank of each value is calculated. The smallest value equals 2.175 in m<sup>3</sup>s<sup>-1</sup> and is given rank 1.</p></li>
-<li><p>The non-exceedance probability, <span class="math inline">\(F(x) = p\)</span>, (column <code>prob.emp</code>) is calculated for each <span class="math inline">\(x\)</span> value using the Weibull plotting position formula <span class="math inline">\(p_i = i / (n + 1)\)</span> (Equation 6.6).</p></li>
-<li><p>A probability plot for the <span class="math inline">\(AM(1)\)</span> values is obtained by plotting the flow values against <span class="math inline">\(F(x)\)</span> as demonstrated in Figure 6.10 (upper). A staircase pattern of several nearly equal values is observed. (Note that the <span class="math inline">\(AM(1)\)</span> values now are plotted on the <span class="math inline">\(y\)</span>-axis as compared to Figure 6.3, lower).</p></li>
-<li><p>The return period (column <code>rp.emp</code>) of the smallest event can be calculated following Equation 6.5. The non-exceedance frequency, <span class="math inline">\(F(x)\)</span>, of the smallest event equals 0.02 according to step 2(b), which gives a return period of 51 years.</p></li>
-</ol>
 </div>
-<div id="fitting-a-distribution" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Fitting a distribution</h1>
-<p>Fitting the two-parameter Weibull (WEI) distribution function (Section A6.1.4) using the method of L-moments. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> The direct estimation of the Weibull parameters is shown in <a href="#ft">section Fast Track</a>. </span></p>
+<div id="fitting-a-distribution" class="section level1">
+<h1><span class="header-section-number">3</span> Fitting a distribution</h1>
+<p>Fitting the two-parameter Weibull (WEI) distribution function (Section A6.1.4) (assuming the location parameter <span class="math inline">\(\xi\)</span> is zero) using the method of L-moments. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> A direct estimation of the Weibull parameters is shown in the <a href="#ft">Fast Track</a> section. </span></p>
 <ol style="list-style-type: lower-alpha">
-<li>The first two L-moments (<span class="math inline">\(\hat\lambda_1\)</span> and <span class="math inline">\(\hat\lambda_2\)</span>) are estimated based on time series of the annual minima <code>am$flow</code>. These so called sample L-moments are calculated with the function <code>samlmu()</code> from the package <strong>lmom</strong>.</li>
-</ol>
+<li><p>The first two L-moments (<span class="math inline">\(\hat\lambda_1\)</span> and <span class="math inline">\(\hat\lambda_2\)</span>) are estimated based on time series of the annual minima <code>am$flow</code>. These so called sample L-moments are calculated with the function <code>samlmu()</code> from the package <strong>lmom</strong>.</p>
 <pre class="r"><code>library(lmom)
 moments &lt;- samlmu(am$flow)
 moments[1:2] </code></pre>
 <pre><code>##       l_1       l_2 
-## 3.8930400 0.5560016</code></pre>
-<ol start="2" style="list-style-type: lower-alpha">
-<li>The parameter estimates of the WEI distribution (scale parameter <span class="math inline">\(\alpha\)</span>, shape parameter <span class="math inline">\(\kappa\)</span>) are obtained following …. :</li>
-</ol>
+## 3.8930400 0.5560016</code></pre></li>
+<li><p>The parameter estimates of the WEI distribution (scale parameter <span class="math inline">\(\alpha\)</span>, shape parameter <span class="math inline">\(\kappa\)</span>) are obtained following Equation A6.144:</p>
 <p><span class="math display">\[\hat\alpha = \frac{\hat\lambda_1}{\Gamma\left( 1 + \frac{1}{\hat\kappa }\right)}\]</span></p>
 <p><span class="math display">\[\hat\kappa = \frac{-\ln(2)}{\ln\left( 1 - \frac{\hat\lambda_2}{\hat\lambda_1}\right)}\]</span></p>
 <pre class="r"><code>kappa &lt;- -log(2) / log(1 - unname(moments[&quot;l_2&quot;] / moments[&quot;l_1&quot;]))
@@ -194,35 +192,36 @@ alpha &lt;- unname(moments[&quot;l_1&quot;]) / gamma(1 + 1/kappa)
 parameter &lt;- c(location = 0, scale = alpha, shape = kappa)
 parameter</code></pre>
 <pre><code>## location    scale    shape 
-## 0.000000 4.266122 4.497841</code></pre>
-<ol start="3" style="list-style-type: lower-alpha">
-<li><span class="math inline">\(F(x)\)</span> for the WEI distribution is obtained following Equation A6.1.33 (recalling that location parameter <span class="math inline">\(\xi\)</span> is set to zero):</li>
-</ol>
+## 0.000000 4.266122 4.497841</code></pre></li>
+<li><p><span class="math inline">\(F(x)\)</span> for the WEI distribution is obtained following Equation A6.1.33 (recalling that the location parameter <span class="math inline">\(\xi\)</span> is set to zero):</p>
 <p><span class="math display">\[ F(x) = 1 - \exp\left[-\left(\frac{x}{\alpha}\right)^\kappa\right]\]</span></p>
 <pre class="r"><code>fitted &lt;- empirical %&gt;%
   select(year, flow, prob.emp) %&gt;%
   mutate(
-    prob.wei = 1 - exp(-(flow / alpha)^kappa),
-    rp.wei = 1 / prob.wei
-  ) </code></pre>
+prob.wei = 1 - exp(-(flow / alpha)^kappa),
+rp.wei = 1 / prob.wei
+  ) </code></pre></li>
+<li><p>The data can be plotted in a probability plot and compared to the empirical quantiles in step 2(b) (Figure 6.10, upper). The plot shows that the WEI distribution is well adjusted to the low flow extreme values, whereas deviation in the upper range may suggest that the three highest values do not belong to the low flow population (Section 6.3.3). In Figure 6.10 (lower) the empirical quantiles are plotted against the estimated distribution quantiles (QQ-plot). The points should be close to the unit diagonal if the data fit the WEI distribution well. The use of a plotting position implies that the ordered sample is plotted in regularly spaced positions. As demonstrated in the figure, the observed jumps in <span class="math inline">\(AM(1)\)</span> values are reflected in the estimated Weibull quantiles, but not in the empirical quantiles.</p></li>
+</ol>
 <div class="figure">
 <p class="caption marginnote shownote">
-Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River Ngaruroro at Kuripapango (NZ); probability plot showing the Weibull distribution (curve).
+Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution (curve) to the sample data.
 </p>
-<img src="6-1_low_flow_frequency_analysis_files/figure-html/unnamed-chunk-12-1.png" alt="Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River
-Ngaruroro at Kuripapango (NZ); probability plot showing the Weibull distribution
-(curve)." width="672"  />
+<img src="6-1_low_flow_frequency_analysis_files/figure-html/unnamed-chunk-11-1.png" alt="Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River
+Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution
+(curve) to the sample data." width="672"  />
 </div>
 <div class="figure">
 <p class="caption marginnote shownote">
 Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles
 </p>
-<img src="6-1_low_flow_frequency_analysis_files/figure-html/unnamed-chunk-14-1.png" alt="Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles" width="672"  />
+<img src="6-1_low_flow_frequency_analysis_files/figure-html/unnamed-chunk-13-1.png" alt="Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles" width="672"  />
 </div>
-<ol start="4" style="list-style-type: lower-alpha">
-<li><p>The data can be plotted in a probability plot and compared to the empirical quantiles in step 2(b) (Figure 6.10, upper). The plot shows that the WEI distribution is well adjusted to the low flow extreme values, whereas the deviation in the upper range might suggest that the three highest values do not belong to the low flow population (Section 6.3.3). In Figure 6.10 (lower) the empirical quantiles are plotted against the estimated distribution quantiles (qq-plot). The points should be close to the unit diagonal if the data fit the WEI distribution well. The use of a plotting position implies that the ordered sample is plotted in regularly spaced positions. As demonstrated in the figure, the observed jumps in <span class="math inline">\(AM(1)\)</span> values are reflected in the estimated Weibull quantiles, but not in the empirical quantiles.</p></li>
-<li><p>The non-exceedance frequency of the smallest value equals 0.0472 (Equation A6.1.33), which gives a return period of 21.2 years (Equation 6.5). This is 29.8 years less that the empirical estimate derived in step 2(d).</p></li>
-</ol>
+</div>
+<div id="estimation-of-t-year-events" class="section level1">
+<h1><span class="header-section-number">4</span> Estimation of T-year events</h1>
+<ol start="5" style="list-style-type: lower-alpha">
+<li><p>The non-exceedance frequency of the smallest value equals 0.0472 (Equation A6.1.33), which gives a return period of 21.2 years (Equation 6.5). This is 29.8 years less that the empirical estimate derived in step 2(d).</p>
 <pre class="r"><code>fitted</code></pre>
 <pre><code>## # A tibble: 50 x 5
 ##     year  flow prob.emp prob.wei rp.wei
@@ -237,23 +236,21 @@ Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles
 ##  8  2004  2.68   0.157    0.115    8.67
 ##  9  1973  2.88   0.176    0.158    6.34
 ## 10  2003  2.99   0.196    0.184    5.45
-## # … with 40 more rows</code></pre>
-<ol start="6" style="list-style-type: lower-alpha">
-<li>The 50 and 100-year events can be estimated from Equation A6.1.34: <span class="math display">\[ x_p = \xi + \alpha \left[-\ln( 1 - p ) \right]^{1/\kappa} \]</span></li>
+## # … with 40 more rows</code></pre></li>
+<li><p>The 50 and 100-year events can be estimated from Equation A6.1.34: <span class="math display">\[ x_p = \xi + \alpha \left[-\ln( 1 - p ) \right]^{1/\kappa} \]</span></p></li>
 </ol>
+<p>which gives: <span class="math inline">\(\hat x_{50} = 1.79\)</span>m<sup>3</sup>s<sup>-1</sup> and <span class="math inline">\(\hat x_{100} = 1.53\)</span>m<sup>3</sup>s<sup>-1</sup>.</p>
 <pre class="r"><code>quantile_weibull &lt;- function(prob, location = 0, scale, shape) {
   location + scale * (-log(1 - prob))^(1/shape)
 }
 
 return.period &lt;- c(50, 100)
-q &lt;- quantile_weibull(prob = 1/return.period, scale = alpha, shape = kappa) 
-
-round(q, 2)</code></pre>
+q &lt;- quantile_weibull(prob = 1/return.period, scale = alpha, shape = kappa) </code></pre>
+<pre class="r"><code>round(q, 2)</code></pre>
 <pre><code>## [1] 1.79 1.53</code></pre>
-<p>which gives: <span class="math inline">\(\hat x_{50} = 1.79\)</span>m<sup>3</sup>s<sup>-1</sup> and <span class="math inline">\(\hat x_{100} = 1.53\)</span>m<sup>3</sup>s<sup>-1</sup>.</p>
 </div>
-<div id="ft" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Fast Track</h1>
+<div id="ft" class="section level1">
+<h1><span class="header-section-number">5</span> Fast Track</h1>
 <p>The function <code>samlmu()</code> from the package <strong>lmom</strong> computes the sample L-moments for a given sample. These sample L-moments are independent of the distribution one wants to fit. They have can be transferred into the parameters of the desired distribution; e.g. the function <code>pelwei()</code> will return the location, scale and shape parameters for a Weibull distribution. By default a three parameter Weibull distribution is used. To obtain L-moment estimates of the two parameter Weibull distribution (where the lower bound and location parameter <span class="math inline">\(\xi\)</span> is set to zero) set the argument <code>bound = 0</code>.</p>
 <pre class="r"><code>library(lmom)
 lmom &lt;- samlmu(am$flow)
@@ -266,8 +263,9 @@ par.wei</code></pre>
   round(digits = 2)</code></pre>
 <pre><code>## [1] 1.79 1.53</code></pre>
 </div>
-<div id="probability-plot-using-the-exponential-reduced-variate" class="section level1" number="5">
-<h1 number="5"><span class="header-section-number">5</span> Probability plot using the exponential reduced variate</h1>
+<div id="probability-plot-using-the-exponential-reduced-variate" class="section level1">
+<h1><span class="header-section-number">6</span> Probability plot using the exponential reduced variate</h1>
+<p>The two-parameter EXP (Equation A6.1.64) and the WEI distribution are compared using the exponential reduced variable (Box 6.4).</p>
 <pre class="r"><code>fitted.fast &lt;- am %&gt;%
   mutate(
     prob.emp = rank(flow) / (n() + 1),
@@ -291,15 +289,15 @@ par.wei</code></pre>
 ## 10  2003  2.99   0.196    0.184    0.173 
 ## # … with 40 more rows</code></pre>
 <ol style="list-style-type: lower-alpha">
-<li><p>For comparison of the two-parameter EXP (Equation A6.1.64) and WEI distribution the exponential reduced variable is applied (Box 6.4). By substituting <span class="math inline">\(y\)</span> into the expression for <span class="math inline">\(F(x)\)</span>, <span class="math inline">\(y\)</span> can be expressed as <span class="math inline">\(-\ln(1 - F(x))\)</span> (Equation B6.4.6). The parameters of the EXP distribution are estimated using L-moments (Equation A6.1.72) and used to calculate <span class="math inline">\(y\)</span> and subsequently <span class="math inline">\(F(x)\)</span>.</p></li>
+<li><p>By substituting <span class="math inline">\(y\)</span> into the expression for <span class="math inline">\(F(x)\)</span>, <span class="math inline">\(y\)</span> can be expressed as <span class="math inline">\(-\ln(1 - F(x))\)</span> (Equation B6.4.6). The parameters of the EXP distribution are estimated using L-moments (Equation A6.1.72) and used to calculate <span class="math inline">\(y\)</span> and subsequently, <span class="math inline">\(F(x)\)</span>.</p></li>
 <li><p>The non-exceedance probability <span class="math inline">\(F(x)\)</span> for the observations is determined using the Weibull plotting position formula (Equation 6.6).</p></li>
 <li><p>The <span class="math inline">\(AM(1)\)</span> values are plotted against the reduced variate in Figure 6.11. A reduced variate of <span class="math inline">\(0.02\)</span> corresponds to a return period of <span class="math inline">\(50.5\)</span> years for minimum values (Equation 6.5). The data will plot as a straight line given they follow the EXP distribution. Again it is demonstrated that the WEI distribution fits the extreme low flow values well, and also the upper range apart from the three largest values. The two-parameter EXP distribution is less suited to model the sample. Alternatively, <span class="math inline">\(-\ln(X)\)</span> could be plotted on a Gumbel probability paper, and a straight line would result provided the data fitted the WEI distribution.</p></li>
 </ol>
 <div class="figure">
 <p class="caption marginnote shownote">
-Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations marked as points, the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line).
+Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations (marked as points), the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line).
 </p>
-<img src="6-1_low_flow_frequency_analysis_files/figure-html/unnamed-chunk-21-1.png" alt="Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations marked as points, the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line)." width="672"  />
+<img src="6-1_low_flow_frequency_analysis_files/figure-html/unnamed-chunk-20-1.png" alt="Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations (marked as points), the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line)." width="672"  />
 </div>
 </div>
 
