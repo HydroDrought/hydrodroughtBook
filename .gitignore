@@ -15,6 +15,9 @@ worked_examples/html/index.html
 
 cache/
 
+# all _files$ directories in markdown/
+worked_examples/rmarkdown/*._files
+
 worked_examples/word/
 worked_examples/html/*.docx
 
