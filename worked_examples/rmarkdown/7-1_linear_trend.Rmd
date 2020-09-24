@@ -1,0 +1,107 @@
+---
+title: "Linear trend analysis"
+author: "Worked example 7.1"
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+# Loading the Data
+
+We begin by loading two flow time series and necesary packages. 
+
+```{r}
+library(tidyverse)
+library(hydroDrought)
+require(lubridate)
+
+gota <- international %>%
+  filter(river == "Gőta älv") %>%
+  select(data) %>%
+  unnest(data) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+    ) %>%
+  print()
+```
+
+# Linear trend for Neu Darchau River
+
+Consider the annual minimum flow for the Neu Darchau river (Fig. 7.8). By fitting a line of form Eq 7.43, the estimated slope is -0.0408 m3/s per year, with a 95% confidence interval of -0.34 to 0.26 m3/s per year. As you can see, we are unclear whether the true trend is positive or negative and this is reflected in a p-value of 0.79 for the t-test of the slope coefficients. Because this p-value is well above 0.05, we accept the null hypothesis (Ho) that there is no significant trend in annual minimum flow. 
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River
+Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution
+(curve) to the sample data."
+```
+```{r, echo=FALSE, fig.cap=fig.cap}
+# quant.theo = qweibull(empirical, shape = kappa, scale = alpha),
+# quant.theo2 = exp(log(-log(1-empirical))/kappa + log(alpha))
+
+# tocheck: we could estimate the fitted distribution much smoother... 
+ggplot(fitted, aes(prob.emp, flow)) + 
+  geom_point() + 
+  geom_line(aes(x = prob.wei)) + 
+  scale_y_continuous(limits = c(0, NA)) + 
+  labs(x = expression(paste("F(", x, ")")),
+       y = expression(paste("Annual minimum flow (", m^{3}, s^{-1}, ")")))
+```
+
+# Linear trend for Göta River
+
+If we instead consider the annual minimum flow on the Göta River, the annual trend is 1.23 m3/s per year (Fig. 7.9 with a 95% confidence interval of 0.875 to 1.59 m3/s per year. The t-test on this coefficient produces a p-value of 4 x 10-9, meaning it is highly unlikely that such a strong trend would have appeared randomly in observations if there were no true underlying trend. We reject the null hypothesis, and accept the alternative hypothesis, that there is a significant trend in Göta River annual minimum flows. Remember that we set up our alternative hypothesis as a two-sided test (b1 ≠ 0), so we are testing whether there is a significant trend, regardless if it is positive or negative. We should make this clear when we report our findings. Of course, we should also report that the trend we found was that Göta River minimum flows have been increasing at an estimated rate of 1.23 m3/s per year since 1941. 
+
+
+```{r}
+
+### Create an OLS linear trend model and save to variable
+trend_ols <- lm(goetta_annual_ts$min_m3s~goetta_annual_ts$year)
+
+### Show results
+summary(trend_ols)
+
+### Calculate the residuals and add to dataframe
+goetta_annual_ts$resid <- resid(trend_ols)
+
+### Plot the fit
+p <- ggplot(goetta_annual_ts, aes(x=year, y=min_m3s)) %>%
+	+ geom_point(colour="grey50") %>%  ## Plot as points. 
+	+ stat_summary(fun.data=mean_cl_normal) %>%
+	+ geom_smooth(method='lm') %>%  ## Add the linear model and confidence interval
+	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
+	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name=bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) ## Set the y-axis title and add commas to values
+p
+
+
+fitted.fast <- am %>%
+  mutate(
+    prob.emp = rank(flow) / (n() + 1),
+    prob.wei = cdfwei(x = flow, para = pelwei(lmom, bound = 0)),
+    prob.exp = cdfexp(x = flow, para = pelexp(lmom))
+  ) %>% 
+  arrange(flow) %>%
+  print()
+```
+Although this is the same river and low flow statistic modelled in Section 7.2.3, this period (1941-present) is after the period from Section 7.2.3. We purposefully excluded this later period from AR(1) modelling because of its non-stationary trend. 
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River
+Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution
+(curve) to the sample data."
+```
+```{r, echo=FALSE, fig.cap=fig.cap}
+# quant.theo = qweibull(empirical, shape = kappa, scale = alpha),
+# quant.theo2 = exp(log(-log(1-empirical))/kappa + log(alpha))
+
+# tocheck: we could estimate the fitted distribution much smoother... 
+ggplot(fitted, aes(prob.emp, flow)) + 
+  geom_point() + 
+  geom_line(aes(x = prob.wei)) + 
+  scale_y_continuous(limits = c(0, NA)) + 
+  labs(x = expression(paste("F(", x, ")")),
+       y = expression(paste("Annual minimum flow (", m^{3}, s^{-1}, ")")))
+```
+
