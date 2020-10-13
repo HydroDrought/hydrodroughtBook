@@ -93,14 +93,14 @@ metrics &lt;- intermittent %&gt;%
   unnest_wider(metrics) %&gt;%
   print()</code></pre>
 <pre><code>## # A tibble: 6 x 9
-##   river          `frac nf years`    MAN    CVAN `no flow days`   MAMD onset `sd onset` term.
-##   &lt;fct&gt;                    &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
-## 1 Sabar                    1     185.   0.239   &lt;int [29]&gt;     168.     862       60.0  1063
-## 2 Upper Guadiana           0.116   8.12 3.26    &lt;int [40]&gt;       8.12   954       25.8  1017
-## 3 Dawib                    1     361.   0.00830 &lt;int [6]&gt;      298.     730        0     756
-## 4 Elands                   0.214  14.4  1.83    &lt;int [9]&gt;        7.89   964       83.6   977
-## 5 Ray                      0.945  98.2  0.576   &lt;int [46]&gt;      40.2    864       52.8   870
-## 6 Arroyo Seco              0.441  39.0  1.33    &lt;int [118]&gt;     38.3    941       24.7  1027</code></pre>
+##   river          `frac nf years`    MAN    CVAN `no flow days`   MAMD  onset `sd onset`  term.
+##   &lt;chr&gt;                    &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt; &lt;date&gt;      &lt;dbl&gt; &lt;date&gt;
+## 1 Sabar                    1     185.   0.239   &lt;int [29]&gt;     168.   -05-12       60.0 -11-29
+## 2 Upper Guadiana           0.116   8.12 3.26    &lt;int [40]&gt;       8.12 -08-12       25.8 -10-14
+## 3 Dawib                    1     361.   0.00830 &lt;int [6]&gt;      298.   -01-01        0   -01-27
+## 4 Elands                   0.214  14.4  1.83    &lt;int [9]&gt;        7.89 -08-22       83.6 -09-04
+## 5 Ray                      0.945  98.2  0.576   &lt;int [46]&gt;      40.2  -05-14       52.8 -05-20
+## 6 Arroyo Seco              0.441  39.0  1.33    &lt;int [118]&gt;     38.3  -07-30       24.7 -10-24</code></pre>
 <pre class="r"><code>metrics %&gt;%
   select(river, n.days = `no flow days`) %&gt;%
   unnest(n.days) %&gt;%

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Worked example 7.2" />
+
+
+<title>Non-Parametric Trends</title>
+
+<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
+<link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
+<link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Non-Parametric Trends</h1>
+<h4 class="author">Worked example 7.2</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+</ul>
+</div>
+
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
+<p>Consider the same data as Worked Example 7.1 using annual minimum flow from the Göta River beginning in 1941.</p>
+<pre class="r"><code>library(tidyverse)
+library(hydroDrought)
+library(lubridate)
+#require(Hmisc)
+require(zyp)
+
+### Filter to the rivers and create columns for dates
+flow_df &lt;- international %&gt;%
+    filter(river == &quot;Gota&quot;) %&gt;%
+    select(river, data) %&gt;%
+    unnest(cols = data) %&gt;%
+    mutate(
+        year = year(time),
+        jdate = yday(time)
+    )  %&gt;%
+    print()</code></pre>
+<pre><code>## # A tibble: 61,498 x 5
+##    river time       discharge  year jdate
+##    &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 Gota  1850-01-01       506  1850     1
+##  2 Gota  1850-01-02       506  1850     2
+##  3 Gota  1850-01-03       502  1850     3
+##  4 Gota  1850-01-04       502  1850     4
+##  5 Gota  1850-01-05       502  1850     5
+##  6 Gota  1850-01-06       502  1850     6
+##  7 Gota  1850-01-07       496  1850     7
+##  8 Gota  1850-01-08       496  1850     8
+##  9 Gota  1850-01-09       496  1850     9
+## 10 Gota  1850-01-10       496  1850    10
+## # … with 61,488 more rows</code></pre>
+<pre class="r"><code>### Group by year and river and then calculate min annual flow
+flow_annual &lt;- flow_df %&gt;%
+    group_by(river, year) %&gt;%
+    summarise(min_m3s = min(discharge, na.rm=TRUE), .groups = &quot;drop_last&quot;) %&gt;%
+    print() %&gt;%
+    ungroup()</code></pre>
+<pre><code>## # A tibble: 169 x 3
+## # Groups:   river [1]
+##    river  year min_m3s
+##    &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Gota   1850     471
+##  2 Gota   1851     500
+##  3 Gota   1852     565
+##  4 Gota   1853     591
+##  5 Gota   1854     347
+##  6 Gota   1855     316
+##  7 Gota   1856     366
+##  8 Gota   1857     401
+##  9 Gota   1858     316
+## 10 Gota   1859     310
+## # … with 159 more rows</code></pre>
+<pre class="r"><code>### Subset to 1941 and after
+flow_annual_subset &lt;- flow_annual %&gt;% filter( year &gt;= 1941) 
+
+### Run the Mann-Kendall Test for the annual min flow
+mk_test_results &lt;- Kendall(x=flow_annual_subset$year, y=flow_annual_subset$min_m3s)
+summary(mk_test_results)</code></pre>
+<pre><code>## Score =  1426 , Var(Score) = 53676.67
+## denominator =  2988.465
+## tau = 0.477, 2-sided pvalue =&lt; 2.22e-16</code></pre>
+<p>The Mann-Kendall test produces an S value of 1426, meaning that we have 1426 more date pairs where the later observation is larger than the earlier. Using this test statistic and the 78 years of observations, the Mann-Kendall test produces a p-value &lt; 2.2x10-16 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.</p>
+<p>As discussed in the text, the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results, but is slightly less affected by relatively high outliers during the late 2000s.</p>
+<pre class="r"><code>### Run the Theil-Sen slope for annual min flow
+sen_slope_results &lt;- zyp.sen(min_m3s ~ year, data = flow_annual_subset)
+sen_slope_results</code></pre>
+<pre><code>## 
+## Call:
+## NULL
+## 
+## Coefficients:
+## Intercept       year  
+## -2202.414      1.172</code></pre>
+<pre class="r"><code>confint.zyp(sen_slope_results)</code></pre>
+<pre><code>##                   0.025        0.975
+## Intercept -2263.3510083 -2132.799301
+## year          0.8387097     1.553571</code></pre>
+<pre class="r"><code>### Rerun OLS trend
+gota_lm &lt;- lm(min_m3s~year, data = flow_annual_subset)
+
+### Combine for plotting purposes
+trend_lines &lt;- flow_annual_subset %&gt;% 
+    select(year) %&gt;%  ### Only select the year
+    mutate(   ### Create two new columns with predictions
+        ols = gota_lm$coef[1] + gota_lm$coef[2] * year,
+        sen = sen_slope_results$coef[1] + sen_slope_results$coef[2] * year
+    ) %&gt;% 
+    gather(model, min_m3s, -year)   ### Gather these predictions into a long format for plotting
+
+### Re-factor the model names to make it better to plot
+trend_lines$model &lt;- factor(trend_lines$model, c(&quot;ols&quot;, &quot;sen&quot;), labels=c(&quot;Ordinary Least Squares (OLS)&quot;, &quot;Thiel-Sen Slope&quot;))</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river after 1940.
+</p>
+<img src="7-2_nonparametric_trend_files/figure-html/unnamed-chunk-6-1.png" alt="Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river after 1940." width="672"  />
+</div>
+<p>If we instead expand the Göta River timeseries to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent.</p>
+<pre class="r"><code>### Subset to 1934 and after
+flow_annual_longer &lt;- flow_annual %&gt;% filter( year &gt;= 1934) 
+
+### Run the Mann-Kendall Test for the annual min flow
+mk_longer &lt;- Kendall(x=flow_annual_longer$year, y=flow_annual_longer$min_m3s)
+summary(mk_longer)</code></pre>
+<pre><code>## Score =  921 , Var(Score) = 69373
+## denominator =  3555.47
+## tau = 0.259, 2-sided pvalue =0.00047767</code></pre>
+<pre class="r"><code>### Run the Theil-Sen slope for annual min flow
+sen_slope_longer &lt;- zyp.sen(min_m3s ~ year, data = flow_annual_longer)
+sen_slope_longer</code></pre>
+<pre><code>## 
+## Call:
+## NULL
+## 
+## Coefficients:
+##  Intercept        year  
+## -1390.5720      0.7639</code></pre>
+<pre class="r"><code>confint.zyp(sen_slope_longer)</code></pre>
+<pre><code>##                   0.025        0.975
+## Intercept -1545.8315356 -1191.203759
+## year          0.3676471     1.142857</code></pre>
+<pre class="r"><code>### Rerun OLS trend
+gota_lm_longer &lt;- lm(min_m3s~year, data = flow_annual_longer)
+summary(gota_lm_longer)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = min_m3s ~ year, data = flow_annual_longer)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -90.84 -46.66 -21.78  13.05 423.93 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 489.7563   768.4614   0.637    0.526
+## year         -0.1765     0.3889  -0.454    0.651
+## 
+## Residual standard error: 87.96 on 83 degrees of freedom
+## Multiple R-squared:  0.002476,   Adjusted R-squared:  -0.009543 
+## F-statistic: 0.206 on 1 and 83 DF,  p-value: 0.6511</code></pre>
+<p>By including only 6 additional years, the OLS line changes from a significantly positive trend (+1.3387372 m3/s per year) to a significantly negative trend (-0.1764901 m3/s per year). The Theil-Sen line is slightly affected by these outliers, decreasing in slope from 1.1724138 to 0.7639319, but maintaining a statistically significant 70-year increasing trend that is clear visually.</p>
+<p>This is an extreme example and we know from Section 7.2.3 that these outliers are related to a change in lake management. Data before 1940 follows a different underlying distribution, violating the assumptions of our model. To prove this, read ahead to Section 7.4.3.</p>
+<pre class="r"><code>### Combine for plotting purposes
+trend_lines &lt;- flow_annual_longer %&gt;% 
+    select(year) %&gt;%  ### Only select the year
+    mutate(   ### Create two new columns with predictions
+        ols = gota_lm_longer$coef[1] + gota_lm_longer$coef[2] * year,
+        sen = sen_slope_longer$coef[1] + sen_slope_longer$coef[2] * year
+    ) %&gt;% 
+    gather(model, min_m3s, -year)   ### Gather these predictions into a long format for plotting
+
+### Re-factor the model names to make it better to plot
+trend_lines$model &lt;- factor(trend_lines$model, c(&quot;ols&quot;, &quot;sen&quot;), labels=c(&quot;Ordinary Least Squares (OLS)&quot;, &quot;Thiel-Sen Slope&quot;))</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 7.11: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river by incorrectly including data from 1934 (prior to dam regulation).
+</p>
+<img src="7-2_nonparametric_trend_files/figure-html/unnamed-chunk-10-1.png" alt="Figure 7.11: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river by incorrectly including data from 1934 (prior to dam regulation)." width="672"  />
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
