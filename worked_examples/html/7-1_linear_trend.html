@@ -54,7 +54,8 @@ if (window.hljs) {
 <div id="TOC">
 <ul>
 <li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
-<li><a href="#linear-trend-for-göta-river"><span class="toc-section-number">2</span> Linear trend for Göta River</a></li>
+<li><a href="#linear-trend-for-elbe-river"><span class="toc-section-number">2</span> Linear trend for Elbe River</a></li>
+<li><a href="#linear-trend-for-göta-river"><span class="toc-section-number">3</span> Linear trend for Göta River</a></li>
 </ul>
 </div>
 
@@ -73,43 +74,41 @@ flow_df &lt;- international %&gt;%
     mutate(
         year = year(time),
         jdate = yday(time)
-    )  %&gt;%
-    print()</code></pre>
-<pre><code>## # A tibble: 114,031 x 5
-##    river time       discharge  year jdate
-##    &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-##  1 Gota  1850-01-01       506  1850     1
-##  2 Gota  1850-01-02       506  1850     2
-##  3 Gota  1850-01-03       502  1850     3
-##  4 Gota  1850-01-04       502  1850     4
-##  5 Gota  1850-01-05       502  1850     5
-##  6 Gota  1850-01-06       502  1850     6
-##  7 Gota  1850-01-07       496  1850     7
-##  8 Gota  1850-01-08       496  1850     8
-##  9 Gota  1850-01-09       496  1850     9
-## 10 Gota  1850-01-10       496  1850    10
-## # … with 114,021 more rows</code></pre>
+    )
+
+head(flow_df, 8)</code></pre>
+<pre><code>## # A tibble: 8 x 5
+##   river time       discharge  year jdate
+##   &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Gota  1850-01-01       506  1850     1
+## 2 Gota  1850-01-02       506  1850     2
+## 3 Gota  1850-01-03       502  1850     3
+## 4 Gota  1850-01-04       502  1850     4
+## 5 Gota  1850-01-05       502  1850     5
+## 6 Gota  1850-01-06       502  1850     6
+## 7 Gota  1850-01-07       496  1850     7
+## 8 Gota  1850-01-08       496  1850     8</code></pre>
 <pre class="r"><code>### Group by year and river and then calculate min and mean flow
 flow_annual &lt;- flow_df %&gt;%
     group_by(river, year) %&gt;%
-    summarise(min_m3s = min(discharge, na.rm=TRUE), mean_m3s=mean(discharge, na.rm=TRUE), .groups = &quot;drop_last&quot;) %&gt;%
-    print()</code></pre>
-<pre><code>## # A tibble: 313 x 4
-## # Groups:   river [2]
-##    river  year min_m3s mean_m3s
-##    &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
-##  1 Elbe   1875     230     583.
-##  2 Elbe   1876     237     912.
-##  3 Elbe   1877     296     695.
-##  4 Elbe   1878     296     636.
-##  5 Elbe   1879     327     805.
-##  6 Elbe   1880     330     823.
-##  7 Elbe   1881     327     918.
-##  8 Elbe   1882     345     735.
-##  9 Elbe   1883     298     724.
-## 10 Elbe   1884     292     680.
-## # … with 303 more rows</code></pre>
-<p><img src="7-1_linear_trend_files/figure-html/unnamed-chunk-2-1.png" width="672"  /> # Linear trend for Elbe River</p>
+    summarise(min_m3s = min(discharge, na.rm=TRUE), mean_m3s=mean(discharge, na.rm=TRUE), .groups = &quot;drop_last&quot;) 
+
+head(flow_annual, 8)</code></pre>
+<pre><code>## # A tibble: 8 x 4
+## # Groups:   river [1]
+##   river  year min_m3s mean_m3s
+##   &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Elbe   1875     230     583.
+## 2 Elbe   1876     237     912.
+## 3 Elbe   1877     296     695.
+## 4 Elbe   1878     296     636.
+## 5 Elbe   1879     327     805.
+## 6 Elbe   1880     330     823.
+## 7 Elbe   1881     327     918.
+## 8 Elbe   1882     345     735.</code></pre>
+</div>
+<div id="linear-trend-for-elbe-river" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Linear trend for Elbe River</h1>
 <p>Consider the annual minimum flow for the Elbe river (Fig. 7.8). By fitting a line of form Eq 7.43, the estimated slope is -0.0408 m3/s per year, with a 95% confidence interval of -0.34 to 0.26 m3/s per year. As you can see, we are unclear whether the true trend is positive or negative and this is reflected in a p-value of 0.79 for the t-test of the slope coefficients. Because this p-value is well above 0.05, we accept the null hypothesis (Ho) that there is likely no significant trend in annual minimum flow for the Elbe River.</p>
 <pre class="r"><code>### Filter to only the Elbe River
 elbe_annual &lt;- flow_annual %&gt;%
@@ -161,170 +160,18 @@ new_data &lt;- data.frame(year = seq(1865, 2025, 1))
 elbe_conf &lt;- predict(elbe_lm, newdata=new_data, interval = &quot;confidence&quot;, level = 0.95) %&gt;%
     as.data.frame() %&gt;%
     bind_cols(new_data) %&gt;%
-    mutate(interval = &quot;Confidence&quot;, level = 0.95) %&gt;%
-    print()</code></pre>
-<pre><code>##          fit      lwr      upr year   interval level
-## 1   274.0878 246.4956 301.6801 1865 Confidence  0.95
-## 2   274.0470 246.7231 301.3710 1866 Confidence  0.95
-## 3   274.0063 246.9499 301.0626 1867 Confidence  0.95
-## 4   273.9655 247.1760 300.7549 1868 Confidence  0.95
-## 5   273.9247 247.4014 300.4480 1869 Confidence  0.95
-## 6   273.8839 247.6260 300.1418 1870 Confidence  0.95
-## 7   273.8431 247.8498 299.8364 1871 Confidence  0.95
-## 8   273.8023 248.0728 299.5318 1872 Confidence  0.95
-## 9   273.7615 248.2950 299.2281 1873 Confidence  0.95
-## 10  273.7208 248.5163 298.9252 1874 Confidence  0.95
-## 11  273.6800 248.7367 298.6233 1875 Confidence  0.95
-## 12  273.6392 248.9562 298.3222 1876 Confidence  0.95
-## 13  273.5984 249.1747 298.0221 1877 Confidence  0.95
-## 14  273.5576 249.3922 297.7230 1878 Confidence  0.95
-## 15  273.5168 249.6088 297.4249 1879 Confidence  0.95
-## 16  273.4761 249.8243 297.1278 1880 Confidence  0.95
-## 17  273.4353 250.0387 296.8319 1881 Confidence  0.95
-## 18  273.3945 250.2520 296.5370 1882 Confidence  0.95
-## 19  273.3537 250.4641 296.2433 1883 Confidence  0.95
-## 20  273.3129 250.6751 295.9508 1884 Confidence  0.95
-## 21  273.2721 250.8848 295.6595 1885 Confidence  0.95
-## 22  273.2314 251.0932 295.3695 1886 Confidence  0.95
-## 23  273.1906 251.3003 295.0808 1887 Confidence  0.95
-## 24  273.1498 251.5061 294.7935 1888 Confidence  0.95
-## 25  273.1090 251.7105 294.5075 1889 Confidence  0.95
-## 26  273.0682 251.9133 294.2231 1890 Confidence  0.95
-## 27  273.0274 252.1147 293.9401 1891 Confidence  0.95
-## 28  272.9866 252.3145 293.6587 1892 Confidence  0.95
-## 29  272.9459 252.5127 293.3790 1893 Confidence  0.95
-## 30  272.9051 252.7093 293.1009 1894 Confidence  0.95
-## 31  272.8643 252.9041 292.8245 1895 Confidence  0.95
-## 32  272.8235 253.0970 292.5500 1896 Confidence  0.95
-## 33  272.7827 253.2882 292.2773 1897 Confidence  0.95
-## 34  272.7419 253.4774 292.0065 1898 Confidence  0.95
-## 35  272.7012 253.6646 291.7377 1899 Confidence  0.95
-## 36  272.6604 253.8497 291.4711 1900 Confidence  0.95
-## 37  272.6196 254.0327 291.2065 1901 Confidence  0.95
-## 38  272.5788 254.2134 290.9442 1902 Confidence  0.95
-## 39  272.5380 254.3919 290.6842 1903 Confidence  0.95
-## 40  272.4972 254.5679 290.4266 1904 Confidence  0.95
-## 41  272.4564 254.7415 290.1714 1905 Confidence  0.95
-## 42  272.4157 254.9125 289.9189 1906 Confidence  0.95
-## 43  272.3749 255.0808 289.6690 1907 Confidence  0.95
-## 44  272.3341 255.2464 289.4218 1908 Confidence  0.95
-## 45  272.2933 255.4091 289.1775 1909 Confidence  0.95
-## 46  272.2525 255.5688 288.9362 1910 Confidence  0.95
-## 47  272.2117 255.7255 288.6980 1911 Confidence  0.95
-## 48  272.1710 255.8789 288.4630 1912 Confidence  0.95
-## 49  272.1302 256.0291 288.2313 1913 Confidence  0.95
-## 50  272.0894 256.1758 288.0030 1914 Confidence  0.95
-## 51  272.0486 256.3190 287.7782 1915 Confidence  0.95
-## 52  272.0078 256.4585 287.5571 1916 Confidence  0.95
-## 53  271.9670 256.5942 287.3399 1917 Confidence  0.95
-## 54  271.9262 256.7260 287.1265 1918 Confidence  0.95
-## 55  271.8855 256.8537 286.9173 1919 Confidence  0.95
-## 56  271.8447 256.9772 286.7122 1920 Confidence  0.95
-## 57  271.8039 257.0963 286.5115 1921 Confidence  0.95
-## 58  271.7631 257.2109 286.3153 1922 Confidence  0.95
-## 59  271.7223 257.3210 286.1237 1923 Confidence  0.95
-## 60  271.6815 257.4262 285.9369 1924 Confidence  0.95
-## 61  271.6408 257.5265 285.7550 1925 Confidence  0.95
-## 62  271.6000 257.6217 285.5783 1926 Confidence  0.95
-## 63  271.5592 257.7116 285.4067 1927 Confidence  0.95
-## 64  271.5184 257.7962 285.2406 1928 Confidence  0.95
-## 65  271.4776 257.8753 285.0800 1929 Confidence  0.95
-## 66  271.4368 257.9486 284.9250 1930 Confidence  0.95
-## 67  271.3960 258.0162 284.7759 1931 Confidence  0.95
-## 68  271.3553 258.0778 284.6328 1932 Confidence  0.95
-## 69  271.3145 258.1332 284.4957 1933 Confidence  0.95
-## 70  271.2737 258.1825 284.3649 1934 Confidence  0.95
-## 71  271.2329 258.2253 284.2405 1935 Confidence  0.95
-## 72  271.1921 258.2617 284.1226 1936 Confidence  0.95
-## 73  271.1513 258.2915 284.0112 1937 Confidence  0.95
-## 74  271.1106 258.3145 283.9066 1938 Confidence  0.95
-## 75  271.0698 258.3307 283.8089 1939 Confidence  0.95
-## 76  271.0290 258.3400 283.7180 1940 Confidence  0.95
-## 77  270.9882 258.3423 283.6341 1941 Confidence  0.95
-## 78  270.9474 258.3375 283.5573 1942 Confidence  0.95
-## 79  270.9066 258.3256 283.4877 1943 Confidence  0.95
-## 80  270.8659 258.3065 283.4252 1944 Confidence  0.95
-## 81  270.8251 258.2802 283.3699 1945 Confidence  0.95
-## 82  270.7843 258.2467 283.3218 1946 Confidence  0.95
-## 83  270.7435 258.2059 283.2811 1947 Confidence  0.95
-## 84  270.7027 258.1579 283.2475 1948 Confidence  0.95
-## 85  270.6619 258.1026 283.2212 1949 Confidence  0.95
-## 86  270.6211 258.0401 283.2022 1950 Confidence  0.95
-## 87  270.5804 257.9705 283.1903 1951 Confidence  0.95
-## 88  270.5396 257.8937 283.1855 1952 Confidence  0.95
-## 89  270.4988 257.8098 283.1878 1953 Confidence  0.95
-## 90  270.4580 257.7189 283.1971 1954 Confidence  0.95
-## 91  270.4172 257.6211 283.2133 1955 Confidence  0.95
-## 92  270.3764 257.5165 283.2363 1956 Confidence  0.95
-## 93  270.3357 257.4052 283.2661 1957 Confidence  0.95
-## 94  270.2949 257.2873 283.3024 1958 Confidence  0.95
-## 95  270.2541 257.1629 283.3453 1959 Confidence  0.95
-## 96  270.2133 257.0321 283.3945 1960 Confidence  0.95
-## 97  270.1725 256.8950 283.4500 1961 Confidence  0.95
-## 98  270.1317 256.7519 283.5116 1962 Confidence  0.95
-## 99  270.0909 256.6028 283.5791 1963 Confidence  0.95
-## 100 270.0502 256.4478 283.6525 1964 Confidence  0.95
-## 101 270.0094 256.2872 283.7316 1965 Confidence  0.95
-## 102 269.9686 256.1210 283.8161 1966 Confidence  0.95
-## 103 269.9278 255.9495 283.9061 1967 Confidence  0.95
-## 104 269.8870 255.7727 284.0013 1968 Confidence  0.95
-## 105 269.8462 255.5909 284.1016 1969 Confidence  0.95
-## 106 269.8055 255.4041 284.2068 1970 Confidence  0.95
-## 107 269.7647 255.2125 284.3168 1971 Confidence  0.95
-## 108 269.7239 255.0163 284.4315 1972 Confidence  0.95
-## 109 269.6831 254.8156 284.5506 1973 Confidence  0.95
-## 110 269.6423 254.6105 284.6741 1974 Confidence  0.95
-## 111 269.6015 254.4013 284.8018 1975 Confidence  0.95
-## 112 269.5607 254.1879 284.9336 1976 Confidence  0.95
-## 113 269.5200 253.9706 285.0693 1977 Confidence  0.95
-## 114 269.4792 253.7496 285.2088 1978 Confidence  0.95
-## 115 269.4384 253.5248 285.3520 1979 Confidence  0.95
-## 116 269.3976 253.2965 285.4987 1980 Confidence  0.95
-## 117 269.3568 253.0648 285.6489 1981 Confidence  0.95
-## 118 269.3160 252.8298 285.8023 1982 Confidence  0.95
-## 119 269.2753 252.5915 285.9590 1983 Confidence  0.95
-## 120 269.2345 252.3502 286.1187 1984 Confidence  0.95
-## 121 269.1937 252.1060 286.2814 1985 Confidence  0.95
-## 122 269.1529 251.8588 286.4470 1986 Confidence  0.95
-## 123 269.1121 251.6089 286.6153 1987 Confidence  0.95
-## 124 269.0713 251.3564 286.7863 1988 Confidence  0.95
-## 125 269.0305 251.1012 286.9599 1989 Confidence  0.95
-## 126 268.9898 250.8436 287.1359 1990 Confidence  0.95
-## 127 268.9490 250.5836 287.3144 1991 Confidence  0.95
-## 128 268.9082 250.3213 287.4951 1992 Confidence  0.95
-## 129 268.8674 250.0567 287.6781 1993 Confidence  0.95
-## 130 268.8266 249.7900 287.8632 1994 Confidence  0.95
-## 131 268.7858 249.5213 288.0504 1995 Confidence  0.95
-## 132 268.7451 249.2505 288.2396 1996 Confidence  0.95
-## 133 268.7043 248.9778 288.4307 1997 Confidence  0.95
-## 134 268.6635 248.7032 288.6237 1998 Confidence  0.95
-## 135 268.6227 248.4269 288.8185 1999 Confidence  0.95
-## 136 268.5819 248.1488 289.0150 2000 Confidence  0.95
-## 137 268.5411 247.8690 289.2132 2001 Confidence  0.95
-## 138 268.5003 247.5876 289.4131 2002 Confidence  0.95
-## 139 268.4596 247.3047 289.6144 2003 Confidence  0.95
-## 140 268.4188 247.0202 289.8173 2004 Confidence  0.95
-## 141 268.3780 246.7343 290.0217 2005 Confidence  0.95
-## 142 268.3372 246.4470 290.2274 2006 Confidence  0.95
-## 143 268.2964 246.1583 290.4346 2007 Confidence  0.95
-## 144 268.2556 245.8683 290.6430 2008 Confidence  0.95
-## 145 268.2149 245.5770 290.8527 2009 Confidence  0.95
-## 146 268.1741 245.2845 291.0637 2010 Confidence  0.95
-## 147 268.1333 244.9908 291.2758 2011 Confidence  0.95
-## 148 268.0925 244.6959 291.4891 2012 Confidence  0.95
-## 149 268.0517 244.3999 291.7035 2013 Confidence  0.95
-## 150 268.0109 244.1029 291.9190 2014 Confidence  0.95
-## 151 267.9702 243.8048 292.1355 2015 Confidence  0.95
-## 152 267.9294 243.5057 292.3531 2016 Confidence  0.95
-## 153 267.8886 243.2056 292.5716 2017 Confidence  0.95
-## 154 267.8478 242.9045 292.7911 2018 Confidence  0.95
-## 155 267.8070 242.6025 293.0115 2019 Confidence  0.95
-## 156 267.7662 242.2997 293.2328 2020 Confidence  0.95
-## 157 267.7254 241.9959 293.4549 2021 Confidence  0.95
-## 158 267.6847 241.6914 293.6779 2022 Confidence  0.95
-## 159 267.6439 241.3860 293.9018 2023 Confidence  0.95
-## 160 267.6031 241.0798 294.1264 2024 Confidence  0.95
-## 161 267.5623 240.7729 294.3517 2025 Confidence  0.95</code></pre>
+    mutate(interval = &quot;Confidence&quot;, level = 0.95)
+
+head(elbe_conf, 8)</code></pre>
+<pre><code>##        fit      lwr      upr year   interval level
+## 1 274.0878 246.4956 301.6801 1865 Confidence  0.95
+## 2 274.0470 246.7231 301.3710 1866 Confidence  0.95
+## 3 274.0063 246.9499 301.0626 1867 Confidence  0.95
+## 4 273.9655 247.1760 300.7549 1868 Confidence  0.95
+## 5 273.9247 247.4014 300.4480 1869 Confidence  0.95
+## 6 273.8839 247.6260 300.1418 1870 Confidence  0.95
+## 7 273.8431 247.8498 299.8364 1871 Confidence  0.95
+## 8 273.8023 248.0728 299.5318 1872 Confidence  0.95</code></pre>
 <pre class="r"><code>elbe_pred &lt;- predict(elbe_lm, newdata=new_data, interval = &quot;prediction&quot;, level = 0.95) %&gt;%
     as.data.frame() %&gt;%
     bind_cols(new_data) %&gt;%
@@ -336,8 +183,8 @@ Figure 7.8: Linear trend of annual minimum flow on the Elbe River at Neu Darchau
 <img src="7-1_linear_trend_files/figure-html/unnamed-chunk-6-1.png" alt="Figure 7.8: Linear trend of annual minimum flow on the Elbe River at Neu Darchau. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval." width="672"  />
 </div>
 </div>
-<div id="linear-trend-for-göta-river" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Linear trend for Göta River</h1>
+<div id="linear-trend-for-göta-river" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Linear trend for Göta River</h1>
 <p>If we instead consider the annual minimum flow on the Göta River, the annual trend is 1.23 m3/s per year (Fig. 7.9 with a 95% confidence interval of 0.875 to 1.59 m3/s per year. The t-test on this coefficient produces a p-value of 4 x 10-9, meaning it is highly unlikely that such a strong trend would have appeared randomly in observations if there were no true underlying trend. We reject the null hypothesis, and accept the alternative hypothesis, that there is a significant trend in Göta River annual minimum flows. Remember that we set up our alternative hypothesis as a two-sided test (b1 ≠ 0), so we are testing whether there is a significant trend, regardless if it is positive or negative. We should make this clear when we report our findings. Of course, we should also report that the trend we found was that Göta River minimum flows have been increasing at an estimated rate of 1.23 m3/s per year since 1941.</p>
 <pre class="r"><code>### Filter to the Gota River and years after 1940 
 gota_annual &lt;- flow_annual %&gt;%
@@ -367,120 +214,34 @@ summary(gota_lm)</code></pre>
 ## Residual standard error: 33.31 on 76 degrees of freedom
 ## Multiple R-squared:  0.4567, Adjusted R-squared:  0.4495 
 ## F-statistic: 63.88 on 1 and 76 DF,  p-value: 1.139e-11</code></pre>
-<pre><code>## # A tibble: 78 x 6
-## # Groups:   river [1]
-##    river  year min_m3s mean_m3s fitted  resid
-##    &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-##  1 Gota   1941     147     426.   71.2  75.8 
-##  2 Gota   1942      90     306.   72.5  17.5 
-##  3 Gota   1943      56     361.   73.9 -17.9 
-##  4 Gota   1944     100     484.   75.2  24.8 
-##  5 Gota   1945     100     696.   76.5  23.5 
-##  6 Gota   1946      92     332.   77.9  14.1 
-##  7 Gota   1947     102     462.   79.2  22.8 
-##  8 Gota   1948      88     263.   80.5   7.45
-##  9 Gota   1949      70     402.   81.9 -11.9 
-## 10 Gota   1950     111     638.   83.2  27.8 
-## # … with 68 more rows</code></pre>
-<pre><code>##          fit       lwr       upr year   interval level
-## 1   63.14414  46.50623  79.78206 1935 Confidence  0.95
-## 2   64.48288  48.14195  80.82381 1936 Confidence  0.95
-## 3   65.82162  49.77624  81.86700 1937 Confidence  0.95
-## 4   67.16035  51.40901  82.91170 1938 Confidence  0.95
-## 5   68.49909  53.04016  83.95802 1939 Confidence  0.95
-## 6   69.83783  54.66962  85.00604 1940 Confidence  0.95
-## 7   71.17657  56.29728  86.05585 1941 Confidence  0.95
-## 8   72.51530  57.92303  87.10757 1942 Confidence  0.95
-## 9   73.85404  59.54676  88.16132 1943 Confidence  0.95
-## 10  75.19278  61.16835  89.21721 1944 Confidence  0.95
-## 11  76.53151  62.78765  90.27538 1945 Confidence  0.95
-## 12  77.87025  64.40454  91.33596 1946 Confidence  0.95
-## 13  79.20899  66.01886  92.39912 1947 Confidence  0.95
-## 14  80.54773  67.63044  93.46502 1948 Confidence  0.95
-## 15  81.88646  69.23910  94.53383 1949 Confidence  0.95
-## 16  83.22520  70.84466  95.60575 1950 Confidence  0.95
-## 17  84.56394  72.44690  96.68097 1951 Confidence  0.95
-## 18  85.90268  74.04562  97.75973 1952 Confidence  0.95
-## 19  87.24141  75.64057  98.84226 1953 Confidence  0.95
-## 20  88.58015  77.23149  99.92881 1954 Confidence  0.95
-## 21  89.91889  78.81812 101.01965 1955 Confidence  0.95
-## 22  91.25762  80.40015 102.11509 1956 Confidence  0.95
-## 23  92.59636  81.97728 103.21544 1957 Confidence  0.95
-## 24  93.93510  83.54916 104.32104 1958 Confidence  0.95
-## 25  95.27384  85.11543 105.43224 1959 Confidence  0.95
-## 26  96.61257  86.67571 106.54943 1960 Confidence  0.95
-## 27  97.95131  88.22959 107.67303 1961 Confidence  0.95
-## 28  99.29005  89.77664 108.80346 1962 Confidence  0.95
-## 29 100.62878  91.31638 109.94119 1963 Confidence  0.95
-## 30 101.96752  92.84835 111.08669 1964 Confidence  0.95
-## 31 103.30626  94.37204 112.24048 1965 Confidence  0.95
-## 32 104.64500  95.88692 113.40307 1966 Confidence  0.95
-## 33 105.98373  97.39245 114.57501 1967 Confidence  0.95
-## 34 107.32247  98.88808 115.75686 1968 Confidence  0.95
-## 35 108.66121 100.37325 116.94917 1969 Confidence  0.95
-## 36 109.99995 101.84738 118.15251 1970 Confidence  0.95
-## 37 111.33868 103.30993 119.36744 1971 Confidence  0.95
-## 38 112.67742 104.76034 120.59450 1972 Confidence  0.95
-## 39 114.01616 106.19810 121.83421 1973 Confidence  0.95
-## 40 115.35489 107.62273 123.08706 1974 Confidence  0.95
-## 41 116.69363 109.03378 124.35348 1975 Confidence  0.95
-## 42 118.03237 110.43086 125.63388 1976 Confidence  0.95
-## 43 119.37111 111.81365 126.92856 1977 Confidence  0.95
-## 44 120.70984 113.18190 128.23779 1978 Confidence  0.95
-## 45 122.04858 114.53543 129.56173 1979 Confidence  0.95
-## 46 123.38732 115.87417 130.90046 1980 Confidence  0.95
-## 47 124.72605 117.19811 132.25400 1981 Confidence  0.95
-## 48 126.06479 118.50733 133.62225 1982 Confidence  0.95
-## 49 127.40353 119.80202 135.00504 1983 Confidence  0.95
-## 50 128.74227 121.08241 136.40212 1984 Confidence  0.95
-## 51 130.08100 122.34884 137.81317 1985 Confidence  0.95
-## 52 131.41974 123.60169 139.23779 1986 Confidence  0.95
-## 53 132.75848 124.84140 140.67556 1987 Confidence  0.95
-## 54 134.09722 126.06846 142.12597 1988 Confidence  0.95
-## 55 135.43595 127.28339 143.58852 1989 Confidence  0.95
-## 56 136.77469 128.48673 145.06265 1990 Confidence  0.95
-## 57 138.11343 129.67904 146.54781 1991 Confidence  0.95
-## 58 139.45216 130.86088 148.04344 1992 Confidence  0.95
-## 59 140.79090 132.03283 149.54898 1993 Confidence  0.95
-## 60 142.12964 133.19542 151.06386 1994 Confidence  0.95
-## 61 143.46838 134.34921 152.58754 1995 Confidence  0.95
-## 62 144.80711 135.49471 154.11951 1996 Confidence  0.95
-## 63 146.14585 136.63244 155.65926 1997 Confidence  0.95
-## 64 147.48459 137.76287 157.20630 1998 Confidence  0.95
-## 65 148.82332 138.88647 158.76018 1999 Confidence  0.95
-## 66 150.16206 140.00366 160.32046 2000 Confidence  0.95
-## 67 151.50080 141.11486 161.88674 2001 Confidence  0.95
-## 68 152.83954 142.22045 163.45862 2002 Confidence  0.95
-## 69 154.17827 143.32080 165.03574 2003 Confidence  0.95
-## 70 155.51701 144.41624 166.61778 2004 Confidence  0.95
-## 71 156.85575 145.50709 168.20440 2005 Confidence  0.95
-## 72 158.19448 146.59364 169.79533 2006 Confidence  0.95
-## 73 159.53322 147.67617 171.39028 2007 Confidence  0.95
-## 74 160.87196 148.75493 172.98899 2008 Confidence  0.95
-## 75 162.21070 149.83015 174.59124 2009 Confidence  0.95
-## 76 163.54943 150.90207 176.19680 2010 Confidence  0.95
-## 77 164.88817 151.97088 177.80546 2011 Confidence  0.95
-## 78 166.22691 153.03678 179.41704 2012 Confidence  0.95
-## 79 167.56565 154.09994 181.03136 2013 Confidence  0.95
-## 80 168.90438 155.16052 182.64824 2014 Confidence  0.95
-## 81 170.24312 156.21869 184.26755 2015 Confidence  0.95
-## 82 171.58186 157.27458 185.88914 2016 Confidence  0.95
-## 83 172.92059 158.32832 187.51287 2017 Confidence  0.95
-## 84 174.25933 159.38005 189.13862 2018 Confidence  0.95
-## 85 175.59807 160.42986 190.76628 2019 Confidence  0.95
-## 86 176.93681 161.47788 192.39573 2020 Confidence  0.95
-## 87 178.27554 162.52419 194.02689 2021 Confidence  0.95
-## 88 179.61428 163.56890 195.65966 2022 Confidence  0.95
-## 89 180.95302 164.61209 197.29394 2023 Confidence  0.95
-## 90 182.29175 165.65384 198.92967 2024 Confidence  0.95
-## 91 183.63049 166.69422 200.56676 2025 Confidence  0.95</code></pre>
+<pre class="r"><code>### Insert columns for trend fit and residuals
+gota_annual &lt;- gota_annual %&gt;%
+    mutate(fitted = fitted(gota_lm)) %&gt;%
+    mutate(resid = resid(gota_lm))
+
+### Create dataframe for confidence interval and predition interval
+new_data &lt;- data.frame(year = seq(1935, 2025, 1))
+gota_conf &lt;- predict(gota_lm, newdata=new_data, interval = &quot;confidence&quot;, level = 0.95) %&gt;%
+    as.data.frame() %&gt;%
+    bind_cols(new_data) %&gt;%
+    mutate(interval = &quot;Confidence&quot;, level = 0.95)
+
+gota_pred &lt;- predict(gota_lm, newdata=new_data, interval = &quot;prediction&quot;, level = 0.95) %&gt;%
+    as.data.frame() %&gt;%
+    bind_cols(new_data) %&gt;%
+    mutate(interval = &quot;Prediction&quot;, level = 0.95)
+
+plot_ribbon &lt;- gota_conf %&gt;%
+    bind_rows(gota_pred)
+
+plot_line &lt;- new_data %&gt;%
+    mutate(line_fit = predict(gota_lm, newdata=new_data), Data = &quot;Linear&quot;) </code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">
 Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval.
 </p>
-<img src="7-1_linear_trend_files/figure-html/unnamed-chunk-9-1.png" alt="Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval." width="672"  />
+<img src="7-1_linear_trend_files/figure-html/unnamed-chunk-10-1.png" alt="Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval." width="672"  />
 </div>
-<p><img src="7-1_linear_trend_files/figure-html/unnamed-chunk-10-1.png" width="672"  /></p>
 </div>
 
 

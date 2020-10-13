@@ -111,40 +111,24 @@
   <tr>
   <td colspan="3">
   <ul>
-  <li>7.1 Linear regression and residuals: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-1_linear_regression_and_residuals.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-1_linear_regression_and_residuals.R">R-script</a>-->
-    <br><i>No code online. </i>
+  <li>7.1 Linear trend analysis: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-1_linear_trend.html">Worked Example</a>, 
+    <br><i>Completed. </i>
 
   </li>
 
-  <li>7.2 Multiple regression: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-2_multiple_regression.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-2_multiple_regression.R">R-script</a>-->
-    <br><i>incl. variable selection. No code online.</i>
+  <li>7.2 Non-Parametric Trends: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-1_linear_trend.html">Worked Example</a>, 
+    <br><i>Completed.</i>
   </li>
 
-  <li>7.3 Regression extensions: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-3_regression_extensions.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-3_regression_extensions.R">R-script</a>-->
-    <br><i>logistic, poisson, GLMs. No code online.</i>
-  </li>
-
-  <li>7.4 Trend analysis: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-4_trend_analysis.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-4_trend_analysis.R">R-script</a>-->
+  <li>7.3 Structural change analysis: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-3_structural_change_analysis.html">Worked Example</a>, 
     <br><i>No code online. </i>
   </li>
 
-  <li>7.5 Structural change analysis: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-5_structural_change_analysis.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-5_structural_change_analysis.R">R-script</a>-->
-    <br><i>No code online. </i>
-  </li>
-
-  <li>7.6 PCA fundamentals: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-6_pca_fundamentals.html">Worked Example</a>, 
-    <!--<a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/7-6_pca_fundamentals.R">R-script</a>-->
+  <li>7.4 PCA fundamentals: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-4_principal_component_analysis.html">Worked Example</a>, 
     <br><i>No code online. </i>
   </li>
   </ul>
@@ -190,9 +174,8 @@
   </li>
 
   <li>12.2 Likelihood of impact occurrence: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/12-2_likelihood_of_impact_occurrence.html">Worked Example</a>, 
-    <a href="https://github.com/jstagge/hydroDrought/blob/testing_binder/worked_examples/12-2_likelihood_of_impact_occurrence.R">R-script</a>
-    <br><i>will be based on data and code from Jim’s JoH paper</i>
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/12-2_likelihood_of_impact_occurrence.html">Worked Example</a>, 
+    <br><i>Completed. </i>
   </li>
   </ul>
   </td>

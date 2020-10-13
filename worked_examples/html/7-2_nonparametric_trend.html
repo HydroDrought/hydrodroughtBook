@@ -54,12 +54,14 @@ if (window.hljs) {
 <div id="TOC">
 <ul>
 <li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#mann-kendall-test"><span class="toc-section-number">2</span> Mann-Kendall test</a></li>
+<li><a href="#high-leverage-outlier-effects"><span class="toc-section-number">3</span> High leverage outlier effects</a></li>
 </ul>
 </div>
 
 <div id="loading-the-data" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
-<p>Consider the same data as Worked Example 7.1 using annual minimum flow from the Göta River beginning in 1941.</p>
+<p>First we must load the data. Consider the same data as Worked Example 7.1 using annual minimum flow from the Göta River beginning in 1941.</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
 library(lubridate)
@@ -120,6 +122,9 @@ summary(mk_test_results)</code></pre>
 <pre><code>## Score =  1426 , Var(Score) = 53676.67
 ## denominator =  2988.465
 ## tau = 0.477, 2-sided pvalue =&lt; 2.22e-16</code></pre>
+</div>
+<div id="mann-kendall-test" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Mann-Kendall test</h1>
 <p>The Mann-Kendall test produces an S value of 1426, meaning that we have 1426 more date pairs where the later observation is larger than the earlier. Using this test statistic and the 78 years of observations, the Mann-Kendall test produces a p-value &lt; 2.2x10-16 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.</p>
 <p>As discussed in the text, the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results, but is slightly less affected by relatively high outliers during the late 2000s.</p>
 <pre class="r"><code>### Run the Theil-Sen slope for annual min flow
@@ -156,6 +161,9 @@ Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS
 </p>
 <img src="7-2_nonparametric_trend_files/figure-html/unnamed-chunk-6-1.png" alt="Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river after 1940." width="672"  />
 </div>
+</div>
+<div id="high-leverage-outlier-effects" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> High leverage outlier effects</h1>
 <p>If we instead expand the Göta River timeseries to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent.</p>
 <pre class="r"><code>### Subset to 1934 and after
 flow_annual_longer &lt;- flow_annual %&gt;% filter( year &gt;= 1934) 

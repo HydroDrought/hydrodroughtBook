@@ -25,26 +25,29 @@ flow_df <- international %>%
 	mutate(
 		year = year(time),
 		jdate = yday(time)
-	)  %>%
-	print()
+	)
+
+head(flow_df, 8)
 
 ### Group by year and river and then calculate min and mean flow
 flow_annual <- flow_df %>%
 	group_by(river, year) %>%
-	summarise(min_m3s = min(discharge, na.rm=TRUE), mean_m3s=mean(discharge, na.rm=TRUE), .groups = "drop_last") %>%
-	print()
+	summarise(min_m3s = min(discharge, na.rm=TRUE), mean_m3s=mean(discharge, na.rm=TRUE), .groups = "drop_last") 
+
+head(flow_annual, 8)
 ```
 
 ```{r, echo=FALSE}
 plot_df <- flow_df %>% filter((river == "Gota" & year < 1935) | river == "Elbe")
 
 ### Double check plot of seasonal pattern 
-ggplot(plot_df, aes(x=jdate, y=discharge)) %>%
-	+ geom_point(alpha =0.2) %>%
+p <- ggplot(plot_df, aes(x=jdate, y=discharge)) %>%
+	+ geom_line(aes(group=year), alpha =0.2) %>%
 	+ geom_smooth(method = "gam", formula = y ~ s(x, bs = "cc")) %>%
 	+ geom_vline(xintercept=yday(c("2000-01-01", "2000-09-01", "2000-10-01")), colour = "red") %>%
 	+ facet_grid(river ~ . , scales = "free_y")
 ```
+
 # Linear trend for Elbe River
 
 Consider the annual minimum flow for the Elbe river (Fig. 7.8). By fitting a line of form Eq 7.43, the estimated slope is -0.0408 m3/s per year, with a 95% confidence interval of -0.34 to 0.26 m3/s per year. As you can see, we are unclear whether the true trend is positive or negative and this is reflected in a p-value of 0.79 for the t-test of the slope coefficients. Because this p-value is well above 0.05, we accept the null hypothesis (Ho) that there is likely no significant trend in annual minimum flow for the Elbe River. 
@@ -73,8 +76,9 @@ new_data <- data.frame(year = seq(1865, 2025, 1))
 elbe_conf <- predict(elbe_lm, newdata=new_data, interval = "confidence", level = 0.95) %>%
 	as.data.frame() %>%
 	bind_cols(new_data) %>%
-	mutate(interval = "Confidence", level = 0.95) %>%
-	print()
+	mutate(interval = "Confidence", level = 0.95)
+
+head(elbe_conf, 8)
 
 elbe_pred <- predict(elbe_lm, newdata=new_data, interval = "prediction", level = 0.95) %>%
 	as.data.frame() %>%
@@ -130,35 +134,33 @@ gota_lm <- lm(min_m3s~year, data = gota_annual)
 summary(gota_lm)
 ```
 
-
-
-```{r, echo=FALSE}
+```{r}
 ### Insert columns for trend fit and residuals
 gota_annual <- gota_annual %>%
 	mutate(fitted = fitted(gota_lm)) %>%
-	mutate(resid = resid(gota_lm)) %>%
-	print()
+	mutate(resid = resid(gota_lm))
 
 ### Create dataframe for confidence interval and predition interval
 new_data <- data.frame(year = seq(1935, 2025, 1))
 gota_conf <- predict(gota_lm, newdata=new_data, interval = "confidence", level = 0.95) %>%
 	as.data.frame() %>%
 	bind_cols(new_data) %>%
-	mutate(interval = "Confidence", level = 0.95) %>%
-	print()
+	mutate(interval = "Confidence", level = 0.95)
 
 gota_pred <- predict(gota_lm, newdata=new_data, interval = "prediction", level = 0.95) %>%
 	as.data.frame() %>%
 	bind_cols(new_data) %>%
 	mutate(interval = "Prediction", level = 0.95)
 
-fig.cap <- "Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval."
-
 plot_ribbon <- gota_conf %>%
 	bind_rows(gota_pred)
 
 plot_line <- new_data %>%
 	mutate(line_fit = predict(gota_lm, newdata=new_data), Data = "Linear") 
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval."
 ```
 
 ```{r, echo=FALSE, fig.cap=fig.cap}
@@ -181,7 +183,7 @@ p <- ggplot(gota_annual, aes(x=year)) %>%
 p
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 ### Plot the residuals
 p <- ggplot(gota_annual, aes(x=year, y=resid)) %>%
 	+ geom_point(colour="grey50") %>%  ## Plot as points. 
