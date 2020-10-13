@@ -10,10 +10,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<meta name="author" content="Worked example 6.1" />
+<meta name="author" content="Worked example 7.3" />
 
 
-<title>Low flow frequency analysis</title>
+<title>Structural Change Analysis</title>
 
 <script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
@@ -47,259 +47,181 @@ if (window.hljs) {
 
 
 
-<h1 class="title toc-ignore">Low flow frequency analysis</h1>
-<h4 class="author">Worked example 6.1</h4>
+<h1 class="title toc-ignore">Structural Change Analysis</h1>
+<h4 class="author">Worked example 7.3</h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
-<li><a href="#derivation-of-an-empirical-distribution-function"><span class="toc-section-number">2</span> Derivation of an empirical distribution function</a></li>
-<li><a href="#fitting-a-distribution"><span class="toc-section-number">3</span> Fitting a distribution</a></li>
-<li><a href="#estimation-of-t-year-events"><span class="toc-section-number">4</span> Estimation of T-year events</a></li>
-<li><a href="#ft"><span class="toc-section-number">5</span> Fast Track</a></li>
-<li><a href="#probability-plot-using-the-exponential-reduced-variate"><span class="toc-section-number">6</span> Probability plot using the exponential reduced variate</a></li>
+<li><a href="#visualizing-daily-flow"><span class="toc-section-number">1</span> Visualizing Daily Flow</a></li>
+<li><a href="#testing-for-a-change-point"><span class="toc-section-number">2</span> Testing for a change point</a></li>
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1" number="1">
-<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
-<p>River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been selected for frequency analysis of annual minimum 1-day values, <span class="math inline">\(AM(1)\)</span>, using the Weibull (WEI) distribution. In mid-latitudes in the Northern Hemisphere, the calendar year is often used to select the annual minimum flows. This is a suitable period for the selection of independent events as the drought or low flow period commonly occurs during the summer months. In the Southern Hemisphere the low flow season occurs at the opposite time of the year, and for Ngaruroro the lowest flows are typically found in the period November to May. As a result <span class="math inline">\(AM(1)\)</span> flows were selected for a hydrological year starting at 1 September.</p>
+<div id="visualizing-daily-flow" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Visualizing Daily Flow</h1>
+<p>In previous worked examples, we used a subset of Göta River discharges, processed to produce the annual minimum flow cut either to the period before 1940 or after 1940. Plotting the raw daily data from the earliest records (Fig. 7.12), we see an abrupt and obvious structural change around 1940. There is clearly a change in variance and a change in temporal autocorrelation (flow persistence/noisiness).</p>
 <pre class="r"><code>library(tidyverse)
 library(hydroDrought)
+library(lubridate)
+library(strucchange)
+library(Hmisc)
 
-ngaruroro &lt;- international %&gt;%
-  filter(river == &quot;Ngaruroro&quot;) %&gt;%
-  select(data) %&gt;%
-  unnest(data) %&gt;%
-  # linear interpolation of periods of missing values 
-  # with a duration of up to 15 days
-  sanitize_ts(approx.missing = 15) %&gt;%
-   mutate(
-    year = water_year(time, origin = &quot;-09-01&quot;)
-    ) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 20,473 x 3
-##    time       discharge  year
-##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
-##  1 1963-09-20      30.5  1963
-##  2 1963-09-21      52.8  1963
-##  3 1963-09-22      43.6  1963
-##  4 1963-09-23      37.3  1963
-##  5 1963-09-24      32.3  1963
-##  6 1963-09-25      29.0  1963
-##  7 1963-09-26      25.3  1963
-##  8 1963-09-27      22.4  1963
-##  9 1963-09-28      19.9  1963
-## 10 1963-09-29      18.2  1963
-## # … with 20,463 more rows</code></pre>
-<pre class="r"><code># remove incomplete years
-incomplete &lt;- ngaruroro %&gt;%
-  filter(!is.na(discharge)) %&gt;%
-  pull(time) %&gt;%
-  coverage_yearly(origin = &quot;-09-01&quot;) %&gt;%
-  filter(days.missing &gt; 0) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 7 x 5
-##    year days.in.year days.with.data days.missing coverage
-##   &lt;dbl&gt;        &lt;int&gt;          &lt;int&gt;        &lt;int&gt;    &lt;dbl&gt;
-## 1  1963          366            347           19    0.948
-## 2  1965          365            294           71    0.805
-## 3  1978          365            305           60    0.836
-## 4  1986          365            341           24    0.934
-## 5  1987          366            336           30    0.918
-## 6  2001          365            344           21    0.942
-## 7  2019          366             38          328    0.104</code></pre>
-<pre class="r"><code>ngaruroro &lt;- ngaruroro %&gt;%
-    anti_join(incomplete, by = &quot;year&quot;)</code></pre>
-<pre class="r"><code># derivation of the annual minima
-am &lt;- annual_minima(
-  discharge = ngaruroro$discharge, 
-  time = ngaruroro$time, 
-  origin = &quot;-09-01&quot;
-  ) %&gt;%
-  rename(flow = am) %&gt;%
-  arrange(flow) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 50 x 2
-##     year  flow
-##    &lt;dbl&gt; &lt;dbl&gt;
-##  1  2014  2.17
-##  2  2012  2.34
-##  3  1982  2.46
-##  4  2008  2.53
-##  5  1977  2.59
-##  6  2007  2.64
-##  7  1972  2.66
-##  8  2004  2.68
-##  9  1973  2.88
-## 10  2003  2.99
-## # … with 40 more rows</code></pre>
+### Filter to the rivers and create columns for dates
+flow_df &lt;- international %&gt;%
+    filter(river == &quot;Gota&quot;) %&gt;%
+    select(river, data) %&gt;%
+    unnest(cols = data) %&gt;%
+    mutate(
+        year = year(time),
+        jdate = yday(time)
+    )  %&gt;%
+    print()</code></pre>
+<pre><code>## # A tibble: 61,498 x 5
+##    river time       discharge  year jdate
+##    &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 Gota  1850-01-01       506  1850     1
+##  2 Gota  1850-01-02       506  1850     2
+##  3 Gota  1850-01-03       502  1850     3
+##  4 Gota  1850-01-04       502  1850     4
+##  5 Gota  1850-01-05       502  1850     5
+##  6 Gota  1850-01-06       502  1850     6
+##  7 Gota  1850-01-07       496  1850     7
+##  8 Gota  1850-01-08       496  1850     8
+##  9 Gota  1850-01-09       496  1850     9
+## 10 Gota  1850-01-10       496  1850    10
+## # … with 61,488 more rows</code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">
-Figure 6.9 Time series of annual minimum 1-day flow, AM(1), for River Ngaruroro at Kuripapango (NZ).
+Figure 7.12: Daily discharge at the Gota River station demonstrating a visually clear structural change.
 </p>
-<img src="7-3_structural_change_analysis_files/figure-html/unnamed-chunk-5-1.png" alt="Figure 6.9 Time series of annual minimum 1-day flow, AM(1), for River Ngaruroro at
-Kuripapango (NZ)." width="672"  />
+<img src="7-3_structural_change_analysis_files/figure-html/unnamed-chunk-3-1.png" alt="Figure 7.12: Daily discharge at the Gota River station demonstrating a visually clear structural change." width="672"  />
 </div>
-<p>Ngaruroro has a flashy river regime, but has no observed zero flows. The flows are considered to come from the same population as only a minor part of the catchment is influenced by snow in winter. The observations (daily flow series) cover the period 1 September 1964 to 31 August 2019. With the omission of 7 years (1963, 1965, 1978, 1986, 1987, 2001 and 2019) with missing data, a total of 50 annual minimum values results. The procedure used for interpolation of missing data is the same as in WE5.4. A histogram of the values is shown in Figure 6.3 (upper left). To test the assumption of stationarity, the values are plotted against time in Figure 6.9. No trend can be detected in the series and the data are therefore assumed to fulfil the requirement of independent and identically distributed data (iid).</p>
 </div>
-<div id="derivation-of-an-empirical-distribution-function" class="section level1" number="2">
-<h1 number="2"><span class="header-section-number">2</span> Derivation of an empirical distribution function</h1>
-<ol style="list-style-type: lower-alpha">
-<li><p>The <span class="math inline">\(x\)</span> values, AM(1), are sorted in ascending order and the rank of each value is calculated. The smallest value equals 2.175 in m<sup>3</sup>s<sup>-1</sup> and is given rank 1.</p></li>
-<li><p>The non-exceedance probability, <span class="math inline">\(F(x) = p\)</span>, (<code>'prob.emp'</code> in the tibble below) is calculated for each <span class="math inline">\(x\)</span> value using the Weibull plotting position formula <span class="math inline">\(p_i = i / (n + 1)\)</span> (Equation 6.6).</p></li>
-<li><p>A probability plot for the <span class="math inline">\(AM(1)\)</span> values is obtained by plotting the flow values against <span class="math inline">\(F(x)\)</span> as demonstrated in Figure 6.10 (upper). A staircase pattern of several nearly equal values is observed. (Note that the <span class="math inline">\(AM(1)\)</span> values now are plotted on the <span class="math inline">\(y\)</span>-axis as compared to Figure 6.3, lower).</p></li>
-<li><p>The return period (<code>'rp.emp'</code>) of the smallest event can be calculated following Equation 6.5. The non-exceedance frequency, <span class="math inline">\(F(x)\)</span>, of the smallest event equals 0.02 according to step 2(b), which gives a return period of 51 years.</p></li>
-</ol>
-<pre class="r"><code>empirical &lt;- am %&gt;%
-  mutate(
-    rank = rank(flow),
-    prob.emp = rank / (n() + 1),
-    rp.emp = 1 / prob.emp
-  ) %&gt;%
-  arrange(rank)  </code></pre>
-<pre class="r"><code>print(empirical)</code></pre>
-<pre><code>## # A tibble: 50 x 5
-##     year  flow  rank prob.emp rp.emp
-##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
-##  1  2014  2.17     1   0.0196  51   
-##  2  2012  2.34     2   0.0392  25.5 
-##  3  1982  2.46     3   0.0588  17   
-##  4  2008  2.53     4   0.0784  12.8 
-##  5  1977  2.59     5   0.0980  10.2 
-##  6  2007  2.64     6   0.118    8.5 
-##  7  1972  2.66     7   0.137    7.29
-##  8  2004  2.68     8   0.157    6.38
-##  9  1973  2.88     9   0.176    5.67
-## 10  2003  2.99    10   0.196    5.1 
-## # … with 40 more rows</code></pre>
-</div>
-<div id="fitting-a-distribution" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Fitting a distribution</h1>
-<p>Fitting the two-parameter Weibull (WEI) distribution function (Section A6.1.4) (assuming the location parameter <span class="math inline">\(\xi\)</span> is zero) using the method of L-moments. <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> A direct estimation of the Weibull parameters is shown in the <a href="#ft">Fast Track</a> section. </span></p>
-<ol style="list-style-type: lower-alpha">
-<li><p>The first two L-moments (<span class="math inline">\(\hat\lambda_1\)</span> and <span class="math inline">\(\hat\lambda_2\)</span>) are estimated based on time series of the annual minima <code>am$flow</code>. These so called sample L-moments are calculated with the function <code>samlmu()</code> from the package <strong>lmom</strong>.</p>
-<pre class="r"><code>library(lmom)
-moments &lt;- samlmu(am$flow)
-moments[1:2] </code></pre>
-<pre><code>##       l_1       l_2 
-## 3.8930400 0.5560016</code></pre></li>
-<li><p>The parameter estimates of the WEI distribution (scale parameter <span class="math inline">\(\alpha\)</span>, shape parameter <span class="math inline">\(\kappa\)</span>) are obtained following Equation A6.144:</p>
-<p><span class="math display">\[\hat\alpha = \frac{\hat\lambda_1}{\Gamma\left( 1 + \frac{1}{\hat\kappa }\right)}\]</span></p>
-<p><span class="math display">\[\hat\kappa = \frac{-\ln(2)}{\ln\left( 1 - \frac{\hat\lambda_2}{\hat\lambda_1}\right)}\]</span></p>
-<pre class="r"><code>kappa &lt;- -log(2) / log(1 - unname(moments[&quot;l_2&quot;] / moments[&quot;l_1&quot;]))
-alpha &lt;- unname(moments[&quot;l_1&quot;]) / gamma(1 + 1/kappa)
-parameter &lt;- c(location = 0, scale = alpha, shape = kappa)
-parameter</code></pre>
-<pre><code>## location    scale    shape 
-## 0.000000 4.266122 4.497841</code></pre></li>
-<li><p><span class="math inline">\(F(x)\)</span> for the WEI distribution is obtained following Equation A6.1.33 (recalling that the location parameter <span class="math inline">\(\xi\)</span> is set to zero):</p>
-<p><span class="math display">\[ F(x) = 1 - \exp\left[-\left(\frac{x}{\alpha}\right)^\kappa\right]\]</span></p>
-<pre class="r"><code>fitted &lt;- empirical %&gt;%
-  select(year, flow, prob.emp) %&gt;%
-  mutate(
-prob.wei = 1 - exp(-(flow / alpha)^kappa),
-rp.wei = 1 / prob.wei
-  ) </code></pre></li>
-<li><p>The data can be plotted in a probability plot and compared to the empirical quantiles in step 2(b) (Figure 6.10, upper). The plot shows that the WEI distribution is well adjusted to the low flow extreme values, whereas deviation in the upper range may suggest that the three highest values do not belong to the low flow population (Section 6.3.3). In Figure 6.10 (lower) the empirical quantiles are plotted against the estimated distribution quantiles (QQ-plot). The points should be close to the unit diagonal if the data fit the WEI distribution well. The use of a plotting position implies that the ordered sample is plotted in regularly spaced positions. As demonstrated in the figure, the observed jumps in <span class="math inline">\(AM(1)\)</span> values are reflected in the estimated Weibull quantiles, but not in the empirical quantiles.</p></li>
-</ol>
+<div id="testing-for-a-change-point" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Testing for a change point</h1>
+<p>To avoid this temporal autocorrelation issue, let us focus again on the annual minimum flow for the entire time series. We now see a severe decrease in flow from 300-600 m3/s prior to the 1930s and 50-200 m3/s after 1940 (Fig. 7.13). Examples are not typically this clear. We can apply the Chow F-test to identify the change point.</p>
+<pre class="r"><code>### Group by year and river and then calculate min annual flow
+flow_annual &lt;- flow_df %&gt;%
+    group_by(river, year) %&gt;%
+    summarise(min_m3s = min(discharge, na.rm=TRUE), .groups = &quot;drop_last&quot;) %&gt;%
+    print() %&gt;%
+    ungroup()</code></pre>
+<pre><code>## # A tibble: 169 x 3
+## # Groups:   river [1]
+##    river  year min_m3s
+##    &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Gota   1850     471
+##  2 Gota   1851     500
+##  3 Gota   1852     565
+##  4 Gota   1853     591
+##  5 Gota   1854     347
+##  6 Gota   1855     316
+##  7 Gota   1856     366
+##  8 Gota   1857     401
+##  9 Gota   1858     316
+## 10 Gota   1859     310
+## # … with 159 more rows</code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">
-Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution (curve) to the sample data.
+Figure 7.13: Annual minimum discharge at the Gota River station for the full period (1850-present).
 </p>
-<img src="7-3_structural_change_analysis_files/figure-html/unnamed-chunk-11-1.png" alt="Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River
-Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution
-(curve) to the sample data." width="672"  />
+<img src="7-3_structural_change_analysis_files/figure-html/unnamed-chunk-6-1.png" alt="Figure 7.13: Annual minimum discharge at the Gota River station for the full period (1850-present)." width="672"  />
 </div>
-<div class="figure">
-<p class="caption marginnote shownote">
-Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles
-</p>
-<img src="7-3_structural_change_analysis_files/figure-html/unnamed-chunk-13-1.png" alt="Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles" width="672"  />
-</div>
-</div>
-<div id="estimation-of-t-year-events" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Estimation of T-year events</h1>
-<ol start="5" style="list-style-type: lower-alpha">
-<li><p>The non-exceedance frequency of the smallest value equals 0.0472 (Equation A6.1.33), which gives a return period of 21.2 years (Equation 6.5). This is 29.8 years less that the empirical estimate derived in step 2(d).</p>
-<pre class="r"><code>fitted</code></pre>
-<pre><code>## # A tibble: 50 x 5
-##     year  flow prob.emp prob.wei rp.wei
-##    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
-##  1  2014  2.17   0.0196   0.0472  21.2 
-##  2  2012  2.34   0.0392   0.0644  15.5 
-##  3  1982  2.46   0.0588   0.0806  12.4 
-##  4  2008  2.53   0.0784   0.0913  11.0 
-##  5  1977  2.59   0.0980   0.101    9.91
-##  6  2007  2.64   0.118    0.109    9.20
-##  7  1972  2.66   0.137    0.113    8.84
-##  8  2004  2.68   0.157    0.115    8.67
-##  9  1973  2.88   0.176    0.158    6.34
-## 10  2003  2.99   0.196    0.184    5.45
-## # … with 40 more rows</code></pre></li>
-<li><p>The 50 and 100-year events can be estimated from Equation A6.1.34: <span class="math display">\[ x_p = \xi + \alpha \left[-\ln( 1 - p ) \right]^{1/\kappa} \]</span></p></li>
-</ol>
-<p>which gives: <span class="math inline">\(\hat x_{50} = 1.79\)</span>m<sup>3</sup>s<sup>-1</sup> and <span class="math inline">\(\hat x_{100} = 1.53\)</span>m<sup>3</sup>s<sup>-1</sup>.</p>
-<pre class="r"><code>quantile_weibull &lt;- function(prob, location = 0, scale, shape) {
-  location + scale * (-log(1 - prob))^(1/shape)
-}
+<pre class="r"><code>### Convert the data to a regularly spaced annual time series
+first_year &lt;- min(flow_annual$year, na.rm=TRUE)
 
-return.period &lt;- c(50, 100)
-q &lt;- quantile_weibull(prob = 1/return.period, scale = alpha, shape = kappa) </code></pre>
-<pre class="r"><code>round(q, 2)</code></pre>
-<pre><code>## [1] 1.79 1.53</code></pre>
-</div>
-<div id="ft" class="section level1" number="5">
-<h1 number="5"><span class="header-section-number">5</span> Fast Track</h1>
-<p>The function <code>samlmu()</code> from the package <strong>lmom</strong> computes the sample L-moments for a given sample. These sample L-moments are independent of the distribution one wants to fit. They have can be transferred into the parameters of the desired distribution; e.g. the function <code>pelwei()</code> will return the location, scale and shape parameters for a Weibull distribution. By default a three parameter Weibull distribution is used. To obtain L-moment estimates of the two parameter Weibull distribution (where the lower bound and location parameter <span class="math inline">\(\xi\)</span> is set to zero) set the argument <code>bound = 0</code>.</p>
-<pre class="r"><code>library(lmom)
-lmom &lt;- samlmu(am$flow)
-par.wei &lt;- pelwei(lmom, bound = 0)
-par.wei</code></pre>
-<pre><code>##     zeta     beta    delta 
-## 0.000000 4.266122 4.497841</code></pre>
-<p>Quantiles for given probabilities can be calculated for many suitable distributions by the corresponding quantile function <code>quawei()</code>.</p>
-<pre class="r"><code>quawei(f = c(0.02, 0.01), para = par.wei) %&gt;%
-  round(digits = 2)</code></pre>
-<pre><code>## [1] 1.79 1.53</code></pre>
-</div>
-<div id="probability-plot-using-the-exponential-reduced-variate" class="section level1" number="6">
-<h1 number="6"><span class="header-section-number">6</span> Probability plot using the exponential reduced variate</h1>
-<p>The two-parameter EXP (Equation A6.1.64) and the WEI distribution are compared using the exponential reduced variable (Box 6.4).</p>
-<pre class="r"><code>fitted.fast &lt;- am %&gt;%
-  mutate(
-    prob.emp = rank(flow) / (n() + 1),
-    prob.wei = cdfwei(x = flow, para = pelwei(lmom, bound = 0)),
-    prob.exp = cdfexp(x = flow, para = pelexp(lmom))
-  ) %&gt;% 
-  arrange(flow) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 50 x 5
-##     year  flow prob.emp prob.wei prob.exp
-##    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
-##  1  2014  2.17   0.0196   0.0472   0     
-##  2  2012  2.34   0.0392   0.0644   0     
-##  3  1982  2.46   0.0588   0.0806   0     
-##  4  2008  2.53   0.0784   0.0913   0     
-##  5  1977  2.59   0.0980   0.101    0     
-##  6  2007  2.64   0.118    0.109    0     
-##  7  1972  2.66   0.137    0.113    0     
-##  8  2004  2.68   0.157    0.115    0     
-##  9  1973  2.88   0.176    0.158    0.0876
-## 10  2003  2.99   0.196    0.184    0.173 
-## # … with 40 more rows</code></pre>
-<ol style="list-style-type: lower-alpha">
-<li><p>By substituting <span class="math inline">\(y\)</span> into the expression for <span class="math inline">\(F(x)\)</span>, <span class="math inline">\(y\)</span> can be expressed as <span class="math inline">\(-\ln(1 - F(x))\)</span> (Equation B6.4.6). The parameters of the EXP distribution are estimated using L-moments (Equation A6.1.72) and used to calculate <span class="math inline">\(y\)</span> and subsequently, <span class="math inline">\(F(x)\)</span>.</p></li>
-<li><p>The non-exceedance probability <span class="math inline">\(F(x)\)</span> for the observations is determined using the Weibull plotting position formula (Equation 6.6).</p></li>
-<li><p>The <span class="math inline">\(AM(1)\)</span> values are plotted against the reduced variate in Figure 6.11. A reduced variate of <span class="math inline">\(0.02\)</span> corresponds to a return period of <span class="math inline">\(50.5\)</span> years for minimum values (Equation 6.5). The data will plot as a straight line given they follow the EXP distribution. Again it is demonstrated that the WEI distribution fits the extreme low flow values well, and also the upper range apart from the three largest values. The two-parameter EXP distribution is less suited to model the sample. Alternatively, <span class="math inline">\(-\ln(X)\)</span> could be plotted on a Gumbel probability paper, and a straight line would result provided the data fitted the WEI distribution.</p></li>
-</ol>
+flow_annual_ts &lt;- flow_annual %&gt;% 
+    complete(year=full_seq(year,1)) %&gt;%    ### Make sure all years are included using the complete command
+    ts(frequency=1, start=first_year) 
+
+### Run the Chow F test for a single breakpoint, assuming there is no trend in the data (ie intercept only)
+### The equation therefore looks like min_m3s is a function only of an intercept (designated by a 1)
+f_test_int_only &lt;- Fstats(min_m3s ~ 1, data=flow_annual_ts)
+sctest(f_test_int_only)</code></pre>
+<pre><code>## 
+##  supF test
+## 
+## data:  f_test_int_only
+## sup.F = 789.79, p-value &lt; 2.2e-16</code></pre>
+<pre class="r"><code>bp_int_only &lt;- breakpoints(f_test_int_only)
+summary(bp_int_only)</code></pre>
+<pre><code>## 
+##   Optimal 2-segment partition: 
+## 
+## Call:
+## breakpoints.Fstats(obj = f_test_int_only)
+## 
+## Breakpoints at observation number:
+## 88 
+## 
+## Corresponding to breakdates:
+## 1937 
+## 
+## RSS: 951054.5</code></pre>
+<p>Fig. 7.14 shows the null model in green, assuming the data come from the same distribution, and the alternative model in blue, assuming a sudden change point. In this example, we choose to constrain the model to assume there is a constant mean with no trends, i.e. b1=b2a=b2b=0. Using a single breakpoint, we see that the F-test statistic is maximized with a breakpoint in 1937. This breakpoint is highly statistically significant, suggesting there was a detectable structural change during this year. The 95% confidence interval around the location of this breakpoint is between 1936 and 1938, also giving us strong confidence in the location of this breakpoint.</p>
+<pre class="r"><code>### Run for multiple potential breakpoints
+all_bp_int_only &lt;- breakpoints(min_m3s ~ 1, data=flow_annual_ts)
+summary(all_bp_int_only)</code></pre>
+<pre><code>## 
+##   Optimal (m+1)-segment partition: 
+## 
+## Call:
+## breakpoints.formula(formula = min_m3s ~ 1, data = flow_annual_ts)
+## 
+## Breakpoints at observation number:
+##                         
+## m = 1         88        
+## m = 2         88     135
+## m = 3      51 88     135
+## m = 4      51 88 115 144
+## m = 5   25 51 88 115 144
+## 
+## Corresponding to breakdates:
+##                                 
+## m = 1             1937          
+## m = 2             1937      1984
+## m = 3        1900 1937      1984
+## m = 4        1900 1937 1964 1993
+## m = 5   1874 1900 1937 1964 1993
+## 
+## Fit:
+##                                                    
+## m   0       1       2       3       4       5      
+## RSS 5448868  951054  908267  894278  891014  888699
+## BIC    2244    1960    1962    1970    1979    1989</code></pre>
+<pre class="r"><code>### Best solution should minimize BIC (Bayesian Information Criterion)
+#plot(all_bp_int_only)
+
+### Calculate a confidence interval around this
+ci_int_only &lt;- confint(all_bp_int_only)
+ci_int_only</code></pre>
+<pre><code>## 
+##   Confidence intervals for breakpoints
+##   of optimal 2-segment partition: 
+## 
+## Call:
+## confint.breakpointsfull(object = all_bp_int_only)
+## 
+## Breakpoints at observation number:
+##   2.5 % breakpoints 97.5 %
+## 1    87          88     89
+## 
+## Corresponding to breakdates:
+##   2.5 % breakpoints 97.5 %
+## 1  1936        1937   1938</code></pre>
+<pre class="r"><code>### Assume this breakpoint and plot the null hypothesis model (no breakpoint, intercept only) vs the alternative (breakpoint, intercept only)
+### Fit both models
+fm0 &lt;- lm(min_m3s ~ 1, data=flow_annual_ts )
+fm1 &lt;- lm(min_m3s ~ breakfactor(all_bp_int_only, breaks = 1) + 1, data=flow_annual_ts )</code></pre>
 <div class="figure">
 <p class="caption marginnote shownote">
-Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations (marked as points), the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line).
+Figure 7.14: Candidate models for Chow Breakpoint Test. Null model (no breakpoint) shown in green, while the alternative model (single breakpoint) is shown in blue. Location of the breakpoint shown with a dashed line and a 95% confidence interval in red.
 </p>
-<img src="7-3_structural_change_analysis_files/figure-html/unnamed-chunk-20-1.png" alt="Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations (marked as points), the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line)." width="672"  />
+<img src="7-3_structural_change_analysis_files/figure-html/unnamed-chunk-11-1.png" alt="Figure 7.14: Candidate models for Chow Breakpoint Test. Null model (no breakpoint) shown in green, while the alternative model (single breakpoint) is shown in blue. Location of the breakpoint shown with a dashed line and a 95% confidence interval in red." width="672"  />
 </div>
+<p>To test the possibility of additional breakpoints, we introduced more complex models with 2-5 breakpoints. However, adding these breaks did not significantly decrease the model residuals, pointing to a single breakpoint.</p>
+<p>As with all statistical findings, it is important to validate results with real-world understanding, checking whether the findings make physical sense. In this case, we can check the historical record during the period 1936-1938 to try and identify what physical processes could produce this sudden decrease in annual minimum flows on the Göta River. The Lake Vanern decree was signed in 1937, which codified water management on Lake Vanern, the headwaters of Göta River, to prevent severe flooding through dam control. This more active reservoir management decreased annual low flows and peak flows.</p>
 </div>
 
 
