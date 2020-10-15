@@ -105,7 +105,7 @@
   <tr>
     <td> <b> 7. Statistical modelling</b> </td>
     <td> <i>Jim Stagge</i> </td>
-    <td> 6 </td>
+    <td> 4 </td>
   </tr>
 
   <tr>
@@ -124,12 +124,12 @@
 
   <li>7.3 Structural change analysis: 
     <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-3_structural_change_analysis.html">Worked Example</a>, 
-    <br><i>No code online. </i>
+    <br><i>Completed. </i>
   </li>
 
   <li>7.4 PCA fundamentals: 
     <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-4_principal_component_analysis.html">Worked Example</a>, 
-    <br><i>No code online. </i>
+    <br><i>Completed. </i>
   </li>
   </ul>
   </td>

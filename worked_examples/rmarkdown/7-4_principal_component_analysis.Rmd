@@ -1,353 +1,222 @@
 ---
-title: "Low flow frequency analysis"
-author: "Worked example 6.1"
+title: "Principal Component Analysis"
+author: "Worked example 7.4"
 ---
 
 ```{r, setup, include=FALSE}
 ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-```
 
-# Loading the Data
-
-River Ngaruroro at Kuripapango in New Zealand (Table 4.3), has been
-selected for frequency analysis of annual minimum 1-day values, $AM(1)$,
-using the Weibull (WEI) distribution. In mid-latitudes in the Northern
-Hemisphere, the calendar year is often used to select the annual
-minimum flows. This is a suitable period for the selection of independent
-events as the drought or low flow period commonly occurs during the
-summer months. In the Southern Hemisphere the low flow season occurs at
-the opposite time of the year, and for Ngaruroro the lowest flows are
-typically found in the period November to May. As a result $AM(1)$ flows
-were selected for a hydrological year starting at 1 September.
-
-
-```{r}
 library(tidyverse)
-library(hydroDrought)
+library(hydroDrought) 
 
-ngaruroro <- international %>%
-  filter(river == "Ngaruroro") %>%
-  select(data) %>%
-  unnest(data) %>%
-  # linear interpolation of periods of missing values 
-  # with a duration of up to 15 days
-  sanitize_ts(approx.missing = 15) %>%
-   mutate(
-    year = water_year(time, origin = "-09-01")
-    ) %>%
-  print()
-```
+library(ggfortify)
+library(ggrepel)
+library(cowplot)
 
+r <- regional %>%
+  select(id, data = discharge) 
 
-```{r}
-# remove incomplete years
-incomplete <- ngaruroro %>%
-  filter(!is.na(discharge)) %>%
-  pull(time) %>%
-  coverage_yearly(origin = "-09-01") %>%
-  filter(days.missing > 0) %>%
-  print()
+# list of functions we applied to each station
+f <- list(
+  mean = function(x, ...) mean(x), 
+  Q50 = function(x, ...) lfquantile(x, exc.freq = 0.5),
+  `MAM(1)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 1),
+  `MAM(10)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 10),
+  `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
+  Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
+  Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7),
+  ALPHA = function(x, t, ...) recession(time = t, discharge = x)
+)
 
-ngaruroro <- ngaruroro %>%
-    anti_join(incomplete, by = "year")
-```
-
-
-```{r}
-# derivation of the annual minima
-am <- annual_minima(
-  discharge = ngaruroro$discharge, 
-  time = ngaruroro$time, 
-  origin = "-09-01"
+indices <- r %>%
+  transmute(
+    id, 
+    indices = map(data, ~map_df(f, exec, x = .x$discharge, t = .x$time))
   ) %>%
-  rename(flow = am) %>%
-  arrange(flow) %>%
-  print()
-```
+  unnest(indices) 
 
-```{r, echo=FALSE}
-fig.cap <- "Figure 6.9 Time series of annual minimum 1-day flow, AM(1), for River Ngaruroro at
-Kuripapango (NZ)."
-```
-```{r, echo=FALSE, fig.cap=fig.cap}
-ggplot(am, aes(x = year, y = flow)) + 
-  geom_point() + 
-  # geom_smooth(method = "loess", formula = "y ~ x", span = 1, se = FALSE,
-  #             col = "black", size = 0.2, linetype = "dashed") + 
-  labs(y = expression(paste("Annual minimum flow (", m^{3}, s^{-1}, ")"))) +
-  scale_y_continuous(limits = c(0, NA)) + 
-  theme(axis.title.x = element_blank(), 
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank())
-```
-
-Ngaruroro has a flashy river regime, but has no observed zero flows. The  flows 
-are considered to come from the same population as only a minor part of the 
-catchment is influenced by snow in winter. The observations (daily flow series) 
-cover the period `r trimws(format(min(ngaruroro$time), format = "%e %B %Y"))` to 
-`r trimws(format(max(ngaruroro$time), format = "%e %B %Y"))`. With the omission 
-of `r nrow(incomplete)` 
-years (`r hydroDrought:::paste_with_and(incomplete$year)`) with missing data, a 
-total of `r nrow(am)` annual minimum values results. The procedure used for 
-interpolation of missing data is the same as in WE5.4. A histogram of the values 
-is shown in Figure 6.3 (upper left). To test the assumption of stationarity, 
-the  values are plotted against time in Figure 6.9. No trend can be detected 
-in the series and the data are therefore assumed to fulfil the requirement of 
-independent and identically distributed data (iid).
-
-
-# Derivation of an empirical distribution function
-
-```{r, empirical, echo=FALSE}
-empirical <- am %>%
+# derived indices
+indices <- indices %>%
   mutate(
-    rank = rank(flow),
-    prob.emp = rank / (n() + 1),
-    rp.emp = 1 / prob.emp
-  ) %>%
-  arrange(rank)  
-```
-
-a) The $x$ values, AM(1), are sorted in ascending order and the rank of
-each value is calculated. The smallest value equals `r min(am$flow)` in m<sup>3</sup>s<sup>-1</sup> and is given rank 1.
-
-b) The non-exceedance probability, $F(x) = p$, (`'prob.emp'` in the tibble below) is calculated for each $x$
-value using the Weibull plotting position formula $p_i = i / (n + 1)$ (Equation 6.6).
-
-c) A probability plot for the $AM(1)$ values is obtained by plotting the
-flow values against $F(x)$ as demonstrated in Figure 6.10 (upper). A
-staircase pattern of several nearly equal values is observed. (Note that
-the $AM(1)$ values now are plotted on the $y$-axis as compared to
-Figure 6.3, lower).
-
-
-
-d) The return period (`'rp.emp'`) of the smallest event can be calculated following
-Equation 6.5. The non-exceedance frequency, $F(x)$, of the smallest
-event equals `r round(empirical$prob.emp[1], 3)` according to step 2(b), which gives a return period
-of `r empirical$rp.emp[1]`  years.
-
-```{r, empirical, eval=TRUE, echo=TRUE}
-```
-```{r}
-print(empirical)
-```
-
-# Fitting a distribution  
-Fitting the two-parameter Weibull (WEI) distribution function
-(Section A6.1.4) (assuming the location parameter $\xi$ is zero) using the method of L-moments. 
-^[A direct estimation of the Weibull parameters is shown in the [Fast Track](#ft) section. ]
-
-
-a) The first two L-moments ($\hat\lambda_1$ and $\hat\lambda_2$) are estimated 
-based on time series of the annual minima `am$flow`. These so called sample 
-L-moments are calculated with the function `samlmu()` from the package **lmom**.
-
-    ```{r}
-library(lmom)
-moments <- samlmu(am$flow)
-moments[1:2] 
-    ```
-
-b) The parameter estimates of the WEI distribution (scale parameter $\alpha$, 
-shape parameter $\kappa$) are obtained following Equation A6.144:
-
-    $$\hat\alpha = \frac{\hat\lambda_1}{\Gamma\left( 1 + \frac{1}{\hat\kappa }\right)}$$ 
-
-    $$\hat\kappa = \frac{-\ln(2)}{\ln\left( 1 - \frac{\hat\lambda_2}{\hat\lambda_1}\right)}$$ 
-
-
-    ```{r}
-kappa <- -log(2) / log(1 - unname(moments["l_2"] / moments["l_1"]))
-alpha <- unname(moments["l_1"]) / gamma(1 + 1/kappa)
-parameter <- c(location = 0, scale = alpha, shape = kappa)
-parameter
-    ```
-
-c) $F(x)$ for the WEI distribution is obtained following Equation A6.1.33
-(recalling that the location parameter $\xi$ is set to zero):
-
-    $$ F(x) = 1 - \exp\left[-\left(\frac{x}{\alpha}\right)^\kappa\right]$$
-    
-    ```{r}
-fitted <- empirical %>%
-  select(year, flow, prob.emp) %>%
-  mutate(
-    prob.wei = 1 - exp(-(flow / alpha)^kappa),
-    rp.wei = 1 / prob.wei
+    `Q90/Q50` = Q90/Q50,
+    `Q95/Q50` = Q95/Q50,
+    `MAM(30)/Q50` = `MAM(30)`/Q50,
+    `MAM(10)/Q50` = `MAM(10)`/Q50,
+    `MAM(1)/Q50` = `MAM(1)`/Q50,
   ) 
-    ```
 
-d) The data can be plotted in a probability plot and compared to the
-empirical quantiles in step 2(b) (Figure 6.10, upper). The plot shows
-that the WEI distribution is well adjusted to the low flow extreme
-values, whereas deviation in the upper range may suggest that the
-three highest values do not belong to the low flow population
-(Section 6.3.3). In Figure 6.10 (lower) the empirical quantiles are
-plotted against the estimated distribution quantiles (QQ-plot). The
-points should be close to the unit diagonal if the data fit the WEI
-distribution well. The use of a plotting position implies that the
-ordered sample is plotted in regularly spaced positions. As
-demonstrated in the figure, the observed jumps in $AM(1)$ values are
-reflected in the estimated Weibull quantiles, but not in the empirical
-quantiles.
+indices <- indices %>%
+	full_join(select(regional, id, river, station, catchment), by = "id")
+```
+
+# Simple PCA with two variables
+
+To explain what PCA is, we can consider two variables from the regional low flow analysis: ALPHA and Q95/Q50 (Table 5.1, Figure 5.16). The values for the 21 sites are replotted in Fig. 7.17a after they have been standardized to have zero mean and unit standard deviation (now referred to as ALPHA* and Q95/Q50*). Because ALPHA* and Q95/Q50* are correlated, PC1 captures variability along a nearly 1:1 line (Fig. 7.17a) that measures the value of this artificial variable. This new axis is PC1. PC2, is set at a 90 degree angle (orthogonal), to capture the remaining variability. This oversimplified example allows us to visualize these underlying axes, but as we move into more variables, and therefore higher dimensions, it is more appropriate to use the loading plot (Figure 7.17b). After rotating the data into the page so that positive PC1 is along the x-axis, we see that most variance falls along this horizontal axis. In fact, if we only consider PC1, ignoring the vertical PC2, we could still reconstruct 72.14% of the ALPHA* and Q95/Q50* values. This is why PCA is so valuable for data reduction. 
+
+```{r}
+### Select only two variables
+indices_matrix <- indices %>%
+	select(ALPHA, `Q95/Q50`) %>% 
+	as.matrix()
+rownames(indices_matrix) <- indices$id
+```
+```{r, include = FALSE}
+### If you need to manually rescale
+#mutate(ALPHA_star = as.vector(scale(ALPHA))) %>%
+#mutate(`Q95/Q50_star` = as.vector(scale(`Q95/Q50`) )) %>%
+#select(-ALPHA, -`Q95/Q50`)
+```
+```{r}
+### Run the PCA analysis with scaling
+regional_pca <- prcomp(indices_matrix, scale = TRUE)
+
+# Mean (center) and standard deviation (scale) from normalization
+#regional_pca$center
+#regional_pca$scale
+
+### View the PC Loading matrix
+head(regional_pca$rotation)
+### View the PC Scores
+head(regional_pca$x)
+
+#By default, eigenvectors in R point in the negative direction. We can adjust this with a simple change.
+regional_pca$rotation <- -regional_pca$rotation
+regional_pca$x <- -regional_pca$x
+```
+
+```{r, include = FALSE}
+#Manually rescale for plotting purposes
+plot_points <- indices_matrix %>%
+	as.data.frame() %>%
+	mutate(ALPHA_star = as.vector(scale(ALPHA))) %>%
+	mutate(`Q95/Q50_star` = as.vector(scale(`Q95/Q50`) )) %>%
+	select(-ALPHA, -`Q95/Q50`) %>%
+	mutate(station = indices$station)
+
+scaled_loading <- regional_pca$rotation/max(regional_pca$rotation, na.rm=TRUE)
+scaled_loading[,1] <- scaled_loading[,1] * regional_pca$sdev[1]
+scaled_loading[,2] <- scaled_loading[,2] * regional_pca$sdev[2]
+
+plot_line <- data.frame(ALPHA_star = c(0,0,scaled_loading[1,]), 
+	second_var = c(0,0,scaled_loading[2,]), 
+	group = rep(c("PC1", "PC2"), 2))
+
+### Create a plot of the original variables with the future axes
+p1 <- ggplot(plot_points, aes(x=ALPHA_star, y=`Q95/Q50_star`)) %>%
+	+ geom_hline(yintercept = 0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_vline(xintercept=0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_point() %>%
+	+ geom_line(data = plot_line, aes(x=ALPHA_star, y=second_var, group=group), colour = "blue") %>%
+	+ geom_text_repel(aes(label = station), vjust=-1, size = 3, colour = "grey40", alpha =0.8)  %>%
+	+ geom_text_repel(data = plot_line %>% filter(ALPHA_star !=0), aes(label = group, x=ALPHA_star, y=second_var ),  vjust=-1, colour = "blue") %>%
+	+ scale_x_continuous(name="ALPHA*") %>%
+	+ scale_y_continuous(name ="Q95/Q50*") %>%
+	+ coord_fixed(ratio=1, xlim=c(-2.5,2.5), ylim=c(-2.5,2.5))
+```
+```{r}
+### Plot the PC Loading
+p2 <- autoplot(regional_pca,
+		loadings.label=TRUE, loadings=TRUE, 
+		loadings.label.size=4, loadings.colour='red', loadings.label.vjust = -1, scale = 0) %>%
+	+ geom_hline(yintercept = 0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_vline(xintercept=0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = "grey40", alpha =0.8)  %>%
+	+ coord_fixed(ratio=1, xlim=c(-2.5,2.5), ylim=c(-2.5,2.5))
+```
 
 ```{r, echo=FALSE}
-fig.cap <- "Figure 6.10 (upper): Estimated quantiles for annual minimum 1-day flow, AM(1), for River
-Ngaruroro at Kuripapango (NZ); probability plot showing the fit for the Weibull distribution
-(curve) to the sample data."
+fig.cap <- "Figure 7.17: Normalized variables with the PC axes (a) and the resultant PC Loading diagram (b) for these two variables."
 ```
+
 ```{r, echo=FALSE, fig.cap=fig.cap}
-# quant.theo = qweibull(empirical, shape = kappa, scale = alpha),
-# quant.theo2 = exp(log(-log(1-empirical))/kappa + log(alpha))
-
-# tocheck: we could estimate the fitted distribution much smoother... 
-ggplot(fitted, aes(prob.emp, flow)) + 
-  geom_point() + 
-  geom_line(aes(x = prob.wei)) + 
-  scale_y_continuous(limits = c(0, NA)) + 
-  labs(x = expression(paste("F(", x, ")")),
-       y = expression(paste("Annual minimum flow (", m^{3}, s^{-1}, ")")))
-
-
+### Combine the plots and label them as A and B
+plot_grid(p1, p2, labels = "AUTO")
 ```
 
+# PCA with all variables
 
+If we instead consider all variables, we produce the loading plot shown in Figure 7.18a. The loading plot shows that nearly all low flow metrics load onto PC1 in the negative direction, opposite to ALPHA. Further, all of the flow metrics prior to normalization by Q50, catchment area, and ALPHA load positively onto PC2, while the normalized metrics load negatively. PC2 is highly related to watershed size, and thereby absolute flow.
+
+```{r}
+### Remove all the naming variables
+indices_matrix <- indices %>%
+	select(-id, -river, -station) %>%
+#	select(ALPHA, `Q90/Q50`, `Q95/Q50`, `MAM(30)/Q50`, `MAM(10)/Q50`,`MAM(1)/Q50`) %>% 	
+	as.matrix()
+rownames(indices_matrix) <- indices$id
+
+### Run the PCA analysis with scaling
+regional_pca <- prcomp(indices_matrix, scale = TRUE)
+
+#Adjust the sign of Eigen vectors.
+regional_pca$rotation <- -regional_pca$rotation
+regional_pca$x <- -regional_pca$x
+
+### Create loading plot
+p1 <- autoplot(regional_pca,
+		loadings.label=TRUE, loadings=TRUE, 
+		loadings.label.size=3, loadings.colour='red', loadings.label.vjust = -1, scale = 0) %>%
+	+ geom_hline(yintercept = 0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_vline(xintercept=0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = "grey40", alpha =0.8)  %>%
+	+ coord_fixed(ratio=1)
+```
+
+If we are interested in focusing only on the most important PCs in the analysis, there are different ways of deciding how many to include. One method is to look at the scree plot, which graphs the proportion of variance explained by each PC and only retain the components above the scree plot ‘elbow’. In Fig. 7.18b this appears at two PCs. Another common metric is to only retain components with eigen values greater than 1, which also results in retaining the first two components. These two components explain 93.2% of the total variance across 15 variables because the variables are so highly correlated (Figure 7.18a).
+
+```{r}
+###  Extract the PC eigen values and variance explained
+pc.importance <- summary (regional_pca)
+
+### Create scree plot data
+scree_plot <- data.frame(cbind(Component=seq(1,dim(pc.importance$importance)[2]),t(pc.importance$importance)))
+scree_plot$EigenVal <- scree_plot$Standard.deviation^2
+scree_plot
+
+### Create scree plot using proportion of variance explained
+p2 <- ggplot(scree_plot, aes(Component,Proportion.of.Variance*100)) %>%
+	+ geom_line() %>%
+	+ geom_point() %>%
+	+ scale_x_continuous(name = "Principal Component", breaks=seq(0,30,2)) %>%
+	+ scale_y_continuous(name = "Proportion of Variance (%)", breaks=seq(0,100, 10)) %>%
+	+ theme_classic(10) %>%
+	+ coord_cartesian(xlim=c(0.7,8))
+
+```
 
 ```{r, echo=FALSE}
-fig.cap <- "Figure 6.10 (lower): QQ-plot of empirical quantiles versus Weibull quantiles"
+fig.cap <- "Figure 7.18: PC Loading diagram for all low flow metrics (a) and the resultant scree plot (b)."
 ```
+
 ```{r, echo=FALSE, fig.cap=fig.cap}
-# todo: in the old book, these are not quantiles! 
-ggplot(fitted, aes(x = prob.emp, y = prob.wei)) + 
-  geom_point() + 
-  labs(x = "Empirical quantiles", y = "Theoretical Quantiles") + 
-  geom_abline(slope = 1, intercept = 0, size = 0.2, linetype = "dashed") + 
-  coord_fixed()
+### Combine the plots and label them as A and B
+plot_grid(p1, p2, labels = "AUTO")
 ```
 
 
+```{r, include=FALSE}
+### Plot Eigen value scree plot
+ggplot(scree_plot, aes(Component,EigenVal)) %>%
+	+ geom_line() %>%
+	+ geom_point() %>%
+	+ geom_hline(yintercept=1, linetype ="longdash") %>%
+	+ scale_x_continuous(name = "Principal Component", breaks=seq(0,30,1)) %>%
+	+ scale_y_continuous(name = "Eigen Value", breaks=seq(0,20, 1)) %>%
+	+ theme_classic(10) %>%
+	+ coord_cartesian(xlim=c(0.7,8))
 
-# Estimation of T-year events
+### Plot the cumulative variance explained
+scree_plot <- scree_plot %>% bind_rows(data.frame(Component = 0, Cumulative.Proportion = 0))
 
-e) The non-exceedance frequency of the smallest value equals 
-`r round(fitted$prob.wei[1], 4)` (Equation A6.1.33), which gives a return period of 
-`r round(fitted$rp.wei[1], 1)` years (Equation 6.5). 
-This is `r round(empirical$rp.emp[1] - fitted$rp.wei[1], 1)` 
-years less that the empirical estimate derived in step 2(d).
-
-    ```{r}
-fitted
-    ```
-
-
-f) The 50 and 100-year events can be estimated from Equation A6.1.34:
-$$ x_p = \xi + \alpha \left[-\ln( 1 - p ) \right]^{1/\kappa} $$
-
-```{r, quantiles, echo=FALSE}
-quantile_weibull <- function(prob, location = 0, scale, shape) {
-  location + scale * (-log(1 - prob))^(1/shape)
-}
-
-return.period <- c(50, 100)
-q <- quantile_weibull(prob = 1/return.period, scale = alpha, shape = kappa) 
-```
-
-which gives: $\hat x_{50} = `r format(q[1], digits = 2, nsmall = 2)`$m<sup>3</sup>s<sup>-1</sup> 
-and $\hat x_{100} = `r format(q[2], digits = 2, nsmall = 2)`$m<sup>3</sup>s<sup>-1</sup>. 
-
-
-```{r, quantiles, echo=TRUE}
-```
-```{r}
-round(q, 2)
-```
-
-
-
-# Fast Track {#ft}
-
-The function `samlmu()` from the package **lmom** computes the sample L-moments 
-for a given sample. These sample L-moments are independent of the distribution one
-wants to fit. They have can be transferred into the parameters of the desired
-distribution; e.g. the function `pelwei()` will return the location, scale and 
-shape parameters for a Weibull distribution. By default a three parameter Weibull
-distribution is used. To obtain L-moment estimates of the two parameter Weibull 
-distribution (where the lower bound and location parameter $\xi$ is set to zero) 
-set the argument `bound = 0`.
-```{r}
-library(lmom)
-lmom <- samlmu(am$flow)
-par.wei <- pelwei(lmom, bound = 0)
-par.wei
-```
-
-Quantiles for given probabilities can be calculated for many suitable 
-distributions by the corresponding quantile function `quawei()`. 
-
-```{r}
-quawei(f = c(0.02, 0.01), para = par.wei) %>%
-  round(digits = 2)
-```
-
-# Probability plot using the exponential reduced variate
-
-The two-parameter EXP (Equation A6.1.64) and the WEI distribution are compared
-using the exponential reduced variable (Box 6.4). 
-
-```{r}
-fitted.fast <- am %>%
-  mutate(
-    prob.emp = rank(flow) / (n() + 1),
-    prob.wei = cdfwei(x = flow, para = pelwei(lmom, bound = 0)),
-    prob.exp = cdfexp(x = flow, para = pelexp(lmom))
-  ) %>% 
-  arrange(flow) %>%
-  print()
-```
-
-a) By substituting $y$ into the expression for $F(x)$, $y$ can be
-expressed as $-\ln(1 - F(x))$ (Equation B6.4.6). The parameters of the
-EXP distribution are estimated using L-moments (Equation A6.1.72)
-and used to calculate $y$ and subsequently, $F(x)$.
-
-b) The non-exceedance probability $F(x)$ for the observations is
-determined using the Weibull plotting position formula
-(Equation 6.6).
-
-c) The $AM(1)$ values are plotted against the reduced variate in
-Figure 6.11. A reduced variate of $0.02$ corresponds to a return period
-of $50.5$ years for minimum values (Equation 6.5). The data will plot as
-a straight line given they follow the EXP distribution. Again it is
-demonstrated that the WEI distribution fits the extreme low flow
-values well, and also the upper range apart from the three largest
-values. The two-parameter EXP distribution is less suited to model the
-sample. Alternatively, $-\ln(X)$ could be plotted on a Gumbel
-probability paper, and a straight line would result provided the data
-fitted the WEI distribution.
-
-```{r, echo=FALSE}
-fig.cap <- "Figure 6.11: The annual minimum 1-day flow, AM(1), plotted against the reduced variate, y, of the EXP distribution for River Ngaruroro at Kuripapango (NZ); the observations (marked as points), the two-parameter EXP distribution (continous line) and the two-parameter WEI distribution (dashed line)."
-```
-
-
-```{r, echo=FALSE, warning=FALSE, fig.cap=fig.cap}
-reduced_var <- function (x) -log(1 - x)
-
-d <- fitted.fast %>%
-  select(year, flow, prob.wei, prob.exp) %>%
-  pivot_longer(c(prob.wei, prob.exp), 
-               names_to = "Distribution", values_to = "probability") %>%
-  mutate(Distribution = c(prob.wei = "Weibull", prob.exp = "Exponential")[Distribution])
-
-ggplot(empirical, aes(x = reduced_var(prob.emp), flow)) + 
-  geom_point() + 
-  geom_line(data = d, 
-            aes(x = reduced_var(probability), linetype = Distribution)) +
-  scale_x_continuous(limits = c(0.01, 4)) +
-  labs(x = expression(paste("Exponential reduced variate -log(", 1, " - F(", x, "))")),
-       y = expression(paste("Annual minimum flow (", m^{3}, s^{-1}, ")")))
+ggplot(scree_plot, aes(Component,Cumulative.Proportion*100)) %>%
+	+ geom_line() %>%
+	+ geom_point() %>%
+	+ scale_x_continuous(name = "Principal Component", breaks=seq(0,30,1)) %>%
+	+ scale_y_continuous(name = "Cumulative Variance Explained (%)", breaks=seq(0,100, 20)) %>%
+	+ theme_classic(10)  %>%
+	+ coord_cartesian(xlim=c(0,8), ylim=c(0,100))
 ```
 
 
