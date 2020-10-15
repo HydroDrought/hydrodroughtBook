@@ -53,7 +53,11 @@ indices <- indices %>%
 
 # Simple PCA with two variables
 
-To explain what PCA is, we can consider two variables from the regional low flow analysis: ALPHA and Q95/Q50 (Table 5.1, Figure 5.16). The values for the 21 sites are replotted in Fig. 7.17a after they have been standardized to have zero mean and unit standard deviation (now referred to as ALPHA* and Q95/Q50*). Because ALPHA* and Q95/Q50* are correlated, PC1 captures variability along a nearly 1:1 line (Fig. 7.17a) that measures the value of this artificial variable. This new axis is PC1. PC2, is set at a 90 degree angle (orthogonal), to capture the remaining variability. This oversimplified example allows us to visualize these underlying axes, but as we move into more variables, and therefore higher dimensions, it is more appropriate to use the loading plot (Figure 7.17b). After rotating the data into the page so that positive PC1 is along the x-axis, we see that most variance falls along this horizontal axis. In fact, if we only consider PC1, ignoring the vertical PC2, we could still reconstruct 72.14% of the ALPHA* and Q95/Q50* values. This is why PCA is so valuable for data reduction. 
+To explain what PCA is, we can consider two variables from the regional low flow analysis: ALPHA and Q95/Q50 (Table 5.1, Figure 5.16). The values for the 21 sites are replotted in Fig. 7.17a after they have been standardized to have zero mean and unit standard deviation (now referred to as ALPHA* and Q95/Q50*). 
+
+Because ALPHA* and Q95/Q50* are correlated, PC1 captures variability along a nearly 1:1 line (Fig. 7.17a) that measures the value of this artificial variable. This new axis is PC1. PC2, is set at a 90 degree angle (orthogonal), to capture the remaining variability. 
+
+This oversimplified example allows us to visualize these underlying axes, but as we consider more variables, and therefore higher dimensions, it is more appropriate to use the loading plot (Figure 7.17b). After rotating the data into the page so that positive PC1 is along the x-axis, we see that most variance falls along this horizontal axis. In fact, if we only consider PC1, ignoring the vertical PC2, we could still reconstruct 72.14% of the ALPHA* and Q95/Q50* values. This is why PCA is so valuable for data reduction. 
 
 ```{r}
 ### Select only two variables
@@ -130,7 +134,7 @@ p2 <- autoplot(regional_pca,
 fig.cap <- "Figure 7.17: Normalized variables with the PC axes (a) and the resultant PC Loading diagram (b) for these two variables."
 ```
 
-```{r, echo=FALSE, fig.cap=fig.cap}
+```{r, echo=FALSE, fig.cap=fig.cap, fig.width = 8}
 ### Combine the plots and label them as A and B
 plot_grid(p1, p2, labels = "AUTO")
 ```
@@ -160,7 +164,7 @@ p1 <- autoplot(regional_pca,
 		loadings.label.size=3, loadings.colour='red', loadings.label.vjust = -1, scale = 0) %>%
 	+ geom_hline(yintercept = 0, colour = "grey20", alpha = 0.5) %>%
 	+ geom_vline(xintercept=0, colour = "grey20", alpha = 0.5) %>%
-	+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = "grey40", alpha =0.8)  %>%
+	#+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = "grey40", alpha =0.8)  %>%
 	+ coord_fixed(ratio=1)
 ```
 
@@ -173,7 +177,7 @@ pc.importance <- summary (regional_pca)
 ### Create scree plot data
 scree_plot <- data.frame(cbind(Component=seq(1,dim(pc.importance$importance)[2]),t(pc.importance$importance)))
 scree_plot$EigenVal <- scree_plot$Standard.deviation^2
-scree_plot
+scree_plot[1:5,]
 
 ### Create scree plot using proportion of variance explained
 p2 <- ggplot(scree_plot, aes(Component,Proportion.of.Variance*100)) %>%
@@ -182,7 +186,7 @@ p2 <- ggplot(scree_plot, aes(Component,Proportion.of.Variance*100)) %>%
 	+ scale_x_continuous(name = "Principal Component", breaks=seq(0,30,2)) %>%
 	+ scale_y_continuous(name = "Proportion of Variance (%)", breaks=seq(0,100, 10)) %>%
 	+ theme_classic(10) %>%
-	+ coord_cartesian(xlim=c(0.7,8))
+	+ coord_fixed(ratio = 0.1, xlim=c(0.7,8))
 
 ```
 
@@ -190,9 +194,9 @@ p2 <- ggplot(scree_plot, aes(Component,Proportion.of.Variance*100)) %>%
 fig.cap <- "Figure 7.18: PC Loading diagram for all low flow metrics (a) and the resultant scree plot (b)."
 ```
 
-```{r, echo=FALSE, fig.cap=fig.cap}
+```{r, echo=FALSE, fig.cap=fig.cap, fig.width = 8}
 ### Combine the plots and label them as A and B
-plot_grid(p1, p2, labels = "AUTO")
+plot_grid(p1, p2, labels = "AUTO",  rel_widths = c(1.5, 1))
 ```
 
 
