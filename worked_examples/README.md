@@ -118,7 +118,7 @@
   </li>
 
   <li>7.2 Non-Parametric Trends: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-1_linear_trend.html">Worked Example</a>, 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-2_nonparametric_trend.html">Worked Example</a>, 
     <br><i>Completed.</i>
   </li>
 
