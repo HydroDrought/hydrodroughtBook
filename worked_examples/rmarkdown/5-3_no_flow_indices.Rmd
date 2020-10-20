@@ -1,0 +1,127 @@
+---
+title: "Worked example 5.3: No-flow indices"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+options("width" =  97)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# filter(year >= 1964, year <= 1999) # original filter
+```
+
+# Loading the Data
+
+In this example we use river flow data from the rivers of the International Data Set in the package **hydroDrought** that are classified as intermittent or ephemeral. The dataset becomes accessible by loading the **hydroDrought** package.
+
+```{r}
+library(hydroDrought)
+library(tidyverse)
+
+rivers <- international %>%
+  select(river, data) 
+```
+
+
+# Finding intermittent rivers
+
+A river is defined as intermittent or ephemeral if the river flow is below a threshold of 0.001m<sup>3</sup>s<sup>-1</sup> at least for 5 days each year. Six rivers in the International Dataset fulfil the criteria: Sabar at Alfartanejo and Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US). If the first and/or last year in the time series contain missing values, these years are removed. Only years without missing values are included in the analysis.
+
+
+```{r, cache=TRUE}
+intermittent <- rivers %>%
+  mutate(
+    is.intermittent = map_lgl(data, ~is_intermittent(.x$time, .x$discharge))
+  ) %>% 
+  filter(is.intermittent) %>%
+  mutate(
+    clipped = map(data, remove_incomplete_first_last),
+  ) 
+```
+
+# Computing indices
+
+The following indices are calculated and included in the table below:
+
+* `frac nf years`: the proportion of no-flow years, defined as the number of years with no-flow occurrence divided by the total number of years in the time series; 
+
+* `MAN`: the mean annual number of no-flow days;
+
+* `CVAN`: the coefficient of variation of no-flow days 
+
+* `no flow days`: the number of days without flow for each year of the time series. This is list of integer values corresponing to the number of years in the record. 
+
+* `MAMD`: the mean annual maximum no-flow spell duration;
+
+* `onset`: arithmetic mean of the date the first annual no-flow spell starts (using circular statistics). 
+
+* `sd onset`: standard deviation of the date the first annual no-flow spell starts (using circular statistics). 
+
+* `term.`: arithmetic mean of the date the first no-flow spell ends (using circular statistics)
+
+```{r, cache=TRUE}
+f <- list("frac nf years" = no_flow_years ,
+          "MAN" = MAN, "CVAN" = CVAN, "no flow days" = FAN,
+          "MAMD" = MAMD,
+          "onset" = tau0, "sd onset" = tau0r, "term." = tauE)
+
+metrics <- intermittent %>%
+  transmute(
+    river,
+    metrics = map(clipped, ~map(f, exec, time = .x$time, flow = .x$discharge))
+  ) %>%
+  unnest_wider(metrics)
+```
+
+
+`r tufte::margin_note("Table 5.xx. No-flow indices for rivers Sabar at Alfartanejo,  Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US)")`
+```{r, echo=FALSE}
+metrics %>%
+  print()
+```
+
+# Visualising streamflow permanence
+```{r, echo=FALSE, }
+fig.cap <- "Figure 5.xx Streamflow permanence for rivers Sabar at Alfartanejo,  Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US)"
+```
+```{r, fig.cap=fig.cap, echo = TRUE}
+spells <- intermittent %>%
+  mutate(
+    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = "drop_year"))
+  ) %>%
+  select(river, spells) %>%
+  unnest(spells) %>%
+  mutate(
+    year = water_year(time),
+    day = monthDay(time)
+  ) 
+
+onoff <- metrics %>%
+  select(river, "mean onset" = onset, "mean termination" = `term.`) %>%
+  pivot_longer(-river, names_to = "Timing")
+
+ggplot(spells, aes(monthDay(time), year, fill = state)) +
+  geom_tile() +
+  geom_vline(data = onoff, aes(xintercept = value, linetype = Timing), 
+             col = "red", size = 0.2) + 
+  scale_x_month(expand = expansion(), nletters = 1) +
+  scale_y_continuous(expand = expansion(), breaks = breaks_integer()) +
+  scale_fill_manual("Spell", values = c("no-flow" = "grey80", "flow" = "grey60", 
+                                        "no-data" = "NA"), 
+                    drop = FALSE) +
+  facet_wrap(vars(river), scales = "free_y") +
+  guides(fill = guide_legend(override.aes = list(col = 1))) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor.x = element_line(colour = "black", size = 0.1),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.ontop = TRUE,
+        panel.background = element_rect(fill = NA),
+        axis.title = element_blank())
+```
+

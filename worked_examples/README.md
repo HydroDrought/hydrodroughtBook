@@ -44,35 +44,35 @@
     <br><i>new R-script and updated time series; not yet finished</i>
   </li>
 
-  <li>5.3 Base Flow Index: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-3_base_flow_index.html">Worked Example</a>, 
+  <li>5.3 No-flow indices: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-3_no_flow_indices.html">Worked Example</a>, 
+    <br><i>No text yet </i>
+  </li>
+
+  <li>5.4 Base Flow Index: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-4_base_flow_index.html">Worked Example</a>, 
     <br><i>new R-script and updated time series; not yet finished</i>
   </li>
 
-  <li>5.4 Threshold level method: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-4_threshold_level_method.html">Worked Example</a>, 
+  <li>5.5 Threshold level method: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-5_threshold_level_method.html">Worked Example</a>, 
     <br><i>Nizowka replaced by new R-script (+updated time series), not yet finished</i>
   </li>
 
-  <li>5.5 Sequent Peak Algorithm: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-5_sequent_peak_algorithm.html">Worked Example</a>, 
+  <li>5.6 Sequent Peak Algorithm: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-6_sequent_peak_algorithm.html">Worked Example</a>, 
     <br><i>Decided to keep as the method is applied operationally by the hydropower sector. New R-script and updated time series; not yet finished</i>
   </li>
 
-  <li>5.6 Standardized Groundwater Index: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-6_standardized_groundwater_index.html">Worked Example</a>, 
+  <li>5.7 Standardized Groundwater Index: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-7_standardized_groundwater_index.html">Worked Example</a>, 
     <br><i>new script, almost finished. </i>
   </li>
  
-  <li>5.7 Rank and correlation coefficients: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-7_rank_and_correlation_coefficients.html">Worked Example</a>, 
+  <li>5.8 Rank and correlation coefficients: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-8_rank_and_correlation_coefficients.html">Worked Example</a>, 
     <br><i>To be implemented in R -- updated by Nico – in collaboration with Tobias. Numbers a d figures ready, text is missing </i>
   </li> 
-  
-  <li>5.8 No-flow indices: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-8_no_flow_indices.html">Worked Example</a>, 
-    <br><i>No text yet </i>
-  </li>
   </ul>
   </td>
   </tr>

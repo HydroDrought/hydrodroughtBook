@@ -1,0 +1,175 @@
+---
+title: "Base Flow Index: Worked example 5.4"
+always_allow_html: true
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+fmt_number <- function(x) format(x, big.mark = "<i>&#8239;</i>")
+```
+
+# Loading the Data
+
+Three years of daily flow (1995 to 1997) from the Ray at Grendon Underwood (UK) have been selected. The base flow separation is done for the whole three-year period, whereas the BFI is calculated for the mid-year 1996. This ensures that days at the start and end of the calculation year are included. In [Table 5.7](#table) the calculation steps are illustrated using data from the beginning of the record.
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lubridate)
+library(hydroDrought)
+
+ray <- international %>%
+  filter(river == "Ray") %>%
+  select(data) %>%
+  unnest(data) %>%
+  mutate(
+    year = water_year(time)
+  ) %>%
+  filter(year >= 1995, year <= 1997)
+```
+
+
+# Calculation
+(@) The daily flows, $Q$<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>, are divided into non-overlapping blocks of five days (Column 1 and 2, [Table 5.7](#table)).
+    ```{r}
+ray <- ray %>%
+  mutate(
+    block = ((row_number() - 1) %/% 5) + 1
+  ) %>%
+  print()
+    ```
+
+(@) Mark the minima of each of these blocks and let them be called $Q_{min_1}$, <i>&hellip;</i> $Q_{min_n}$ (Column 3, [Table 5.7](#table)). Consider in turn ($Q_{min_1}$, $Q_{min_2}$, $Q_{min_3}$), <i>&hellip;</i> ($Q_{min_{n-1}}$, $Q_{min_{n}}$, $Q_{min_{n+1}}$). In each case, if 0.9<i>&middot;</i>central value <i>&le;</i> outer values, then the central value is identified as a turning point for the base flow line (bold lines in [Table 5.7](#table)). Continue this procedure until the whole time series has been analysed. 
+
+    ```{r}
+points <- ray %>%
+  group_by(block) %>%
+  slice_min(discharge, with_ties = FALSE) %>%
+  ungroup() %>%
+  rename(Qmin = discharge) %>%
+  mutate(
+    Qmin.red = 0.9 * Qmin,
+    is.turning.point = Qmin.red <= lag(Qmin) & Qmin.red <= lead(Qmin)
+  )
+    ```
+
+
+(@) Join the turning points by straight lines to form the base flow separation line and assign to each day a base flow value $Q_b$, by linear interpolation between the turning points. If, on any day, the base flow estimated by this line exceeds the total flow, the base flow is set to be equal to the total flow $Q$, on that day.
+
+    ```{r}
+tp <- points %>%
+  filter(is.turning.point) %>%
+  select(time, Qmin) 
+
+baseflow <- ray %>%
+  mutate(
+    baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
+    baseflow = pmin(baseflow, discharge)
+  )
+    ```
+
+
+(@) Calculate the volume of water ($V_{base}$) beneath the base flow hydrograph between the first and last date of interest. The volume (m<sup>3</sup>) is simply derived as the sum of the daily base flow values multiplied by `r fmt_number(86400)` (the number of seconds per day). 
+
+(@) Calculate the corresponding volume of water beneath the recorded hydrograph ($V_{total}$). The volume  (m<sup>3</sup>) is obtained by summing the daily flow values between the first and the last dates inclusive. 
+
+    ```{r}
+volume <- baseflow %>%
+  filter(year == 1996) %>%
+  na.omit() %>%
+  summarise(
+    total = sum(discharge) * 86400,
+    baseflow = sum(baseflow) * 86400
+  )
+    ```
+
+(@) The BFI is then $V_{base}/V_{total}$.
+
+```{r}
+bfi <- volume$baseflow / volume$total
+bfi
+```
+
+```{r, echo=FALSE}
+options(knitr.kable.NA = '')
+library(kableExtra)
+tbl <- points %>%
+  select(-block, -year) %>%
+  right_join(baseflow, by = "time") %>% 
+  arrange(time)
+
+tbl <- tbl  %>%
+  filter(time <= as.Date("1995-02-09")) %>%
+  mutate_at(vars(discharge, Qmin, baseflow), .funs = round, digits = 3) %>%
+  mutate(Qmin.red = round(Qmin.red, digits = 4),
+         bold = is.finite(is.turning.point) & is.turning.point, 
+         # Qmin.red = text_spec(Qmin.red, format = "html", bold = bold)
+  ) 
+
+tbl2 <- tbl %>%
+  select(`1 . Date` = time, `2 . Daily flow` = discharge, ` 3 . Qmin` = Qmin, `4 . 0.9 * Qmin` = Qmin.red, `5 . Base flow` = baseflow) %>%
+  kable(
+    caption = "<a name=\"table\"></a>Table 5.7 Calculation of the base flow separation line from time series of daily flow; non-overlapping 5-day blocks are indicated by alternating background colors and turning points are marked bold.") %>%
+  # add_header_above(c(" " = 1,
+  #                    "$Q$ in ${m^3s^{-1}}$" = 1,
+  #                    "in ${m^3s^{-1}}$" = 1,
+  #                    "in ${m^3s^{-1}}$" = 1,
+  #                    "$Q_b$ in ${m^3s^{-1}}$" = 1),
+  #                  align = "right") %>%
+  kable_styling(fixed_thead = TRUE, position = "left") %>%
+  row_spec(which(!(tbl$block %% 2)), background = "#f0f0f0") %>%
+  row_spec(which(tbl$bold), bold = TRUE)
+
+tbl2
+```
+
+
+# Results
+
+(@) The first and second turning points are found on day `r tp$time[1]`  and day `r tp$time[1]` (Column 4, [Table 5.7](#table)), respectively, and a linear interpolation is used to estimate the base flow at time steps (days) between these dates (Column 5, [Table 5.7](#table)). The daily base flow separation line is subsequently calculated for the whole period by linear interpolation between all turning points.
+
+(@) The volume beneath the base flow line, $V_{base}$, for 1996 is found to be `r fmt_number(volume$baseflow)`<i>&nbsp;</i>m<sup>3</sup>, whereas the volume of the total flow, $V_{total}$, is `r fmt_number(volume$total)`<i>&nbsp;</i>m<sup>3</sup>. The resultant BFI is `r format(round(bfi, digits = 2), nsmall = 2)`. The base flow separation line for River Ray in 1996 is shown in Figure 5.4 of the book.
+
+
+
+
+# Fast Track
+The base flow for a given time series can also be calculated directly using the 
+function `baseflow()`, optionally with a different choice of the block length ($N = x$ days) or 
+the turning point factor or parameter ($TP$) for the central value. The default 
+values are `tp.factor = 0.9` and `block.len = 5`, which can be adopted to the 
+type of flow regime studied and changed accordingly by the user.
+
+```{r}
+bf <- ray %>%
+  select(time, discharge) %>%
+  mutate(
+    baseflow = baseflow(discharge, tp.factor = 0.9, block.len = 5)
+  ) %>%
+  filter(year(time) == 1996) %>%
+  print()
+```
+
+
+```{r, fig.cap="Figure 5.4 Annual recorded hydrograph and calculated continuous base flow line for UK river Ray in year 1996 based on the BFI separation procedure (Worked Example 5.3).", warning=FALSE, fig.margin = FALSE, echo=FALSE}
+x <- bf %>%
+  gather(key = key, value = value, discharge, baseflow) %>%
+  mutate(key = factor(key, levels = c("discharge", "baseflow"),
+                      labels = c("Recorded Hydrograph", "Baseflow Line")))
+
+ggplot(x, aes(time, value)) +
+  geom_ribbon(data = ~filter(.x, key == "Baseflow Line"), 
+              aes(ymin = 0, ymax = value), fill = "grey90") + 
+  geom_line(aes(size = key)) +
+  scale_size_manual(values = c(0.2, 0.5)) +
+  scale_x_month(expand = expansion()) +
+  labs(y = expression(paste("Flow (", m^{3}, s^{-1}, ")"))) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = c(0.8, 0.35),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.title = element_blank(),
+        panel.grid.major = element_blank()
+  )
+```
+

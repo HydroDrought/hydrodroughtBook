@@ -135,10 +135,10 @@ tbl <- ngaruroro %>%
 # Fast-Track
 
 The function `lfquantile()` calculates percentiles (quantiles) directly. The 
-exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
+exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{70}$ would be: 
 
 ```{r}
-lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
+lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.7))
 ```
 
 The retrieved value for $Q_{90}$ is 

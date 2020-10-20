@@ -1,0 +1,145 @@
+---
+title: "Rank and correlation coefficients: Worked example 5.8"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+# Loading the Data
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(hydroDrought) 
+
+r <- regional %>%
+  select(id, river, station, data = discharge) %>%
+  print()
+```
+
+
+# Indices
+```{r, message=FALSE, warning=FALSE}
+# list of functions we applied to each station
+f <- list(
+  mean = function(x, ...) mean(x), 
+  Q50 = function(x, ...) lfquantile(x, exc.freq = 0.5),
+  `MAM(1)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 1),
+  `MAM(10)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 10),
+  `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
+  Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
+  Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7),
+  ALPHA = function(x, t, ...) recession(time = t, discharge = x)
+)
+
+indices <- r %>%
+  transmute(
+    id, 
+    indices = map(data, ~map_df(f, exec, x = .x$discharge, t = .x$time))
+  ) %>%
+  unnest(indices) 
+```
+
+
+```{r}
+# derived indices
+indices <- indices %>%
+  mutate(
+    `Q90/Q50` = Q90/Q50,
+    `Q95/Q50` = Q95/Q50,
+    `MAM(30)/Q50` = `MAM(30)`/Q50,
+    `MAM(10)/Q50` = `MAM(10)`/Q50,
+    `MAM(1)/Q50` = `MAM(1)`/Q50,
+  ) 
+```
+
+`r tufte::margin_note("Table 5.11 Flow indices for a subset of the Regional Data Set.")`
+```{r, echo=FALSE}
+indices  %>%
+  hydroDrought:::export_table(name = "Tab5.11") %>%
+  print()
+```
+
+
+#  Ranks
+```{r, fig.width=6, fig.height=6}
+long <- indices %>%
+  pivot_longer(cols = -id, names_to = "index") %>%
+  mutate(index = factor(index, levels = setdiff(colnames(indices), "id")))
+
+ranks <- long %>%
+  group_by(id) %>%
+  mutate(
+    rank = rank(value, ties.method = "min")
+  )
+
+ggplot(ranks, aes(x = index, y = id, fill = rank, label = rank)) + 
+  geom_tile() + 
+  geom_text(size = 3) + 
+  scale_fill_viridis_c(alpha = 0.3) + 
+  labs(y = "Station ID") + 
+  theme(panel.grid = element_blank(), 
+        legend.position = "none",
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, eval=FALSE}
+correlation <- long %>%
+  left_join(x = ., y = ., by = "id", suffix = c("", "2")) %>%
+  group_by(index, index2) %>%
+  summarise(
+    pearson = cor(x = value, y = value2, method = "pearson"),
+    spearman = cor(x = value, y = value2, method = "spearman"),
+    .groups = "drop"
+  )
+
+
+ggplot(correlation, aes(x = index, y = index2, fill = pearson, label = round(pearson, 3))) + 
+  geom_tile() + 
+  geom_text() + 
+  scale_fill_viridis_c(alpha = 0.3) + 
+  theme(panel.grid = element_blank(), 
+        legend.position = "none", 
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+#  Pearson correlation 
+```{r}
+library(corrplot)
+x <- indices %>%
+  select(-id)
+M <- cor(x, method = "pearson")
+res1 <- cor.mtest(x, method = "pearson", conf.level = .95)
+
+col2 <- colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582",
+                           "#FDDBC7", "#FFFFFF", "#D1E5F0", "#92C5DE",
+                           "#4393C3", "#2166AC", "#053061"))
+
+corrplot(M, type = "upper",
+         col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = "grey10",
+         p.mat = res1$p, insig = "pch", 
+         order = "hclust", addrect = 3, rect.col = "navy",
+         pch.cex = 2, 
+         number.cex = .7, tl.col = "black")
+```
+
+
+#  Spearman (rank) correlation 
+```{r}
+M <- cor(x, method = "spearman")
+res1 <- cor.mtest(x, method = "spearman", conf.level = .95)
+corrplot(M, type = "upper",
+          col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = "grey10",
+         p.mat = res1$p, insig = "pch", 
+         order = "hclust", addrect = 3, rect.col = "navy",
+         pch.cex = 2, 
+         number.cex = .7, tl.col = "black")
+```
+

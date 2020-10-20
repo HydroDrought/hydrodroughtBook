@@ -1,0 +1,253 @@
+---
+title: "Worked example 5.5: Threshold level method"
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+fmt_date <- function(x) trimws(format(x, format = "%e %B %Y"))
+```
+
+```{r, loadingData, echo=FALSE}
+library(tidyverse)
+library(hydroDrought)
+
+ngaruroro <- international %>%
+  filter(river == "Ngaruroro") %>%
+  select(data) %>%
+  unnest(data) 
+```
+
+The threshold level method can be used to select drought events from time series of river flow as long as there are not too many missing values in the dataset and a meaningful threshold  $Q_0$ is chosen. Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below.
+
+
+# Loading the Data
+`r round(as.double(diff(range(ngaruroro$time)), "days") / 365.25, 1)`  years of 
+daily flow (`r fmt_date(min(ngaruroro$time))` to `r fmt_date(max(ngaruroro$time))`)
+are analysed. In this river the low flow period covers the turn of the calendar 
+year. To avoid problems with allocating droughts to a specific calendar year 
+because of drought events starting in one year and ending in another year, the 
+start of the year is set to 1 September. An event is attributed to the 
+year it starts. 
+
+```{r, loadingData, eval=TRUE, echo=TRUE}
+```
+
+# Missing values
+The time series, Ngaruroro, contains missing values.  We do not know if a missing value (`NA`) represents a flow below the threshold or above the threshold, as the flow value itself is unknown. A single missing value will cause the function `drought_events()` to terminate a dry spell (drought event) or similar, a wet spell. Accordingly, most characteristics derived for this event (e.g. drought duration, drought termination, drought volume, etc.) will not be correct.
+
+```{r, preprocessing, echo=FALSE}
+ngaruroro <- ngaruroro %>%
+  sanitize_ts(approx.missing = 14) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+  )
+
+coverage <- ngaruroro %>%
+  filter(!is.na(discharge)) %>%
+  pull(time) %>%
+  coverage_yearly(origin = "-09-01")
+
+incomplete <- coverage %>%
+  filter(days.missing > 0) 
+
+complete <- coverage %>%
+  filter(days.missing == 0)
+
+ngaruroro <- ngaruroro %>%
+  anti_join(incomplete, by = "year")
+```
+
+```{r, properties-dataset, echo=FALSE}
+nyear <- length(unique(ngaruroro$year))
+nremoved <- hydroDrought:::numbers_english(nrow(incomplete))
+years.removed <- hydroDrought:::paste_with_and(paste(
+  incomplete$year, 
+  substr(incomplete$year + 1, 3L, 4L), sep = "/")
+)
+```
+
+
+A conservative approach would be to eliminate years with missing values completely. Instead, to avoid losing too many years of observations, we filled periods of missing data with linear interpolation if they are of short duration. Here short duration is defined as periods < 15 days, whereas years containing long periods of missing values (≥15 days) have been removed. This results in `r nyear` years of daily flow (`r fmt_date(min(ngaruroro$time))` 
+to `r fmt_date(max(ngaruroro$time))`). In total `r nremoved` years are omitted from the series (`r years.removed`). 
+
+```{r, preprocessing, echo=TRUE, eval=FALSE}
+```
+
+
+The table below displays the year removed, the total number of days in the year
+(365 or 366 for leap years), the number of days with flow observations, 
+the number of `NA`-values (days with missing data) and the remaining fraction of days.
+
+```{r}
+print(incomplete)
+```
+
+
+#	Threshold selection and drought events
+A sequence of drought events is obtained from the streamflow hydrograph by 
+considering periods with flow below a certain threshold, $Q_0$. In this 
+example $Q_{90} = `r round(lfquantile(ngaruroro$discharge, exc.freq = 0.9), 2)`$m<sup>3</sup>s<sup>-1</sup> is used as threshold. A table of drought characteristics 
+is derived with the function `drought_events()`. 
+
+```{r}
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) %>%
+  print()
+
+droughts <- ngaruroro %>%
+  drought_events(threshold = q90, pooling = "none") 
+```
+
+
+`r tufte::margin_note("Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ.")`
+```{r, echo=FALSE}
+droughts %>%
+  hydroDrought:::export_table(name = "Tab5.8") %>%
+  print()
+```
+
+The table displayed above includes:
+
+* `first.day`: the start date, defined as the first day below the threshold;
+* `last.day`: the end date, defined as the last day below the threshold; 
+* `duration`: the drought duration (days), defined as `last.day - first.day + 1`
+* `volume`: the deficit volume in m<sup>3</sup>, defined as the sum of the daily
+deficit flows times the duration in days;
+* `qmin`: the minimum flow in m<sup>3</sup>s<sup>-1</sup>, defined as the minimum flow $Q_{min}$ within a drought event;
+* `tqmin`: the date of the minimum flow.
+
+
+# 	Removing minor droughts (Filtering)
+Several minor droughts, lasting for a few days only, can be observed. To reduce the problem of minor droughts two restrictions are imposed:
+
+* a minimum drought duration, $d_{min}$ which removes droughts with duration less 
+than a specified number of days;
+
+* a minimum drought deficit volume (coefficient $\alpha$), which removes droughts 
+with a deficit volume less than a certain fraction $\alpha$ of the maximum 
+drought deficit volume observed in the complete series of drought events. 
+
+```{r, echo=FALSE}
+vmin <- max(droughts$volume) * 0.005
+```
+
+```{r, minorDroughts, echo = FALSE}
+droughts <- droughts %>%
+  mutate(is.minor = duration < 5 | volume < max(volume) * 0.005) 
+```
+
+We will append a logical column called `is.minor` to the table of drought events.
+It is `TRUE` when drought duration is less than five days OR if the drought volume is less than 5% of the maximum drought deficit volume (i.e., `r format(vmin, big.mark = "<i>&nbsp;</i>")`<i>&nbsp;</i>m<sup>3</sup>). In total `r sum(droughts$is.minor)` droughts are considered minor, and thus removed, based on these criteria. 
+
+
+```{r, minorDroughts, echo = TRUE, eval=FALSE}
+```
+```{r}
+print(droughts)
+```
+
+
+
+
+#	Eliminating dependent droughts (Pooling)
+The inter-event time criterion (IC) is used to pool dependent droughts, which 
+are droughts separated by a short period of flow above the threshold. If the time between 
+two droughts is less than a critical duration, $t_{min}$, the two events are pooled. 
+
+In this example $t_{min}$ is set equal to two days. 
+
+```{r}
+pooled <- ngaruroro %>%
+  drought_events(
+    threshold = q90, pooling = "inter-event", 
+    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf)
+  ) %>%
+  filter(duration >= 5, volume > max(volume) * 0.005) %>%
+  arrange(desc(duration)) %>%
+  print()
+```
+
+When drought events are pooled the table of drought events contain two 
+more columns:
+
+* `dbt`: the duration below the threshold, i.e. the drought duration minus short 
+period(s) above the threshold (note: the ‘full’ duration can be derived from the start and end date of each event); 
+
+* `pooled`: the number of drought events. 
+
+The drought deficit characteristics of the ten longest (pooled) drought events are given in the table above. In total, there are `r nrow(pooled)` drought 
+events, which equal an  average of `r round(nrow(pooled) / nyear, 2)` events per year. 
+
+Key drought characteristics for all drought events occurring in the period (09.1963- 08.2020), can be summarized for different drought metrics. In the example below, for each year, the number of droughts in the year, the days below the threshold (summed over all events) in a year and the minimum flow in a year, are presented:
+
+```{r}
+pooled %>%
+  mutate(
+    year = water_year(first.day, origin = "-09-01")
+  ) %>%
+  group_by(year) %>%
+  summarise(
+    n.droughts = n(),
+    real.duration = sum(dbt), 
+    min.flow = min(qmin)
+  )
+```
+
+
+```{r, echo=FALSE}
+p <- pooled %>%
+  mutate(
+    year = water_year(first.day, origin = "-09-01")
+  ) %>%
+  group_by(year) %>%
+  mutate(
+    event = group_const_value(event) + 1
+  ) %>%
+  ungroup() %>%
+  select(event, duration, year) %>%
+  right_join(complete %>% select(year), by = "year") 
+
+major <- hydroDrought:::paste_with_and(sort(head(p$year)))
+```
+
+Time series of the drought duration are plotted in Figure 5.12. The longest drought durations (dbt) are found in `r major`.
+
+
+```{r, echo=FALSE, }
+fig.cap <- "Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\\alpha = 0.005$ and $t_{min} = 2$ days."
+```
+```{r,fig.cap=fig.cap, echo = FALSE}
+ggplot(p, aes(x = event, y = as.double(duration))) + 
+  geom_col(position = "stack", col = "white") + 
+  labs(x = "Number of drought events", y = "Drought duration (days)") +
+  facet_wrap(vars(year), ncol = 10) + 
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+```
+
+
+A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed. Short duration droughts are dominating with `r sum(pooled$duration <= 10)` events lasting 
+less than 11 days. Only `r hydroDrought:::numbers_english(sum(pooled$duration > 30))`
+events lasted more than 30 days. 
+
+```{r, echo=FALSE, }
+fig.cap <- "Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\\alpha = 0.005$ and $t_{min} = 2$ days."
+```
+```{r, echo=TRUE, fig.cap=fig.cap}
+p %>%
+  # replace_na(list(duration = 0)) %>%
+  ggplot(aes(duration)) + 
+  geom_histogram(binwidth = 5, boundary = 0, closed = "left", 
+                 size = 0.2, col = "black", fill = "grey90") + 
+  scale_x_continuous(limits = c(0, NA)) + 
+  scale_y_continuous(breaks = breaks_integer()) + 
+  labs(x = "Drought duration (days)", y = "Counts")
+```
+
+
+
+
+
+
+
+
