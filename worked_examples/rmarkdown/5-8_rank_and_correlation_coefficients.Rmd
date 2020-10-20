@@ -11,6 +11,8 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 # Loading the Data
 
+29 time series of at between 35 and 65 years of daily river flow from the Regional Data Set are analysed.
+
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(hydroDrought) 
@@ -21,8 +23,11 @@ r <- regional %>%
 ```
 
 
-# Indices
-```{r, message=FALSE, warning=FALSE}
+# Calculation of indices 
+
+Seven low flow indices (described in Sections 5.3.1–5.3.4) and the mean ($\bar Q$) and median flow ($Q_{50}$) were calculated. The values are shown in Table 5.11. The recession constant $ALPHA$ is equivalent to $\alpha$ as defined in Equation 5.1a. Also calculated, but not included in Table 5.11 because of space concerns, are $MAM(1)/Q_{50}$, $MAM(10)/Q_{50}$, $MAM(30)/Q_{50}$, $Q_{95}/Q_{50}$ and $Q_{90}/Q_{50}$, which are standardized indices indicating flow variability rather than absolute values. $Q_{50}$ was used here for standardization rather than  because it is less sensitive to outliers, especially high values.
+
+```{r, message=FALSE, warning=FALSE, cache=TRUE}
 # list of functions we applied to each station
 f <- list(
   mean = function(x, ...) mean(x), 
@@ -66,6 +71,8 @@ indices  %>%
 
 
 #  Ranks
+The flow indices in Table 5.11 and five indices divided by $Q_{50}$ were ranked in ascending order (Table 5.12). The results show that $\bar Q$,  $Q_{50}$ and $MAM(30)/Q_{50}$  have high ranks for most stations. This is typical for daily flow data (data are positively skewed or skewed to the right). $MAM(1)$, and $Q_{95}$ have low ranks for many stations. $ΑLPHA$ has very mixed ranks with the lowest rank for eight stations and the second highest for seven stations.
+
 ```{r, fig.width=6, fig.height=6}
 long <- indices %>%
   pivot_longer(cols = -id, names_to = "index") %>%
@@ -88,7 +95,10 @@ ggplot(ranks, aes(x = index, y = id, fill = rank, label = rank)) +
 ```
 
 
-```{r, warning=FALSE, message=FALSE, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, }
+fig.cap <- "Table 5.12 Ranks for low flow indices for the sites in Table 5.11 (1 indicates the lowest value and 14 the highest)"
+```
+```{r, fig.cap=fig.cap, warning=FALSE, message=FALSE, echo=FALSE, eval=FALSE}
 correlation <- long %>%
   left_join(x = ., y = ., by = "id", suffix = c("", "2")) %>%
   group_by(index, index2) %>%
@@ -108,8 +118,13 @@ ggplot(correlation, aes(x = index, y = index2, fill = pearson, label = round(pea
         axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 
+
 #  Pearson correlation 
-```{r}
+The Pearson correlation coefficients was calculated for pairs of low flow indices (Table 5.13). 
+```{r, echo=FALSE, }
+fig.cap <- "Table 5.13 Pearson correlation coefficient matrix (X shows a non-significant correlation)"
+```
+```{r, fig.cap=fig.cap,warning=FALSE}
 library(corrplot)
 x <- indices %>%
   select(-id)
@@ -120,7 +135,7 @@ col2 <- colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582",
                            "#FDDBC7", "#FFFFFF", "#D1E5F0", "#92C5DE",
                            "#4393C3", "#2166AC", "#053061"))
 
-corrplot(M, type = "upper",
+o <- corrplot(M, type = "upper",
          col = tail(head(col2(200), -30), -30),
          tl.cex = 0.8, addCoef.col = "grey10",
          p.mat = res1$p, insig = "pch", 
@@ -129,17 +144,30 @@ corrplot(M, type = "upper",
          number.cex = .7, tl.col = "black")
 ```
 
+```{r, echo=FALSE}
+x <- x[, colnames(o)]
+```
+
+
 
 #  Spearman (rank) correlation 
-```{r}
+The Spearman (rank) correlation coefficients was calculated for pairs of low flow indices (Table 5.14). 
+```{r, echo=FALSE, }
+fig.cap <- "Table 5.14 Spearman (rank) correlation coefficient matrix (X shows a non-significant correlation)"
+```
+```{r, fig.cap=fig.cap}
 M <- cor(x, method = "spearman")
 res1 <- cor.mtest(x, method = "spearman", conf.level = .95)
 corrplot(M, type = "upper",
           col = tail(head(col2(200), -30), -30),
          tl.cex = 0.8, addCoef.col = "grey10",
          p.mat = res1$p, insig = "pch", 
-         order = "hclust", addrect = 3, rect.col = "navy",
+         order = "original", addrect = 3, rect.col = "navy",
          pch.cex = 2, 
          number.cex = .7, tl.col = "black")
 ```
 
+# Results
+Table 5.13 and 5.14 show that all relationships, except between $ALPHA$ and the other indices are positive (the tendency is that when one index increases, so does the other). The relationship between  and $Q_{50}$ is, as expected, very strong ($r_P = 0.99$, $r_S = 0.96$). There are also very strong relationships between these two central tendency measures and the ‘absolute’ low flow indices ($MAM(1)$, $MAM(10)$, $MAM(30)$, $Q_{95}$ and $Q_{90}$) and between the standardized indices $ALPHA$ is not related to the low flow indices that are not standardized, which is expected because $ALPHA$ does not reflect the size of the stream, whereas the low flow indices expressed in m<sup>3</sup>s<sup>-1</sup> do. $ALPHA$ expresses the steepness of the recession and is strongly (significance levels $<0.1\%$) related to $MAM(1)/Q_{50}$ and $Q_{95}/Q_{50}$, which also expresses the flashiness of the stream. The standardized low flow indices are only weakly related to ‘absolute’ low flow indices with values of $r_P$ and $r_s$ around 0.4-0.6, and the coefficient of determination (for the linear regression case simply equal to $r_P^2$) around 0.4 (or less). The in general strong correlations is likely the result of the rather similar runoff behavior in the catchments in the sample dataset used in this worked example. In addition, the climatology is rather homogeneous. When looking at different climate regions, catchment size and catchment properties (e.g. geology, vegetation), this will lead to a significant change in the relationships of low flow indices for different catchments.
+
+Table 5.13 and 5.14 show that $r_s$ is smaller than $r_P$ in many cases (but not all). This is a common tendency. The difference between the two coefficients is generally small. For indices without outliers (close to being normal distributed), there is usually very little difference between the two coefficients. In our case the data set does hold a few relatively high values (for the large rivers), and $r_P$ is affected by these high values, whereas $r_s$ is not.
