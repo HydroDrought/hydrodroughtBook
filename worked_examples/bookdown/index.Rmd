@@ -1,0 +1,40 @@
+---
+title: "Hydrological Drought (2nd Edition)"
+author: "Jim Stagge"
+site: bookdown::bookdown_site
+description: "Worked examples for Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (2nd Edition)"
+url: 'https\://github.com/jstagge/hydroDrought/docs'
+---
+
+# Preface {-}
+
+This website provides all worked examples associated with the 2nd Edition of Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (Tallaksen and van Lanen). 
+
+All code is written in the R programming language.
+
+
+```{r, setup, include=FALSE}
+### This is all of our standard setup
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+
+###########################################################################
+## Set the Paths
+###########################################################################
+### Set here path as the current location of your code
+require(here)
+here_path <- here::here()
+
+### Path for Data and Output	
+data_path <- file.path(here_path, "data")
+output_path <- file.path(here_path, "output")
+
+### Set up output folder for this specific example
+### We will use this to save our results
+write_output_path <- file.path(output_path, "01-introduction")
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
+
+```
+
+

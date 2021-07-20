@@ -1,0 +1,22 @@
+bookdown::gitbook:
+  highlight: tango
+  config:
+    edit:
+      link: https://github.com/jstagge/hydroDrought/master/docs/%s
+      text: ""
+    toc:
+      collapse: section
+      before: |
+          <li><b><a href="./">Hydrologic Drought </a></b></li>
+          <li><a href="./">2nd Edition </a></li>
+          <li><a href="./">Tallaksen and van Lanen (2021) </a></li>
+      after: |
+        <li><a href="https://github.com/rstudio4edu/rstudio4edu-book" target="blank">Published with bookdown</a></li>
+    download: ["rmd"]
+    sharing:
+      github: yes
+      facebook: no
+      twitter: yes
+      all: no
+  number_sections: false
+  output_dir: "docs"

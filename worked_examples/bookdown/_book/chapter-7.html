@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 7 | Hydrological Drought (2nd Edition)</title>
+  <meta name="description" content="Worked examples for Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (2nd Edition)" />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 7 | Hydrological Drought (2nd Edition)" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://github.com/jstagge/hydroDrought/docs" />
+  
+  <meta property="og:description" content="Worked examples for Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (2nd Edition)" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 7 | Hydrological Drought (2nd Edition)" />
+  
+  <meta name="twitter:description" content="Worked examples for Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (2nd Edition)" />
+  
+
+<meta name="author" content="Jim Stagge" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="chapter-6.html"/>
+<link rel="next" href="chapter-10.html"/>
+<script src="libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<link href="libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><b><a href="./">Hydrologic Drought </a></b></li>
+<li><a href="./">2nd Edition </a></li>
+<li><a href="./">Tallaksen and van Lanen (2021) </a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html"><i class="fa fa-check"></i>Chapter 5</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.1-flow-duration-curve"><i class="fa fa-check"></i>Worked Example 5.1: Flow Duration Curve</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-of-the-fdc"><i class="fa fa-check"></i>Calculation of the FDC</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#plot-of-the-fdc"><i class="fa fa-check"></i>Plot of the FDC</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#selected-exceedance-values"><i class="fa fa-check"></i>Selected exceedance values</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track"><i class="fa fa-check"></i>Fast-Track</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#standardized-flow-duration-curves"><i class="fa fa-check"></i>Standardized Flow Duration Curves</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.2-mean-annual-minimum-n-day-flow"><i class="fa fa-check"></i>Worked example 5.2: Mean annual minimum n-day flow</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-1"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation"><i class="fa fa-check"></i>Calculation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-1"><i class="fa fa-check"></i>Fast Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.3-base-flow-index"><i class="fa fa-check"></i>Worked Example 5.3: Base Flow Index</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-2"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-1"><i class="fa fa-check"></i>Calculation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#results"><i class="fa fa-check"></i>Results</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-2"><i class="fa fa-check"></i>Fast Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.4-threshold-level-method"><i class="fa fa-check"></i>Worked example 5.4: Threshold level method</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-3"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#missing-values"><i class="fa fa-check"></i>Missing values</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#threshold-selection-and-drought-events"><i class="fa fa-check"></i>Threshold selection and drought events</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#removing-minor-droughts-filtering"><i class="fa fa-check"></i>Removing minor droughts (Filtering)</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#eliminating-dependent-droughts-pooling"><i class="fa fa-check"></i>Eliminating dependent droughts (Pooling)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.5-sequent-peak-algorithm"><i class="fa fa-check"></i>Worked example 5.5: Sequent Peak Algorithm</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-4"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-2"><i class="fa fa-check"></i>Calculation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#selection-of-the-drought-deficit-volume-and-duration"><i class="fa fa-check"></i>Selection of the drought deficit volume and duration</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#results-1"><i class="fa fa-check"></i>Results</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-3"><i class="fa fa-check"></i>Fast Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.6-example-of-how-to-estimate-sgi-using-data-from-stonor-park-uk"><i class="fa fa-check"></i>Worked example 5.6, Example of how to estimate SGI using data from Stonor Park, UK</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#load-the-data"><i class="fa fa-check"></i>Load the data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#create-a-regular-times-series-of-monthly-data"><i class="fa fa-check"></i>Create a regular times series of monthly data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculate-an-sgi-values"><i class="fa fa-check"></i>Calculate an SGI values</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-4"><i class="fa fa-check"></i>Fast-Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.7-rank-and-correlation-coefficients"><i class="fa fa-check"></i>Worked example 5.7: Rank and correlation coefficients</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-5"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#indices"><i class="fa fa-check"></i>Indices</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#ranks"><i class="fa fa-check"></i>Ranks</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#pearson-correlation"><i class="fa fa-check"></i>Pearson correlation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#spearman-rank-correlation"><i class="fa fa-check"></i>Spearman (rank) correlation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.8-no-flow-indices"><i class="fa fa-check"></i>Worked example 5.8: No-flow indices</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-6"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#finding-intermittent-rivers"><i class="fa fa-check"></i>Finding intermittent rivers</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#computing-metrics"><i class="fa fa-check"></i>Computing metrics</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#visualising-streamflow-permanence-spells"><i class="fa fa-check"></i>Visualising streamflow permanence (spells)</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html"><i class="fa fa-check"></i>Chapter 6</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.1-low-flow-frequency-analysis"><i class="fa fa-check"></i>Worked Example 6.1: Low flow frequency analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#loading-the-data-7"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-an-empirical-distribution-function"><i class="fa fa-check"></i>Derivation of an empirical distribution function</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#fitting-a-distribution"><i class="fa fa-check"></i>Fitting a distribution</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#estimation-of-t-year-events"><i class="fa fa-check"></i>Estimation of T-year events</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#ft"><i class="fa fa-check"></i>Fast Track</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#probability-plot-using-the-exponential-reduced-variate"><i class="fa fa-check"></i>Probability plot using the exponential reduced variate</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.2-drought-deficit-frequency-analysis"><i class="fa fa-check"></i>Worked Example 6.2: Drought deficit frequency analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#data"><i class="fa fa-check"></i>Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-distribution-function"><i class="fa fa-check"></i>Derivation of distribution function</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#calculation-of-the-t-year-event"><i class="fa fa-check"></i>Calculation of the T-year event</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#manual-computation"><i class="fa fa-check"></i>Manual computation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html"><i class="fa fa-check"></i>Chapter 7</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.1-linear-trend-analysis"><i class="fa fa-check"></i>Worked example 7.1: Linear trend analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-8"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-elbe-river"><i class="fa fa-check"></i>Linear trend for Elbe River</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-göta-river"><i class="fa fa-check"></i>Linear trend for Göta River</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.2-non-parametric-trends"><i class="fa fa-check"></i>Worked Example 7.2: Non Parametric Trends</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-9"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#mann-kendall-test"><i class="fa fa-check"></i>Mann-Kendall test</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#high-leverage-outlier-effects"><i class="fa fa-check"></i>High leverage outlier effects</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.3-structural-change-analysis"><i class="fa fa-check"></i>Worked Example 7.3: Structural Change Analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#visualizing-daily-flow"><i class="fa fa-check"></i>Visualizing Daily Flow</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#testing-for-a-change-point"><i class="fa fa-check"></i>Testing for a change point</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.4-principal-component-analysis"><i class="fa fa-check"></i>Worked Example 7.4: Principal Component Analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#simple-pca-with-two-variables"><i class="fa fa-check"></i>Simple PCA with two variables</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#pca-with-all-variables"><i class="fa fa-check"></i>PCA with all variables</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html"><i class="fa fa-check"></i>Chapter 10</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#worked-example-10.1-quantifying-effect-of-human-influences"><i class="fa fa-check"></i>Worked example 10.1: Quantifying effect of human influences</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#loading-the-data-10"><i class="fa fa-check"></i>Loading the data</a></li>
+<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#threshold-calculation"><i class="fa fa-check"></i>Threshold calculation</a></li>
+<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#benchmark-drought-characteristics"><i class="fa fa-check"></i>Benchmark Drought characteristics</a></li>
+<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#human-influenced-drought-characteristics"><i class="fa fa-check"></i>Human-influenced drought characteristics</a></li>
+<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#comparison-of-drought-characteristics"><i class="fa fa-check"></i>Comparison of drought characteristics</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html"><i class="fa fa-check"></i>Chapter 12</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#worked-example-12.2-drought-impact-model"><i class="fa fa-check"></i>Worked example 12.2: Drought Impact Model</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#data-1"><i class="fa fa-check"></i>Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#preliminary-visual-comparison"><i class="fa fa-check"></i>Preliminary visual comparison</a></li>
+<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#logistic-regression"><i class="fa fa-check"></i>Logistic Regression</a></li>
+<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#predicting-drought-impacts"><i class="fa fa-check"></i>Predicting drought impacts</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html"><i class="fa fa-check"></i>Chapter 13</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#worked-example-13.1-forecast-skill"><i class="fa fa-check"></i>Worked example 13.1: Forecast skill</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#loading-the-data-11"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#calculate-long-term-low-flow-threshold-from-observations"><i class="fa fa-check"></i>Calculate long-term low flow threshold from observations</a></li>
+<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#calculate-the-brier-score-bs"><i class="fa fa-check"></i>Calculate the Brier Score (BS)</a></li>
+<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#calculate-the-brier-skill-score-bss"><i class="fa fa-check"></i>Calculate the Brier Skill Score (BSS)</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio4edu/rstudio4edu-book" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Hydrological Drought (2nd Edition)</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="chapter-7" class="section level1">
+<h1>Chapter 7</h1>
+<div id="worked-example-7.1-linear-trend-analysis" class="section level2">
+<h2>Worked example 7.1: Linear trend analysis</h2>
+<div id="loading-the-data-8" class="section level3">
+<h3>Loading the Data</h3>
+<p>We begin by loading the Elbe and Gota flow time series and then calculating annual minimum flow for each. We are purposefully choosing to use the calendar year (beginning January 1) for this analysis rather than water year (beginning October 1 or November 1 for many northern hemisphere countries) because the water year breakpoint occurs near the seasonal minimum flow.</p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="chapter-7.html#cb118-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb118-2"><a href="chapter-7.html#cb118-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hydroDrought)</span>
+<span id="cb118-3"><a href="chapter-7.html#cb118-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb118-4"><a href="chapter-7.html#cb118-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb118-5"><a href="chapter-7.html#cb118-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Filter to the rivers and create columns for dates</span></span>
+<span id="cb118-6"><a href="chapter-7.html#cb118-6" aria-hidden="true" tabindex="-1"></a>flow_df <span class="ot">&lt;-</span> international <span class="sc">%&gt;%</span></span>
+<span id="cb118-7"><a href="chapter-7.html#cb118-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(river <span class="sc">==</span> <span class="st">&quot;Elbe&quot;</span> <span class="sc">|</span> river <span class="sc">==</span> <span class="st">&quot;Gota&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb118-8"><a href="chapter-7.html#cb118-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(river, data) <span class="sc">%&gt;%</span></span>
+<span id="cb118-9"><a href="chapter-7.html#cb118-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest</span>(<span class="at">cols =</span> data) <span class="sc">%&gt;%</span></span>
+<span id="cb118-10"><a href="chapter-7.html#cb118-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb118-11"><a href="chapter-7.html#cb118-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">year =</span> <span class="fu">year</span>(time),</span>
+<span id="cb118-12"><a href="chapter-7.html#cb118-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">jdate =</span> <span class="fu">yday</span>(time)</span>
+<span id="cb118-13"><a href="chapter-7.html#cb118-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb118-14"><a href="chapter-7.html#cb118-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb118-15"><a href="chapter-7.html#cb118-15" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(flow_df, <span class="dv">8</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 8 x 5
+##   river time       discharge  year jdate
+##   &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Gota  1850-01-01       506  1850     1
+## 2 Gota  1850-01-02       506  1850     2
+## 3 Gota  1850-01-03       502  1850     3
+## 4 Gota  1850-01-04       502  1850     4
+## 5 Gota  1850-01-05       502  1850     5
+## 6 Gota  1850-01-06       502  1850     6
+## 7 Gota  1850-01-07       496  1850     7
+## 8 Gota  1850-01-08       496  1850     8</code></pre>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="chapter-7.html#cb120-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Group by year and river and then calculate min and mean flow</span></span>
+<span id="cb120-2"><a href="chapter-7.html#cb120-2" aria-hidden="true" tabindex="-1"></a>flow_annual <span class="ot">&lt;-</span> flow_df <span class="sc">%&gt;%</span></span>
+<span id="cb120-3"><a href="chapter-7.html#cb120-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(river, year) <span class="sc">%&gt;%</span></span>
+<span id="cb120-4"><a href="chapter-7.html#cb120-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">min_m3s =</span> <span class="fu">min</span>(discharge, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="at">mean_m3s=</span><span class="fu">mean</span>(discharge, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">&quot;drop_last&quot;</span>) </span>
+<span id="cb120-5"><a href="chapter-7.html#cb120-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb120-6"><a href="chapter-7.html#cb120-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(flow_annual, <span class="dv">8</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 8 x 4
+## # Groups:   river [1]
+##   river  year min_m3s mean_m3s
+##   &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Elbe   1875     230     583.
+## 2 Elbe   1876     237     912.
+## 3 Elbe   1877     296     695.
+## 4 Elbe   1878     296     636.
+## 5 Elbe   1879     327     805.
+## 6 Elbe   1880     330     823.
+## 7 Elbe   1881     327     918.
+## 8 Elbe   1882     345     735.</code></pre>
+</div>
+<div id="linear-trend-for-elbe-river" class="section level3">
+<h3>Linear trend for Elbe River</h3>
+<p>Consider the annual minimum flow for the Elbe river (Fig. 7.8). By fitting a line of form Eq 7.43, the estimated slope is -0.0408 m3/s per year, with a 95% confidence interval of -0.34 to 0.26 m3/s per year. As you can see, we are unclear whether the true trend is positive or negative and this is reflected in a p-value of 0.79 for the t-test of the slope coefficients. Because this p-value is well above 0.05, we accept the null hypothesis (Ho) that there is likely no significant trend in annual minimum flow for the Elbe River.</p>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="chapter-7.html#cb122-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Filter to only the Elbe River</span></span>
+<span id="cb122-2"><a href="chapter-7.html#cb122-2" aria-hidden="true" tabindex="-1"></a>elbe_annual <span class="ot">&lt;-</span> flow_annual <span class="sc">%&gt;%</span></span>
+<span id="cb122-3"><a href="chapter-7.html#cb122-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(river <span class="sc">==</span> <span class="st">&quot;Elbe&quot;</span>) </span>
+<span id="cb122-4"><a href="chapter-7.html#cb122-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-5"><a href="chapter-7.html#cb122-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Create an OLS linear trend model </span></span>
+<span id="cb122-6"><a href="chapter-7.html#cb122-6" aria-hidden="true" tabindex="-1"></a>elbe_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(min_m3s<span class="sc">~</span>year, <span class="at">data =</span> elbe_annual)</span>
+<span id="cb122-7"><a href="chapter-7.html#cb122-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-8"><a href="chapter-7.html#cb122-8" aria-hidden="true" tabindex="-1"></a><span class="do">### Show results</span></span>
+<span id="cb122-9"><a href="chapter-7.html#cb122-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(elbe_lm)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = min_m3s ~ year, data = elbe_annual)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -144.497  -54.136   -7.038   53.504  236.888 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 350.15092  297.03574   1.179     0.24
+## year         -0.04078    0.15257  -0.267     0.79
+## 
+## Residual standard error: 76.1 on 142 degrees of freedom
+## Multiple R-squared:  0.000503,   Adjusted R-squared:  -0.006536 
+## F-statistic: 0.07146 on 1 and 142 DF,  p-value: 0.7896</code></pre>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="chapter-7.html#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Insert columns for trend fit and residuals</span></span>
+<span id="cb124-2"><a href="chapter-7.html#cb124-2" aria-hidden="true" tabindex="-1"></a>elbe_annual <span class="ot">&lt;-</span> elbe_annual <span class="sc">%&gt;%</span></span>
+<span id="cb124-3"><a href="chapter-7.html#cb124-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">fitted =</span> <span class="fu">fitted</span>(elbe_lm)) <span class="sc">%&gt;%</span></span>
+<span id="cb124-4"><a href="chapter-7.html#cb124-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">resid =</span> <span class="fu">resid</span>(elbe_lm)) <span class="sc">%&gt;%</span></span>
+<span id="cb124-5"><a href="chapter-7.html#cb124-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 144 x 6
+## # Groups:   river [1]
+##    river  year min_m3s mean_m3s fitted resid
+##    &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+##  1 Elbe   1875     230     583.   274. -43.7
+##  2 Elbe   1876     237     912.   274. -36.6
+##  3 Elbe   1877     296     695.   274.  22.4
+##  4 Elbe   1878     296     636.   274.  22.4
+##  5 Elbe   1879     327     805.   274.  53.5
+##  6 Elbe   1880     330     823.   273.  56.5
+##  7 Elbe   1881     327     918.   273.  53.6
+##  8 Elbe   1882     345     735.   273.  71.6
+##  9 Elbe   1883     298     724.   273.  24.6
+## 10 Elbe   1884     292     680.   273.  18.7
+## # … with 134 more rows</code></pre>
+<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb126-1"><a href="chapter-7.html#cb126-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create dataframe for confidence interval and predition interval</span></span>
+<span id="cb126-2"><a href="chapter-7.html#cb126-2" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">year =</span> <span class="fu">seq</span>(<span class="dv">1865</span>, <span class="dv">2025</span>, <span class="dv">1</span>))</span>
+<span id="cb126-3"><a href="chapter-7.html#cb126-3" aria-hidden="true" tabindex="-1"></a>elbe_conf <span class="ot">&lt;-</span> <span class="fu">predict</span>(elbe_lm, <span class="at">newdata=</span>new_data, <span class="at">interval =</span> <span class="st">&quot;confidence&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb126-4"><a href="chapter-7.html#cb126-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb126-5"><a href="chapter-7.html#cb126-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(new_data) <span class="sc">%&gt;%</span></span>
+<span id="cb126-6"><a href="chapter-7.html#cb126-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">interval =</span> <span class="st">&quot;Confidence&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>)</span>
+<span id="cb126-7"><a href="chapter-7.html#cb126-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb126-8"><a href="chapter-7.html#cb126-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(elbe_conf, <span class="dv">8</span>)</span></code></pre></div>
+<pre><code>##        fit      lwr      upr year   interval level
+## 1 274.0878 246.4956 301.6801 1865 Confidence  0.95
+## 2 274.0470 246.7231 301.3710 1866 Confidence  0.95
+## 3 274.0063 246.9499 301.0626 1867 Confidence  0.95
+## 4 273.9655 247.1760 300.7549 1868 Confidence  0.95
+## 5 273.9247 247.4014 300.4480 1869 Confidence  0.95
+## 6 273.8839 247.6260 300.1418 1870 Confidence  0.95
+## 7 273.8431 247.8498 299.8364 1871 Confidence  0.95
+## 8 273.8023 248.0728 299.5318 1872 Confidence  0.95</code></pre>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb128-1"><a href="chapter-7.html#cb128-1" aria-hidden="true" tabindex="-1"></a>elbe_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(elbe_lm, <span class="at">newdata=</span>new_data, <span class="at">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb128-2"><a href="chapter-7.html#cb128-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb128-3"><a href="chapter-7.html#cb128-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(new_data) <span class="sc">%&gt;%</span></span>
+<span id="cb128-4"><a href="chapter-7.html#cb128-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">interval =</span> <span class="st">&quot;Prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>)</span></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-106"></span>
+<img src="_main_files/figure-html/unnamed-chunk-106-1.png" alt="Figure 7.8: Linear trend of annual minimum flow on the Elbe River at Neu Darchau. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval." width="672" />
+<p class="caption">
+Figure 11: Figure 7.8: Linear trend of annual minimum flow on the Elbe River at Neu Darchau. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval.
+</p>
+</div>
+</div>
+<div id="linear-trend-for-göta-river" class="section level3">
+<h3>Linear trend for Göta River</h3>
+<p>If we instead consider the annual minimum flow on the Göta River, the annual trend is 1.23 m3/s per year (Fig. 7.9 with a 95% confidence interval of 0.875 to 1.59 m3/s per year. The t-test on this coefficient produces a p-value of 4 x 10-9, meaning it is highly unlikely that such a strong trend would have appeared randomly in observations if there were no true underlying trend. We reject the null hypothesis, and accept the alternative hypothesis, that there is a significant trend in Göta River annual minimum flows. Remember that we set up our alternative hypothesis as a two-sided test (b1 ≠ 0), so we are testing whether there is a significant trend, regardless if it is positive or negative. We should make this clear when we report our findings. Of course, we should also report that the trend we found was that Göta River minimum flows have been increasing at an estimated rate of 1.23 m3/s per year since 1941.</p>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="chapter-7.html#cb129-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Filter to the Gota River and years after 1940 </span></span>
+<span id="cb129-2"><a href="chapter-7.html#cb129-2" aria-hidden="true" tabindex="-1"></a>gota_annual <span class="ot">&lt;-</span> flow_annual <span class="sc">%&gt;%</span></span>
+<span id="cb129-3"><a href="chapter-7.html#cb129-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(river <span class="sc">==</span> <span class="st">&quot;Gota&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb129-4"><a href="chapter-7.html#cb129-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">1941</span>)</span>
+<span id="cb129-5"><a href="chapter-7.html#cb129-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb129-6"><a href="chapter-7.html#cb129-6" aria-hidden="true" tabindex="-1"></a><span class="do">### Create an OLS linear trend model </span></span>
+<span id="cb129-7"><a href="chapter-7.html#cb129-7" aria-hidden="true" tabindex="-1"></a>gota_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(min_m3s<span class="sc">~</span>year, <span class="at">data =</span> gota_annual)</span>
+<span id="cb129-8"><a href="chapter-7.html#cb129-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb129-9"><a href="chapter-7.html#cb129-9" aria-hidden="true" tabindex="-1"></a><span class="do">### Show results</span></span>
+<span id="cb129-10"><a href="chapter-7.html#cb129-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(gota_lm)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = min_m3s ~ year, data = gota_annual)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -60.468 -22.089  -4.605  17.556  90.773 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -2527.3124   331.5982  -7.622 5.82e-11 ***
+## year            1.3387     0.1675   7.992 1.14e-11 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 33.31 on 76 degrees of freedom
+## Multiple R-squared:  0.4567, Adjusted R-squared:  0.4495 
+## F-statistic: 63.88 on 1 and 76 DF,  p-value: 1.139e-11</code></pre>
+<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="chapter-7.html#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Insert columns for trend fit and residuals</span></span>
+<span id="cb131-2"><a href="chapter-7.html#cb131-2" aria-hidden="true" tabindex="-1"></a>gota_annual <span class="ot">&lt;-</span> gota_annual <span class="sc">%&gt;%</span></span>
+<span id="cb131-3"><a href="chapter-7.html#cb131-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">fitted =</span> <span class="fu">fitted</span>(gota_lm)) <span class="sc">%&gt;%</span></span>
+<span id="cb131-4"><a href="chapter-7.html#cb131-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">resid =</span> <span class="fu">resid</span>(gota_lm))</span>
+<span id="cb131-5"><a href="chapter-7.html#cb131-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb131-6"><a href="chapter-7.html#cb131-6" aria-hidden="true" tabindex="-1"></a><span class="do">### Create dataframe for confidence interval and predition interval</span></span>
+<span id="cb131-7"><a href="chapter-7.html#cb131-7" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">year =</span> <span class="fu">seq</span>(<span class="dv">1935</span>, <span class="dv">2025</span>, <span class="dv">1</span>))</span>
+<span id="cb131-8"><a href="chapter-7.html#cb131-8" aria-hidden="true" tabindex="-1"></a>gota_conf <span class="ot">&lt;-</span> <span class="fu">predict</span>(gota_lm, <span class="at">newdata=</span>new_data, <span class="at">interval =</span> <span class="st">&quot;confidence&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb131-9"><a href="chapter-7.html#cb131-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb131-10"><a href="chapter-7.html#cb131-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(new_data) <span class="sc">%&gt;%</span></span>
+<span id="cb131-11"><a href="chapter-7.html#cb131-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">interval =</span> <span class="st">&quot;Confidence&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>)</span>
+<span id="cb131-12"><a href="chapter-7.html#cb131-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb131-13"><a href="chapter-7.html#cb131-13" aria-hidden="true" tabindex="-1"></a>gota_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(gota_lm, <span class="at">newdata=</span>new_data, <span class="at">interval =</span> <span class="st">&quot;prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb131-14"><a href="chapter-7.html#cb131-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb131-15"><a href="chapter-7.html#cb131-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(new_data) <span class="sc">%&gt;%</span></span>
+<span id="cb131-16"><a href="chapter-7.html#cb131-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">interval =</span> <span class="st">&quot;Prediction&quot;</span>, <span class="at">level =</span> <span class="fl">0.95</span>)</span>
+<span id="cb131-17"><a href="chapter-7.html#cb131-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb131-18"><a href="chapter-7.html#cb131-18" aria-hidden="true" tabindex="-1"></a>plot_ribbon <span class="ot">&lt;-</span> gota_conf <span class="sc">%&gt;%</span></span>
+<span id="cb131-19"><a href="chapter-7.html#cb131-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_rows</span>(gota_pred)</span>
+<span id="cb131-20"><a href="chapter-7.html#cb131-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb131-21"><a href="chapter-7.html#cb131-21" aria-hidden="true" tabindex="-1"></a>plot_line <span class="ot">&lt;-</span> new_data <span class="sc">%&gt;%</span></span>
+<span id="cb131-22"><a href="chapter-7.html#cb131-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">line_fit =</span> <span class="fu">predict</span>(gota_lm, <span class="at">newdata=</span>new_data), <span class="at">Data =</span> <span class="st">&quot;Linear&quot;</span>) </span></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-110"></span>
+<img src="_main_files/figure-html/unnamed-chunk-110-1.png" alt="Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval." width="672" />
+<p class="caption">
+Figure 12: Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval.
+</p>
+</div>
+</div>
+</div>
+<div id="worked-example-7.2-non-parametric-trends" class="section level2">
+<h2>Worked Example 7.2: Non Parametric Trends</h2>
+<div id="loading-the-data-9" class="section level3">
+<h3>Loading the Data</h3>
+<p>First we must load the data. Consider the same data as Worked Example 7.1 using annual minimum flow from the Göta River beginning in 1941.</p>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="chapter-7.html#cb132-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb132-2"><a href="chapter-7.html#cb132-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hydroDrought)</span>
+<span id="cb132-3"><a href="chapter-7.html#cb132-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb132-4"><a href="chapter-7.html#cb132-4" aria-hidden="true" tabindex="-1"></a><span class="co">#require(Hmisc)</span></span>
+<span id="cb132-5"><a href="chapter-7.html#cb132-5" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(zyp)</span>
+<span id="cb132-6"><a href="chapter-7.html#cb132-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb132-7"><a href="chapter-7.html#cb132-7" aria-hidden="true" tabindex="-1"></a><span class="do">### Filter to the rivers and create columns for dates</span></span>
+<span id="cb132-8"><a href="chapter-7.html#cb132-8" aria-hidden="true" tabindex="-1"></a>flow_df <span class="ot">&lt;-</span> international <span class="sc">%&gt;%</span></span>
+<span id="cb132-9"><a href="chapter-7.html#cb132-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(river <span class="sc">==</span> <span class="st">&quot;Gota&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb132-10"><a href="chapter-7.html#cb132-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(river, data) <span class="sc">%&gt;%</span></span>
+<span id="cb132-11"><a href="chapter-7.html#cb132-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest</span>(<span class="at">cols =</span> data) <span class="sc">%&gt;%</span></span>
+<span id="cb132-12"><a href="chapter-7.html#cb132-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb132-13"><a href="chapter-7.html#cb132-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">year =</span> <span class="fu">year</span>(time),</span>
+<span id="cb132-14"><a href="chapter-7.html#cb132-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">jdate =</span> <span class="fu">yday</span>(time)</span>
+<span id="cb132-15"><a href="chapter-7.html#cb132-15" aria-hidden="true" tabindex="-1"></a>    )  <span class="sc">%&gt;%</span></span>
+<span id="cb132-16"><a href="chapter-7.html#cb132-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 61,498 x 5
+##    river time       discharge  year jdate
+##    &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 Gota  1850-01-01       506  1850     1
+##  2 Gota  1850-01-02       506  1850     2
+##  3 Gota  1850-01-03       502  1850     3
+##  4 Gota  1850-01-04       502  1850     4
+##  5 Gota  1850-01-05       502  1850     5
+##  6 Gota  1850-01-06       502  1850     6
+##  7 Gota  1850-01-07       496  1850     7
+##  8 Gota  1850-01-08       496  1850     8
+##  9 Gota  1850-01-09       496  1850     9
+## 10 Gota  1850-01-10       496  1850    10
+## # … with 61,488 more rows</code></pre>
+<div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="chapter-7.html#cb134-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Group by year and river and then calculate min annual flow</span></span>
+<span id="cb134-2"><a href="chapter-7.html#cb134-2" aria-hidden="true" tabindex="-1"></a>flow_annual <span class="ot">&lt;-</span> flow_df <span class="sc">%&gt;%</span></span>
+<span id="cb134-3"><a href="chapter-7.html#cb134-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(river, year) <span class="sc">%&gt;%</span></span>
+<span id="cb134-4"><a href="chapter-7.html#cb134-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">min_m3s =</span> <span class="fu">min</span>(discharge, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">&quot;drop_last&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb134-5"><a href="chapter-7.html#cb134-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb134-6"><a href="chapter-7.html#cb134-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 169 x 3
+## # Groups:   river [1]
+##    river  year min_m3s
+##    &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Gota   1850     471
+##  2 Gota   1851     500
+##  3 Gota   1852     565
+##  4 Gota   1853     591
+##  5 Gota   1854     347
+##  6 Gota   1855     316
+##  7 Gota   1856     366
+##  8 Gota   1857     401
+##  9 Gota   1858     316
+## 10 Gota   1859     310
+## # … with 159 more rows</code></pre>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="chapter-7.html#cb136-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Subset to 1941 and after</span></span>
+<span id="cb136-2"><a href="chapter-7.html#cb136-2" aria-hidden="true" tabindex="-1"></a>flow_annual_subset <span class="ot">&lt;-</span> flow_annual <span class="sc">%&gt;%</span> <span class="fu">filter</span>( year <span class="sc">&gt;=</span> <span class="dv">1941</span>) </span>
+<span id="cb136-3"><a href="chapter-7.html#cb136-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb136-4"><a href="chapter-7.html#cb136-4" aria-hidden="true" tabindex="-1"></a><span class="do">### Run the Mann-Kendall Test for the annual min flow</span></span>
+<span id="cb136-5"><a href="chapter-7.html#cb136-5" aria-hidden="true" tabindex="-1"></a>mk_test_results <span class="ot">&lt;-</span> <span class="fu">Kendall</span>(<span class="at">x=</span>flow_annual_subset<span class="sc">$</span>year, <span class="at">y=</span>flow_annual_subset<span class="sc">$</span>min_m3s)</span>
+<span id="cb136-6"><a href="chapter-7.html#cb136-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mk_test_results)</span></code></pre></div>
+<pre><code>## Score =  1426 , Var(Score) = 53676.67
+## denominator =  2988.465
+## tau = 0.477, 2-sided pvalue =&lt; 2.22e-16</code></pre>
+</div>
+<div id="mann-kendall-test" class="section level3">
+<h3>Mann-Kendall test</h3>
+<p>The Mann-Kendall test produces an S value of 1426, meaning that we have 1426 more date pairs where the later observation is larger than the earlier. Using this test statistic and the 78 years of observations, the Mann-Kendall test produces a p-value &lt; 2.2x10-16 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.</p>
+<p>As discussed in the text, the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results, but is slightly less affected by relatively high outliers during the late 2000s.</p>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb138-1"><a href="chapter-7.html#cb138-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Run the Theil-Sen slope for annual min flow</span></span>
+<span id="cb138-2"><a href="chapter-7.html#cb138-2" aria-hidden="true" tabindex="-1"></a>sen_slope_results <span class="ot">&lt;-</span> <span class="fu">zyp.sen</span>(min_m3s <span class="sc">~</span> year, <span class="at">data =</span> flow_annual_subset)</span>
+<span id="cb138-3"><a href="chapter-7.html#cb138-3" aria-hidden="true" tabindex="-1"></a>sen_slope_results</span></code></pre></div>
+<pre><code>## 
+## Call:
+## NULL
+## 
+## Coefficients:
+## Intercept       year  
+## -2202.414      1.172</code></pre>
+<div class="sourceCode" id="cb140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb140-1"><a href="chapter-7.html#cb140-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint.zyp</span>(sen_slope_results)</span></code></pre></div>
+<pre><code>##                   0.025        0.975
+## Intercept -2263.3510083 -2132.799301
+## year          0.8387097     1.553571</code></pre>
+<div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="chapter-7.html#cb142-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Rerun OLS trend</span></span>
+<span id="cb142-2"><a href="chapter-7.html#cb142-2" aria-hidden="true" tabindex="-1"></a>gota_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(min_m3s<span class="sc">~</span>year, <span class="at">data =</span> flow_annual_subset)</span>
+<span id="cb142-3"><a href="chapter-7.html#cb142-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-4"><a href="chapter-7.html#cb142-4" aria-hidden="true" tabindex="-1"></a><span class="do">### Combine for plotting purposes</span></span>
+<span id="cb142-5"><a href="chapter-7.html#cb142-5" aria-hidden="true" tabindex="-1"></a>trend_lines <span class="ot">&lt;-</span> flow_annual_subset <span class="sc">%&gt;%</span> </span>
+<span id="cb142-6"><a href="chapter-7.html#cb142-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(year) <span class="sc">%&gt;%</span>  <span class="do">### Only dplyr::select the year</span></span>
+<span id="cb142-7"><a href="chapter-7.html#cb142-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(   <span class="do">### Create two new columns with predictions</span></span>
+<span id="cb142-8"><a href="chapter-7.html#cb142-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">ols =</span> gota_lm<span class="sc">$</span>coef[<span class="dv">1</span>] <span class="sc">+</span> gota_lm<span class="sc">$</span>coef[<span class="dv">2</span>] <span class="sc">*</span> year,</span>
+<span id="cb142-9"><a href="chapter-7.html#cb142-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">sen =</span> sen_slope_results<span class="sc">$</span>coef[<span class="dv">1</span>] <span class="sc">+</span> sen_slope_results<span class="sc">$</span>coef[<span class="dv">2</span>] <span class="sc">*</span> year</span>
+<span id="cb142-10"><a href="chapter-7.html#cb142-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb142-11"><a href="chapter-7.html#cb142-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">gather</span>(model, min_m3s, <span class="sc">-</span>year)   <span class="do">### Gather these predictions into a long format for plotting</span></span>
+<span id="cb142-12"><a href="chapter-7.html#cb142-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb142-13"><a href="chapter-7.html#cb142-13" aria-hidden="true" tabindex="-1"></a><span class="do">### Re-factor the model names to make it better to plot</span></span>
+<span id="cb142-14"><a href="chapter-7.html#cb142-14" aria-hidden="true" tabindex="-1"></a>trend_lines<span class="sc">$</span>model <span class="ot">&lt;-</span> <span class="fu">factor</span>(trend_lines<span class="sc">$</span>model, <span class="fu">c</span>(<span class="st">&quot;ols&quot;</span>, <span class="st">&quot;sen&quot;</span>), <span class="at">labels=</span><span class="fu">c</span>(<span class="st">&quot;Ordinary Least Squares (OLS)&quot;</span>, <span class="st">&quot;Thiel-Sen Slope&quot;</span>))</span></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-117"></span>
+<img src="_main_files/figure-html/unnamed-chunk-117-1.png" alt="Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river after 1940." width="672" />
+<p class="caption">
+Figure 13: Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river after 1940.
+</p>
+</div>
+</div>
+<div id="high-leverage-outlier-effects" class="section level3">
+<h3>High leverage outlier effects</h3>
+<p>If we instead expand the Göta River timeseries to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent.</p>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="chapter-7.html#cb143-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Subset to 1934 and after</span></span>
+<span id="cb143-2"><a href="chapter-7.html#cb143-2" aria-hidden="true" tabindex="-1"></a>flow_annual_longer <span class="ot">&lt;-</span> flow_annual <span class="sc">%&gt;%</span> <span class="fu">filter</span>( year <span class="sc">&gt;=</span> <span class="dv">1934</span>) </span>
+<span id="cb143-3"><a href="chapter-7.html#cb143-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb143-4"><a href="chapter-7.html#cb143-4" aria-hidden="true" tabindex="-1"></a><span class="do">### Run the Mann-Kendall Test for the annual min flow</span></span>
+<span id="cb143-5"><a href="chapter-7.html#cb143-5" aria-hidden="true" tabindex="-1"></a>mk_longer <span class="ot">&lt;-</span> <span class="fu">Kendall</span>(<span class="at">x=</span>flow_annual_longer<span class="sc">$</span>year, <span class="at">y=</span>flow_annual_longer<span class="sc">$</span>min_m3s)</span>
+<span id="cb143-6"><a href="chapter-7.html#cb143-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mk_longer)</span></code></pre></div>
+<pre><code>## Score =  921 , Var(Score) = 69373
+## denominator =  3555.47
+## tau = 0.259, 2-sided pvalue =0.00047767</code></pre>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="chapter-7.html#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Run the Theil-Sen slope for annual min flow</span></span>
+<span id="cb145-2"><a href="chapter-7.html#cb145-2" aria-hidden="true" tabindex="-1"></a>sen_slope_longer <span class="ot">&lt;-</span> <span class="fu">zyp.sen</span>(min_m3s <span class="sc">~</span> year, <span class="at">data =</span> flow_annual_longer)</span>
+<span id="cb145-3"><a href="chapter-7.html#cb145-3" aria-hidden="true" tabindex="-1"></a>sen_slope_longer</span></code></pre></div>
+<pre><code>## 
+## Call:
+## NULL
+## 
+## Coefficients:
+##  Intercept        year  
+## -1390.5720      0.7639</code></pre>
+<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="chapter-7.html#cb147-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint.zyp</span>(sen_slope_longer)</span></code></pre></div>
+<pre><code>##                   0.025        0.975
+## Intercept -1545.8315356 -1191.203759
+## year          0.3676471     1.142857</code></pre>
+<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="chapter-7.html#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Rerun OLS trend</span></span>
+<span id="cb149-2"><a href="chapter-7.html#cb149-2" aria-hidden="true" tabindex="-1"></a>gota_lm_longer <span class="ot">&lt;-</span> <span class="fu">lm</span>(min_m3s<span class="sc">~</span>year, <span class="at">data =</span> flow_annual_longer)</span>
+<span id="cb149-3"><a href="chapter-7.html#cb149-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(gota_lm_longer)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = min_m3s ~ year, data = flow_annual_longer)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -90.84 -46.66 -21.78  13.05 423.93 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 489.7563   768.4614   0.637    0.526
+## year         -0.1765     0.3889  -0.454    0.651
+## 
+## Residual standard error: 87.96 on 83 degrees of freedom
+## Multiple R-squared:  0.002476,   Adjusted R-squared:  -0.009543 
+## F-statistic: 0.206 on 1 and 83 DF,  p-value: 0.6511</code></pre>
+<p>By including only 6 additional years, the OLS line changes from a significantly positive trend (+1.3387372 m3/s per year) to a significantly negative trend (-0.1764901 m3/s per year). The Theil-Sen line is slightly affected by these outliers, decreasing in slope from 1.1724138 to 0.7639319, but maintaining a statistically significant 70-year increasing trend that is clear visually.</p>
+<p>This is an extreme example and we know from Section 7.2.3 that these outliers are related to a change in lake management. Data before 1940 follows a different underlying distribution, violating the assumptions of our model. To prove this, read ahead to Section 7.4.3.</p>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="chapter-7.html#cb151-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Combine for plotting purposes</span></span>
+<span id="cb151-2"><a href="chapter-7.html#cb151-2" aria-hidden="true" tabindex="-1"></a>trend_lines <span class="ot">&lt;-</span> flow_annual_longer <span class="sc">%&gt;%</span> </span>
+<span id="cb151-3"><a href="chapter-7.html#cb151-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(year) <span class="sc">%&gt;%</span>  <span class="do">### Only dplyr::select the year</span></span>
+<span id="cb151-4"><a href="chapter-7.html#cb151-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(   <span class="do">### Create two new columns with predictions</span></span>
+<span id="cb151-5"><a href="chapter-7.html#cb151-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">ols =</span> gota_lm_longer<span class="sc">$</span>coef[<span class="dv">1</span>] <span class="sc">+</span> gota_lm_longer<span class="sc">$</span>coef[<span class="dv">2</span>] <span class="sc">*</span> year,</span>
+<span id="cb151-6"><a href="chapter-7.html#cb151-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">sen =</span> sen_slope_longer<span class="sc">$</span>coef[<span class="dv">1</span>] <span class="sc">+</span> sen_slope_longer<span class="sc">$</span>coef[<span class="dv">2</span>] <span class="sc">*</span> year</span>
+<span id="cb151-7"><a href="chapter-7.html#cb151-7" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb151-8"><a href="chapter-7.html#cb151-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">gather</span>(model, min_m3s, <span class="sc">-</span>year)   <span class="do">### Gather these predictions into a long format for plotting</span></span>
+<span id="cb151-9"><a href="chapter-7.html#cb151-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb151-10"><a href="chapter-7.html#cb151-10" aria-hidden="true" tabindex="-1"></a><span class="do">### Re-factor the model names to make it better to plot</span></span>
+<span id="cb151-11"><a href="chapter-7.html#cb151-11" aria-hidden="true" tabindex="-1"></a>trend_lines<span class="sc">$</span>model <span class="ot">&lt;-</span> <span class="fu">factor</span>(trend_lines<span class="sc">$</span>model, <span class="fu">c</span>(<span class="st">&quot;ols&quot;</span>, <span class="st">&quot;sen&quot;</span>), <span class="at">labels=</span><span class="fu">c</span>(<span class="st">&quot;Ordinary Least Squares (OLS)&quot;</span>, <span class="st">&quot;Thiel-Sen Slope&quot;</span>))</span></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-121"></span>
+<img src="_main_files/figure-html/unnamed-chunk-121-1.png" alt="Figure 7.11: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river by incorrectly including data from 1934 (prior to dam regulation)." width="672" />
+<p class="caption">
+Figure 14: Figure 7.11: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river by incorrectly including data from 1934 (prior to dam regulation).
+</p>
+</div>
+</div>
+</div>
+<div id="worked-example-7.3-structural-change-analysis" class="section level2">
+<h2>Worked Example 7.3: Structural Change Analysis</h2>
+<div id="visualizing-daily-flow" class="section level3">
+<h3>Visualizing Daily Flow</h3>
+<p>In previous worked examples, we used a subset of Göta River discharges, processed to produce the annual minimum flow cut either to the period before 1940 or after 1940. Plotting the raw daily data from the earliest records (Fig. 7.12), we see an abrupt and obvious structural change around 1940. There is clearly a change in variance and a change in temporal autocorrelation (flow persistence/noisiness).</p>
+<div class="sourceCode" id="cb152"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb152-1"><a href="chapter-7.html#cb152-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb152-2"><a href="chapter-7.html#cb152-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hydroDrought)</span>
+<span id="cb152-3"><a href="chapter-7.html#cb152-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb152-4"><a href="chapter-7.html#cb152-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(strucchange)</span>
+<span id="cb152-5"><a href="chapter-7.html#cb152-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Hmisc)</span>
+<span id="cb152-6"><a href="chapter-7.html#cb152-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb152-7"><a href="chapter-7.html#cb152-7" aria-hidden="true" tabindex="-1"></a><span class="do">### Filter to the rivers and create columns for dates</span></span>
+<span id="cb152-8"><a href="chapter-7.html#cb152-8" aria-hidden="true" tabindex="-1"></a>flow_df <span class="ot">&lt;-</span> international <span class="sc">%&gt;%</span></span>
+<span id="cb152-9"><a href="chapter-7.html#cb152-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(river <span class="sc">==</span> <span class="st">&quot;Gota&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb152-10"><a href="chapter-7.html#cb152-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(river, data) <span class="sc">%&gt;%</span></span>
+<span id="cb152-11"><a href="chapter-7.html#cb152-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unnest</span>(<span class="at">cols =</span> data) <span class="sc">%&gt;%</span></span>
+<span id="cb152-12"><a href="chapter-7.html#cb152-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb152-13"><a href="chapter-7.html#cb152-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">year =</span> <span class="fu">year</span>(time),</span>
+<span id="cb152-14"><a href="chapter-7.html#cb152-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">jdate =</span> <span class="fu">yday</span>(time)</span>
+<span id="cb152-15"><a href="chapter-7.html#cb152-15" aria-hidden="true" tabindex="-1"></a>    )  <span class="sc">%&gt;%</span></span>
+<span id="cb152-16"><a href="chapter-7.html#cb152-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 61,498 x 5
+##    river time       discharge  year jdate
+##    &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 Gota  1850-01-01       506  1850     1
+##  2 Gota  1850-01-02       506  1850     2
+##  3 Gota  1850-01-03       502  1850     3
+##  4 Gota  1850-01-04       502  1850     4
+##  5 Gota  1850-01-05       502  1850     5
+##  6 Gota  1850-01-06       502  1850     6
+##  7 Gota  1850-01-07       496  1850     7
+##  8 Gota  1850-01-08       496  1850     8
+##  9 Gota  1850-01-09       496  1850     9
+## 10 Gota  1850-01-10       496  1850    10
+## # … with 61,488 more rows</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-124"></span>
+<img src="_main_files/figure-html/unnamed-chunk-124-1.png" alt="Figure 7.12: Daily discharge at the Gota River station demonstrating a visually clear structural change." width="672" />
+<p class="caption">
+Figure 15: Figure 7.12: Daily discharge at the Gota River station demonstrating a visually clear structural change.
+</p>
+</div>
+</div>
+<div id="testing-for-a-change-point" class="section level3">
+<h3>Testing for a change point</h3>
+<p>To avoid this temporal autocorrelation issue, let us focus again on the annual minimum flow for the entire time series. We now see a severe decrease in flow from 300-600 m3/s prior to the 1930s and 50-200 m3/s after 1940 (Fig. 7.13). Examples are not typically this clear. We can apply the Chow F-test to identify the change point.</p>
+<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="chapter-7.html#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Group by year and river and then calculate min annual flow</span></span>
+<span id="cb154-2"><a href="chapter-7.html#cb154-2" aria-hidden="true" tabindex="-1"></a>flow_annual <span class="ot">&lt;-</span> flow_df <span class="sc">%&gt;%</span></span>
+<span id="cb154-3"><a href="chapter-7.html#cb154-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(river, year) <span class="sc">%&gt;%</span></span>
+<span id="cb154-4"><a href="chapter-7.html#cb154-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">min_m3s =</span> <span class="fu">min</span>(discharge, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">&quot;drop_last&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb154-5"><a href="chapter-7.html#cb154-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb154-6"><a href="chapter-7.html#cb154-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span></code></pre></div>
+<pre><code>## # A tibble: 169 x 3
+## # Groups:   river [1]
+##    river  year min_m3s
+##    &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Gota   1850     471
+##  2 Gota   1851     500
+##  3 Gota   1852     565
+##  4 Gota   1853     591
+##  5 Gota   1854     347
+##  6 Gota   1855     316
+##  7 Gota   1856     366
+##  8 Gota   1857     401
+##  9 Gota   1858     316
+## 10 Gota   1859     310
+## # … with 159 more rows</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-127"></span>
+<img src="_main_files/figure-html/unnamed-chunk-127-1.png" alt="Figure 7.13: Annual minimum discharge at the Gota River station for the full period (1850-present)." width="672" />
+<p class="caption">
+Figure 16: Figure 7.13: Annual minimum discharge at the Gota River station for the full period (1850-present).
+</p>
+</div>
+<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="chapter-7.html#cb156-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Convert the data to a regularly spaced annual time series</span></span>
+<span id="cb156-2"><a href="chapter-7.html#cb156-2" aria-hidden="true" tabindex="-1"></a>first_year <span class="ot">&lt;-</span> <span class="fu">min</span>(flow_annual<span class="sc">$</span>year, <span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
+<span id="cb156-3"><a href="chapter-7.html#cb156-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb156-4"><a href="chapter-7.html#cb156-4" aria-hidden="true" tabindex="-1"></a>flow_annual_ts <span class="ot">&lt;-</span> flow_annual <span class="sc">%&gt;%</span> </span>
+<span id="cb156-5"><a href="chapter-7.html#cb156-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">complete</span>(<span class="at">year=</span><span class="fu">full_seq</span>(year,<span class="dv">1</span>)) <span class="sc">%&gt;%</span>    <span class="do">### Make sure all years are included using the complete command</span></span>
+<span id="cb156-6"><a href="chapter-7.html#cb156-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ts</span>(<span class="at">frequency=</span><span class="dv">1</span>, <span class="at">start=</span>first_year) </span>
+<span id="cb156-7"><a href="chapter-7.html#cb156-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb156-8"><a href="chapter-7.html#cb156-8" aria-hidden="true" tabindex="-1"></a><span class="do">### Run the Chow F test for a single breakpoint, assuming there is no trend in the data (ie intercept only)</span></span>
+<span id="cb156-9"><a href="chapter-7.html#cb156-9" aria-hidden="true" tabindex="-1"></a><span class="do">### The equation therefore looks like min_m3s is a function only of an intercept (designated by a 1)</span></span>
+<span id="cb156-10"><a href="chapter-7.html#cb156-10" aria-hidden="true" tabindex="-1"></a>f_test_int_only <span class="ot">&lt;-</span> <span class="fu">Fstats</span>(min_m3s <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data=</span>flow_annual_ts)</span>
+<span id="cb156-11"><a href="chapter-7.html#cb156-11" aria-hidden="true" tabindex="-1"></a><span class="fu">sctest</span>(f_test_int_only)</span></code></pre></div>
+<pre><code>## 
+##  supF test
+## 
+## data:  f_test_int_only
+## sup.F = 789.79, p-value &lt; 2.2e-16</code></pre>
+<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="chapter-7.html#cb158-1" aria-hidden="true" tabindex="-1"></a>bp_int_only <span class="ot">&lt;-</span> <span class="fu">breakpoints</span>(f_test_int_only)</span>
+<span id="cb158-2"><a href="chapter-7.html#cb158-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(bp_int_only)</span></code></pre></div>
+<pre><code>## 
+##   Optimal 2-segment partition: 
+## 
+## Call:
+## breakpoints.Fstats(obj = f_test_int_only)
+## 
+## Breakpoints at observation number:
+## 88 
+## 
+## Corresponding to breakdates:
+## 1937 
+## 
+## RSS: 951054.5</code></pre>
+<p>Fig. 7.14 shows the null model in green, assuming the data come from the same distribution, and the alternative model in blue, assuming a sudden change point. In this example, we choose to constrain the model to assume there is a constant mean with no trends, i.e. b1=b2a=b2b=0. Using a single breakpoint, we see that the F-test statistic is maximized with a breakpoint in 1937. This breakpoint is highly statistically significant, suggesting there was a detectable structural change during this year. The 95% confidence interval around the location of this breakpoint is between 1936 and 1938, also giving us strong confidence in the location of this breakpoint.</p>
+<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb160-1"><a href="chapter-7.html#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Run for multiple potential breakpoints</span></span>
+<span id="cb160-2"><a href="chapter-7.html#cb160-2" aria-hidden="true" tabindex="-1"></a>all_bp_int_only <span class="ot">&lt;-</span> <span class="fu">breakpoints</span>(min_m3s <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data=</span>flow_annual_ts)</span>
+<span id="cb160-3"><a href="chapter-7.html#cb160-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(all_bp_int_only)</span></code></pre></div>
+<pre><code>## 
+##   Optimal (m+1)-segment partition: 
+## 
+## Call:
+## breakpoints.formula(formula = min_m3s ~ 1, data = flow_annual_ts)
+## 
+## Breakpoints at observation number:
+##                         
+## m = 1         88        
+## m = 2         88     135
+## m = 3      51 88     135
+## m = 4      51 88 115 144
+## m = 5   25 51 88 115 144
+## 
+## Corresponding to breakdates:
+##                                 
+## m = 1             1937          
+## m = 2             1937      1984
+## m = 3        1900 1937      1984
+## m = 4        1900 1937 1964 1993
+## m = 5   1874 1900 1937 1964 1993
+## 
+## Fit:
+##                                                    
+## m   0       1       2       3       4       5      
+## RSS 5448868  951054  908267  894278  891014  888699
+## BIC    2244    1960    1962    1970    1979    1989</code></pre>
+<div class="sourceCode" id="cb162"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb162-1"><a href="chapter-7.html#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Best solution should minimize BIC (Bayesian Information Criterion)</span></span>
+<span id="cb162-2"><a href="chapter-7.html#cb162-2" aria-hidden="true" tabindex="-1"></a><span class="co">#plot(all_bp_int_only)</span></span>
+<span id="cb162-3"><a href="chapter-7.html#cb162-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb162-4"><a href="chapter-7.html#cb162-4" aria-hidden="true" tabindex="-1"></a><span class="do">### Calculate a confidence interval around this</span></span>
+<span id="cb162-5"><a href="chapter-7.html#cb162-5" aria-hidden="true" tabindex="-1"></a>ci_int_only <span class="ot">&lt;-</span> <span class="fu">confint</span>(all_bp_int_only)</span>
+<span id="cb162-6"><a href="chapter-7.html#cb162-6" aria-hidden="true" tabindex="-1"></a>ci_int_only</span></code></pre></div>
+<pre><code>## 
+##   Confidence intervals for breakpoints
+##   of optimal 2-segment partition: 
+## 
+## Call:
+## confint.breakpointsfull(object = all_bp_int_only)
+## 
+## Breakpoints at observation number:
+##   2.5 % breakpoints 97.5 %
+## 1    87          88     89
+## 
+## Corresponding to breakdates:
+##   2.5 % breakpoints 97.5 %
+## 1  1936        1937   1938</code></pre>
+<div class="sourceCode" id="cb164"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb164-1"><a href="chapter-7.html#cb164-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Assume this breakpoint and plot the null hypothesis model (no breakpoint, intercept only) vs the alternative (breakpoint, intercept only)</span></span>
+<span id="cb164-2"><a href="chapter-7.html#cb164-2" aria-hidden="true" tabindex="-1"></a><span class="do">### Fit both models</span></span>
+<span id="cb164-3"><a href="chapter-7.html#cb164-3" aria-hidden="true" tabindex="-1"></a>fm0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(min_m3s <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data=</span>flow_annual_ts )</span>
+<span id="cb164-4"><a href="chapter-7.html#cb164-4" aria-hidden="true" tabindex="-1"></a>fm1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(min_m3s <span class="sc">~</span> <span class="fu">breakfactor</span>(all_bp_int_only, <span class="at">breaks =</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="dv">1</span>, <span class="at">data=</span>flow_annual_ts )</span></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-132"></span>
+<img src="_main_files/figure-html/unnamed-chunk-132-1.png" alt="Figure 7.14: Candidate models for Chow Breakpoint Test. Null model (no breakpoint) shown in green, while the alternative model (single breakpoint) is shown in blue. Location of the breakpoint shown with a dashed line and a 95% confidence interval in red." width="672" />
+<p class="caption">
+Figure 17: Figure 7.14: Candidate models for Chow Breakpoint Test. Null model (no breakpoint) shown in green, while the alternative model (single breakpoint) is shown in blue. Location of the breakpoint shown with a dashed line and a 95% confidence interval in red.
+</p>
+</div>
+<p>To test the possibility of additional breakpoints, we introduced more complex models with 2-5 breakpoints. However, adding these breaks did not significantly decrease the model residuals, pointing to a single breakpoint.</p>
+<p>As with all statistical findings, it is important to validate results with real-world understanding, checking whether the findings make physical sense. In this case, we can check the historical record during the period 1936-1938 to try and identify what physical processes could produce this sudden decrease in annual minimum flows on the Göta River. The Lake Vanern decree was signed in 1937, which codified water management on Lake Vanern, the headwaters of Göta River, to prevent severe flooding through dam control. This more active reservoir management decreased annual low flows and peak flows.</p>
+</div>
+</div>
+<div id="worked-example-7.4-principal-component-analysis" class="section level2">
+<h2>Worked Example 7.4: Principal Component Analysis</h2>
+<div id="simple-pca-with-two-variables" class="section level3">
+<h3>Simple PCA with two variables</h3>
+<p>To explain what PCA is, we can consider two variables from the regional low flow analysis: ALPHA and Q95/Q50 (Table 5.1, Figure 5.16). The values for the 21 sites are replotted in Fig. 7.17a after they have been standardized to have zero mean and unit standard deviation (now referred to as ALPHA* and Q95/Q50*).</p>
+<p>Because ALPHA* and Q95/Q50* are correlated, PC1 captures variability along a nearly 1:1 line (Fig. 7.17a) that measures the value of this artificial variable. This new axis is PC1. PC2, is set at a 90 degree angle (orthogonal), to capture the remaining variability.</p>
+<p>This oversimplified example allows us to visualize these underlying axes, but as we consider more variables, and therefore higher dimensions, it is more appropriate to use the loading plot (Figure 7.17b). After rotating the data into the page so that positive PC1 is along the x-axis, we see that most variance falls along this horizontal axis. In fact, if we only consider PC1, ignoring the vertical PC2, we could still reconstruct 72.14% of the ALPHA* and Q95/Q50* values. This is why PCA is so valuable for data reduction.</p>
+<div class="sourceCode" id="cb165"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb165-1"><a href="chapter-7.html#cb165-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Select only two variables</span></span>
+<span id="cb165-2"><a href="chapter-7.html#cb165-2" aria-hidden="true" tabindex="-1"></a>indices_matrix <span class="ot">&lt;-</span> indices <span class="sc">%&gt;%</span></span>
+<span id="cb165-3"><a href="chapter-7.html#cb165-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(ALPHA, <span class="st">`</span><span class="at">Q95/Q50</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb165-4"><a href="chapter-7.html#cb165-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.matrix</span>()</span>
+<span id="cb165-5"><a href="chapter-7.html#cb165-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(indices_matrix) <span class="ot">&lt;-</span> indices<span class="sc">$</span>id</span></code></pre></div>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="chapter-7.html#cb166-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Run the PCA analysis with scaling</span></span>
+<span id="cb166-2"><a href="chapter-7.html#cb166-2" aria-hidden="true" tabindex="-1"></a>regional_pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(indices_matrix, <span class="at">scale =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb166-3"><a href="chapter-7.html#cb166-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb166-4"><a href="chapter-7.html#cb166-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Mean (center) and standard deviation (scale) from normalization</span></span>
+<span id="cb166-5"><a href="chapter-7.html#cb166-5" aria-hidden="true" tabindex="-1"></a><span class="co">#regional_pca$center</span></span>
+<span id="cb166-6"><a href="chapter-7.html#cb166-6" aria-hidden="true" tabindex="-1"></a><span class="co">#regional_pca$scale</span></span>
+<span id="cb166-7"><a href="chapter-7.html#cb166-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb166-8"><a href="chapter-7.html#cb166-8" aria-hidden="true" tabindex="-1"></a><span class="do">### View the PC Loading matrix</span></span>
+<span id="cb166-9"><a href="chapter-7.html#cb166-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(regional_pca<span class="sc">$</span>rotation)</span></code></pre></div>
+<pre><code>##                PC1        PC2
+## ALPHA    0.7071068 -0.7071068
+## Q95/Q50 -0.7071068 -0.7071068</code></pre>
+<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="chapter-7.html#cb168-1" aria-hidden="true" tabindex="-1"></a><span class="do">### View the PC Scores</span></span>
+<span id="cb168-2"><a href="chapter-7.html#cb168-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(regional_pca<span class="sc">$</span>x)</span></code></pre></div>
+<pre><code>##               PC1        PC2
+## 210039 -0.1404138  0.9569836
+## 210054  0.5984752 -0.7416445
+## 210062  0.6078436 -0.1317603
+## 210088  0.1721435 -0.1278319
+## 210211 -1.2826950 -0.2886183
+## 210237 -0.2715253 -0.3175126</code></pre>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="chapter-7.html#cb170-1" aria-hidden="true" tabindex="-1"></a><span class="co">#By default, eigenvectors in R point in the negative direction. We can adjust this with a simple change.</span></span>
+<span id="cb170-2"><a href="chapter-7.html#cb170-2" aria-hidden="true" tabindex="-1"></a>regional_pca<span class="sc">$</span>rotation <span class="ot">&lt;-</span> <span class="sc">-</span>regional_pca<span class="sc">$</span>rotation</span>
+<span id="cb170-3"><a href="chapter-7.html#cb170-3" aria-hidden="true" tabindex="-1"></a>regional_pca<span class="sc">$</span>x <span class="ot">&lt;-</span> <span class="sc">-</span>regional_pca<span class="sc">$</span>x</span></code></pre></div>
+<div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb171-1"><a href="chapter-7.html#cb171-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Plot the PC Loading</span></span>
+<span id="cb171-2"><a href="chapter-7.html#cb171-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">autoplot</span>(regional_pca,</span>
+<span id="cb171-3"><a href="chapter-7.html#cb171-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">loadings.label=</span><span class="cn">TRUE</span>, <span class="at">loadings=</span><span class="cn">TRUE</span>, </span>
+<span id="cb171-4"><a href="chapter-7.html#cb171-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">loadings.label.size=</span><span class="dv">4</span>, <span class="at">loadings.colour=</span><span class="st">&#39;red&#39;</span>, <span class="at">loadings.label.vjust =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">scale =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb171-5"><a href="chapter-7.html#cb171-5" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">colour =</span> <span class="st">&quot;grey20&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb171-6"><a href="chapter-7.html#cb171-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">xintercept=</span><span class="dv">0</span>, <span class="at">colour =</span> <span class="st">&quot;grey20&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb171-7"><a href="chapter-7.html#cb171-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_text_repel</span>(<span class="at">vjust=</span><span class="sc">-</span><span class="dv">1</span>, <span class="at">label=</span>indices<span class="sc">$</span>station, <span class="at">size =</span> <span class="dv">3</span>, <span class="at">colour =</span> <span class="st">&quot;grey40&quot;</span>, <span class="at">alpha =</span><span class="fl">0.8</span>)  <span class="sc">%&gt;%</span></span>
+<span id="cb171-8"><a href="chapter-7.html#cb171-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">coord_fixed</span>(<span class="at">ratio=</span><span class="dv">1</span>, <span class="at">xlim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>,<span class="fl">2.5</span>), <span class="at">ylim=</span><span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>,<span class="fl">2.5</span>))</span></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-141"></span>
+<img src="_main_files/figure-html/unnamed-chunk-141-1.png" alt="Figure 7.17: Normalized variables with the PC axes (a) and the resultant PC Loading diagram (b) for these two variables." width="768" />
+<p class="caption">
+Figure 18: Figure 7.17: Normalized variables with the PC axes (a) and the resultant PC Loading diagram (b) for these two variables.
+</p>
+</div>
+</div>
+<div id="pca-with-all-variables" class="section level3">
+<h3>PCA with all variables</h3>
+<p>If we instead consider all variables, we produce the loading plot shown in Figure 7.18a. The loading plot shows that nearly all low flow metrics load onto PC1 in the negative direction, opposite to ALPHA. Further, all of the flow metrics prior to normalization by Q50, catchment area, and ALPHA load positively onto PC2, while the normalized metrics load negatively. PC2 is highly related to watershed size, and thereby absolute flow.</p>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="chapter-7.html#cb172-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Remove all the naming variables</span></span>
+<span id="cb172-2"><a href="chapter-7.html#cb172-2" aria-hidden="true" tabindex="-1"></a>indices_matrix <span class="ot">&lt;-</span> indices <span class="sc">%&gt;%</span></span>
+<span id="cb172-3"><a href="chapter-7.html#cb172-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id, <span class="sc">-</span>river, <span class="sc">-</span>station) <span class="sc">%&gt;%</span></span>
+<span id="cb172-4"><a href="chapter-7.html#cb172-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   select(ALPHA, `Q90/Q50`, `Q95/Q50`, `MAM(30)/Q50`, `MAM(10)/Q50`,`MAM(1)/Q50`) %&gt;%  </span></span>
+<span id="cb172-5"><a href="chapter-7.html#cb172-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.matrix</span>()</span>
+<span id="cb172-6"><a href="chapter-7.html#cb172-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(indices_matrix) <span class="ot">&lt;-</span> indices<span class="sc">$</span>id</span>
+<span id="cb172-7"><a href="chapter-7.html#cb172-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-8"><a href="chapter-7.html#cb172-8" aria-hidden="true" tabindex="-1"></a><span class="do">### Run the PCA analysis with scaling</span></span>
+<span id="cb172-9"><a href="chapter-7.html#cb172-9" aria-hidden="true" tabindex="-1"></a>regional_pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(indices_matrix, <span class="at">scale =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb172-10"><a href="chapter-7.html#cb172-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-11"><a href="chapter-7.html#cb172-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Adjust the sign of Eigen vectors.</span></span>
+<span id="cb172-12"><a href="chapter-7.html#cb172-12" aria-hidden="true" tabindex="-1"></a>regional_pca<span class="sc">$</span>rotation <span class="ot">&lt;-</span> <span class="sc">-</span>regional_pca<span class="sc">$</span>rotation</span>
+<span id="cb172-13"><a href="chapter-7.html#cb172-13" aria-hidden="true" tabindex="-1"></a>regional_pca<span class="sc">$</span>x <span class="ot">&lt;-</span> <span class="sc">-</span>regional_pca<span class="sc">$</span>x</span>
+<span id="cb172-14"><a href="chapter-7.html#cb172-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-15"><a href="chapter-7.html#cb172-15" aria-hidden="true" tabindex="-1"></a><span class="do">### Create loading plot</span></span>
+<span id="cb172-16"><a href="chapter-7.html#cb172-16" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">autoplot</span>(regional_pca,</span>
+<span id="cb172-17"><a href="chapter-7.html#cb172-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">loadings.label=</span><span class="cn">TRUE</span>, <span class="at">loadings=</span><span class="cn">TRUE</span>, </span>
+<span id="cb172-18"><a href="chapter-7.html#cb172-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">loadings.label.size=</span><span class="dv">3</span>, <span class="at">loadings.colour=</span><span class="st">&#39;red&#39;</span>, <span class="at">loadings.label.vjust =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">scale =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb172-19"><a href="chapter-7.html#cb172-19" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">colour =</span> <span class="st">&quot;grey20&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb172-20"><a href="chapter-7.html#cb172-20" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">xintercept=</span><span class="dv">0</span>, <span class="at">colour =</span> <span class="st">&quot;grey20&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb172-21"><a href="chapter-7.html#cb172-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">#+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = &quot;grey40&quot;, alpha =0.8)  %&gt;%</span></span>
+<span id="cb172-22"><a href="chapter-7.html#cb172-22" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">coord_fixed</span>(<span class="at">ratio=</span><span class="dv">1</span>)</span></code></pre></div>
+<p>If we are interested in focusing only on the most important PCs in the analysis, there are different ways of deciding how many to include. One method is to look at the scree plot, which graphs the proportion of variance explained by each PC and only retain the components above the scree plot ‘elbow’. In Fig. 7.18b this appears at two PCs. Another common metric is to only retain components with eigen values greater than 1, which also results in retaining the first two components. These two components explain 93.2% of the total variance across 15 variables because the variables are so highly correlated (Figure 7.18a).</p>
+<div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb173-1"><a href="chapter-7.html#cb173-1" aria-hidden="true" tabindex="-1"></a><span class="do">###  Extract the PC eigen values and variance explained</span></span>
+<span id="cb173-2"><a href="chapter-7.html#cb173-2" aria-hidden="true" tabindex="-1"></a>pc.importance <span class="ot">&lt;-</span> <span class="fu">summary</span> (regional_pca)</span>
+<span id="cb173-3"><a href="chapter-7.html#cb173-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb173-4"><a href="chapter-7.html#cb173-4" aria-hidden="true" tabindex="-1"></a><span class="do">### Create scree plot data</span></span>
+<span id="cb173-5"><a href="chapter-7.html#cb173-5" aria-hidden="true" tabindex="-1"></a>scree_plot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">cbind</span>(<span class="at">Component=</span><span class="fu">seq</span>(<span class="dv">1</span>,<span class="fu">dim</span>(pc.importance<span class="sc">$</span>importance)[<span class="dv">2</span>]),<span class="fu">t</span>(pc.importance<span class="sc">$</span>importance)))</span>
+<span id="cb173-6"><a href="chapter-7.html#cb173-6" aria-hidden="true" tabindex="-1"></a>scree_plot<span class="sc">$</span>EigenVal <span class="ot">&lt;-</span> scree_plot<span class="sc">$</span>Standard.deviation<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb173-7"><a href="chapter-7.html#cb173-7" aria-hidden="true" tabindex="-1"></a>scree_plot[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,]</span></code></pre></div>
+<pre><code>##     Component Standard.deviation Proportion.of.Variance Cumulative.Proportion    EigenVal
+## PC1         1          3.3005444                0.72624               0.72624 10.89359347
+## PC2         2          1.7570323                0.20581               0.93205  3.08716252
+## PC3         3          0.8720938                0.05070               0.98275  0.76054757
+## PC4         4          0.3639048                0.00883               0.99158  0.13242668
+## PC5         5          0.2496006                0.00415               0.99574  0.06230047</code></pre>
+<div class="sourceCode" id="cb175"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb175-1"><a href="chapter-7.html#cb175-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create scree plot using proportion of variance explained</span></span>
+<span id="cb175-2"><a href="chapter-7.html#cb175-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(scree_plot, <span class="fu">aes</span>(Component,Proportion.of.Variance<span class="sc">*</span><span class="dv">100</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb175-3"><a href="chapter-7.html#cb175-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_line</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb175-4"><a href="chapter-7.html#cb175-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb175-5"><a href="chapter-7.html#cb175-5" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Principal Component&quot;</span>, <span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">30</span>,<span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb175-6"><a href="chapter-7.html#cb175-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Proportion of Variance (%)&quot;</span>, <span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">100</span>, <span class="dv">10</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb175-7"><a href="chapter-7.html#cb175-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme_classic</span>(<span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb175-8"><a href="chapter-7.html#cb175-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">coord_fixed</span>(<span class="at">ratio =</span> <span class="fl">0.1</span>, <span class="at">xlim=</span><span class="fu">c</span>(<span class="fl">0.7</span>,<span class="dv">8</span>))</span></code></pre></div>
+<div class="figure"><span id="fig:unnamed-chunk-145"></span>
+<img src="_main_files/figure-html/unnamed-chunk-145-1.png" alt="Figure 7.18: PC Loading diagram for all low flow metrics (a) and the resultant scree plot (b)." width="768" />
+<p class="caption">
+Figure 19: Figure 7.18: PC Loading diagram for all low flow metrics (a) and the resultant scree plot (b).
+</p>
+</div>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="chapter-6.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="chapter-10.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": false
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/jstagge/hydroDrought/master/docs/07-chapter7.Rmd",
+"text": ""
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

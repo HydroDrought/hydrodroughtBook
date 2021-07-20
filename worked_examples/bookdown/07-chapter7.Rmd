@@ -1,0 +1,744 @@
+# Chapter 7
+
+## Worked example 7.1: Linear trend analysis
+
+
+### Loading the Data
+
+We begin by loading the Elbe and Gota flow time series and then calculating annual minimum flow for each. We are purposefully choosing to use the calendar year (beginning January 1) for this analysis rather than water year (beginning October 1 or November 1 for many northern hemisphere countries) because the water year breakpoint occurs near the seasonal minimum flow.
+
+```{r}
+library(tidyverse)
+library(hydroDrought)
+library(lubridate)
+
+### Filter to the rivers and create columns for dates
+flow_df <- international %>%
+	filter(river == "Elbe" | river == "Gota") %>%
+	dplyr::select(river, data) %>%
+	unnest(cols = data) %>%
+	mutate(
+		year = year(time),
+		jdate = yday(time)
+	)
+
+head(flow_df, 8)
+
+### Group by year and river and then calculate min and mean flow
+flow_annual <- flow_df %>%
+	group_by(river, year) %>%
+	summarise(min_m3s = min(discharge, na.rm=TRUE), mean_m3s=mean(discharge, na.rm=TRUE), .groups = "drop_last") 
+
+head(flow_annual, 8)
+```
+
+```{r, echo=FALSE}
+plot_df <- flow_df %>% filter((river == "Gota" & year < 1935) | river == "Elbe")
+
+### Double check plot of seasonal pattern 
+p <- ggplot(plot_df, aes(x=jdate, y=discharge)) %>%
+	+ geom_line(aes(group=year), alpha =0.2) %>%
+	+ geom_smooth(method = "gam", formula = y ~ s(x, bs = "cc")) %>%
+	+ geom_vline(xintercept=yday(c("2000-01-01", "2000-09-01", "2000-10-01")), colour = "red") %>%
+	+ facet_grid(river ~ . , scales = "free_y")
+```
+
+### Linear trend for Elbe River
+
+Consider the annual minimum flow for the Elbe river (Fig. 7.8). By fitting a line of form Eq 7.43, the estimated slope is -0.0408 m3/s per year, with a 95% confidence interval of -0.34 to 0.26 m3/s per year. As you can see, we are unclear whether the true trend is positive or negative and this is reflected in a p-value of 0.79 for the t-test of the slope coefficients. Because this p-value is well above 0.05, we accept the null hypothesis (Ho) that there is likely no significant trend in annual minimum flow for the Elbe River. 
+
+```{r}
+### Filter to only the Elbe River
+elbe_annual <- flow_annual %>%
+	filter(river == "Elbe") 
+
+### Create an OLS linear trend model 
+elbe_lm <- lm(min_m3s~year, data = elbe_annual)
+
+### Show results
+summary(elbe_lm)
+```
+
+```{r}
+### Insert columns for trend fit and residuals
+elbe_annual <- elbe_annual %>%
+	mutate(fitted = fitted(elbe_lm)) %>%
+	mutate(resid = resid(elbe_lm)) %>%
+	print()
+
+### Create dataframe for confidence interval and predition interval
+new_data <- data.frame(year = seq(1865, 2025, 1))
+elbe_conf <- predict(elbe_lm, newdata=new_data, interval = "confidence", level = 0.95) %>%
+	as.data.frame() %>%
+	bind_cols(new_data) %>%
+	mutate(interval = "Confidence", level = 0.95)
+
+head(elbe_conf, 8)
+
+elbe_pred <- predict(elbe_lm, newdata=new_data, interval = "prediction", level = 0.95) %>%
+	as.data.frame() %>%
+	bind_cols(new_data) %>%
+	mutate(interval = "Prediction", level = 0.95)
+```
+
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.8: Linear trend of annual minimum flow on the Elbe River at Neu Darchau. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval."
+
+plot_ribbon <- elbe_conf %>%
+	bind_rows(elbe_pred)
+
+plot_line <- new_data %>%
+	mutate(line_fit = predict(elbe_lm, newdata=new_data), Data = "Linear") 
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot annual min flows and the linear regression
+p <- ggplot(elbe_annual, aes(x=year)) %>%
+	+ geom_ribbon(data = plot_ribbon, aes(ymin= lwr, ymax = upr, fill = interval), alpha = 0.5) %>%
+	+ geom_point(aes(y=min_m3s), alpha = 0.5, colour = "black") %>%
+	+ geom_line(data = plot_line, aes(y=line_fit, colour = Data), alpha = 0.5) %>%
+	+ theme_classic() %>%
+	+ scale_colour_manual(name = "", values = c("blue")) %>%
+	+ scale_fill_manual(name = "Interval (95%)", values = c("grey25", "grey83")) %>%
+	+ scale_x_continuous( name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ coord_cartesian(xlim=c(1869,2021), ylim = c(90,550), expand = FALSE) %>%
+	+ theme(legend.position=c(0.93,0.9), legend.spacing = unit(0.15, "cm")) %>%
+	+ guides(colour = guide_legend(title.position="top", title.hjust = 0.1, order = 1),
+         fill = guide_legend(title.position="top", title.hjust = 0.1, order = 2))	
+
+### Display figure (stored in variable p)
+p
+```
+
+### Linear trend for Göta River
+
+If we instead consider the annual minimum flow on the Göta River, the annual trend is 1.23 m3/s per year (Fig. 7.9 with a 95% confidence interval of 0.875 to 1.59 m3/s per year. The t-test on this coefficient produces a p-value of 4 x 10-9, meaning it is highly unlikely that such a strong trend would have appeared randomly in observations if there were no true underlying trend. We reject the null hypothesis, and accept the alternative hypothesis, that there is a significant trend in Göta River annual minimum flows. Remember that we set up our alternative hypothesis as a two-sided test (b1 ≠ 0), so we are testing whether there is a significant trend, regardless if it is positive or negative. We should make this clear when we report our findings. Of course, we should also report that the trend we found was that Göta River minimum flows have been increasing at an estimated rate of 1.23 m3/s per year since 1941. 
+
+```{r}
+### Filter to the Gota River and years after 1940 
+gota_annual <- flow_annual %>%
+	filter(river == "Gota") %>%
+	filter(year >= 1941)
+
+### Create an OLS linear trend model 
+gota_lm <- lm(min_m3s~year, data = gota_annual)
+
+### Show results
+summary(gota_lm)
+```
+
+```{r}
+### Insert columns for trend fit and residuals
+gota_annual <- gota_annual %>%
+	mutate(fitted = fitted(gota_lm)) %>%
+	mutate(resid = resid(gota_lm))
+
+### Create dataframe for confidence interval and predition interval
+new_data <- data.frame(year = seq(1935, 2025, 1))
+gota_conf <- predict(gota_lm, newdata=new_data, interval = "confidence", level = 0.95) %>%
+	as.data.frame() %>%
+	bind_cols(new_data) %>%
+	mutate(interval = "Confidence", level = 0.95)
+
+gota_pred <- predict(gota_lm, newdata=new_data, interval = "prediction", level = 0.95) %>%
+	as.data.frame() %>%
+	bind_cols(new_data) %>%
+	mutate(interval = "Prediction", level = 0.95)
+
+plot_ribbon <- gota_conf %>%
+	bind_rows(gota_pred)
+
+plot_line <- new_data %>%
+	mutate(line_fit = predict(gota_lm, newdata=new_data), Data = "Linear") 
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.9: Linear trend of annual minimum flow on the Gota River. Light region is the prediction interval, while the darker region is the confidence interval, both using a 95% interval."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot annual min flows and the linear regression
+p <- ggplot(gota_annual, aes(x=year)) %>%
+	+ geom_ribbon(data = plot_ribbon, aes(ymin= lwr, ymax = upr, fill = interval), alpha = 0.5) %>%
+	+ geom_point(aes(y=min_m3s), alpha = 0.5, colour = "black") %>%
+	+ geom_line(data = plot_line, aes(y=line_fit, colour = Data), alpha = 0.5) %>%
+	+ theme_classic() %>%
+	+ scale_colour_manual(name = "", values = c("blue")) %>%
+	+ scale_fill_manual(name = "Interval (95%)", values = c("grey25", "grey83")) %>%
+	+ scale_x_continuous( name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ coord_cartesian(xlim=c(1940,2021), ylim = c(-10,310), expand = FALSE) %>%
+	+ theme(legend.position=c(0.1,0.9), legend.spacing = unit(0.15, "cm")) %>%
+	+ guides(colour = guide_legend(title.position="top", title.hjust = 0.1, order = 1),
+         fill = guide_legend(title.position="top", title.hjust = 0.1, order = 2))	
+
+### Display figure (stored in variable p)
+p
+```
+
+```{r, include=FALSE}
+### Plot the residuals
+p <- ggplot(gota_annual, aes(x=year, y=resid)) %>%
+	+ geom_point(colour="grey50") %>%  ## Plot as points. 
+	+ stat_summary(fun.data=mean_cl_normal) %>%
+	+ geom_hline(yintercept=0, linetype="dashed", color = "grey50") %>%
+	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
+	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name=bquote('OLS Trend Residual'~(m^3/s)), labels = scales::comma) ## Set the y-axis title and add commas to values
+p
+```
+
+## Worked Example 7.2: Non Parametric Trends
+
+
+
+### Loading the Data
+First we must load the data. Consider the same data as Worked Example 7.1 using annual minimum flow from the Göta River beginning in 1941.
+
+```{r}
+library(tidyverse)
+library(hydroDrought)
+library(lubridate)
+#require(Hmisc)
+require(zyp)
+
+### Filter to the rivers and create columns for dates
+flow_df <- international %>%
+	filter(river == "Gota") %>%
+	dplyr::select(river, data) %>%
+	unnest(cols = data) %>%
+	mutate(
+		year = year(time),
+		jdate = yday(time)
+	)  %>%
+	print()
+
+### Group by year and river and then calculate min annual flow
+flow_annual <- flow_df %>%
+	group_by(river, year) %>%
+	summarise(min_m3s = min(discharge, na.rm=TRUE), .groups = "drop_last") %>%
+	print() %>%
+	ungroup()
+```
+
+```{r}
+### Subset to 1941 and after
+flow_annual_subset <- flow_annual %>% filter( year >= 1941) 
+
+### Run the Mann-Kendall Test for the annual min flow
+mk_test_results <- Kendall(x=flow_annual_subset$year, y=flow_annual_subset$min_m3s)
+summary(mk_test_results)
+```
+### Mann-Kendall test
+
+The Mann-Kendall test produces an S value of `r as.numeric(mk_test_results$S)`, meaning that we have `r as.numeric(mk_test_results$S)` more date pairs where the later observation is larger than the earlier. Using this test statistic and the `r dim(flow_annual_subset)[1]` years of observations, the Mann-Kendall test produces a p-value < 2.2x10-16 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.
+
+As discussed in the text, the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results, but is slightly less affected by relatively high outliers during the late 2000s. 
+
+```{r}
+### Run the Theil-Sen slope for annual min flow
+sen_slope_results <- zyp.sen(min_m3s ~ year, data = flow_annual_subset)
+sen_slope_results
+confint.zyp(sen_slope_results)
+```
+
+```{r}
+### Rerun OLS trend
+gota_lm <- lm(min_m3s~year, data = flow_annual_subset)
+
+### Combine for plotting purposes
+trend_lines <- flow_annual_subset %>% 
+	dplyr::select(year) %>%  ### Only dplyr::select the year
+	mutate(   ### Create two new columns with predictions
+		ols = gota_lm$coef[1] + gota_lm$coef[2] * year,
+		sen = sen_slope_results$coef[1] + sen_slope_results$coef[2] * year
+	) %>% 
+	gather(model, min_m3s, -year)   ### Gather these predictions into a long format for plotting
+
+### Re-factor the model names to make it better to plot
+trend_lines$model <- factor(trend_lines$model, c("ols", "sen"), labels=c("Ordinary Least Squares (OLS)", "Thiel-Sen Slope"))
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river after 1940."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot annual min flows and the linear regression
+p <- ggplot(flow_annual_subset, aes(x=year, y=min_m3s)) %>%
+	+ geom_point(aes(y=min_m3s), alpha = 0.5, colour = "black") %>%
+	+ geom_line(data = trend_lines, aes(colour=model, linetype=model)) %>%  ### Plot line fits
+	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
+	+ scale_colour_brewer(name="Model", type="qual", palette="Set2")  %>%  ### Set colors, use color-deficient friendly palette
+	+ scale_linetype_manual(name="Model", values=c("longdash","solid"))  %>%   ### Set linetypes
+	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ theme(legend.position = c(0.25, 0.9))   ## Move legend to inside figure, upper left
+p
+
+```
+### High leverage outlier effects
+
+If we instead expand the Göta River timeseries to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent. 
+
+```{r}
+### Subset to 1934 and after
+flow_annual_longer <- flow_annual %>% filter( year >= 1934) 
+
+### Run the Mann-Kendall Test for the annual min flow
+mk_longer <- Kendall(x=flow_annual_longer$year, y=flow_annual_longer$min_m3s)
+summary(mk_longer)
+
+### Run the Theil-Sen slope for annual min flow
+sen_slope_longer <- zyp.sen(min_m3s ~ year, data = flow_annual_longer)
+sen_slope_longer
+confint.zyp(sen_slope_longer)
+
+### Rerun OLS trend
+gota_lm_longer <- lm(min_m3s~year, data = flow_annual_longer)
+summary(gota_lm_longer)
+```
+By including only 6 additional years, the OLS line changes from a significantly positive trend (+`r gota_lm$coef[2]` m3/s per year) to a significantly negative trend (`r gota_lm_longer$coef[2]` m3/s per year). The Theil-Sen line is slightly affected by these outliers, decreasing in slope from `r sen_slope_results$coef[2]` to `r sen_slope_longer$coef[2]`, but maintaining a statistically significant 70-year increasing trend that is clear visually. 
+
+
+This is an extreme example and we know from Section 7.2.3 that these outliers are related to a change in lake management. Data before 1940 follows a different underlying distribution, violating the assumptions of our model. To prove this, read ahead to Section 7.4.3. 
+
+```{r}
+### Combine for plotting purposes
+trend_lines <- flow_annual_longer %>% 
+	dplyr::select(year) %>%  ### Only dplyr::select the year
+	mutate(   ### Create two new columns with predictions
+		ols = gota_lm_longer$coef[1] + gota_lm_longer$coef[2] * year,
+		sen = sen_slope_longer$coef[1] + sen_slope_longer$coef[2] * year
+	) %>% 
+	gather(model, min_m3s, -year)   ### Gather these predictions into a long format for plotting
+
+### Re-factor the model names to make it better to plot
+trend_lines$model <- factor(trend_lines$model, c("ols", "sen"), labels=c("Ordinary Least Squares (OLS)", "Thiel-Sen Slope"))
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.11: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS) trend for annual minimum flows on the Gota river by incorrectly including data from 1934 (prior to dam regulation)."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot annual min flows and the linear regression
+p <- ggplot(flow_annual_longer, aes(x=year, y=min_m3s)) %>%
+	+ geom_point(aes(y=min_m3s), alpha = 0.5, colour = "black") %>%
+	+ geom_line(data = trend_lines, aes(colour=model, linetype=model)) %>%  ### Plot line fits
+	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
+	+ scale_colour_brewer(name="Model", type="qual", palette="Set2")  %>%  ### Set colors, use color-deficient friendly palette
+	+ scale_linetype_manual(name="Model", values=c("longdash","solid"))  %>%   ### Set linetypes
+	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ theme(legend.position = c(0.25, 0.9))   ## Move legend to inside figure, upper left
+p
+```
+
+
+## Worked Example 7.3: Structural Change Analysis
+
+### Visualizing Daily Flow
+In previous worked examples, we used a subset of Göta River discharges, processed to produce the annual minimum flow cut either to the period before 1940 or after 1940. Plotting the raw daily data from the earliest records (Fig. 7.12), we see an abrupt and obvious structural change around 1940. There is clearly a change in variance and a change in temporal autocorrelation (flow persistence/noisiness). 
+
+```{r}
+library(tidyverse)
+library(hydroDrought)
+library(lubridate)
+library(strucchange)
+library(Hmisc)
+
+### Filter to the rivers and create columns for dates
+flow_df <- international %>%
+	filter(river == "Gota") %>%
+	dplyr::select(river, data) %>%
+	unnest(cols = data) %>%
+	mutate(
+		year = year(time),
+		jdate = yday(time)
+	)  %>%
+	print()
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.12: Daily discharge at the Gota River station demonstrating a visually clear structural change."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot annual min flows and the linear regression
+date_breaks <- seq(from = as.Date("1850-01-01"), to = as.Date("2050-01-01"), by = "10 years")
+
+p <- ggplot(flow_df, aes(x=time, y=discharge)) %>%
+	+ geom_line(colour = "grey20") %>%
+	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
+	+ scale_x_date(name = "Year", breaks = date_breaks, date_labels = "%Y") %>%
+	#+ scale_x_continuous(name="Date", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name = bquote('Daily Discharge'~(m^3/s)), labels = scales::comma) 
+p
+```
+
+### Testing for a change point
+
+To avoid this temporal autocorrelation issue, let us focus again on the annual minimum flow for the entire time series. We now see a severe decrease in flow from 300-600 m3/s prior to the 1930s and 50-200 m3/s after 1940 (Fig. 7.13). Examples are not typically this clear. We can apply the Chow F-test to identify the change point.
+
+```{r}
+### Group by year and river and then calculate min annual flow
+flow_annual <- flow_df %>%
+	group_by(river, year) %>%
+	summarise(min_m3s = min(discharge, na.rm=TRUE), .groups = "drop_last") %>%
+	print() %>%
+	ungroup()
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.13: Annual minimum discharge at the Gota River station for the full period (1850-present)."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap}
+p <- ggplot(flow_annual, aes(x=year, y=min_m3s)) %>%
+	+ geom_line(colour = "grey20", alpha=0.5) %>%
+	+ geom_point(alpha = 0.5, colour = "black") %>%
+	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
+	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
+	+ scale_y_continuous(name = bquote('Annual Minimum Discharge'~(m^3/s)), labels = scales::comma) 
+p
+```
+
+```{r}
+### Convert the data to a regularly spaced annual time series
+first_year <- min(flow_annual$year, na.rm=TRUE)
+
+flow_annual_ts <- flow_annual %>% 
+	complete(year=full_seq(year,1)) %>%    ### Make sure all years are included using the complete command
+	ts(frequency=1, start=first_year) 
+
+### Run the Chow F test for a single breakpoint, assuming there is no trend in the data (ie intercept only)
+### The equation therefore looks like min_m3s is a function only of an intercept (designated by a 1)
+f_test_int_only <- Fstats(min_m3s ~ 1, data=flow_annual_ts)
+sctest(f_test_int_only)
+bp_int_only <- breakpoints(f_test_int_only)
+summary(bp_int_only)
+```
+
+```{r, include =FALSE}
+plot(f_test_int_only, alpha=0.05)
+lines(bp_int_only) 
+```
+
+Fig. 7.14 shows the null model in green, assuming the data come from the same distribution, and the alternative model in blue, assuming a sudden change point. In this example, we choose to constrain the model to assume there is a constant mean with no trends, i.e. b1=b2a=b2b=0. Using a single breakpoint, we see that the F-test statistic is maximized with a breakpoint in 1937. This breakpoint is highly statistically significant, suggesting there was a detectable structural change during this year. The 95% confidence interval around the location of this breakpoint is between 1936 and 1938, also giving us strong confidence in the location of this breakpoint. 
+
+
+```{r}
+### Run for multiple potential breakpoints
+all_bp_int_only <- breakpoints(min_m3s ~ 1, data=flow_annual_ts)
+summary(all_bp_int_only)
+
+### Best solution should minimize BIC (Bayesian Information Criterion)
+#plot(all_bp_int_only)
+
+### Calculate a confidence interval around this
+ci_int_only <- confint(all_bp_int_only)
+ci_int_only
+
+### Assume this breakpoint and plot the null hypothesis model (no breakpoint, intercept only) vs the alternative (breakpoint, intercept only)
+### Fit both models
+fm0 <- lm(min_m3s ~ 1, data=flow_annual_ts )
+fm1 <- lm(min_m3s ~ breakfactor(all_bp_int_only, breaks = 1) + 1, data=flow_annual_ts )
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.14: Candidate models for Chow Breakpoint Test. Null model (no breakpoint) shown in green, while the alternative model (single breakpoint) is shown in blue. Location of the breakpoint shown with a dashed line and a 95% confidence interval in red."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap}
+plot(flow_annual_ts[,"min_m3s"], xlab="Date", ylab="Annual Minimum Flow (m3s)")
+lines(ts(fitted(fm0), start = first_year), col = 3)
+lines(ts(fitted(fm1), start = first_year), col = 4)
+### Add a line for breakpoint
+lines(bp_int_only)
+### Add confidence interval around breakpoint
+lines(ci_int_only)
+```
+
+To test the possibility of additional breakpoints, we introduced more complex models with 2-5 breakpoints. However, adding these breaks did not significantly decrease the model residuals, pointing to a single breakpoint.
+
+As with all statistical findings, it is important to validate results with real-world understanding, checking whether the findings make physical sense. In this case, we can check the historical record during the period 1936-1938 to try and identify what physical processes could produce this sudden decrease in annual minimum flows on the Göta River. The Lake Vanern decree was signed in 1937, which codified water management on Lake Vanern, the headwaters of Göta River, to prevent severe flooding through dam control. This more active reservoir management decreased annual low flows and peak flows. 
+
+
+```{r, include=FALSE}
+### Run the Chow F test for a single breakpoint, allowing for a trend
+f_test_slope_int <- Fstats(min_m3s ~ year + 1, data=flow_annual_ts)
+sctest(f_test_slope_int)
+bp_slope_int <- breakpoints(f_test_slope_int)
+summary(bp_slope_int)
+### F statistics indicate a significant breakpoint. The maximum F statistic (most severe breakpoint) occurs at 1956
+
+### Plot the value of the F statistic, add in a red line for alpha = 0.05, rejection criteria
+plot(f_test_slope_int, alpha=0.05)
+lines(bp_slope_int)  ### Add line for the maximum F-Value
+### We can use this plot to visually see if there are more than 1 potential break points
+
+### Run for multiple potential breakpoints
+all_bp_slope_int <- breakpoints(min_m3s ~ year +1, data=flow_annual_ts)
+
+### Best solution should minimize BIC (Bayesian Information Criterion)
+plot(all_bp_slope_int)
+summary(all_bp_slope_int)
+### Still looks like a single breakpoint is the best (minimizes BIC)
+
+### Calculate a confidence interval around this
+ci_slope_int <- confint(all_bp_slope_int)
+ci_slope_int
+### Wider confidence interval
+
+### Assume this breakpoint and compare the null hypothesis model (no breakpoint, slope intercept model) vs the alternative (breakpoint, slope intercept)
+### Fit both models
+fm0 <- lm(min_m3s ~ year + 1, data=flow_annual_ts )
+fm2 <- lm(min_m3s ~ breakfactor(bp_slope_int, breaks = 1)*year + 1, data=flow_annual_ts )
+
+### Plot the results
+plot(flow_annual_ts[,"min_m3s"])
+lines(ts(fitted(fm0), start = first_year), col = 3)
+lines(ts(fitted(fm2), start = first_year), col = 4)
+### Add a line for breakpoint
+lines(bp_slope_int)
+### Add confidence interval around breakpoint
+lines(ci_slope_int)
+	 
+### For comparison, include the previous breakpoint model without a slope
+fm1 <- lm(min_m3s ~ breakfactor(bp_int_only, breaks = 1) + 1, data=flow_annual_ts )
+
+### Plot the results
+plot(flow_annual_ts[,"min_m3s"])
+lines(ts(fitted(fm0), start = first_year), col = 3)
+lines(ts(fitted(fm1), start = first_year), col = 2)
+lines(ts(fitted(fm2), start = first_year), col = 4)
+
+### Use ANOVA to compare models
+anova(fm0, fm1, fm2)
+```
+
+## Worked Example 7.4: Principal Component Analysis
+
+
+```{r, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(hydroDrought) 
+
+library(ggfortify)
+library(ggrepel)
+library(cowplot)
+
+r <- regional %>%
+  dplyr::select(id, data = discharge) 
+
+# list of functions we applied to each station
+f <- list(
+  mean = function(x, ...) mean(x), 
+  Q50 = function(x, ...) lfquantile(x, exc.freq = 0.5),
+  `MAM(1)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 1),
+  `MAM(10)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 10),
+  `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
+  Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
+  Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7),
+  ALPHA = function(x, t, ...) recession(time = t, discharge = x)
+)
+
+indices <- r %>%
+  transmute(
+    id, 
+    indices = map(data, ~map_df(f, exec, x = .x$discharge, t = .x$time))
+  ) %>%
+  unnest(indices) 
+
+# derived indices
+indices <- indices %>%
+  mutate(
+    `Q90/Q50` = Q90/Q50,
+    `Q95/Q50` = Q95/Q50,
+    `MAM(30)/Q50` = `MAM(30)`/Q50,
+    `MAM(10)/Q50` = `MAM(10)`/Q50,
+    `MAM(1)/Q50` = `MAM(1)`/Q50,
+  ) 
+
+indices <- indices %>%
+	full_join(dplyr::select(regional, id, river, station, catchment), by = "id")
+```
+
+### Simple PCA with two variables
+
+To explain what PCA is, we can consider two variables from the regional low flow analysis: ALPHA and Q95/Q50 (Table 5.1, Figure 5.16). The values for the 21 sites are replotted in Fig. 7.17a after they have been standardized to have zero mean and unit standard deviation (now referred to as ALPHA* and Q95/Q50*). 
+
+Because ALPHA* and Q95/Q50* are correlated, PC1 captures variability along a nearly 1:1 line (Fig. 7.17a) that measures the value of this artificial variable. This new axis is PC1. PC2, is set at a 90 degree angle (orthogonal), to capture the remaining variability. 
+
+This oversimplified example allows us to visualize these underlying axes, but as we consider more variables, and therefore higher dimensions, it is more appropriate to use the loading plot (Figure 7.17b). After rotating the data into the page so that positive PC1 is along the x-axis, we see that most variance falls along this horizontal axis. In fact, if we only consider PC1, ignoring the vertical PC2, we could still reconstruct 72.14% of the ALPHA* and Q95/Q50* values. This is why PCA is so valuable for data reduction. 
+
+```{r}
+### Select only two variables
+indices_matrix <- indices %>%
+	dplyr::select(ALPHA, `Q95/Q50`) %>% 
+	as.matrix()
+rownames(indices_matrix) <- indices$id
+```
+```{r, include = FALSE}
+### If you need to manually rescale
+#mutate(ALPHA_star = as.vector(scale(ALPHA))) %>%
+#mutate(`Q95/Q50_star` = as.vector(scale(`Q95/Q50`) )) %>%
+#select(-ALPHA, -`Q95/Q50`)
+```
+```{r}
+### Run the PCA analysis with scaling
+regional_pca <- prcomp(indices_matrix, scale = TRUE)
+
+# Mean (center) and standard deviation (scale) from normalization
+#regional_pca$center
+#regional_pca$scale
+
+### View the PC Loading matrix
+head(regional_pca$rotation)
+### View the PC Scores
+head(regional_pca$x)
+
+#By default, eigenvectors in R point in the negative direction. We can adjust this with a simple change.
+regional_pca$rotation <- -regional_pca$rotation
+regional_pca$x <- -regional_pca$x
+```
+
+```{r, include = FALSE}
+#Manually rescale for plotting purposes
+plot_points <- indices_matrix %>%
+	as.data.frame() %>%
+	mutate(ALPHA_star = as.vector(scale(ALPHA))) %>%
+	mutate(`Q95/Q50_star` = as.vector(scale(`Q95/Q50`) )) %>%
+	dplyr::select(-ALPHA, -`Q95/Q50`) %>%
+	mutate(station = indices$station)
+
+scaled_loading <- regional_pca$rotation/max(regional_pca$rotation, na.rm=TRUE)
+scaled_loading[,1] <- scaled_loading[,1] * regional_pca$sdev[1]
+scaled_loading[,2] <- scaled_loading[,2] * regional_pca$sdev[2]
+
+plot_line <- data.frame(ALPHA_star = c(0,0,scaled_loading[1,]), 
+	second_var = c(0,0,scaled_loading[2,]), 
+	group = rep(c("PC1", "PC2"), 2))
+
+### Create a plot of the original variables with the future axes
+p1 <- ggplot(plot_points, aes(x=ALPHA_star, y=`Q95/Q50_star`)) %>%
+	+ geom_hline(yintercept = 0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_vline(xintercept=0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_point() %>%
+	+ geom_line(data = plot_line, aes(x=ALPHA_star, y=second_var, group=group), colour = "blue") %>%
+	+ geom_text_repel(aes(label = station), vjust=-1, size = 3, colour = "grey40", alpha =0.8)  %>%
+	+ geom_text_repel(data = plot_line %>% filter(ALPHA_star !=0), aes(label = group, x=ALPHA_star, y=second_var ),  vjust=-1, colour = "blue") %>%
+	+ scale_x_continuous(name="ALPHA*") %>%
+	+ scale_y_continuous(name ="Q95/Q50*") %>%
+	+ coord_fixed(ratio=1, xlim=c(-2.5,2.5), ylim=c(-2.5,2.5))
+```
+```{r}
+### Plot the PC Loading
+p2 <- autoplot(regional_pca,
+		loadings.label=TRUE, loadings=TRUE, 
+		loadings.label.size=4, loadings.colour='red', loadings.label.vjust = -1, scale = 0) %>%
+	+ geom_hline(yintercept = 0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_vline(xintercept=0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = "grey40", alpha =0.8)  %>%
+	+ coord_fixed(ratio=1, xlim=c(-2.5,2.5), ylim=c(-2.5,2.5))
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.17: Normalized variables with the PC axes (a) and the resultant PC Loading diagram (b) for these two variables."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap, fig.width = 8}
+### Combine the plots and label them as A and B
+plot_grid(p1, p2, labels = "AUTO")
+```
+
+### PCA with all variables
+
+If we instead consider all variables, we produce the loading plot shown in Figure 7.18a. The loading plot shows that nearly all low flow metrics load onto PC1 in the negative direction, opposite to ALPHA. Further, all of the flow metrics prior to normalization by Q50, catchment area, and ALPHA load positively onto PC2, while the normalized metrics load negatively. PC2 is highly related to watershed size, and thereby absolute flow.
+
+```{r}
+### Remove all the naming variables
+indices_matrix <- indices %>%
+	dplyr::select(-id, -river, -station) %>%
+#	select(ALPHA, `Q90/Q50`, `Q95/Q50`, `MAM(30)/Q50`, `MAM(10)/Q50`,`MAM(1)/Q50`) %>% 	
+	as.matrix()
+rownames(indices_matrix) <- indices$id
+
+### Run the PCA analysis with scaling
+regional_pca <- prcomp(indices_matrix, scale = TRUE)
+
+#Adjust the sign of Eigen vectors.
+regional_pca$rotation <- -regional_pca$rotation
+regional_pca$x <- -regional_pca$x
+
+### Create loading plot
+p1 <- autoplot(regional_pca,
+		loadings.label=TRUE, loadings=TRUE, 
+		loadings.label.size=3, loadings.colour='red', loadings.label.vjust = -1, scale = 0) %>%
+	+ geom_hline(yintercept = 0, colour = "grey20", alpha = 0.5) %>%
+	+ geom_vline(xintercept=0, colour = "grey20", alpha = 0.5) %>%
+	#+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = "grey40", alpha =0.8)  %>%
+	+ coord_fixed(ratio=1)
+```
+
+If we are interested in focusing only on the most important PCs in the analysis, there are different ways of deciding how many to include. One method is to look at the scree plot, which graphs the proportion of variance explained by each PC and only retain the components above the scree plot ‘elbow’. In Fig. 7.18b this appears at two PCs. Another common metric is to only retain components with eigen values greater than 1, which also results in retaining the first two components. These two components explain 93.2% of the total variance across 15 variables because the variables are so highly correlated (Figure 7.18a).
+
+```{r}
+###  Extract the PC eigen values and variance explained
+pc.importance <- summary (regional_pca)
+
+### Create scree plot data
+scree_plot <- data.frame(cbind(Component=seq(1,dim(pc.importance$importance)[2]),t(pc.importance$importance)))
+scree_plot$EigenVal <- scree_plot$Standard.deviation^2
+scree_plot[1:5,]
+
+### Create scree plot using proportion of variance explained
+p2 <- ggplot(scree_plot, aes(Component,Proportion.of.Variance*100)) %>%
+	+ geom_line() %>%
+	+ geom_point() %>%
+	+ scale_x_continuous(name = "Principal Component", breaks=seq(0,30,2)) %>%
+	+ scale_y_continuous(name = "Proportion of Variance (%)", breaks=seq(0,100, 10)) %>%
+	+ theme_classic(10) %>%
+	+ coord_fixed(ratio = 0.1, xlim=c(0.7,8))
+
+```
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 7.18: PC Loading diagram for all low flow metrics (a) and the resultant scree plot (b)."
+```
+
+```{r, echo=FALSE, fig.cap=fig.cap, fig.width = 8}
+### Combine the plots and label them as A and B
+plot_grid(p1, p2, labels = "AUTO",  rel_widths = c(1.5, 1))
+```
+
+
+```{r, include=FALSE}
+### Plot Eigen value scree plot
+ggplot(scree_plot, aes(Component,EigenVal)) %>%
+	+ geom_line() %>%
+	+ geom_point() %>%
+	+ geom_hline(yintercept=1, linetype ="longdash") %>%
+	+ scale_x_continuous(name = "Principal Component", breaks=seq(0,30,1)) %>%
+	+ scale_y_continuous(name = "Eigen Value", breaks=seq(0,20, 1)) %>%
+	+ theme_classic(10) %>%
+	+ coord_cartesian(xlim=c(0.7,8))
+
+### Plot the cumulative variance explained
+scree_plot <- scree_plot %>% bind_rows(data.frame(Component = 0, Cumulative.Proportion = 0))
+
+ggplot(scree_plot, aes(Component,Cumulative.Proportion*100)) %>%
+	+ geom_line() %>%
+	+ geom_point() %>%
+	+ scale_x_continuous(name = "Principal Component", breaks=seq(0,30,1)) %>%
+	+ scale_y_continuous(name = "Cumulative Variance Explained (%)", breaks=seq(0,100, 20)) %>%
+	+ theme_classic(10)  %>%
+	+ coord_cartesian(xlim=c(0,8), ylim=c(0,100))
+```
