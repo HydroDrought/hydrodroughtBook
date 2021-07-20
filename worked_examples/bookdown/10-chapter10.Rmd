@@ -33,16 +33,18 @@ library(tidyverse)
 library(lubridate)
 library(hydroDrought)
 
-print(guadiana)
-range(guadiana$time)
-```
+### Filter to a specific period
+guadiana_period <- guadiana %>%
+	filter(date >= as.Date("1960-01-02") & date <= as.Date("2000-12-31"))
 
-^[Tobias: To simplify the code, should we subset the included dataset to the period of 1960-2000? Data outside this period is not used, as far as I can see...]
+print(guadiana_period)
+range(guadiana_period$time)
+```
 
 The **benchmark** time series comprises the uninfluenced, naturalized discharge $Q_{sim}$. Note that **benchmark** time series can be calculated from a paired catchment analysis (Sect. XX), an upstream-downstream comparison (Sect. XX), model naturalisation (Sect. XX), or pre-post disturbance analysis (Sect. XX). The **benchmark** time series for this catchment are modeled as described in Sect. XX.
 
 ```{r}
-benchmark <- guadiana %>%
+benchmark <- guadiana_period %>%
   dplyr::select(time, discharge = Qsim) %>%
   mutate(
     year = water_year(time)
@@ -55,7 +57,7 @@ benchmark <- guadiana %>%
 The **human-influenced** time series is basically the time series of observed discharge $Q_{obs}$ from the Upper-Guadiana catchment. 
 
 ```{r}
-influenced <- guadiana %>%
+influenced <- guadiana_period %>%
   dplyr::select(time, discharge = Qobs) %>%
   mutate(
     year = water_year(time)
