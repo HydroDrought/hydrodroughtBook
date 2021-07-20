@@ -35,7 +35,7 @@ library(hydroDrought)
 
 ### Filter to a specific period
 guadiana_period <- guadiana %>%
-	filter(date >= as.Date("1960-01-02") & date <= as.Date("2000-12-31"))
+	filter(time >= as.Date("1960-01-01") & time <= as.Date("2000-12-31"))
 
 print(guadiana_period)
 range(guadiana_period$time)
@@ -91,6 +91,28 @@ p <- ggplot(data = threshold, aes(x = day, y = threshold)) +
 
 p
 ```
+
+
+```{r}
+### Add Julian date columns to the benchmark and threshold
+benchmark <- benchmark %>% 
+	mutate(jdate = yday(time))
+
+threshold <- threshold %>% 
+	mutate(jdate = yday(day), year = year(day))
+
+### Plot the threshold against monthly flows in log10 space
+p <- ggplot(benchmark, aes(x=jdate)) + 
+	geom_line(aes(group=year, y=discharge), alpha = 0.2) + 
+	geom_line(data = ya, aes(y=threshold), colour="red") + 
+    scale_x_continuous(name = "Julian Date", expand = expansion())
+	scale_y_log10()
+
+p
+
+```
+
+
 
 
 ### Benchmark Drought characteristics
