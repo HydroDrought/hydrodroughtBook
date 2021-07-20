@@ -7,9 +7,8 @@ bookdown::gitbook:
     toc:
       collapse: section
       before: |
-          <li><b><a href="./">Hydrologic Drought </a></b></li>
-          <li><a href="./">2nd Edition </a></li>
-          <li><a href="./">Tallaksen and van Lanen (2021) </a></li>
+          <li><b><a href="./">Hydrologic Drought </a></b>2nd Edition</li>
+          <a href="./">Tallaksen and van Lanen (2021) </a>
       after: |
         <li><a href="https://github.com/rstudio4edu/rstudio4edu-book" target="blank">Published with bookdown</a></li>
     download: ["rmd"]

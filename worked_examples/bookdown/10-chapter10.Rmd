@@ -17,9 +17,9 @@ If we want to quantify the human influence on hydrological drought by comparing 
 
 1) Calculate the threshold from the **benchmark** time series
 
-2) Calculate drought characteristics for the **benchmark** time series, using the **benchmark** threshold ^[Tobias: As you are always using the benchmark threshold I suggest to omit the last part of the sentence.]
+2) Calculate **benchmark** drought characteristics for the **benchmark** time series with the **benchmark** threshold
 
-3) Calculate drought characteristics for the **human-influenced** time series, using the **benchmark** threshold
+3) Calculate **human-influenced** drought characteristics for the **human-influenced** time series with the **benchmark** threshold
 
 4) Compare drought characteristics between the **benchmark** & **human-influenced** time series
 
