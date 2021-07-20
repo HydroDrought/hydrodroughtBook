@@ -52,8 +52,6 @@ benchmark <- guadiana_period %>%
   print()
 ```
 
-
-
 The **human-influenced** time series is basically the time series of observed discharge $Q_{obs}$ from the Upper-Guadiana catchment. 
 
 ```{r}
@@ -74,7 +72,7 @@ threshold <- benchmark %>%
   # applying a 30-day moving average smoother
   mutate(discharge = moving_average(discharge, n = 30, sides = "center")) %>%
   
-  # the following line could be obsolete
+  # double check using the correct period
   filter(year >= 1960,  year <= 2000) %>%
   
   # computing the Q95 for each day of the year
@@ -83,35 +81,15 @@ threshold <- benchmark %>%
 print(threshold)
 ```
 
-^[Tobias: These plots are just to show data coverage and the handling of leap-years. If you want to have some of them in the Worked Example should print the code producing them. ]
 
-```{r, echo=FALSE}
-p1 <- benchmark %>%
-  filter(is.finite(discharge)) %>%
-  plot_coverage() + 
-  theme(legend.position = "top")
-
-# p1 <- benchmark %>%
-#   mutate(
-#     day = group_ts(time = time, by = "day")
-#   ) %>%
-#   left_join(threshold, by = "day") %>%
-#   
-#   ggplot(aes(x = day, y = year, fill = threshold)) + 
-#   geom_tile() + 
-#   scale_fill_viridis_c() + 
-#   scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
-#   theme(legend.position = "top", 
-#         axis.title.x = element_blank())
-
-p2 <- ggplot(data = threshold, aes(x = day, y = threshold)) + 
+```{r}
+p <- ggplot(data = threshold, aes(x = day, y = threshold)) + 
   geom_step() + 
   scale_x_date(date_breaks = "1 months", date_labels = "%b", 
                expand = expansion()) + 
   theme(axis.title.x = element_blank())
 
-cowplot::plot_grid(p1, p2, align = "hv", axis = c("l", "r"), 
-                   ncol = 1, rel_heights = c(5, 2))
+p
 ```
 
 
