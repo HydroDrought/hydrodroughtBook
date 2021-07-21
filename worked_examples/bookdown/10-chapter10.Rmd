@@ -41,7 +41,7 @@ print(guadiana_period)
 range(guadiana_period$time)
 ```
 
-The **benchmark** time series comprises the uninfluenced, naturalized discharge $Q_{sim}$. Note that **benchmark** time series can be calculated from a paired catchment analysis (Sect. XX), an upstream-downstream comparison (Sect. XX), model naturalisation (Sect. XX), or pre-post disturbance analysis (Sect. XX). The **benchmark** time series for this catchment are modeled as described in Sect. XX.
+The **benchmark** time series comprises the uninfluenced, naturalized discharge $Q_{sim}$. Note that **benchmark** time series can be calculated from a paired catchment analysis, an upstream-downstream comparison, model naturalisation, or pre-post disturbance analysis (Sect. 10.4.1 and 10.5.1) or from model scenarios (Sect. 10.4.3, 4 and 10.5.3, 4). The **benchmark** time series for this catchment are modelled as described in Sect. XX.
 
 ```{r}
 benchmark <- guadiana_period %>%
@@ -104,12 +104,28 @@ threshold <- threshold %>%
 ### Plot the threshold against monthly flows in log10 space
 p <- ggplot(benchmark, aes(x=jdate)) + 
 	geom_line(aes(group=year, y=discharge), alpha = 0.2) + 
-	geom_line(data = ya, aes(y=threshold), colour="red") + 
-    scale_x_continuous(name = "Julian Date", expand = expansion())
+	geom_line(data = threshold, aes(y=threshold), colour="red") + 
+    scale_x_continuous(name = "Julian Date", expand = expansion()) +
 	scale_y_log10()
 
 p
 
+### Plot the threshold against monthly flows in log10 space
+ya <-  benchmark %>%
+  mutate(discharge = moving_average(discharge, n = 30, sides = "center")) %>%
+  filter(year >= 1960,  year <= 2000)
+
+p <- ggplot(ya %>% drop_na(), aes(x=jdate)) + 
+	geom_line(aes(group=year, y=discharge), alpha = 0.2) + 
+	geom_line(data = threshold, aes(y=threshold), colour="red") + 
+    scale_x_continuous(name = "Julian Date", expand = expansion()) + 
+	scale_y_log10()
+
+p
+
+
+threshold <- threshold %>% 
+	dplyr::select(-jdate, -year)
 ```
 
 

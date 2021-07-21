@@ -131,9 +131,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><b><a href="./">Hydrologic Drought </a></b></li>
-<li><a href="./">2nd Edition </a></li>
-<li><a href="./">Tallaksen and van Lanen (2021) </a></li>
+<li><b><a href="./">Hydrologic Drought </a></b>2nd Edition</li>
+<a href="./">Tallaksen and van Lanen (2021) </a>
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
@@ -302,8 +301,8 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <p>If we want to quantify the human influence on hydrological drought by comparing two time series, one with and one without this human influence, we want to use the threshold of the <strong>benchmark</strong> time series to calculate droughts in both the <strong>human-influenced</strong> and <strong>benchmark</strong> time series. These are the steps that we will discuss in this Worked Example:</p>
 <ol style="list-style-type: decimal">
 <li><p>Calculate the threshold from the <strong>benchmark</strong> time series</p></li>
-<li><p>Calculate drought characteristics for the <strong>benchmark</strong> time series, using the <strong>benchmark</strong> threshold <a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p></li>
-<li><p>Calculate drought characteristics for the <strong>human-influenced</strong> time series, using the <strong>benchmark</strong> threshold</p></li>
+<li><p>Calculate <strong>benchmark</strong> drought characteristics for the <strong>benchmark</strong> time series with the <strong>benchmark</strong> threshold</p></li>
+<li><p>Calculate <strong>human-influenced</strong> drought characteristics for the <strong>human-influenced</strong> time series with the <strong>benchmark</strong> threshold</p></li>
 <li><p>Compare drought characteristics between the <strong>benchmark</strong> &amp; <strong>human-influenced</strong> time series</p></li>
 </ol>
 <div id="loading-the-data-10" class="section level3">
@@ -313,8 +312,12 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb176-2"><a href="chapter-10.html#cb176-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
 <span id="cb176-3"><a href="chapter-10.html#cb176-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hydroDrought)</span>
 <span id="cb176-4"><a href="chapter-10.html#cb176-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb176-5"><a href="chapter-10.html#cb176-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(guadiana)</span></code></pre></div>
-<pre><code>## # A tibble: 15,249 x 3
+<span id="cb176-5"><a href="chapter-10.html#cb176-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Filter to a specific period</span></span>
+<span id="cb176-6"><a href="chapter-10.html#cb176-6" aria-hidden="true" tabindex="-1"></a>guadiana_period <span class="ot">&lt;-</span> guadiana <span class="sc">%&gt;%</span></span>
+<span id="cb176-7"><a href="chapter-10.html#cb176-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(time <span class="sc">&gt;=</span> <span class="fu">as.Date</span>(<span class="st">&quot;1960-01-01&quot;</span>) <span class="sc">&amp;</span> time <span class="sc">&lt;=</span> <span class="fu">as.Date</span>(<span class="st">&quot;2000-12-31&quot;</span>))</span>
+<span id="cb176-8"><a href="chapter-10.html#cb176-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb176-9"><a href="chapter-10.html#cb176-9" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(guadiana_period)</span></code></pre></div>
+<pre><code>## # A tibble: 14,976 x 3
 ##    time        Qsim  Qobs
 ##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;
 ##  1 1960-01-01 0.153 0.146
@@ -327,18 +330,17 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##  8 1960-01-08 0.128 0.148
 ##  9 1960-01-09 0.129 0.146
 ## 10 1960-01-10 0.139 0.133
-## # … with 15,239 more rows</code></pre>
-<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="chapter-10.html#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(guadiana<span class="sc">$</span>time)</span></code></pre></div>
-<pre><code>## [1] &quot;1960-01-01&quot; &quot;2001-09-30&quot;</code></pre>
-<p><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
-<p>The <strong>benchmark</strong> time series comprises the uninfluenced, naturalized discharge <span class="math inline">\(Q_{sim}\)</span>. Note that <strong>benchmark</strong> time series can be calculated from a paired catchment analysis (Sect. XX), an upstream-downstream comparison (Sect. XX), model naturalisation (Sect. XX), or pre-post disturbance analysis (Sect. XX). The <strong>benchmark</strong> time series for this catchment are modeled as described in Sect. XX.</p>
-<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="chapter-10.html#cb180-1" aria-hidden="true" tabindex="-1"></a>benchmark <span class="ot">&lt;-</span> guadiana <span class="sc">%&gt;%</span></span>
+## # … with 14,966 more rows</code></pre>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="chapter-10.html#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(guadiana_period<span class="sc">$</span>time)</span></code></pre></div>
+<pre><code>## [1] &quot;1960-01-01&quot; &quot;2000-12-31&quot;</code></pre>
+<p>The <strong>benchmark</strong> time series comprises the uninfluenced, naturalized discharge <span class="math inline">\(Q_{sim}\)</span>. Note that <strong>benchmark</strong> time series can be calculated from a paired catchment analysis, an upstream-downstream comparison, model naturalisation, or pre-post disturbance analysis (Sect. 10.4.1 and 10.5.1) or from model scenarios (Sect. 10.4.3, 4 and 10.5.3, 4). The <strong>benchmark</strong> time series for this catchment are modelled as described in Sect. XX.</p>
+<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="chapter-10.html#cb180-1" aria-hidden="true" tabindex="-1"></a>benchmark <span class="ot">&lt;-</span> guadiana_period <span class="sc">%&gt;%</span></span>
 <span id="cb180-2"><a href="chapter-10.html#cb180-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(time, <span class="at">discharge =</span> Qsim) <span class="sc">%&gt;%</span></span>
 <span id="cb180-3"><a href="chapter-10.html#cb180-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb180-4"><a href="chapter-10.html#cb180-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">year =</span> <span class="fu">water_year</span>(time)</span>
 <span id="cb180-5"><a href="chapter-10.html#cb180-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb180-6"><a href="chapter-10.html#cb180-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code></pre></div>
-<pre><code>## # A tibble: 15,249 x 3
+<pre><code>## # A tibble: 14,976 x 3
 ##    time       discharge  year
 ##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
 ##  1 1960-01-01     0.153  1960
@@ -351,14 +353,14 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##  8 1960-01-08     0.128  1960
 ##  9 1960-01-09     0.129  1960
 ## 10 1960-01-10     0.139  1960
-## # … with 15,239 more rows</code></pre>
+## # … with 14,966 more rows</code></pre>
 <p>The <strong>human-influenced</strong> time series is basically the time series of observed discharge <span class="math inline">\(Q_{obs}\)</span> from the Upper-Guadiana catchment.</p>
-<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="chapter-10.html#cb182-1" aria-hidden="true" tabindex="-1"></a>influenced <span class="ot">&lt;-</span> guadiana <span class="sc">%&gt;%</span></span>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="chapter-10.html#cb182-1" aria-hidden="true" tabindex="-1"></a>influenced <span class="ot">&lt;-</span> guadiana_period <span class="sc">%&gt;%</span></span>
 <span id="cb182-2"><a href="chapter-10.html#cb182-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(time, <span class="at">discharge =</span> Qobs) <span class="sc">%&gt;%</span></span>
 <span id="cb182-3"><a href="chapter-10.html#cb182-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb182-4"><a href="chapter-10.html#cb182-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">year =</span> <span class="fu">water_year</span>(time)</span>
 <span id="cb182-5"><a href="chapter-10.html#cb182-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span><span class="fu">print</span>()</span></code></pre></div>
-<pre><code>## # A tibble: 15,249 x 3
+<pre><code>## # A tibble: 14,976 x 3
 ##    time       discharge  year
 ##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
 ##  1 1960-01-01     0.146  1960
@@ -371,7 +373,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##  8 1960-01-08     0.148  1960
 ##  9 1960-01-09     0.146  1960
 ## 10 1960-01-10     0.133  1960
-## # … with 15,239 more rows</code></pre>
+## # … with 14,966 more rows</code></pre>
 </div>
 <div id="threshold-calculation" class="section level3">
 <h3>Threshold calculation</h3>
@@ -380,7 +382,7 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb184-2"><a href="chapter-10.html#cb184-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># applying a 30-day moving average smoother</span></span>
 <span id="cb184-3"><a href="chapter-10.html#cb184-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">discharge =</span> <span class="fu">moving_average</span>(discharge, <span class="at">n =</span> <span class="dv">30</span>, <span class="at">sides =</span> <span class="st">&quot;center&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb184-4"><a href="chapter-10.html#cb184-4" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb184-5"><a href="chapter-10.html#cb184-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># the following line could be obsolete</span></span>
+<span id="cb184-5"><a href="chapter-10.html#cb184-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># double check using the correct period</span></span>
 <span id="cb184-6"><a href="chapter-10.html#cb184-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">1960</span>,  year <span class="sc">&lt;=</span> <span class="dv">2000</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb184-7"><a href="chapter-10.html#cb184-7" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb184-8"><a href="chapter-10.html#cb184-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># computing the Q95 for each day of the year</span></span>
@@ -401,93 +403,130 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ##  9 -01-09   0.00942
 ## 10 -01-10   0.0094 
 ## # … with 356 more rows</code></pre>
-<p><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="chapter-10.html#cb186-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> threshold, <span class="fu">aes</span>(<span class="at">x =</span> day, <span class="at">y =</span> threshold)) <span class="sc">+</span> </span>
+<span id="cb186-2"><a href="chapter-10.html#cb186-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>() <span class="sc">+</span> </span>
+<span id="cb186-3"><a href="chapter-10.html#cb186-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_breaks =</span> <span class="st">&quot;1 months&quot;</span>, <span class="at">date_labels =</span> <span class="st">&quot;%b&quot;</span>, </span>
+<span id="cb186-4"><a href="chapter-10.html#cb186-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">expand =</span> <span class="fu">expansion</span>()) <span class="sc">+</span> </span>
+<span id="cb186-5"><a href="chapter-10.html#cb186-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb186-6"><a href="chapter-10.html#cb186-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb186-7"><a href="chapter-10.html#cb186-7" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-152-1.png" width="672" /></p>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="chapter-10.html#cb187-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Add Julian date columns to the benchmark and threshold</span></span>
+<span id="cb187-2"><a href="chapter-10.html#cb187-2" aria-hidden="true" tabindex="-1"></a>benchmark <span class="ot">&lt;-</span> benchmark <span class="sc">%&gt;%</span> </span>
+<span id="cb187-3"><a href="chapter-10.html#cb187-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">jdate =</span> <span class="fu">yday</span>(time))</span>
+<span id="cb187-4"><a href="chapter-10.html#cb187-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb187-5"><a href="chapter-10.html#cb187-5" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> threshold <span class="sc">%&gt;%</span> </span>
+<span id="cb187-6"><a href="chapter-10.html#cb187-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">jdate =</span> <span class="fu">yday</span>(day), <span class="at">year =</span> <span class="fu">year</span>(day))</span>
+<span id="cb187-7"><a href="chapter-10.html#cb187-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb187-8"><a href="chapter-10.html#cb187-8" aria-hidden="true" tabindex="-1"></a><span class="do">### Plot the threshold against monthly flows in log10 space</span></span>
+<span id="cb187-9"><a href="chapter-10.html#cb187-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(benchmark, <span class="fu">aes</span>(<span class="at">x=</span>jdate)) <span class="sc">+</span> </span>
+<span id="cb187-10"><a href="chapter-10.html#cb187-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group=</span>year, <span class="at">y=</span>discharge), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span> </span>
+<span id="cb187-11"><a href="chapter-10.html#cb187-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">data =</span> threshold, <span class="fu">aes</span>(<span class="at">y=</span>threshold), <span class="at">colour=</span><span class="st">&quot;red&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb187-12"><a href="chapter-10.html#cb187-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Julian Date&quot;</span>, <span class="at">expand =</span> <span class="fu">expansion</span>()) <span class="sc">+</span></span>
+<span id="cb187-13"><a href="chapter-10.html#cb187-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_log10</span>()</span>
+<span id="cb187-14"><a href="chapter-10.html#cb187-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb187-15"><a href="chapter-10.html#cb187-15" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-153-1.png" width="672" /></p>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="chapter-10.html#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Plot the threshold against monthly flows in log10 space</span></span>
+<span id="cb188-2"><a href="chapter-10.html#cb188-2" aria-hidden="true" tabindex="-1"></a>ya <span class="ot">&lt;-</span>  benchmark <span class="sc">%&gt;%</span></span>
+<span id="cb188-3"><a href="chapter-10.html#cb188-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">discharge =</span> <span class="fu">moving_average</span>(discharge, <span class="at">n =</span> <span class="dv">30</span>, <span class="at">sides =</span> <span class="st">&quot;center&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb188-4"><a href="chapter-10.html#cb188-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">1960</span>,  year <span class="sc">&lt;=</span> <span class="dv">2000</span>)</span>
+<span id="cb188-5"><a href="chapter-10.html#cb188-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb188-6"><a href="chapter-10.html#cb188-6" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(ya <span class="sc">%&gt;%</span> <span class="fu">drop_na</span>(), <span class="fu">aes</span>(<span class="at">x=</span>jdate)) <span class="sc">+</span> </span>
+<span id="cb188-7"><a href="chapter-10.html#cb188-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group=</span>year, <span class="at">y=</span>discharge), <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span> </span>
+<span id="cb188-8"><a href="chapter-10.html#cb188-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">data =</span> threshold, <span class="fu">aes</span>(<span class="at">y=</span>threshold), <span class="at">colour=</span><span class="st">&quot;red&quot;</span>) <span class="sc">+</span> </span>
+<span id="cb188-9"><a href="chapter-10.html#cb188-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Julian Date&quot;</span>, <span class="at">expand =</span> <span class="fu">expansion</span>()) <span class="sc">+</span> </span>
+<span id="cb188-10"><a href="chapter-10.html#cb188-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_log10</span>()</span>
+<span id="cb188-11"><a href="chapter-10.html#cb188-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb188-12"><a href="chapter-10.html#cb188-12" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-153-2.png" width="672" /></p>
+<div class="sourceCode" id="cb189"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb189-1"><a href="chapter-10.html#cb189-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">&lt;-</span> threshold <span class="sc">%&gt;%</span> </span>
+<span id="cb189-2"><a href="chapter-10.html#cb189-2" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>jdate, <span class="sc">-</span>year)</span></code></pre></div>
 </div>
 <div id="benchmark-drought-characteristics" class="section level3">
 <h3>Benchmark Drought characteristics</h3>
-<p><a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a></p>
-<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="chapter-10.html#cb186-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize empty list for events</span></span>
-<span id="cb186-2"><a href="chapter-10.html#cb186-2" aria-hidden="true" tabindex="-1"></a>events <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">benchmark =</span> <span class="cn">NULL</span>, <span class="at">influenced =</span> <span class="cn">NULL</span>)</span>
-<span id="cb186-3"><a href="chapter-10.html#cb186-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb186-4"><a href="chapter-10.html#cb186-4" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize empty list for final drought characteristics</span></span>
-<span id="cb186-5"><a href="chapter-10.html#cb186-5" aria-hidden="true" tabindex="-1"></a>drought.char <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">benchmark =</span> <span class="cn">NULL</span>, <span class="at">influenced =</span> <span class="cn">NULL</span>) </span>
-<span id="cb186-6"><a href="chapter-10.html#cb186-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb186-7"><a href="chapter-10.html#cb186-7" aria-hidden="true" tabindex="-1"></a><span class="co"># function that computes the drought characteristics given a table of events</span></span>
-<span id="cb186-8"><a href="chapter-10.html#cb186-8" aria-hidden="true" tabindex="-1"></a>summarize_dc <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb186-9"><a href="chapter-10.html#cb186-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&quot;mean.duration&quot;</span> <span class="ot">=</span> <span class="fu">as.double</span>(<span class="fu">mean</span>(x<span class="sc">$</span>duration)), </span>
-<span id="cb186-10"><a href="chapter-10.html#cb186-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;mean.deficit&quot;</span> <span class="ot">=</span> <span class="fu">mean</span>(x<span class="sc">$</span>volume))</span>
-<span id="cb186-11"><a href="chapter-10.html#cb186-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="chapter-10.html#cb190-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize empty list for events</span></span>
+<span id="cb190-2"><a href="chapter-10.html#cb190-2" aria-hidden="true" tabindex="-1"></a>events <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">benchmark =</span> <span class="cn">NULL</span>, <span class="at">influenced =</span> <span class="cn">NULL</span>)</span>
+<span id="cb190-3"><a href="chapter-10.html#cb190-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-4"><a href="chapter-10.html#cb190-4" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize empty list for final drought characteristics</span></span>
+<span id="cb190-5"><a href="chapter-10.html#cb190-5" aria-hidden="true" tabindex="-1"></a>drought.char <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">benchmark =</span> <span class="cn">NULL</span>, <span class="at">influenced =</span> <span class="cn">NULL</span>) </span>
+<span id="cb190-6"><a href="chapter-10.html#cb190-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-7"><a href="chapter-10.html#cb190-7" aria-hidden="true" tabindex="-1"></a><span class="co"># function that computes the drought characteristics given a table of events</span></span>
+<span id="cb190-8"><a href="chapter-10.html#cb190-8" aria-hidden="true" tabindex="-1"></a>summarize_dc <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb190-9"><a href="chapter-10.html#cb190-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&quot;mean.duration&quot;</span> <span class="ot">=</span> <span class="fu">as.double</span>(<span class="fu">mean</span>(x<span class="sc">$</span>duration)), </span>
+<span id="cb190-10"><a href="chapter-10.html#cb190-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;mean.deficit&quot;</span> <span class="ot">=</span> <span class="fu">mean</span>(x<span class="sc">$</span>volume))</span>
+<span id="cb190-11"><a href="chapter-10.html#cb190-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <p>Periods with discharges below the before calculated threshold are considered drought events. Consecutive drought events with an inter-event time of less than or equal to 10 days (argument <code>min.duration = 10</code>) get pooled into single drought event regardless of their inter-event excess volume (argument <code>min.vol.ratio = Inf</code>). To get rid of minor droughts, only drought events with a duration of more than 10 days are kept.</p>
-<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="chapter-10.html#cb187-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought events for the benchmark time series</span></span>
-<span id="cb187-2"><a href="chapter-10.html#cb187-2" aria-hidden="true" tabindex="-1"></a>events<span class="sc">$</span>benchmark <span class="ot">&lt;-</span> benchmark <span class="sc">%&gt;%</span></span>
-<span id="cb187-3"><a href="chapter-10.html#cb187-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">1981</span>, year <span class="sc">&lt;=</span> <span class="dv">2000</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb187-4"><a href="chapter-10.html#cb187-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drought_events</span>(</span>
-<span id="cb187-5"><a href="chapter-10.html#cb187-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">threshold =</span> threshold,</span>
-<span id="cb187-6"><a href="chapter-10.html#cb187-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pooling =</span> <span class="st">&quot;inter-event&quot;</span>,</span>
-<span id="cb187-7"><a href="chapter-10.html#cb187-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">pooling.pars =</span> <span class="fu">list</span>(<span class="at">min.duration =</span> <span class="dv">10</span>, <span class="at">min.vol.ratio =</span> <span class="cn">Inf</span>)</span>
-<span id="cb187-8"><a href="chapter-10.html#cb187-8" aria-hidden="true" tabindex="-1"></a>  )  <span class="sc">%&gt;%</span></span>
-<span id="cb187-9"><a href="chapter-10.html#cb187-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(duration <span class="sc">&gt;</span> <span class="dv">10</span>)</span>
-<span id="cb187-10"><a href="chapter-10.html#cb187-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb187-11"><a href="chapter-10.html#cb187-11" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought characteristics for the benchmark time series</span></span>
-<span id="cb187-12"><a href="chapter-10.html#cb187-12" aria-hidden="true" tabindex="-1"></a>drought.char<span class="sc">$</span>benchmark <span class="ot">&lt;-</span> <span class="fu">summarize_dc</span>(events<span class="sc">$</span>benchmark)</span></code></pre></div>
+<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="chapter-10.html#cb191-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought events for the benchmark time series</span></span>
+<span id="cb191-2"><a href="chapter-10.html#cb191-2" aria-hidden="true" tabindex="-1"></a>events<span class="sc">$</span>benchmark <span class="ot">&lt;-</span> benchmark <span class="sc">%&gt;%</span></span>
+<span id="cb191-3"><a href="chapter-10.html#cb191-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">1981</span>, year <span class="sc">&lt;=</span> <span class="dv">2000</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb191-4"><a href="chapter-10.html#cb191-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drought_events</span>(</span>
+<span id="cb191-5"><a href="chapter-10.html#cb191-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">threshold =</span> threshold,</span>
+<span id="cb191-6"><a href="chapter-10.html#cb191-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pooling =</span> <span class="st">&quot;inter-event&quot;</span>,</span>
+<span id="cb191-7"><a href="chapter-10.html#cb191-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">pooling.pars =</span> <span class="fu">list</span>(<span class="at">min.duration =</span> <span class="dv">10</span>, <span class="at">min.vol.ratio =</span> <span class="cn">Inf</span>)</span>
+<span id="cb191-8"><a href="chapter-10.html#cb191-8" aria-hidden="true" tabindex="-1"></a>  )  <span class="sc">%&gt;%</span></span>
+<span id="cb191-9"><a href="chapter-10.html#cb191-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(duration <span class="sc">&gt;</span> <span class="dv">10</span>)</span>
+<span id="cb191-10"><a href="chapter-10.html#cb191-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb191-11"><a href="chapter-10.html#cb191-11" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought characteristics for the benchmark time series</span></span>
+<span id="cb191-12"><a href="chapter-10.html#cb191-12" aria-hidden="true" tabindex="-1"></a>drought.char<span class="sc">$</span>benchmark <span class="ot">&lt;-</span> <span class="fu">summarize_dc</span>(events<span class="sc">$</span>benchmark)</span></code></pre></div>
 <p>For the Upper-Guadiana, these would be the drought events of the <strong>benchmark</strong> time series. Events numbers that are missing in the sequence are minor drought events that have been filtered out.</p>
-<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="chapter-10.html#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(events<span class="sc">$</span>benchmark)</span></code></pre></div>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="chapter-10.html#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(events<span class="sc">$</span>benchmark)</span></code></pre></div>
 <pre><code>## # A tibble: 17 x 9
 ##    event first.day  last.day   duration dbt        volume  qmin tqmin      pooled
 ##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;drtn&gt;   &lt;drtn&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;      &lt;dbl&gt;
-##  1     4 1981-10-18 1981-12-27  71 days  71 days  33492.  0     1981-11-23      0
+##  1     4 1981-10-18 1981-12-27  71 days  71 days  33421.  0     1981-11-23      0
 ##  2     5 1982-10-07 1982-10-18  12 days  12 days   1166.  0     1982-10-07      0
 ##  3     6 1983-06-03 1983-09-01  91 days  58 days   1169.  0.001 1983-08-12      8
 ##  4     7 1983-09-20 1983-11-20  62 days  62 days   7868.  0     1983-09-20      0
 ##  5     9 1985-11-12 1985-11-26  15 days  15 days   1731.  0.004 1985-11-12      0
-##  6    11 1986-12-29 1987-01-08  11 days   3 days     54.9 0.009 1987-01-08      2
+##  6    11 1986-12-29 1987-01-08  11 days   3 days     48.0 0.009 1987-01-08      2
 ##  7    13 1991-08-21 1991-09-05  16 days  15 days    288.  0     1991-09-03      1
 ##  8    15 1992-01-16 1992-02-19  35 days  32 days   7940.  0.005 1992-02-05      2
 ##  9    16 1992-05-12 1992-06-10  30 days  28 days   1947.  0.006 1992-05-27      2
 ## 10    19 1993-01-01 1993-05-11 131 days 129 days  55539.  0.003 1993-03-05      1
 ## 11    21 1993-09-19 1993-10-11  23 days  21 days    729.  0     1993-09-19      1
-## 12    22 1993-12-22 1994-01-04  14 days  14 days   1815.  0.008 1994-01-01      0
+## 12    22 1993-12-22 1994-01-04  14 days  14 days   1748.  0.008 1994-01-01      0
 ## 13    23 1994-03-20 1994-04-18  30 days  28 days   2174.  0.005 1994-04-13      2
 ## 14    24 1994-05-02 1994-10-16 168 days 162 days  28719.  0     1994-07-25      2
-## 15    25 1994-11-25 1995-09-01 281 days 281 days 126721.  0     1995-06-06      0
+## 15    25 1994-11-25 1995-09-01 281 days 281 days 126625.  0     1995-06-06      0
 ## 16    26 1995-09-29 1995-11-16  49 days  49 days   6581.  0     1995-09-29      0
 ## 17    27 2000-02-29 2000-03-22  23 days  22 days   1326.  0.011 2000-03-18      1</code></pre>
 </div>
 <div id="human-influenced-drought-characteristics" class="section level3">
 <h3>Human-influenced drought characteristics</h3>
-<p>Extent the <strong>benchmark</strong> threshold calculated in step 1 to the period of the <strong>human-influenced</strong> time series. Note that this can be a different time period than was used to calculate the <strong>benchmark</strong> threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a></p>
-<p><a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a></p>
-<p><img src="_main_files/figure-html/unnamed-chunk-156-1.png" width="768" /></p>
-<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="chapter-10.html#cb190-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought events for the human influenced time series</span></span>
-<span id="cb190-2"><a href="chapter-10.html#cb190-2" aria-hidden="true" tabindex="-1"></a>events<span class="sc">$</span>influenced <span class="ot">&lt;-</span> influenced <span class="sc">%&gt;%</span></span>
-<span id="cb190-3"><a href="chapter-10.html#cb190-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">1991</span> <span class="sc">&amp;</span> year <span class="sc">&lt;=</span> <span class="dv">2000</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb190-4"><a href="chapter-10.html#cb190-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drought_events</span>(<span class="at">threshold =</span> threshold,</span>
-<span id="cb190-5"><a href="chapter-10.html#cb190-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">pooling =</span> <span class="st">&quot;inter-event&quot;</span>,</span>
-<span id="cb190-6"><a href="chapter-10.html#cb190-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">pooling.pars =</span> <span class="fu">list</span>(<span class="at">min.duration =</span> <span class="dv">10</span>, <span class="at">min.vol.ratio =</span> <span class="cn">Inf</span>))  <span class="sc">%&gt;%</span></span>
-<span id="cb190-7"><a href="chapter-10.html#cb190-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(duration <span class="sc">&gt;</span> <span class="dv">10</span>)</span>
-<span id="cb190-8"><a href="chapter-10.html#cb190-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb190-9"><a href="chapter-10.html#cb190-9" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought characteristics for the human influenced time series</span></span>
-<span id="cb190-10"><a href="chapter-10.html#cb190-10" aria-hidden="true" tabindex="-1"></a>drought.char<span class="sc">$</span>influenced <span class="ot">&lt;-</span> <span class="fu">summarize_dc</span>(events<span class="sc">$</span>influenced)</span></code></pre></div>
+<p>Extent the <strong>benchmark</strong> threshold calculated in step 1 to the period of the <strong>human-influenced</strong> time series. Note that this can be a different time period than was used to calculate the <strong>benchmark</strong> threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<p><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
+<p><img src="_main_files/figure-html/unnamed-chunk-157-1.png" width="768" /></p>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="chapter-10.html#cb194-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought events for the human influenced time series</span></span>
+<span id="cb194-2"><a href="chapter-10.html#cb194-2" aria-hidden="true" tabindex="-1"></a>events<span class="sc">$</span>influenced <span class="ot">&lt;-</span> influenced <span class="sc">%&gt;%</span></span>
+<span id="cb194-3"><a href="chapter-10.html#cb194-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&gt;=</span> <span class="dv">1991</span> <span class="sc">&amp;</span> year <span class="sc">&lt;=</span> <span class="dv">2000</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb194-4"><a href="chapter-10.html#cb194-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drought_events</span>(<span class="at">threshold =</span> threshold,</span>
+<span id="cb194-5"><a href="chapter-10.html#cb194-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">pooling =</span> <span class="st">&quot;inter-event&quot;</span>,</span>
+<span id="cb194-6"><a href="chapter-10.html#cb194-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">pooling.pars =</span> <span class="fu">list</span>(<span class="at">min.duration =</span> <span class="dv">10</span>, <span class="at">min.vol.ratio =</span> <span class="cn">Inf</span>))  <span class="sc">%&gt;%</span></span>
+<span id="cb194-7"><a href="chapter-10.html#cb194-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(duration <span class="sc">&gt;</span> <span class="dv">10</span>)</span>
+<span id="cb194-8"><a href="chapter-10.html#cb194-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb194-9"><a href="chapter-10.html#cb194-9" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the drought characteristics for the human influenced time series</span></span>
+<span id="cb194-10"><a href="chapter-10.html#cb194-10" aria-hidden="true" tabindex="-1"></a>drought.char<span class="sc">$</span>influenced <span class="ot">&lt;-</span> <span class="fu">summarize_dc</span>(events<span class="sc">$</span>influenced)</span></code></pre></div>
 </div>
 <div id="comparison-of-drought-characteristics" class="section level3">
 <h3>Comparison of drought characteristics</h3>
 <p>For the Upper-Guadiana, these would be the drought characteristics:</p>
-<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="chapter-10.html#cb191-1" aria-hidden="true" tabindex="-1"></a>drought.char</span></code></pre></div>
+<div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb195-1"><a href="chapter-10.html#cb195-1" aria-hidden="true" tabindex="-1"></a>drought.char</span></code></pre></div>
 <pre><code>## $benchmark
 ## mean.duration  mean.deficit 
-##      62.47059   16427.09647 
+##      62.47059   16412.96753 
 ## 
 ## $influenced
 ## mean.duration  mean.deficit 
-##      175.4118    59454.0932</code></pre>
+##      175.4118    59408.5722</code></pre>
 <p>Calculate the percentage difference between the <strong>benchmark</strong> and <strong>human-influenced</strong> drought characteristics.</p>
 <p><span class="math display">\[\Delta DC = \frac{DCHI - DCBM}{DCBM} \cdot 100\]</span>
 where <span class="math inline">\(\Delta DC\)</span> is the percentage change in drought characteristics (<span class="math inline">\(DC\)</span>) between the <strong>human-influenced</strong> (<span class="math inline">\(DCHI\)</span>) and <strong>benchmark</strong> (<span class="math inline">\(DCBM\)</span>) time series.
 For the Upper-Guadiana, these would be the differences in drought characteristics:</p>
-<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="chapter-10.html#cb193-1" aria-hidden="true" tabindex="-1"></a>(drought.char<span class="sc">$</span>influenced <span class="sc">-</span> drought.char<span class="sc">$</span>benchmark) <span class="sc">/</span> drought.char<span class="sc">$</span>benchmark <span class="sc">*</span> <span class="dv">100</span></span></code></pre></div>
+<div class="sourceCode" id="cb197"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb197-1"><a href="chapter-10.html#cb197-1" aria-hidden="true" tabindex="-1"></a>(drought.char<span class="sc">$</span>influenced <span class="sc">-</span> drought.char<span class="sc">$</span>benchmark) <span class="sc">/</span> drought.char<span class="sc">$</span>benchmark <span class="sc">*</span> <span class="dv">100</span></span></code></pre></div>
 <pre><code>## mean.duration  mean.deficit 
-##       180.791       261.927</code></pre>
+##      180.7910      261.9612</code></pre>
 
 </div>
 </div>
@@ -495,12 +534,9 @@ For the Upper-Guadiana, these would be the differences in drought characteristic
 <div class="footnotes">
 <hr />
 <ol start="2">
-<li id="fn2"><p>Tobias: As you are always using the benchmark threshold I suggest to omit the last part of the sentence.<a href="chapter-10.html#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>Tobias: To simplify the code, should we subset the included dataset to the period of 1960-2000? Data outside this period is not used, as far as I can see…<a href="chapter-10.html#fnref3" class="footnote-back">↩︎</a></p></li>
-<li id="fn4"><p>Tobias: These plots are just to show data coverage and the handling of leap-years. If you want to have some of them in the Worked Example should print the code producing them. <a href="chapter-10.html#fnref4" class="footnote-back">↩︎</a></p></li>
-<li id="fn5"><p>Tobias: I think this Worked Example could be easier to follow if we fist compute the drought events for both time series and in a separate section the drought characteristics. So section 2 could become “Drought Events”, Section 3 “Drought Characteristics”.<a href="chapter-10.html#fnref5" class="footnote-back">↩︎</a></p></li>
-<li id="fn6"><p>Tobias: this paragraph doesn’t make sense here. This is probably my fault but I think you don’t need it at all.<a href="chapter-10.html#fnref6" class="footnote-back">↩︎</a></p></li>
-<li id="fn7"><p>Tobias: These plots just explain why I used the Q95. With Q80 the droughts would not terminate within a year. Again: if you want to keep one or all of these plots we should show the code producing them. <a href="chapter-10.html#fnref7" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>Tobias: I think this Worked Example could be easier to follow if we fist compute the drought events for both time series and in a separate section the drought characteristics. So section 2 could become “Drought Events”, Section 3 “Drought Characteristics”.<a href="chapter-10.html#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>Tobias: this paragraph doesn’t make sense here. This is probably my fault but I think you don’t need it at all.<a href="chapter-10.html#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>Tobias: These plots just explain why I used the Q95. With Q80 the droughts would not terminate within a year. Again: if you want to keep one or all of these plots we should show the code producing them. <a href="chapter-10.html#fnref4" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
             </section>
