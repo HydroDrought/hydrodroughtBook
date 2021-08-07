@@ -47,7 +47,7 @@ summary(mk_test_results)
 ```
 # Mann-Kendall test
 
-The Mann-Kendall test produces an S value of `r as.numeric(mk_test_results$S)`, meaning that we have `r as.numeric(mk_test_results$S)` more date pairs where the later observation is larger than the earlier. Using this test statistic and the `r dim(flow_annual_subset)[1]` years of observations, the Mann-Kendall test produces a p-value < 2.2x10-16 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.
+The Mann-Kendall test produces an S value of `r as.numeric(mk_test_results$S)`derived by calculating the difference between 2200 positive pairs (73.3%) and 774 negative pairs (25.8%) out of 3003 possible data pairs (29 pairs had equal values). Using this test statistic and the `r dim(flow_annual_subset)[1]` years of observations, the Mann-Kendall test produces a p-value < 1x10-15 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.
 
 As discussed in the text, the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results, but is slightly less affected by relatively high outliers during the late 2000s. 
 
