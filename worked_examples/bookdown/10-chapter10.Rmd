@@ -65,7 +65,7 @@ influenced <- guadiana_period %>%
 
 ### Threshold calculation
 
-Here we are taking the `benchmark` time series. First we are smoothing the column `discharge` with a 30-day moving average. The threshold itself is calculated as a daily varying $Q_{95}$ yielding a dataset with a row for each day of the year and the appropriate $Q_{95}$ in the column named `threshold`. 
+Here we are taking the `benchmark` time series. First we are smoothing the column `discharge` with a 30-day moving average. The threshold itself is calculated as a daily varying $Q_{80}$ yielding a dataset with a row for each day of the year and the appropriate $Q_{80}$ in the column named `threshold`. 
 
 ```{r}
 threshold <- benchmark %>%
@@ -75,8 +75,8 @@ threshold <- benchmark %>%
   # double check using the correct period
   filter(year >= 1960,  year <= 2000) %>%
   
-  # computing the Q95 for each day of the year
-  var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.95) 
+  # computing the Q80 for each day of the year
+  var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.80) 
 
 print(threshold)
 ```
@@ -149,7 +149,7 @@ summarize_dc <- function(x) {
 }
 ```
 
-Periods with discharges below the before calculated threshold are considered drought events.   Consecutive drought events with an inter-event time of less than or equal to 10 days (argument `min.duration = 10`) get pooled into single drought event regardless of their inter-event excess volume (argument `min.vol.ratio = Inf`). To get rid of minor droughts, only drought events with a duration of more than 10 days are kept. 
+Periods with discharges below the before calculated threshold are considered drought events.   Consecutive drought events with an inter-event time of less than or equal to 10 days (argument `min.duration = 10`) get pooled into a single drought event regardless of their inter-event excess volume (argument `min.vol.ratio = Inf`). To get rid of minor droughts, only drought events with a duration of more than 10 days are kept. 
 
 ```{r}
 # calculate the drought events for the benchmark time series
@@ -167,7 +167,7 @@ drought.char$benchmark <- summarize_dc(events$benchmark)
 ```
 
 
-For the Upper-Guadiana, these would be the drought events of the **benchmark** time series. Events numbers that are missing in the sequence are minor drought events that have been filtered out.
+For the Upper-Guadiana, these would be the drought events of the **benchmark** time series. Note that this calculation can be applied for a different time period than was used to calculate the **benchmark** threshold (for example, for Upper-Guadiana, we are using the period 1981-2000). Events numbers that are missing in the sequence are minor drought events that have been filtered out.
 ```{r}
 print(events$benchmark)
 ```
@@ -176,10 +176,7 @@ print(events$benchmark)
 
 ### Human-influenced drought characteristics 
 
-Extent the **benchmark** threshold calculated in step 1 to the period of the **human-influenced** time series. Note that this can be a different time period than was used to calculate the **benchmark** threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).^[Tobias: this paragraph doesn't make sense here. This is probably my fault but I think you don't need it at all.]
-
-
-^[Tobias: These plots just explain why I used the Q95. With Q80 the droughts would not terminate within a year. Again: if you want to keep one or all of these plots we should show the code producing them. ]
+We will now do the same drought calculation on the human-influenced time series, using the same period as for the benchmark drought calculation (here: 1981-2000).
 
 ```{r, warning=FALSE, echo=FALSE, fig.width=8, fig.height=10}
 infl <- influenced %>%
