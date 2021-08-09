@@ -110,7 +110,7 @@ p
 plot_df <- guadiana_period %>%	mutate(jdate = yday(time), line = "thresh_basis", facet = "thresh_basis") %>%
 	bind_rows(benchmark %>% mutate(line = "benchmark", facet = "benchmark")) %>%
 	bind_rows(influenced %>% mutate(jdate = yday(time), line = "influenced", facet = "influenced")) %>%
-	left_join(threshold %>% select(jdate, threshold), by = "jdate") %>%
+	left_join(threshold %>% dplyr::select(jdate, threshold), by = "jdate") %>%
 	mutate(line = factor(line, levels = c("thresh_basis", "benchmark", "influenced"), labels = c("Threshold\nBasis", "Benchmark", "Human\nInfluenced"))) %>%
 	mutate(facet = factor(facet, levels = c("thresh_basis", "benchmark", "influenced"), labels = c("Threshold Basis", "Benchmark", "Influenced"))) %>%
 	mutate(label = "Threshold")

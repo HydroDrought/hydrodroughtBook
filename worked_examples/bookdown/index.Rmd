@@ -1,6 +1,6 @@
 ---
 title: "Hydrological Drought (2nd Edition)"
-author: "Jim Stagge"
+author: "Lena M. Tallaksen and Henny A.J. van Lanen"
 site: bookdown::bookdown_site
 description: "Worked examples for Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (2nd Edition)"
 url: 'https\://github.com/jstagge/hydroDrought/docs'
