@@ -1,0 +1,1201 @@
+# Chapter 5
+
+## Worked Example 5.1: Flow Duration Curve
+
+### Loading the Data
+
+In this example we are going to use river flow data from the river Ngaruroro which is part of the International Data Set in the package **hydroDrought**. The dataset becomes accessible by loading the **hydroDrought** package. 
+```{r}
+library(tidyverse)
+library(hydroDrought)
+ngaruroro <- international %>%
+  filter(river == "Ngaruroro") %>%
+  dplyr::select(data) %>%
+  unnest(data) 
+```
+
+```{r, properties-dataset, echo=FALSE}
+fmt_date <- function(x) trimws(format(x, format = "%e %B %Y"))
+```
+
+The complete record (`r fmt_date(min(ngaruroro$time))` to `r fmt_date(max(ngaruroro$time))`) 
+of daily data from River Ngaruroro at Kuripapango (NZ) are used here to construct 
+a flow duration curve (FDC) based on a daily time step, $\Delta t = 1$ day. The 
+total number of $\Delta t$ intervals is $N = `r nrow(ngaruroro)`$ days. 
+Table 5.1 lists the first ten flow values. The first three columns show the 
+date and the corresponding riverflow value, $Q$.
+
+
+### Calculation of the FDC
+
+The flow duration curve is constructed following the calculation steps as seen 
+in the right part of the Table 5.1:
+
+- The rank, $i$, of each value (column four in Table 5.1) is calculated (using
+the `rank()` function), which means that if the list is sorted, the rank will be its position. Here the series is sorted in descending order and the $i^{th}$ largest value has rank $i$ (i.e. the largest value has rank 1).
+
+- The exceedance frequency (column five in Table 5.1), $EF_{Q_i}$ is calculated as: 
+$$EF_{Q_i}  = \frac{i} {N}$$ 
+which gives an estimate of the empirical exceedance frequency of the $i^{th}$ largest event. $EF_{Q_i}$ designates here the observed frequency when the flow, $Q$, is larger than the flow value with rank $i$, $Q_i$ .
+
+```{r}
+exceedance_frequency <- function(flow)
+{
+  # current rank
+  i <- rank(-flow, ties.method = "min", na.last = "keep") 
+  
+  # largest rank in sample (= number of non-missing values)
+  N <- length(na.omit(flow))
+  
+  # the exceedance frequency can be seen as the relative rank
+  return(i / N)
+}
+
+ngaruroro <- ngaruroro %>%
+  mutate(
+    rank = rank(-discharge, ties.method = "min"), 
+    freq.exc = exceedance_frequency(discharge)
+  ) 
+```
+
+`r tufte::margin_note("Table 5.1 Calculation of daily flow duration curve for River Ngaruroro at Kuripapango, NZ")`
+```{r, echo=FALSE}
+ngaruroro %>%
+  head(7) %>%
+  hydroDrought:::export_table(name = "Tab5.1") %>%
+  print()
+```
+
+
+```{r, echo=FALSE}
+library(kableExtra)
+# ngaruroro %>%
+#   mutate_if(is.numeric, round, 3) %>%
+#   dplyr::select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+#   head(7) %>%
+#   kable(caption = "Table 5.1 Calculation of a daily flow duration curve for River Ngaruroro at Kuripapango, NZ") %>%
+#   add_header_above(c(" " = 1, "$Q$ in $m^3s^{-1}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+#                    align = "right")
+```
+
+
+### Plot of the FDC
+The sorted table columns are then plotted (Figure 5.2). The ordinate axis is here logarithmic. 
+
+```{r, fig.cap="Figure 5.2 Flow duration curve for River Ngaruroro at Kuripapango, NZ.", fig.margin = FALSE}
+ggplot(ngaruroro, aes(x = freq.exc * 100, y = discharge)) +
+  geom_line() +
+  scale_y_log10(expand = expansion()) +
+  scale_x_continuous(expand = expansion()) +
+  labs(x = "Exceedance Frequency (%)",
+       y = expression(paste("Flow (", m^{3}, s^{-1}, ")"))) + 
+  theme(plot.margin = unit(c(0, 10, 0, 0), units = "pt"))
+```
+
+
+
+### Selected exceedance values
+
+```{r, echo=FALSE}
+q90 <- ngaruroro %>%
+  filter(freq.exc <= 0.9) %>%
+  arrange(desc(freq.exc)) %>%
+  head(1) %>%
+  pull(discharge)
+```
+
+Values for a particular frequency, for example the 90-percentile ($Q_{90}$), can be obtained as the value of $Q$ corresponding to the largest value of $EF_{Q_i}$ that is less than or equal to the value of $EF_{Q_i}$ sought for. A sample of corresponding values in this range is shown in Table 5.2, and the 90-percentile flow value is taken as `r round(q90, 1)`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>. Alternatively, in case of large differences between successive values, a linear interpolation can be used. 
+
+
+`r tufte::margin_note("Table 5.2 An extract of values corresponding to $Q_{90}$.")`
+```{r echo=FALSE}
+tbl <- ngaruroro %>%
+  filter(freq.exc >= 0.8999 & freq.exc <= 0.9002) %>%
+  arrange(freq.exc) %>%
+  hydroDrought:::export_table(name = "Tab5.2") %>%
+  print()
+```
+
+
+```{r echo=FALSE}
+# tbl  %>%
+#   mutate(discharge = round(discharge, 3), 
+#          freq.exc = round(freq.exc, 5)) %>%
+#   dplyr::select(Date = time, Flow = discharge, Rank = rank, `Exceedance Frequency` = freq.exc) %>%
+#   kable(caption = "Table 5.2 An extract of values corresponding to $Q_{90}$.") %>%
+#   add_header_above(c(" " = 1, "$Q$ in ${m^3s^{-1}}$" = 1, "$i$" = 1, "$EF_Q$" = 1), 
+#                    align = "right")
+```
+
+### Fast-Track
+
+The function `lfquantile()` calculates percentiles (quantiles) directly. The 
+exact (interpolated) values for $Q_{95}$, $Q_{90}$ and $Q_{80}$ would be: 
+
+```{r}
+lfquantile(ngaruroro$discharge, exc.freq = c(0.95, 0.9, 0.8))
+```
+
+The retrieved value for $Q_{90}$ is 
+`r lfquantile(ngaruroro$discharge, exc.freq = c(0.9))`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>, 
+approximated to 
+`r round(lfquantile(ngaruroro$discharge, exc.freq = c(0.9)), 2)`<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>.
+
+### Standardized Flow Duration Curves
+
+Comparing FDCs from different catchments requires standardization eg. dividing the discharges by the catchment area, the median or the mean discharge. 
+```{r}
+lambournRay <- international %>%
+  filter(river %in% c("Lambourn", "Ray")) %>%
+  dplyr::select(river, area = catchment, data)
+
+lambournRay <- lambournRay %>%
+  mutate(
+    data = map2(data, area, ~mutate(.x, rel.discharge = discharge * 1000 / .y))
+  ) %>%
+  print()
+
+fdc <- lambournRay %>%
+  dplyr::select(river, data) %>%
+  unnest(cols = data) %>%
+  group_by(river) %>%
+  mutate(
+    freq.exc = exceedance_frequency(rel.discharge)
+  ) 
+```
+
+```{r, echo=TRUE}
+ggplot(fdc, 
+       mapping = aes(x = freq.exc * 100, y = rel.discharge, size = river)) +
+  geom_step(direction = "vh") +
+  scale_x_continuous(expand = expansion()) +
+  scale_y_log10(breaks = breaks_log10_all(mult.base = 1),
+                minor_breaks = breaks_log10_all(),
+                expand = expansion()) +
+  scale_size_manual("River", values = c(0.1, 0.75)) +
+  labs(x = "Exceedance Frequency (%)",
+       y = expression(paste("Flow (", l, s^{-1}, km^{-2}, ")"))) 
+```
+
+
+## Worked example 5.2: Mean annual minimum n-day flow
+
+### Loading the Data
+
+In this example we are again going to use river flow data from the river Ngaruroro
+at Kuripapango (NZ) of the International Data Set in the package **hydroDrought**. 
+Ten years of daily data are used as an example, as in Worked Example 5.1, to 
+estimate mean annual minimum of the $n$-day average flow for $n$ equal to 1, 7 
+and 30 days. For this station the lowest flows are observed around the turn of 
+the calendar year. Therefore the annual minima are selected from years starting 
+1 September and ending 31 August. Table 5.4 lists the first flow values. 
+The first two columns show the date and the corresponding flow value, $Q$.
+
+In order to calculate the mean annual minimum each observation will be attributed 
+to a year according to the date of the observation using the function `water_year()` 
+which appends an additional column named `year` to the dataset. 
+
+```{r, warning=FALSE}
+library(tidyverse)
+library(hydroDrought)
+
+# attribute each observation to the correct year
+# and dplyr::select only the years between 1990/91 and 2000/01
+ngaruroro <- international %>%
+  filter(river == "Ngaruroro") %>%
+  dplyr::select(data) %>%
+  unnest(data) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+  ) %>%
+  filter(year >= 1990, year <= 1999)
+
+smoothed <- ngaruroro %>%
+  mutate(
+    MA1 = moving_average(discharge, n = 1),
+    MA7 = moving_average(discharge, n = 7),
+    MA30 = moving_average(discharge, n = 30)
+  )
+```
+
+`r tufte::margin_note("Table 5.4 Calculation of $n$-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. A moving average with a window length $n$ introduces $n-1$ missing values (<code>NA</code> values). ")`
+```{r, echo=FALSE}
+ smoothed %>%
+  head(31) %>%
+  hydroDrought:::export_table(name = "Tab5.4") %>%
+  print(n = 31)
+```
+
+
+```{r, echo=FALSE}
+# num_in_brackets <- function(x) sub("(\\d+)", "(\\1)", x = x)
+# library(kableExtra)
+# smoothed %>%
+#   dplyr::select(-discharge, -year) %>%
+#   head(31) %>%
+#   mutate_if(is.numeric, round, digits = 3) %>%
+#   rename_all(.funs = num_in_brackets) %>%
+#   kable(caption = "Table 5.4 Calculation of n-day average flow (unit: in m<sup>3</sup>s<sup>-1</sup>), River Ngaruroro at Kuripapango, NZ. ") %>%
+#   add_header_above(c("Data, 10-year series" = 2, "Moving average calculation" = 2), 
+#                    align = "right")
+```
+
+
+### Calculation
+First the annual minimum values are extracted and then the mean annual minimum 
+values, $MAM(1)$, $MAM(7)$ and $MAM(30)$ are calculated by averaging the 
+annual minimum time series. The results are tabulated in Table 5.5.
+
+```{r, mam}
+# compute the annual minima
+am <- smoothed %>%
+  dplyr::select(-discharge, -time) %>%
+  group_by(year) %>%
+  summarise_all(min, na.rm = TRUE)
+
+# average the annual minima to get the mean annual minima
+mam <- am %>% 
+  dplyr::select(-year) %>%
+  summarise_all(mean) 
+```
+
+`r tufte::margin_note("Table 5.5 $MAM(n-day)$, $n=1$ day, 7 days and 30 days (m<sup>3</sup>s<sup>-1</sup>). ")`
+```{r, echo=FALSE}
+print(mam)
+```
+
+
+```{r, echo=FALSE}
+# mam  %>%
+#   mutate_if(is.numeric, round, digits = 3) %>%
+#   rename_all(.funs = num_in_brackets) %>%
+#   kable(caption = "Table 5.5 $MAM$(n-day), $n=1$ day, 7 days and 30 days") %>%
+#   add_header_above(c("$Q$ in ${m^3s^{-1}}$" = 3), align = "center")
+```
+
+### Fast Track
+Mapping over the length of the smoothing window avoids the multiple explicit
+calls of the function `mean_annual_minimum()`. The results are absolutely 
+identical but the code is can be adapted more easily and is less error-prone.
+
+```{r}
+# calculating each column explicitly
+ngaruroro %>% 
+  dplyr::select(discharge, time) %>%
+  summarise(
+    `MAM(1)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 1),
+    `MAM(7)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 7),
+    `MAM(30)` = mean_annual_minimum(discharge, time, origin = "-09-01", n = 30)
+  ) %>%
+  flatten_dbl()
+```
+
+
+
+
+```{r}
+# Applying the function mean_annual_minimum() to each element of the vector
+c(1, 7, 30) %>%
+  map(
+    .f = mean_annual_minimum, 
+    discharge = ngaruroro$discharge, time = ngaruroro$time, origin = "-09-01"
+  ) %>%
+  flatten_dbl()
+```
+
+
+## Worked Example 5.3: Base Flow Index
+
+### Loading the Data
+
+Three years of daily flow (1995 to 1997) from the Ray at Grendon Underwood (UK) have been selected. The base flow separation is done for the whole three-year period, whereas the BFI is calculated for the mid-year 1996. This ensures that days at the start and end of the calculation year are included. In [Table 5.7](#table) the calculation steps are illustrated using data from the beginning of the record.
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lubridate)
+library(hydroDrought)
+
+fmt_number <- function(x) format(x, big.mark = "<i>&#8239;</i>")
+
+ray <- international %>%
+  filter(river == "Ray") %>%
+  dplyr::select(data) %>%
+  unnest(data) %>%
+  mutate(
+    year = water_year(time)
+  ) %>%
+  filter(year >= 1995, year <= 1997)
+```
+
+
+### Calculation
+(@) The daily flows, $Q$<i>&nbsp;</i>m<sup>3</sup>s<sup>-1</sup>, are divided into non-overlapping blocks of five days (Column 1 and 2, [Table 5.7](#table)).
+    ```{r}
+ray <- ray %>%
+  mutate(
+    block = ((row_number() - 1) %/% 5) + 1
+  ) %>%
+  print()
+    ```
+
+(@) Mark the minima of each of these blocks and let them be called $Q_{min_1}$, <i>&hellip;</i> $Q_{min_n}$ (Column 3, [Table 5.7](#table)). Consider in turn ($Q_{min_1}$, $Q_{min_2}$, $Q_{min_3}$), <i>&hellip;</i> ($Q_{min_{n-1}}$, $Q_{min_{n}}$, $Q_{min_{n+1}}$). In each case, if 0.9<i>&middot;</i>central value <i>&le;</i> outer values, then the central value is identified as a turning point for the base flow line (bold lines in [Table 5.7](#table)). Continue this procedure until the whole time series has been analysed. 
+
+    ```{r}
+points <- ray %>%
+  group_by(block) %>%
+  slice_min(discharge, with_ties = FALSE) %>%
+  ungroup() %>%
+  rename(Qmin = discharge) %>%
+  mutate(
+    Qmin.red = 0.9 * Qmin,
+    is.turning.point = Qmin.red <= lag(Qmin) & Qmin.red <= lead(Qmin)
+  )
+    ```
+
+
+(@) Join the turning points by straight lines to form the base flow separation line and assign to each day a base flow value $Q_b$, by linear interpolation between the turning points. If, on any day, the base flow estimated by this line exceeds the total flow, the base flow is set to be equal to the total flow $Q$, on that day.
+
+    ```{r}
+tp <- points %>%
+  filter(is.turning.point) %>%
+  dplyr::select(time, Qmin) 
+
+baseflow <- ray %>%
+  mutate(
+    baseflow = approx(x = tp$time, y = tp$Qmin, xout = time)$y, 
+    baseflow = pmin(baseflow, discharge)
+  )
+    ```
+
+
+(@) Calculate the volume of water ($V_{base}$) beneath the base flow hydrograph between the first and last date of interest. The volume (m<sup>3</sup>) is simply derived as the sum of the daily base flow values multiplied by `r fmt_number(86400)` (the number of seconds per day). 
+
+(@) Calculate the corresponding volume of water beneath the recorded hydrograph ($V_{total}$). The volume  (m<sup>3</sup>) is obtained by summing the daily flow values between the first and the last dates inclusive. 
+
+    ```{r}
+volume <- baseflow %>%
+  filter(year == 1996) %>%
+  na.omit() %>%
+  summarise(
+    total = sum(discharge) * 86400,
+    baseflow = sum(baseflow) * 86400
+  )
+    ```
+
+(@) The BFI is then $V_{base}/V_{total}$.
+
+```{r}
+bfi <- volume$baseflow / volume$total
+bfi
+```
+
+```{r, echo=FALSE}
+options(knitr.kable.NA = '')
+library(kableExtra)
+tbl <- points %>%
+  dplyr::select(-block, -year) %>%
+  right_join(baseflow, by = "time") %>% 
+  arrange(time)
+
+tbl <- tbl  %>%
+  filter(time <= as.Date("1995-02-09")) %>%
+  mutate_at(vars(discharge, Qmin, baseflow), .funs = round, digits = 3) %>%
+  mutate(Qmin.red = round(Qmin.red, digits = 4),
+         bold = is.finite(is.turning.point) & is.turning.point, 
+         # Qmin.red = text_spec(Qmin.red, format = "html", bold = bold)
+  ) 
+
+tbl2 <- tbl %>%
+  dplyr::select(`1 . Date` = time, `2 . Daily flow` = discharge, ` 3 . Qmin` = Qmin, `4 . 0.9 * Qmin` = Qmin.red, `5 . Base flow` = baseflow) %>%
+  kable(
+    caption = "<a name=\"table\"></a>Table 5.7 Calculation of the base flow separation line from time series of daily flow; non-overlapping 5-day blocks are indicated by alternating background colors and turning points are marked bold.") %>%
+  # add_header_above(c(" " = 1,
+  #                    "$Q$ in ${m^3s^{-1}}$" = 1,
+  #                    "in ${m^3s^{-1}}$" = 1,
+  #                    "in ${m^3s^{-1}}$" = 1,
+  #                    "$Q_b$ in ${m^3s^{-1}}$" = 1),
+  #                  align = "right") %>%
+  kable_styling(fixed_thead = TRUE, position = "left") %>%
+  row_spec(which(!(tbl$block %% 2)), background = "#f0f0f0") %>%
+  row_spec(which(tbl$bold), bold = TRUE)
+
+tbl2
+```
+
+
+### Results
+
+(@) The first and second turning points are found on day `r tp$time[1]`  and day `r tp$time[1]` (Column 4, [Table 5.7](#table)), respectively, and a linear interpolation is used to estimate the base flow at time steps (days) between these dates (Column 5, [Table 5.7](#table)). The daily base flow separation line is subsequently calculated for the whole period by linear interpolation between all turning points.
+
+(@) The volume beneath the base flow line, $V_{base}$, for 1996 is found to be `r fmt_number(volume$baseflow)`<i>&nbsp;</i>m<sup>3</sup>, whereas the volume of the total flow, $V_{total}$, is `r fmt_number(volume$total)`<i>&nbsp;</i>m<sup>3</sup>. The resultant BFI is `r format(round(bfi, digits = 2), nsmall = 2)`. The base flow separation line for River Ray in 1996 is shown in Figure 5.4 of the book.
+
+
+
+
+### Fast Track
+The base flow for a given time series can also be calculated directly using the 
+function `baseflow()`, optionally with a different choice of the block length ($N = x$ days) or 
+the turning point factor or parameter ($TP$) for the central value. The default 
+values are `tp.factor = 0.9` and `block.len = 5`, which can be adopted to the 
+type of flow regime studied and changed accordingly by the user.
+
+```{r}
+bf <- ray %>%
+  dplyr::select(time, discharge) %>%
+  mutate(
+    baseflow = baseflow(discharge, tp.factor = 0.9, block.len = 5)
+  ) %>%
+  filter(year(time) == 1996) %>%
+  print()
+```
+
+
+```{r, fig.cap="Figure 5.4 Annual recorded hydrograph and calculated continuous base flow line for UK river Ray in year 1996 based on the BFI separation procedure (Worked Example 5.3).", warning=FALSE, fig.margin = FALSE, echo=FALSE}
+x <- bf %>%
+  gather(key = key, value = value, discharge, baseflow) %>%
+  mutate(key = factor(key, levels = c("discharge", "baseflow"),
+                      labels = c("Recorded Hydrograph", "Baseflow Line")))
+
+ggplot(x, aes(time, value)) +
+  geom_ribbon(data = ~filter(.x, key == "Baseflow Line"), 
+              aes(ymin = 0, ymax = value), fill = "grey90") + 
+  geom_line(aes(size = key)) +
+  scale_size_manual(values = c(0.2, 0.5)) +
+  scale_x_month(expand = expansion()) +
+  labs(y = expression(paste("Flow (", m^{3}, s^{-1}, ")"))) +
+  theme_bw(base_size = 12) +
+  theme(legend.position = c(0.8, 0.35),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.title = element_blank(),
+        panel.grid.major = element_blank()
+  )
+```
+
+
+## Worked example 5.4: Threshold level method
+
+
+```{r, loadingData, echo=FALSE}
+library(tidyverse)
+library(hydroDrought)
+
+ngaruroro <- international %>%
+  filter(river == "Ngaruroro") %>%
+  dplyr::select(data) %>%
+  unnest(data) 
+```
+
+The threshold level method can be used to dplyr::select drought events from time series of river flow as long as there are not too many missing values in the dataset and a meaningful threshold  $Q_0$ is chosen. Data from River Ngaruroro at Kuripapango (NZ) are used to demonstrate the procedure in the example below.
+
+
+
+
+### Loading the Data
+`r round(as.double(diff(range(ngaruroro$time)), "days") / 365.25, 1)`  years of 
+daily flow (`r fmt_date(min(ngaruroro$time))` to `r fmt_date(max(ngaruroro$time))`)
+are analysed. In this river the low flow period covers the turn of the calendar 
+year. To avoid problems with allocating droughts to a specific calendar year 
+because of drought events starting in one year and ending in another year, the 
+start of the year is set to 1 September. An event is attributed to the 
+year it starts. 
+
+```{r, loadingData, eval=TRUE, echo=TRUE}
+```
+
+### Missing values
+The time series, Ngaruroro, contains missing values.  We do not know if a missing value (`NA`) represents a flow below the threshold or above the threshold, as the flow value itself is unknown. A single missing value will cause the function `drought_events()` to terminate a dry spell (drought event) or similar, a wet spell. Accordingly, most characteristics derived for this event (e.g. drought duration, drought termination, drought volume, etc.) will not be correct.
+
+```{r, preprocessing, echo=FALSE}
+ngaruroro <- ngaruroro %>%
+  sanitize_ts(approx.missing = 14) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+  )
+
+coverage <- ngaruroro %>%
+  filter(!is.na(discharge)) %>%
+  pull(time) %>%
+  coverage_yearly(origin = "-09-01")
+
+incomplete <- coverage %>%
+  filter(days.missing > 0) 
+
+complete <- coverage %>%
+  filter(days.missing == 0)
+
+ngaruroro <- ngaruroro %>%
+  anti_join(incomplete, by = "year")
+```
+
+
+```{r, echo=FALSE}
+nyear <- length(unique(ngaruroro$year))
+nremoved <- hydroDrought:::numbers_english(nrow(incomplete))
+years.removed <- hydroDrought:::paste_with_and(paste(
+  incomplete$year, 
+  substr(incomplete$year + 1, 3L, 4L), sep = "/")
+)
+```
+
+
+
+A conservative approach would be to eliminate years with missing values completely. Instead, to avoid losing too many years of observations, we filled periods of missing data with linear interpolation if they are of short duration. Here short duration is defined as periods < 15 days, whereas years containing long periods of missing values (≥15 days) have been removed. This results in `r nyear` years of daily flow (`r fmt_date(min(ngaruroro$time))` 
+to `r fmt_date(max(ngaruroro$time))`). In total `r nremoved` years are omitted from the series (`r years.removed`). 
+
+```{r, preprocessing, echo=TRUE, eval=FALSE}
+```
+
+
+The table below displays the year removed, the total number of days in the year
+(365 or 366 for leap years), the number of days with flow observations, 
+the number of `NA`-values (days with missing data) and the remaining fraction of days.
+
+```{r}
+print(incomplete)
+```
+
+
+###	Threshold selection and drought events
+A sequence of drought events is obtained from the streamflow hydrograph by 
+considering periods with flow below a certain threshold, $Q_0$. In this 
+example $Q_{90} = `r round(lfquantile(ngaruroro$discharge, exc.freq = 0.9), 2)`$m<sup>3</sup>s<sup>-1</sup> is used as threshold. A table of drought characteristics 
+is derived with the function `drought_events()`. 
+
+```{r}
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) %>%
+  print()
+
+droughts <- ngaruroro %>%
+  drought_events(threshold = q90, pooling = "none") 
+```
+
+
+`r tufte::margin_note("Table 5.8 Drought deficit characteristics, River Ngaruroro at Kuripapango, NZ.")`
+```{r, echo=FALSE}
+droughts %>%
+  hydroDrought:::export_table(name = "Tab5.8") %>%
+  print()
+```
+
+The table displayed above includes:
+
+* `first.day`: the start date, defined as the first day below the threshold;
+* `last.day`: the end date, defined as the last day below the threshold; 
+* `duration`: the drought duration (days), defined as `last.day - first.day + 1`
+* `volume`: the deficit volume in m<sup>3</sup>, defined as the sum of the daily
+deficit flows times the duration in days;
+* `qmin`: the minimum flow in m<sup>3</sup>s<sup>-1</sup>, defined as the minimum flow $Q_{min}$ within a drought event;
+* `tqmin`: the date of the minimum flow.
+
+
+### 	Removing minor droughts (Filtering)
+Several minor droughts, lasting for a few days only, can be observed. To reduce the problem of minor droughts two restrictions are imposed:
+
+* a minimum drought duration, $d_{min}$ which removes droughts with duration less 
+than a specified number of days;
+
+* a minimum drought deficit volume (coefficient $\alpha$), which removes droughts 
+with a deficit volume less than a certain fraction $\alpha$ of the maximum 
+drought deficit volume observed in the complete series of drought events. 
+
+```{r, echo=FALSE}
+vmin <- max(droughts$volume) * 0.005
+```
+
+```{r, minorDroughts, echo = FALSE}
+droughts <- droughts %>%
+  mutate(is.minor = duration < 5 | volume < max(volume) * 0.005) 
+```
+
+We will append a logical column called `is.minor` to the table of drought events.
+It is `TRUE` when drought duration is less than five days OR if the drought volume is less than 5% of the maximum drought deficit volume (i.e., `r format(vmin, big.mark = "<i>&nbsp;</i>")`<i>&nbsp;</i>m<sup>3</sup>). In total `r sum(droughts$is.minor)` droughts are considered minor, and thus removed, based on these criteria. 
+
+
+```{r, minorDroughts, echo = TRUE, eval=FALSE}
+```
+```{r}
+print(droughts)
+```
+
+
+
+
+###	Eliminating dependent droughts (Pooling)
+The inter-event time criterion (IC) is used to pool dependent droughts, which 
+are droughts separated by a short period of flow above the threshold. If the time between 
+two droughts is less than a critical duration, $t_{min}$, the two events are pooled. 
+
+In this example $t_{min}$ is set equal to two days. 
+
+```{r}
+pooled <- ngaruroro %>%
+  drought_events(
+    threshold = q90, pooling = "inter-event", 
+    pooling.pars = list(min.duration = 2, min.vol.ratio = Inf)
+  ) %>%
+  filter(duration >= 5, volume > max(volume) * 0.005) %>%
+  arrange(desc(duration)) %>%
+  print()
+```
+
+When drought events are pooled the table of drought events contain two 
+more columns:
+
+* `dbt`: the duration below the threshold, i.e. the drought duration minus short 
+period(s) above the threshold (note: the ‘full’ duration can be derived from the start and end date of each event); 
+
+* `pooled`: the number of drought events. 
+
+The drought deficit characteristics of the ten longest (pooled) drought events are given in the table above. In total, there are `r nrow(pooled)` drought 
+events, which equal an  average of `r round(nrow(pooled) / nyear, 2)` events per year. 
+
+Key drought characteristics for all drought events occurring in the period (09.1963- 08.2020), can be summarized for different drought metrics. In the example below, for each year, the number of droughts in the year, the days below the threshold (summed over all events) in a year and the minimum flow in a year, are presented:
+
+```{r}
+pooled %>%
+  mutate(
+    year = water_year(first.day, origin = "-09-01")
+  ) %>%
+  group_by(year) %>%
+  summarise(
+    n.droughts = n(),
+    real.duration = sum(dbt), 
+    min.flow = min(qmin)
+  )
+```
+
+
+```{r, echo=FALSE}
+p <- pooled %>%
+  mutate(
+    year = water_year(first.day, origin = "-09-01")
+  ) %>%
+  group_by(year) %>%
+  mutate(
+    event = group_const_value(event) + 1
+  ) %>%
+  ungroup() %>%
+  dplyr::select(event, duration, year) %>%
+  right_join(complete %>% dplyr::select(year), by = "year") 
+
+major <- hydroDrought:::paste_with_and(sort(head(p$year)))
+```
+
+Time series of the drought duration are plotted in Figure 5.12. The longest drought durations (dbt) are found in `r major`.
+
+
+```{r, echo=FALSE, }
+fig.cap <- "Figure 5.12 Time series of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\\alpha = 0.005$ and $t_{min} = 2$ days."
+```
+```{r,fig.cap=fig.cap, echo = FALSE}
+ggplot(p, aes(x = event, y = as.double(duration))) + 
+  geom_col(position = "stack", col = "white") + 
+  labs(x = "Number of drought events", y = "Drought duration (days)") +
+  facet_wrap(vars(year), ncol = 10) + 
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank())
+```
+
+
+A histogram of the drought duration is seen in Figure 5.13, and a very skewed distribution is revealed. Short duration droughts are dominating with `r sum(pooled$duration <= 10)` events lasting 
+less than 11 days. Only `r hydroDrought:::numbers_english(sum(pooled$duration > 30))`
+events lasted more than 30 days. 
+
+```{r, echo=FALSE, }
+fig.cap <- "Figure 5.13 Histogram of drought duration for River Ngaruroro at Kuripapango (NZ). Selection criteria: threshold level = $Q_{90}$, $d_{min} = 5$ days, $\\alpha = 0.005$ and $t_{min} = 2$ days."
+```
+```{r, echo=TRUE, fig.cap=fig.cap}
+p %>%
+  # replace_na(list(duration = 0)) %>%
+  ggplot(aes(duration)) + 
+  geom_histogram(binwidth = 5, boundary = 0, closed = "left", 
+                 size = 0.2, col = "black", fill = "grey90") + 
+  scale_x_continuous(limits = c(0, NA)) + 
+  scale_y_continuous(breaks = breaks_integer()) + 
+  labs(x = "Drought duration (days)", y = "Counts")
+```
+
+## Worked example 5.5: Sequent Peak Algorithm
+
+
+### Loading the Data
+
+Twelve years of daily data without missing values from River Ngaruroro at Kuripapango (NZ) 
+are used as an example (1988 – 1999). 
+
+```{r}
+library(tidyverse)
+library(hydroDrought)
+
+ngaruroro <- international %>%
+  filter(river == "Ngaruroro") %>%
+  dplyr::select(data) %>%
+  unnest(data) %>%
+  mutate(
+    year = water_year(time, origin = "-09-01")
+  ) %>%
+  filter(year >= 1988, year <= 1999) %>%
+  print()
+
+```
+
+### Calculation
+
+(@) Define the value of the desired yield (equals the threshold value). Here $Q_{90}$ is used.
+
+(@) Calculate the storage $S_t$ according to Equation 5.5. Storage is appended as 
+a new column to the time series tibble using the function `storage()` with 
+discharge and the threshold as input values ([Table 5.9](#table)).
+
+```{r}
+q90 <- lfquantile(ngaruroro$discharge, exc.freq = 0.9) 
+
+ng <- ngaruroro %>%
+  mutate(
+    storage = storage(discharge = discharge, threshold = q90)
+  ) 
+```
+
+`r tufte::margin_note("<a name=\"table\"></a>Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")`
+```{r, echo=FALSE}
+ng %>%
+  hydroDrought:::export_table(name = "Tab5.9") %>%
+  print()
+
+# r %>%
+#   kable(caption = "Table 5.9 SPA calculation of drought deficit volumes and duration for River Ngaruroro at Kuripapango (NZ)")  %>% 
+#   kable_styling(fixed_thead = TRUE, position = "left") %>%
+#   row_spec(which.max(r$storage), bold = TRUE)
+```
+
+
+As long as the discharge is above, or equal to, the threshold, the storage is zero as only 
+flows below the $Q_{90}$ contributes to the storage. This happens the first time on `r ng$time[ng$storage > 0][1]` and lasts only two days.
+
+```{r}
+ng %>%
+  filter(storage > 0)
+```
+
+
+Filtering for `storage > 0` and assigning new `event` numbers when the time increment
+in the (filtered) time series suddenly changes allows us to identify a
+series of uninterrupted sequences of positive $S_t$. 
+
+```{r}
+ng <- ng %>%
+  filter(storage > 0) %>%
+  mutate(
+    event = group_const_change(time)
+  ) %>%
+  print()
+```
+
+### Selection of the drought deficit volume and duration
+The deficit volume is the maximum value in an uninterrupted sequence of positive 
+$S_t$, and the drought duration is the time from the beginning of the depletion 
+period to the time of the maximum depletion. Accordingly, the duration of the first 
+event is only one day. The date of the maximum depletion is also displayed.
+
+```{r}
+spa <- ng %>%
+  group_by(event) %>%
+  summarise(
+    volume = max(storage), 
+    duration = which.max(storage),
+    time = time[which.max(storage)]
+  )
+```
+
+
+`r tufte::margin_note("Table 5.10 An extract of drought deficit volumes and durations for River Ngaruroro at Kuripapango (NZ), calculated by SPA")`
+```{r, echo=FALSE}
+spa  %>%
+  head(5)  %>%
+  hydroDrought:::export_table(name = "Tab5.10") %>%
+  print()
+```
+
+
+```{r, echo=FALSE, }
+fig.cap <- "Figure x.xx The relationship between between discharge $Q_t$ and storage $Q_t$ for the third drought event starting 1989-05-24."
+```
+```{r,fig.cap=fig.cap, echo = FALSE}
+raw <- ngaruroro %>%
+  hydroDrought:::.drought_events(threshold = q90, pooling = "sequent-peak") 
+
+e <- filter(raw, event == 6)
+
+sample.event <- raw %>%
+  filter(
+    time >= min(e$time) - lubridate::days(1), 
+    time <= max(e$time) + lubridate::days(1)
+  ) 
+
+sample.event %>%
+  mutate(event = " ") %>%
+  hydroDrought:::inspect_spa()
+```
+
+
+### Results
+
+An extract of the drought duration and deficit volumes for the 12-year series is given in the output below. Note that the time series starts with a flow value less than the threshold (not knowing the previous flow values), thus the first event should be omitted from the analysis. Even though the SPA procedure is pooling minor and dependent droughts, the obtained time series of events still contains a number of minor drought events.
+
+### Fast Track
+
+```{r}
+ngaruroro %>%
+  drought_events(threshold = q90, pooling = "sequent-peak") 
+```
+
+## Worked example 5.6, Example of how to estimate SGI using data from Stonor Park, UK
+
+
+In order to compare features of groundwater droughts using groundwater level data from different boreholes, Bloomfield and Marchant (2013) introduced the Standardised Groundwater level Index (SGI). The SGI uses the normal scores transform (Everitt, 2002), a nonparametric normalisation method which assigns a value to ranked observation of groundwater levels for a given month from a given hydrograph. A non-parametric approach to standardisation was favoured by Bloomfield and Marchant (2013) as they showed that no consistent parametric models could be fitted to a wide range of groundwater hydrographs, and that even when a hydrograph for a single site is considered no consistent parametric model could be fitted for all months of the year. Unlike SPI, SGI is based on a continuous variable and requires no accumulation period, however, Bloomfield and Marchant (2013) defined an SPI accumulation period ($q$, in months) that gave a maximum correlation between SPI and SGI for a given site.
+
+There is no commonly agreed definition of groundwater drought status based on SGI. However, recently Bloomfield et al. (2019) defined any month with an SGI of −1 or less as being a groundwater drought month and periods of continuously negative SGI reach a monthly intensity of −1 or less was defined as an episode of groundwater by analogy with the World Meteorological Organisation definition of an SPI drought (WMO, 2012).
+
+### Load the data
+
+Here we illustrate how to estimate SGI from a groundwater level time series using data from a well at Stonor Park, UK, previously described in Chapter 3. It is recommended that the standardisation is applied to data from a period of at least 30 years and that when comparing SGI from more than one site that standardisation is undertaken over a common time period. In this case, groundwater level data for Stonor Park is available for a 40 year period. 
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(hydroDrought)
+stonor 
+```
+
+
+### Create a regular times series of monthly data
+* Step 0: The estimation of SGI requires data to be on a regular time step, in this case we will be using monthly data. The level data (recorded as metres above sea level, m aSL) from Stonor Park is already approximately on a monthly basis so we have linearly interpolated the levels to the first day of each month. Use your interpolation method of choice, or if you have more frequent observations, such as those produced by data logging systems, to sub-set the data onto a monthly time step.
+
+```{r}
+times <- seq(as.Date("1970-01-01"), as.Date("2009-12-01"), by = "1 month")
+
+stonor.monthly <- approx(x = stonor$time, y = stonor$level, xout = times) %>%
+  as_tibble() %>%
+  rename(time = x, level = y) %>% 
+  mutate(
+    month = month(time, label = TRUE, abbr = FALSE)
+  )
+
+stonor.monthly
+```
+
+### Calculate an SGI values
+* Step 1: Extract the level data for an individual month from the full groundwater level time series. For example, in the spreadsheet example we have extracted the groundwater levels for each January in the Stonor Park record.
+
+* Step 2: Order the level data for a given month from lowest to highest and estimate the standardised rank for each level, i.e. rank/number of observations in a given month + 1.
+
+* Step 3: Estimate the inverse standardised normal cumulative value (mean 1, s.d. 0) from the standardise rank for each level. This value is the SGI value. In Microsoft Excel this value is returned by the `=NORM.S.INV(cell)` function, in R it is returned by the `qnorm()` function.
+
+```{r}
+x <- stonor.monthly %>%
+  group_by(month) %>%
+  mutate(
+    rank = rank(level), 
+    standardised.rank = rank / (n() + 1),
+    sgi = qnorm(standardised.rank)
+  )
+
+x
+```
+
+* Step 4: Repeat steps 1 to 3 for data for each calendar month separately. You will end up with 12 sets of monthly level data with associated inverse standardised normal cumulative values, or SGI values.
+
+```{r}
+x %>%
+  nest()
+```
+
+
+* Step 5: Combine SGI values with associated dates estimated in steps 3 and 4 and re-order oldest to most recent.
+
+
+```{r, echo = FALSE}
+tmp <- x %>%
+  ungroup() %>%
+  dplyr::select(time, level, sgi) %>%
+  gather(key = "variable", value = "value", -time) %>%
+  mutate(variable = fct_recode(variable, 
+                               SGI = "sgi", 
+                               "Groundwater level (m aSL)" = "level"))
+
+ggplot(tmp, aes(time, value)) + 
+  geom_line() + 
+  facet_wrap(~variable, scales = "free_y", ncol = 1, strip.position = "left") +
+  theme(axis.title = element_blank())
+```
+
+
+```{r, echo = FALSE}
+# x %>%
+#     filter(month == "August") %>%
+#     dplyr::select(-time) %>%
+#     gather(key = "variable", value = "value", -month, -rank) %>%
+#     mutate(variable = factor(variable, levels = c("level", "standardised.rank", "sgi"))) %>%
+#     ggplot(aes(rank, value)) + 
+#     geom_point() + 
+#     facet_wrap(~variable, scales = "free_y", ncol = 1, strip.position = "left")
+```
+
+### Fast-Track
+
+```{r}
+stonor.monthly %>% 
+  group_by(month) %>%
+  mutate(sgi = sgi(level))
+```
+
+
+## Worked example 5.7: Rank and correlation coefficients
+
+
+### Loading the Data
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(hydroDrought) 
+
+r <- regional %>%
+  dplyr::select(id, river, station, data = discharge) %>%
+  print()
+```
+
+
+### Indices
+```{r, message=FALSE, warning=FALSE}
+# list of functions we applied to each station
+f <- list(
+  mean = function(x, ...) mean(x), 
+  Q50 = function(x, ...) lfquantile(x, exc.freq = 0.5),
+  `MAM(1)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 1),
+  `MAM(10)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 10),
+  `MAM(30)` = function(x, t) mean_annual_minimum(discharge = x, time = t, n = 30),
+  Q95 = function(x, ...) lfquantile(x, exc.freq = 0.95),
+  Q90 = function(x, ...) lfquantile(x, exc.freq = 0.9),
+  Q70 = function(x, ...) lfquantile(x, exc.freq = 0.7),
+  ALPHA = function(x, t, ...) recession(time = t, discharge = x)
+)
+
+indices <- r %>%
+  transmute(
+    id, 
+    indices = map(data, ~map_df(f, exec, x = .x$discharge, t = .x$time))
+  ) %>%
+  unnest(indices) 
+```
+
+
+```{r}
+# derived indices
+indices <- indices %>%
+  mutate(
+    `Q90/Q50` = Q90/Q50,
+    `Q95/Q50` = Q95/Q50,
+    `MAM(30)/Q50` = `MAM(30)`/Q50,
+    `MAM(10)/Q50` = `MAM(10)`/Q50,
+    `MAM(1)/Q50` = `MAM(1)`/Q50,
+  ) 
+```
+
+`r tufte::margin_note("Table 5.11 Flow indices for a subset of the Regional Data Set.")`
+```{r, echo=FALSE}
+indices  %>%
+  hydroDrought:::export_table(name = "Tab5.11") %>%
+  print()
+```
+
+
+###  Ranks
+```{r, fig.width=6, fig.height=6}
+long <- indices %>%
+  pivot_longer(cols = -id, names_to = "index") %>%
+  mutate(index = factor(index, levels = setdiff(colnames(indices), "id")))
+
+ranks <- long %>%
+  group_by(id) %>%
+  mutate(
+    rank = rank(value, ties.method = "min")
+  )
+
+ggplot(ranks, aes(x = index, y = id, fill = rank, label = rank)) + 
+  geom_tile() + 
+  geom_text(size = 3) + 
+  scale_fill_viridis_c(alpha = 0.3) + 
+  labs(y = "Station ID") + 
+  theme(panel.grid = element_blank(), 
+        legend.position = "none",
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, eval=FALSE}
+correlation <- long %>%
+  left_join(x = ., y = ., by = "id", suffix = c("", "2")) %>%
+  group_by(index, index2) %>%
+  summarise(
+    pearson = cor(x = value, y = value2, method = "pearson"),
+    spearman = cor(x = value, y = value2, method = "spearman"),
+    .groups = "drop"
+  )
+
+
+ggplot(correlation, aes(x = index, y = index2, fill = pearson, label = round(pearson, 3))) + 
+  geom_tile() + 
+  geom_text() + 
+  scale_fill_viridis_c(alpha = 0.3) + 
+  theme(panel.grid = element_blank(), 
+        legend.position = "none", 
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+```
+
+###  Pearson correlation 
+```{r}
+library(corrplot)
+x <- indices %>%
+  dplyr::select(-id)
+M <- cor(x, method = "pearson")
+res1 <- cor.mtest(x, method = "pearson", conf.level = .95)
+
+col2 <- colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582",
+                           "#FDDBC7", "#FFFFFF", "#D1E5F0", "#92C5DE",
+                           "#4393C3", "#2166AC", "#053061"))
+
+corrplot(M, type = "upper",
+         col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = "grey10",
+         p.mat = res1$p, insig = "pch", 
+         order = "hclust", addrect = 3, rect.col = "navy",
+         pch.cex = 2, 
+         number.cex = .7, tl.col = "black")
+```
+
+
+###  Spearman (rank) correlation 
+```{r}
+M <- cor(x, method = "spearman")
+res1 <- cor.mtest(x, method = "spearman", conf.level = .95)
+corrplot(M, type = "upper",
+          col = tail(head(col2(200), -30), -30),
+         tl.cex = 0.8, addCoef.col = "grey10",
+         p.mat = res1$p, insig = "pch", 
+         order = "hclust", addrect = 3, rect.col = "navy",
+         pch.cex = 2, 
+         number.cex = .7, tl.col = "black")
+```
+
+## Worked example 5.8: No-flow indices
+
+
+```{r, echo=FALSE, eval=FALSE}
+# filter(year >= 1964, year <= 1999) # original filter
+```
+
+### Loading the Data
+
+```{r}
+library(hydroDrought)
+library(tidyverse)
+
+rivers <- international %>%
+  dplyr::select(river, data) 
+```
+
+
+### Finding intermittent rivers
+
+Streamflow is on at least 5 days below the threshold of 0.001m<sup>3</sup>s<sup>-1</sup>. 
+Removing incomplete first and last years. 
+
+```{r}
+intermittent <- rivers %>%
+  mutate(
+    is.intermittent = map_lgl(data, ~is_intermittent(.x$time, .x$discharge))
+  ) %>% 
+  filter(is.intermittent) %>%
+  mutate(
+    clipped = map(data, remove_incomplete_first_last),
+  ) 
+```
+
+
+
+### Computing metrics
+
+```{r}
+f <- list("frac nf years" = no_flow_years ,
+          "MAN" = MAN, "CVAN" = CVAN, "no flow days" = FAN,
+          "MAMD" = MAMD,
+          "onset" = tau0, "sd onset" = tau0r, "term." = tauE)
+
+metrics <- intermittent %>%
+  transmute(
+    river,
+    metrics = map(clipped, ~map(f, exec, time = .x$time, flow = .x$discharge))
+  ) %>%
+  unnest_wider(metrics) %>%
+  print()
+```
+
+
+```{r}
+metrics %>%
+  dplyr::select(river, n.days = `no flow days`) %>%
+  unnest(n.days) %>%
+  ggplot(aes(n.days)) +
+  geom_histogram(binwidth = 31, boundary = 0,
+                 fill = "grey90", col = "black", size = 0.2) +
+  facet_wrap(vars(river)) +
+  scale_y_continuous(breaks = breaks_integer()) +
+  scale_x_continuous(expand = expansion(add = 7)) +
+  labs(x = "Number of no flow days per year", y = "Count") +
+  theme_bw() +
+  theme(panel.grid.minor.y = element_blank())
+```
+
+### Visualising streamflow permanence (spells)
+
+```{r, echo = FALSE}
+spells <- intermittent %>%
+  mutate(
+    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = "drop_year"))
+  ) %>%
+  dplyr::select(river, spells) %>%
+  unnest(spells) %>%
+  mutate(
+    year = water_year(time),
+    day = monthDay(time)
+  ) 
+
+onoff <- metrics %>%
+  dplyr::select(river, "mean onset" = onset, "mean termination" = `term.`) %>%
+  pivot_longer(-river, names_to = "Timing")
+
+ggplot(spells, aes(monthDay(time), year, fill = state)) +
+  geom_tile() +
+  geom_vline(data = onoff, aes(xintercept = value, linetype = Timing), 
+             col = "red", size = 0.2) + 
+  scale_x_month(expand = expansion(), nletters = 1) +
+  scale_y_continuous(expand = expansion(), breaks = breaks_integer()) +
+  scale_fill_manual("Spell", values = c("no-flow" = "grey80", "flow" = "grey60", 
+                                        "no-data" = "NA"), 
+                    drop = FALSE) +
+  labs(title = "Streamflow permanence") +
+  facet_wrap(vars(river), scales = "free_y") +
+  guides(fill = guide_legend(override.aes = list(col = 1))) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.ontop = TRUE,
+        panel.background = element_rect(fill = NA),
+        axis.title = element_blank())
+```
+
+
+

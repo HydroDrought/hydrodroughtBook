@@ -9,7 +9,7 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 ```
 
 # Visualizing Daily Flow
-In previous worked examples, we used a subset of Göta River discharges, processed to produce the annual minimum flow cut either to the period before 1940 or after 1940. Plotting the raw daily data from the earliest records (Fig. 7.12), we see an abrupt and obvious structural change around 1940. There is clearly a change in variance and a change in temporal autocorrelation (flow persistence/noisiness). 
+In previous worked examples, we used a subset of Göta River discharges, processed to produce the annual minimum flow cut either to the period before 1940 or after 1940. Plotting the raw daily data from the earliest records (Fig. 7.12), we see an abrupt and obvious structural change around 1940. There is clearly a change in variance and a change in temporal autocorrelation (flow persistence) at this point in time. 
 
 ```{r}
 library(tidyverse)
@@ -49,7 +49,7 @@ p
 
 # Testing for a change point
 
-To avoid this temporal autocorrelation issue, let us focus again on the annual minimum flow for the entire time series. We now see a severe decrease in flow from 300-600 m3/s prior to the 1930s and 50-200 m3/s after 1940 (Fig. 7.13). Examples are not typically this clear. We can apply the Chow F-test to identify the change point.
+To avoid this shift in temporal autocorrelation, let us focus on the annual minimum flow for the entire time series. We see a severe decrease in flow from 300-600 m3 s-1prior to the 1930s and 50-200 m3 s-1 after 1940 (Fig. 7.13). Note, that examples are not normally this clear. We can apply the Chow F-test to identify the change point. 
 
 ```{r}
 ### Group by year and river and then calculate min annual flow
@@ -130,9 +130,9 @@ lines(bp_int_only)
 lines(ci_int_only)
 ```
 
-To test the possibility of additional breakpoints, we introduced more complex models with 2-5 breakpoints. However, adding these breaks did not significantly decrease the model residuals, pointing to a single breakpoint.
+To test the possibility of additional breakpoints, we introduce more complex models with 2-5 breakpoints (Bai and Perron, 2003; Zeileis et al. 2003). However, adding these breaks did not significantly decrease the model residuals, pointing to the presence of a single breakpoint.
 
-As with all statistical findings, it is important to validate results with real-world understanding, checking whether the findings make physical sense. In this case, we can check the historical record during the period 1936-1938 to try and identify what physical processes could produce this sudden decrease in annual minimum flows on the Göta River. The Lake Vanern decree was signed in 1937, which codified water management on Lake Vanern, the headwaters of Göta River, to prevent severe flooding through dam control. This more active reservoir management decreased annual low flows and peak flows. 
+As with all statistical findings, it is important to validate results with real-world understanding, checking whether the findings make physical sense. In this case, we can check the historical record during the period 1936–38 to try and identify what physical processes could produce this sudden decrease in annual minimum flows on the Göta River. The Lake Vänern decree was signed in 1937, which codified water management on Lake Vanern, the headwaters of Göta River, to facilitate hydropower. This more active reservoir management focused on maintaining a regular pattern of seasonal flow characterized by low summer flows (150 m3 s-1) and high winter flows (900 m3 s-1), with occasional fluctuation between these two extremes. Prior to management, lake flows tended to increase and decrease along decadal time scales with narrower variance. In this way, the structural change both decreased annual low flows and increased peak flows to maximize hydropower. 
 
 
 ```{r, include=FALSE}

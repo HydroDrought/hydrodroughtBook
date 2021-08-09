@@ -20,7 +20,7 @@ library(lubridate)
 ### Filter to the rivers and create columns for dates
 flow_df <- international %>%
 	filter(river == "Elbe" | river == "Gota") %>%
-	select(river, data) %>%
+	dplyr::select(river, data) %>%
 	unnest(cols = data) %>%
 	mutate(
 		year = year(time),
@@ -50,7 +50,7 @@ p <- ggplot(plot_df, aes(x=jdate, y=discharge)) %>%
 
 # Linear trend for Elbe River
 
-Consider the annual minimum flow for the Elbe river (Fig. 7.8). By fitting a line of form Eq 7.43, the estimated slope is -0.0408 m3/s per year, with a 95% confidence interval of -0.34 to 0.26 m3/s per year. As you can see, we are unclear whether the true trend is positive or negative and this is reflected in a p-value of 0.79 for the t-test of the slope coefficients. Because this p-value is well above 0.05, we accept the null hypothesis (Ho) that there is likely no significant trend in annual minimum flow for the Elbe River. 
+Consider the annual minimum flow for the Neu Darchau river (Fig. 7.8). By fitting a line of form Eq 7.43, the estimated slope is -0.0408 m3 s-1 per year, with a 95% confidence interval of -0.34 to 0.26 m3 s-1 per year. Thus, it is unclear whether the true trend is positive or negative and this is reflected in a p-value of 0.79 for the t-test of the slope coefficient. Because this p-value is well above 0.05, we accept the null hypothesis (Ho) that there is no significant trend in annual minimum flow. 
 
 ```{r}
 ### Filter to only the Elbe River
@@ -119,7 +119,7 @@ p
 
 # Linear trend for Göta River
 
-If we instead consider the annual minimum flow on the Göta River, the annual trend is 1.23 m3/s per year (Fig. 7.9 with a 95% confidence interval of 0.875 to 1.59 m3/s per year. The t-test on this coefficient produces a p-value of 4 x 10-9, meaning it is highly unlikely that such a strong trend would have appeared randomly in observations if there were no true underlying trend. We reject the null hypothesis, and accept the alternative hypothesis, that there is a significant trend in Göta River annual minimum flows. Remember that we set up our alternative hypothesis as a two-sided test (b1 ≠ 0), so we are testing whether there is a significant trend, regardless if it is positive or negative. We should make this clear when we report our findings. Of course, we should also report that the trend we found was that Göta River minimum flows have been increasing at an estimated rate of 1.23 m3/s per year since 1941. 
+If we instead consider the annual minimum flow on the Göta River, the annual trend is 1.23 m3 s-1 per year (Fig. 7.9) with a 95% confidence interval of 0.875 to 1.59 m3 s-1per year. The t-test on this coefficient produces a p-value of 4 x 10 -9, meaning it is highly unlikely that such a strong trend would have appeared randomly in observations if there were no true underlying trend. We reject the null hypothesis, and accept the alternative hypothesis, that there is a significant trend in Göta River annual minimum flows. Remember that we set up our alternative hypothesis as a two-sided test (b1 ≠ 0), so we are testing whether there is a significant trend, regardless if it is positive or negative. We should make this clear when we report our findings. Of course, we should also report that the trend we found was that Göta River minimum flows have been increasing at an estimated rate of 1.23 m3 s-1per year since 1941. 
 
 ```{r}
 ### Filter to the Gota River and years after 1940 
@@ -182,6 +182,8 @@ p <- ggplot(gota_annual, aes(x=year)) %>%
 ### Display figure (stored in variable p)
 p
 ```
+
+Although this is the same river and low flow statistic modelled in Section 7.2.4, this period (1941-present) occurs after the period 1807-1937 modelled in Section 7.2.4. We purposefully excluded all data after 1940 in Section 7.2.4 because of its non-stationary trend, whereas this non-stationary nature is now our primary focus. 
 
 ```{r, include=FALSE}
 ### Plot the residuals

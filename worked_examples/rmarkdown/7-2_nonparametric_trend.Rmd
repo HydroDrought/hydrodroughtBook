@@ -21,7 +21,7 @@ require(zyp)
 ### Filter to the rivers and create columns for dates
 flow_df <- international %>%
 	filter(river == "Gota") %>%
-	select(river, data) %>%
+	dplyr::select(river, data) %>%
 	unnest(cols = data) %>%
 	mutate(
 		year = year(time),
@@ -47,9 +47,9 @@ summary(mk_test_results)
 ```
 # Mann-Kendall test
 
-The Mann-Kendall test produces an S value of `r as.numeric(mk_test_results$S)`derived by calculating the difference between 2200 positive pairs (73.3%) and 774 negative pairs (25.8%) out of 3003 possible data pairs (29 pairs had equal values). Using this test statistic and the `r dim(flow_annual_subset)[1]` years of observations, the Mann-Kendall test produces a p-value < 1x10-15 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.
+The Mann-Kendall test produces an S value of `r as.numeric(mk_test_results$S)`, derived by calculating the difference between 2200 positive pairs (73.3%) and 774 negative pairs (25.8%) out of 3003 possible data pairs (29 pairs had equal values). Using this test statistic and the `r dim(flow_annual_subset)[1]` years of observations, the Mann-Kendall test produces a p-value of < 1x10-15 suggesting there is a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test (Section 7.4.1), though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test. 
 
-As discussed in the text, the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results, but is slightly less affected by relatively high outliers during the late 2000s. 
+As discussed earlier (Section 7.4.2), the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results (1.02 m3 s-1 per year), but is slightly less affected by relatively high outliers during the late 2000s. 
 
 ```{r}
 ### Run the Theil-Sen slope for annual min flow
@@ -95,7 +95,7 @@ p
 ```
 # High leverage outlier effects
 
-If we instead expand the Göta River timeseries to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent. 
+If we instead expand the Göta River time series to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent.
 
 ```{r}
 ### Subset to 1934 and after
@@ -114,10 +114,10 @@ confint.zyp(sen_slope_longer)
 gota_lm_longer <- lm(min_m3s~year, data = flow_annual_longer)
 summary(gota_lm_longer)
 ```
-By including only 6 additional years, the OLS line changes from a significantly positive trend (+`r gota_lm$coef[2]` m3/s per year) to a significantly negative trend (`r gota_lm_longer$coef[2]` m3/s per year). The Theil-Sen line is slightly affected by these outliers, decreasing in slope from `r sen_slope_results$coef[2]` to `r sen_slope_longer$coef[2]`, but maintaining a statistically significant 70-year increasing trend that is clear visually. 
 
+By including only 6 additional years, the OLS line changes from a significantly positive trend (+1.23 m3 s-1per year) to a significantly negative trend (-0.35 m3 s-1per year). The Theil-Sen line is barely affected by these outliers, instead capturing the 70-year increasing trend. 
 
-This is an extreme example and we know from Section 7.2.3 that these outliers are related to a change in lake management. Data before 1940 follows a different underlying distribution, violating the assumptions of our model. To prove this, read ahead to Section 7.4.3. 
+This is an extreme example and we know from Section 7.2.3 that these outliers are related to a change in lake management. Data before 1940 follows a different underlying distribution, violating the assumptions of our model (Fig. 7.11). To prove this, read ahead to Section 7.4.3. 
 
 ```{r}
 ### Combine for plotting purposes

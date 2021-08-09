@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 - No Examples | A drought book thing</title>
+  <meta name="description" content="Test description." />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 - No Examples | A drought book thing" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://bookdown.org/yihui/rmarkdown/" />
+  
+  <meta property="og:description" content="Test description." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 - No Examples | A drought book thing" />
+  
+  <meta name="twitter:description" content="Test description." />
+  
+
+<meta name="author" content="Jim Stagge" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="chapter-3-no-examples.html"/>
+<link rel="next" href="chapter-5.html"/>
+<script src="libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  background-color: #f8f8f8; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ef2929; } /* Alert */
+code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #c4a000; } /* Attribute */
+code span.bn { color: #0000cf; } /* BaseN */
+code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4e9a06; } /* Char */
+code span.cn { color: #000000; } /* Constant */
+code span.co { color: #8f5902; font-style: italic; } /* Comment */
+code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
+code span.dt { color: #204a87; } /* DataType */
+code span.dv { color: #0000cf; } /* DecVal */
+code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #0000cf; } /* Float */
+code span.fu { color: #000000; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
+code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
+code span.ot { color: #8f5902; } /* Other */
+code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
+code span.sc { color: #000000; } /* SpecialChar */
+code span.ss { color: #4e9a06; } /* SpecialString */
+code span.st { color: #4e9a06; } /* String */
+code span.va { color: #000000; } /* Variable */
+code span.vs { color: #4e9a06; } /* VerbatimString */
+code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">This title is in _output</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="" data-path="chapter-1-no-examples.html"><a href="chapter-1-no-examples.html"><i class="fa fa-check"></i>Chapter 1 - No Examples</a></li>
+<li class="chapter" data-level="" data-path="chapter-2-no-examples.html"><a href="chapter-2-no-examples.html"><i class="fa fa-check"></i>Chapter 2 - No Examples</a></li>
+<li class="chapter" data-level="" data-path="chapter-3-no-examples.html"><a href="chapter-3-no-examples.html"><i class="fa fa-check"></i>Chapter 3 - No Examples</a></li>
+<li class="chapter" data-level="" data-path="chapter-4-no-examples.html"><a href="chapter-4-no-examples.html"><i class="fa fa-check"></i>Chapter 4 - No Examples</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html"><i class="fa fa-check"></i>Chapter 5</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.1-flow-duration-curve"><i class="fa fa-check"></i>Worked Example 5.1: Flow Duration Curve</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-of-the-fdc"><i class="fa fa-check"></i>Calculation of the FDC</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#plot-of-the-fdc"><i class="fa fa-check"></i>Plot of the FDC</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#selected-exceedance-values"><i class="fa fa-check"></i>Selected exceedance values</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track"><i class="fa fa-check"></i>Fast-Track</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#standardized-flow-duration-curves"><i class="fa fa-check"></i>Standardized Flow Duration Curves</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.2-mean-annual-minimum-n-day-flow"><i class="fa fa-check"></i>Worked example 5.2: Mean annual minimum n-day flow</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-1"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation"><i class="fa fa-check"></i>Calculation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-1"><i class="fa fa-check"></i>Fast Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.3-base-flow-index"><i class="fa fa-check"></i>Worked Example 5.3: Base Flow Index</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-2"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-1"><i class="fa fa-check"></i>Calculation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#results"><i class="fa fa-check"></i>Results</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-2"><i class="fa fa-check"></i>Fast Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.4-threshold-level-method"><i class="fa fa-check"></i>Worked example 5.4: Threshold level method</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-3"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#missing-values"><i class="fa fa-check"></i>Missing values</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#threshold-selection-and-drought-events"><i class="fa fa-check"></i>Threshold selection and drought events</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#removing-minor-droughts-filtering"><i class="fa fa-check"></i>Removing minor droughts (Filtering)</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#eliminating-dependent-droughts-pooling"><i class="fa fa-check"></i>Eliminating dependent droughts (Pooling)</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.5-sequent-peak-algorithm"><i class="fa fa-check"></i>Worked example 5.5: Sequent Peak Algorithm</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-4"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-2"><i class="fa fa-check"></i>Calculation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#selection-of-the-drought-deficit-volume-and-duration"><i class="fa fa-check"></i>Selection of the drought deficit volume and duration</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#results-1"><i class="fa fa-check"></i>Results</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-3"><i class="fa fa-check"></i>Fast Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.6-example-of-how-to-estimate-sgi-using-data-from-stonor-park-uk"><i class="fa fa-check"></i>Worked example 5.6, Example of how to estimate SGI using data from Stonor Park, UK</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#load-the-data"><i class="fa fa-check"></i>Load the data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#create-a-regular-times-series-of-monthly-data"><i class="fa fa-check"></i>Create a regular times series of monthly data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculate-an-sgi-values"><i class="fa fa-check"></i>Calculate an SGI values</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-4"><i class="fa fa-check"></i>Fast-Track</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.7-rank-and-correlation-coefficients"><i class="fa fa-check"></i>Worked example 5.7: Rank and correlation coefficients</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-5"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#indices"><i class="fa fa-check"></i>Indices</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#ranks"><i class="fa fa-check"></i>Ranks</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#pearson-correlation"><i class="fa fa-check"></i>Pearson correlation</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#spearman-rank-correlation"><i class="fa fa-check"></i>Spearman (rank) correlation</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.8-no-flow-indices"><i class="fa fa-check"></i>Worked example 5.8: No-flow indices</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-6"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#finding-intermittent-rivers"><i class="fa fa-check"></i>Finding intermittent rivers</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#computing-metrics"><i class="fa fa-check"></i>Computing metrics</a></li>
+<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#visualising-streamflow-permanence-spells"><i class="fa fa-check"></i>Visualising streamflow permanence (spells)</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html"><i class="fa fa-check"></i>Chapter 6</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.1-low-flow-frequency-analysis"><i class="fa fa-check"></i>Worked Example 6.1: Low flow frequency analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#loading-the-data-7"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-an-empirical-distribution-function"><i class="fa fa-check"></i>Derivation of an empirical distribution function</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#fitting-a-distribution"><i class="fa fa-check"></i>Fitting a distribution</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#estimation-of-t-year-events"><i class="fa fa-check"></i>Estimation of T-year events</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#ft"><i class="fa fa-check"></i>Fast Track</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#probability-plot-using-the-exponential-reduced-variate"><i class="fa fa-check"></i>Probability plot using the exponential reduced variate</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.2-drought-deficit-frequency-analysis"><i class="fa fa-check"></i>Worked Example 6.2: Drought deficit frequency analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#data"><i class="fa fa-check"></i>Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-distribution-function"><i class="fa fa-check"></i>Derivation of distribution function</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#calculation-of-the-t-year-event"><i class="fa fa-check"></i>Calculation of the T-year event</a></li>
+<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#manual-computation"><i class="fa fa-check"></i>Manual computation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html"><i class="fa fa-check"></i>Chapter 7</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.1-linear-trend-analysis"><i class="fa fa-check"></i>Worked example 7.1: Linear trend analysis</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-8"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-elbe-river"><i class="fa fa-check"></i>Linear trend for Elbe River</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-göta-river"><i class="fa fa-check"></i>Linear trend for Göta River</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.2-non-parametric-trends"><i class="fa fa-check"></i>Worked Example 7.2: Non Parametric Trends</a>
+<ul>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-9"><i class="fa fa-check"></i>Loading the Data</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#mann-kendall-test"><i class="fa fa-check"></i>Mann-Kendall test</a></li>
+<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#high-leverage-outlier-effects"><i class="fa fa-check"></i>High leverage outlier effects</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio4edu/rstudio4edu-book" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">A drought book thing</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="chapter-4---no-examples" class="section level1">
+<h1>Chapter 4 - No Examples</h1>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="chapter-3-no-examples.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="chapter-5.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": false
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/rstudio4edu/rstudio4edu-book/edit/master/04-chapter4.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["https://github.com/rstudio4edu/rstudio4edu-book/raw/master/04-chapter4.Rmd"],
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
