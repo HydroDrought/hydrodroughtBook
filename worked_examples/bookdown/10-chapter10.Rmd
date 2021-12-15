@@ -109,9 +109,9 @@ plot_thresh <- threshold %>%
 ### Plot the threshold against flows
 p <- ggplot(plot_df, aes(x=plot_date)) + 
 	geom_line(aes(group=year, y=benchmark), alpha = 0.2) + 
-	geom_line(data = plot_thresh, aes(y=threshold), colour="red", size = 0.5) + 
- 	scale_x_date(name = "Month", date_labels = "%b")+
-	scale_y_continuous(name = "Discharge (mm/day)")
+	geom_line(data = plot_thresh, aes(y=threshold), colour="red", size = 1.5) + 
+ 	scale_x_date(date_labels = "%b")+
+	scale_y_continuous()
 
 ### Display figure (stored in variable p)
 p
