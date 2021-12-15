@@ -15,11 +15,20 @@
 
 <title>Drought Impact Model</title>
 
-<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
@@ -31,6 +40,7 @@ if (window.hljs) {
   }
 }
 </script>
+
 
 
 
@@ -82,20 +92,19 @@ spi_impacts &lt;- spi_de %&gt;%
     drop_na(impact) %&gt;%                     ### Drop rows with NA in the impact column
     print(spi_impacts)                      ### Check results</code></pre>
 <pre><code>## # A tibble: 172 x 11
-##    date        year month index_val index index_type index_months country
-##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;        &lt;chr&gt;  
-##  1 1970-07-01  1970     7     0.364 spei… spei       12           DE     
-##  2 1971-07-01  1971     7    -0.605 spei… spei       12           DE     
-##  3 1972-07-01  1972     7    -0.741 spei… spei       12           DE     
-##  4 1973-07-01  1973     7    -0.758 spei… spei       12           DE     
-##  5 1974-07-01  1974     7    -0.295 spei… spei       12           DE     
-##  6 1975-07-01  1975     7     1.25  spei… spei       12           DE     
-##  7 1976-07-01  1976     7    -1.88  spei… spei       12           DE     
-##  8 1977-07-01  1977     7    -0.299 spei… spei       12           DE     
-##  9 1978-07-01  1978     7     0.274 spei… spei       12           DE     
-## 10 1979-07-01  1979     7     0.763 spei… spei       12           DE     
-## # … with 162 more rows, and 3 more variables: impact_count &lt;int&gt;, nuts_n &lt;int&gt;,
-## #   impact &lt;lgl&gt;</code></pre>
+##    date        year month index_val index index_type index_months country impact_count nuts_n impact
+##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;        &lt;chr&gt;          &lt;int&gt;  &lt;int&gt; &lt;lgl&gt; 
+##  1 1970-07-01  1970     7     0.364 spei… spei       12           DE                 0     13 FALSE 
+##  2 1971-07-01  1971     7    -0.605 spei… spei       12           DE                 0     13 FALSE 
+##  3 1972-07-01  1972     7    -0.741 spei… spei       12           DE                 0     13 FALSE 
+##  4 1973-07-01  1973     7    -0.758 spei… spei       12           DE                 0     13 FALSE 
+##  5 1974-07-01  1974     7    -0.295 spei… spei       12           DE                 0     13 FALSE 
+##  6 1975-07-01  1975     7     1.25  spei… spei       12           DE                 0     13 FALSE 
+##  7 1976-07-01  1976     7    -1.88  spei… spei       12           DE                 5     13 TRUE  
+##  8 1977-07-01  1977     7    -0.299 spei… spei       12           DE                 0     13 FALSE 
+##  9 1978-07-01  1978     7     0.274 spei… spei       12           DE                 0     13 FALSE 
+## 10 1979-07-01  1979     7     0.763 spei… spei       12           DE                 0     13 FALSE 
+## # … with 162 more rows</code></pre>
 </div>
 <div id="preliminary-visual-comparison" class="section level1" number="2">
 <h1 number="2"><span class="header-section-number">2</span> Preliminary visual comparison</h1>

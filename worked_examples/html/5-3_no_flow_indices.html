@@ -14,10 +14,20 @@
 
 <title>Worked example 5.3: No-flow indices</title>
 
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
@@ -29,6 +39,7 @@ if (window.hljs) {
   }
 }
 </script>
+
 
 
 
@@ -57,8 +68,8 @@ if (window.hljs) {
 </ul>
 </div>
 
-<div id="loading-the-data" class="section level1">
-<h1><span class="header-section-number">1</span> Loading the Data</h1>
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
 <p>In this example we use river flow data from the rivers of the International Data Set in the package <strong>hydroDrought</strong> that are classified as intermittent or ephemeral. The dataset becomes accessible by loading the <strong>hydroDrought</strong> package.</p>
 <pre class="r"><code>library(hydroDrought)
 library(tidyverse)
@@ -66,8 +77,8 @@ library(tidyverse)
 rivers &lt;- international %&gt;%
   select(river, data) </code></pre>
 </div>
-<div id="finding-intermittent-rivers" class="section level1">
-<h1><span class="header-section-number">2</span> Finding intermittent rivers</h1>
+<div id="finding-intermittent-rivers" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Finding intermittent rivers</h1>
 <p>A river is defined as intermittent or ephemeral if the river flow is below a threshold of 0.001m<sup>3</sup>s<sup>-1</sup> at least for 5 days each year. Six rivers in the International Dataset fulfil the criteria: Sabar at Alfartanejo and Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US). If the first and/or last year in the time series contain missing values, these years are removed. Only years without missing values are included in the analysis.</p>
 <pre class="r"><code>intermittent &lt;- rivers %&gt;%
   mutate(
@@ -78,8 +89,8 @@ rivers &lt;- international %&gt;%
     clipped = map(data, remove_incomplete_first_last),
   ) </code></pre>
 </div>
-<div id="computing-indices" class="section level1">
-<h1><span class="header-section-number">3</span> Computing indices</h1>
+<div id="computing-indices" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Computing indices</h1>
 <p>The following indices are calculated and included in the table below:</p>
 <ul>
 <li><p><code>frac nf years</code>: the proportion of no-flow years, defined as the number of years with no-flow occurrence divided by the total number of years in the time series;</p></li>
@@ -104,17 +115,17 @@ metrics &lt;- intermittent %&gt;%
   unnest_wider(metrics)</code></pre>
 <p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.xx. No-flow indices for rivers Sabar at Alfartanejo, Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US)</span></p>
 <pre><code>## # A tibble: 6 x 9
-##   river       `frac nf years`    MAN    CVAN `no flow days`   MAMD     onset `sd onset`     term.
-##   &lt;fct&gt;                 &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt; &lt;month-d&gt;      &lt;dbl&gt; &lt;month-d&gt;
-## 1 Sabar                 1     185.   0.239   &lt;int [29]&gt;     168.      -05-12       60.0    -11-29
-## 2 Upper Guad…           0.116   8.12 3.26    &lt;int [40]&gt;       8.12    -08-12       25.8    -10-14
-## 3 Dawib                 1     361.   0.00830 &lt;int [6]&gt;      298.      -01-01        0      -01-27
-## 4 Elands                0.214  14.4  1.83    &lt;int [9]&gt;        7.89    -08-22       83.6    -09-04
-## 5 Ray                   0.945  98.2  0.576   &lt;int [46]&gt;      40.2     -05-14       52.8    -05-20
-## 6 Arroyo Seco           0.441  39.0  1.33    &lt;int [118]&gt;     38.3     -07-30       24.7    -10-24</code></pre>
+##   river          `frac nf years`    MAN    CVAN `no flow days`   MAMD  onset `sd onset`  term.
+##   &lt;chr&gt;                    &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt; &lt;date&gt;      &lt;dbl&gt; &lt;date&gt;
+## 1 Sabar                    1     185.   0.239   &lt;int [29]&gt;     168.   -05-12       60.0 -11-29
+## 2 Upper Guadiana           0.116   8.12 3.26    &lt;int [40]&gt;       8.12 -08-12       25.8 -10-14
+## 3 Dawib                    1     361.   0.00830 &lt;int [6]&gt;      298.   -01-01        0   -01-27
+## 4 Elands                   0.214  14.4  1.83    &lt;int [9]&gt;        7.89 -08-22       83.6 -09-04
+## 5 Ray                      0.945  98.2  0.576   &lt;int [46]&gt;      40.2  -05-14       52.8 -05-20
+## 6 Arroyo Seco              0.441  39.0  1.33    &lt;int [118]&gt;     38.3  -07-30       24.7 -10-24</code></pre>
 </div>
-<div id="visualising-streamflow-permanence" class="section level1">
-<h1><span class="header-section-number">4</span> Visualising streamflow permanence</h1>
+<div id="visualising-streamflow-permanence" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Visualising streamflow permanence</h1>
 <pre class="r"><code>spells &lt;- intermittent %&gt;%
   mutate(
     spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = &quot;drop_year&quot;))

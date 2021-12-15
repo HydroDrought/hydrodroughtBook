@@ -13,13 +13,22 @@
 <meta name="author" content="Worked example 10.1" />
 
 
-<title>Quantifying effect of human influences</title>
+<title>Quantifying the human influence on drought</title>
 
-<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
@@ -31,6 +40,7 @@ if (window.hljs) {
   }
 }
 </script>
+
 
 
 
@@ -47,7 +57,7 @@ if (window.hljs) {
 
 
 
-<h1 class="title toc-ignore">Quantifying effect of human influences</h1>
+<h1 class="title toc-ignore">Quantifying the human influence on drought</h1>
 <h4 class="author">Worked example 10.1</h4>
 
 
@@ -55,120 +65,89 @@ if (window.hljs) {
 <ul>
 <li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the data</a></li>
 <li><a href="#threshold-calculation"><span class="toc-section-number">2</span> Threshold calculation</a></li>
-<li><a href="#benchmark-drought-characteristics"><span class="toc-section-number">3</span> Benchmark Drought characteristics</a></li>
-<li><a href="#human-influenced-drought-characteristics"><span class="toc-section-number">4</span> Human-influenced drought characteristics</a></li>
+<li><a href="#calculate-the-benchmark-drought-indices"><span class="toc-section-number">3</span> Calculate the benchmark drought indices</a></li>
+<li><a href="#calculate-the-human-influenced-drought-indices"><span class="toc-section-number">4</span> Calculate the human-influenced drought indices</a></li>
 <li><a href="#comparison-of-drought-characteristics"><span class="toc-section-number">5</span> Comparison of drought characteristics</a></li>
 </ul>
 </div>
 
-<p>If we want to quantify the human influence on hydrological drought by comparing two time series, one with and one without this human influence, we want to use the threshold of the <strong>benchmark</strong> time series to calculate droughts in both the <strong>human-influenced</strong> and <strong>benchmark</strong> time series. These are the steps that we will discuss in this Worked Example:</p>
-<ol style="list-style-type: decimal">
-<li><p>Calculate the threshold from the <strong>benchmark</strong> time series</p></li>
-<li><p>Calculate drought characteristics for the <strong>benchmark</strong> time series, using the <strong>benchmark</strong> threshold <label for="tufte-sn-1" class="margin-toggle sidenote-number">1</label><input type="checkbox" id="tufte-sn-1" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">1</span> Tobias: As you are always using the benchmark threshold I suggest to omit the last part of the sentence.</span></p></li>
-<li><p>Calculate drought characteristics for the <strong>human-influenced</strong> time series, using the <strong>benchmark</strong> threshold</p></li>
-<li><p>Compare drought characteristics between the <strong>benchmark</strong> &amp; <strong>human-influenced</strong> time series</p></li>
-</ol>
+<p>A comparison of two time series from the Upper-Guadiana catchment, one with and one without human influence, is done to demonstrate the catchment-scale observation-based methods to quantify the human influence on hydrological drought (Section 10.4.1; Fig. 10.6). These time series can be calculated from a paired catchment analysis, an upstream-downstream comparison, observed-naturalised comparison, or pre-post disturbance analysis (Section 10.4.1). In this example, we use the observed-naturalised approach.</p>
 <div id="loading-the-data" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Loading the data</h1>
-<p>As an example we here use the Upper-Guadiana dataset with the two time series: the <strong>benchmark</strong> time series and the <strong>human-influenced</strong> time series.</p>
+<p>We begin by loading the two time series from the Upper-Guadiana dataset: the benchmark (natural) time series and the human-influenced time series.</p>
 <pre class="r"><code>library(tidyverse)
 library(lubridate)
 library(hydroDrought)
 
-print(guadiana)</code></pre>
-<pre><code>## # A tibble: 15,249 x 3
-##    time        Qsim  Qobs
-##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;
-##  1 1960-01-01 0.153 0.146
-##  2 1960-01-02 0.148 0.146
-##  3 1960-01-03 0.144 0.143
-##  4 1960-01-04 0.14  0.154
-##  5 1960-01-05 0.136 0.148
-##  6 1960-01-06 0.133 0.154
-##  7 1960-01-07 0.13  0.154
-##  8 1960-01-08 0.128 0.148
-##  9 1960-01-09 0.129 0.146
-## 10 1960-01-10 0.139 0.133
-## # … with 15,239 more rows</code></pre>
-<pre class="r"><code>range(guadiana$time)</code></pre>
-<pre><code>## [1] &quot;1960-01-01&quot; &quot;2001-09-30&quot;</code></pre>
-<p><label for="tufte-sn-2" class="margin-toggle sidenote-number">2</label><input type="checkbox" id="tufte-sn-2" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">2</span> Tobias: To simplify the code, should we subset the included dataset to the period of 1960-2000? Data outside this period is not used, as far as I can see…</span></p>
-<p>The <strong>benchmark</strong> time series comprises the uninfluenced, naturalized discharge <span class="math inline">\(Q_{sim}\)</span>. Note that <strong>benchmark</strong> time series can be calculated from a paired catchment analysis (Sect. XX), an upstream-downstream comparison (Sect. XX), model naturalisation (Sect. XX), or pre-post disturbance analysis (Sect. XX). The <strong>benchmark</strong> time series for this catchment are modeled as described in Sect. XX.</p>
-<pre class="r"><code>benchmark &lt;- guadiana %&gt;%
-  select(time, discharge = Qsim) %&gt;%
-  mutate(
-    year = water_year(time)
-  ) %&gt;%
-  print()</code></pre>
-<pre><code>## # A tibble: 15,249 x 3
-##    time       discharge  year
-##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
-##  1 1960-01-01     0.153  1960
-##  2 1960-01-02     0.148  1960
-##  3 1960-01-03     0.144  1960
-##  4 1960-01-04     0.14   1960
-##  5 1960-01-05     0.136  1960
-##  6 1960-01-06     0.133  1960
-##  7 1960-01-07     0.13   1960
-##  8 1960-01-08     0.128  1960
-##  9 1960-01-09     0.129  1960
-## 10 1960-01-10     0.139  1960
-## # … with 15,239 more rows</code></pre>
-<p>The <strong>human-influenced</strong> time series is basically the time series of observed discharge <span class="math inline">\(Q_{obs}\)</span> from the Upper-Guadiana catchment.</p>
-<pre class="r"><code>influenced &lt;- guadiana %&gt;%
-  select(time, discharge = Qobs) %&gt;%
-  mutate(
-    year = water_year(time)
-  ) %&gt;%print()</code></pre>
-<pre><code>## # A tibble: 15,249 x 3
-##    time       discharge  year
-##    &lt;date&gt;         &lt;dbl&gt; &lt;dbl&gt;
-##  1 1960-01-01     0.146  1960
-##  2 1960-01-02     0.146  1960
-##  3 1960-01-03     0.143  1960
-##  4 1960-01-04     0.154  1960
-##  5 1960-01-05     0.148  1960
-##  6 1960-01-06     0.154  1960
-##  7 1960-01-07     0.154  1960
-##  8 1960-01-08     0.148  1960
-##  9 1960-01-09     0.146  1960
-## 10 1960-01-10     0.133  1960
-## # … with 15,239 more rows</code></pre>
+### Filter to the period 1960-2000 
+### Rename the columns
+### Calculate the water year
+guadiana_full &lt;- guadiana %&gt;%
+    dplyr::select(time, benchmark = Qsim, influenced = Qobs) %&gt;%
+    mutate(
+        year = water_year(time)
+    ) %&gt;%
+    filter(year &gt;= 1960,  year &lt;= 2000) 
+
+print(guadiana_full)</code></pre>
+<pre><code>## # A tibble: 14,976 x 4
+##    time       benchmark influenced  year
+##    &lt;date&gt;         &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
+##  1 1960-01-01     0.153      0.146  1960
+##  2 1960-01-02     0.148      0.146  1960
+##  3 1960-01-03     0.144      0.143  1960
+##  4 1960-01-04     0.14       0.154  1960
+##  5 1960-01-05     0.136      0.148  1960
+##  6 1960-01-06     0.133      0.154  1960
+##  7 1960-01-07     0.13       0.154  1960
+##  8 1960-01-08     0.128      0.148  1960
+##  9 1960-01-09     0.129      0.146  1960
+## 10 1960-01-10     0.139      0.133  1960
+## # … with 14,966 more rows</code></pre>
+<pre class="r"><code>range(guadiana_full$time)</code></pre>
+<pre><code>## [1] &quot;1960-01-01&quot; &quot;2000-12-31&quot;</code></pre>
+<p>The benchmark time series is simulated as described in Section 9.3.3. In this case, the observed time series from the Upper-Guadiana catchment is the human-influenced time series (Section 4.5.X).</p>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 10.xxxx: Time series showing the benchmark and human-influenced time series. Discharge is plotted on a log scale to emphasize low flow behavior. The grey region shows the comparison period for human influence (1981-2000).
+</p>
+<img src="10-1_human_influences_files/figure-html/unnamed-chunk-4-1.png" alt="Figure 10.xxxx: Time series showing the benchmark and human-influenced time series. Discharge is plotted on a log scale to emphasize low flow behavior. The grey region shows the comparison period for human influence (1981-2000)." width="672"  />
+</div>
 </div>
 <div id="threshold-calculation" class="section level1" number="2">
 <h1 number="2"><span class="header-section-number">2</span> Threshold calculation</h1>
-<p>Here we are taking the <code>benchmark</code> time series. First we are smoothing the column <code>discharge</code> with a 30-day moving average. The threshold itself is calculated as a daily varying <span class="math inline">\(Q_{95}\)</span> yielding a dataset with a row for each day of the year and the appropriate <span class="math inline">\(Q_{95}\)</span> in the column named <code>threshold</code>.</p>
-<pre class="r"><code>threshold &lt;- benchmark %&gt;%
-  # applying a 30-day moving average smoother
-  mutate(discharge = moving_average(discharge, n = 30, sides = &quot;center&quot;)) %&gt;%
-  
-  # the following line could be obsolete
-  filter(year &gt;= 1960,  year &lt;= 2000) %&gt;%
-  
-  # computing the Q95 for each day of the year
-  var_threshold(vary.by = &quot;day&quot;, fun = lfquantile, exc.freq = 0.95) 
+<p>In this example we use a daily varying threshold, the Q80, calculated based on a smoothed 30-day moving average series over the period 1960-2000. The threshold is derived based on the benchmark time series.</p>
+<pre class="r"><code>### First apply a 30-day moving average smoother
+### Then compute the Q80 for each day of the year
+threshold &lt;- guadiana_full %&gt;%
+  mutate(discharge = moving_average(benchmark, n = 30, sides = &quot;center&quot;)) %&gt;%
+  var_threshold(vary.by = &quot;day&quot;, fun = lfquantile, exc.freq = 0.80) 
 
 print(threshold)</code></pre>
 <pre><code>## # A tibble: 366 x 2
 ##       day threshold
-##    &lt;date&gt;     &lt;dbl&gt;
-##  1 -01-01   0.0103 
-##  2 -01-02   0.0100 
-##  3 -01-03   0.00966
-##  4 -01-04   0.00943
-##  5 -01-05   0.00941
-##  6 -01-06   0.00943
-##  7 -01-07   0.00944
-##  8 -01-08   0.00943
-##  9 -01-09   0.00942
-## 10 -01-10   0.0094 
+##  * &lt;date&gt;     &lt;dbl&gt;
+##  1 -01-01    0.0172
+##  2 -01-02    0.0184
+##  3 -01-03    0.0184
+##  4 -01-04    0.0187
+##  5 -01-05    0.0190
+##  6 -01-06    0.0194
+##  7 -01-07    0.0197
+##  8 -01-08    0.0200
+##  9 -01-09    0.0203
+## 10 -01-10    0.0206
 ## # … with 356 more rows</code></pre>
-<p><label for="tufte-sn-3" class="margin-toggle sidenote-number">3</label><input type="checkbox" id="tufte-sn-3" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">3</span> Tobias: These plots are just to show data coverage and the handling of leap-years. If you want to have some of them in the Worked Example should print the code producing them. </span></p>
-<p><img src="10-1_human_influences_files/figure-html/unnamed-chunk-6-1.png" width="672"  /></p>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 10.xxxx: Benchmark discharge for the period 1960-2000 showing seasonality, with each line representing a year. The smoothed Q80 threshold is shown in bold red.
+</p>
+<img src="10-1_human_influences_files/figure-html/unnamed-chunk-7-1.png" alt="Figure 10.xxxx: Benchmark discharge for the period 1960-2000 showing seasonality, with each line representing a year. The smoothed Q80 threshold is shown in bold red." width="672"  />
 </div>
-<div id="benchmark-drought-characteristics" class="section level1" number="3">
-<h1 number="3"><span class="header-section-number">3</span> Benchmark Drought characteristics</h1>
-<p><label for="tufte-sn-4" class="margin-toggle sidenote-number">4</label><input type="checkbox" id="tufte-sn-4" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">4</span> Tobias: I think this Worked Example could be easier to follow if we fist compute the drought events for both time series and in a separate section the drought characteristics. So section 2 could become “Drought Events”, Section 3 “Drought Characteristics”.</span></p>
+</div>
+<div id="calculate-the-benchmark-drought-indices" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Calculate the benchmark drought indices</h1>
+<p>Apply the benchmark threshold (Step 2) to identify drought events in the benchmark time series using the threshold level method (Section 5.4.1) for a selected period. Note that this time period can differ from the reference period used to calculate the benchmark threshold. In this example, we use the period 1981-2000, which equals the period with the main human intervention in the Upper Guadiana catchment.</p>
 <pre class="r"><code># initialize empty list for events
 events &lt;- list(benchmark = NULL, influenced = NULL)
 
@@ -180,10 +159,13 @@ summarize_dc &lt;- function(x) {
   c(&quot;mean.duration&quot; = as.double(mean(x$duration)), 
     &quot;mean.deficit&quot; = mean(x$volume))
 }</code></pre>
-<p>Periods with discharges below the before calculated threshold are considered drought events. Consecutive drought events with an inter-event time of less than or equal to 10 days (argument <code>min.duration = 10</code>) get pooled into single drought event regardless of their inter-event excess volume (argument <code>min.vol.ratio = Inf</code>). To get rid of minor droughts, only drought events with a duration of more than 10 days are kept.</p>
-<pre class="r"><code># calculate the drought events for the benchmark time series
-events$benchmark &lt;- benchmark %&gt;%
+<p>Consecutive drought events with an inter-event time less than or equal to 10 days are pooled into a single drought event. To remove minor droughts, only drought events with a duration of more than 10 days are kept. The resultant drought indices of the naturalised benchmark time series are: (a) mean duration 91 days, and (b) mean deficit volume 58,000 mm.</p>
+<pre class="r"><code>### Calculate the drought events for the benchmark time series
+### Filter to 1981-2000
+### use the benchmark column as discharge
+events$benchmark &lt;- guadiana_full %&gt;%
   filter(year &gt;= 1981, year &lt;= 2000) %&gt;%
+  rename(discharge = benchmark) %&gt;%
   drought_events(
     threshold = threshold,
     pooling = &quot;inter-event&quot;,
@@ -192,38 +174,39 @@ events$benchmark &lt;- benchmark %&gt;%
   filter(duration &gt; 10)
 
 # calculate the drought characteristics for the benchmark time series
-drought.char$benchmark &lt;- summarize_dc(events$benchmark)</code></pre>
-<p>For the Upper-Guadiana, these would be the drought events of the <strong>benchmark</strong> time series. Events numbers that are missing in the sequence are minor drought events that have been filtered out.</p>
-<pre class="r"><code>print(events$benchmark)</code></pre>
-<pre><code>## # A tibble: 17 x 9
+drought.char$benchmark &lt;- summarize_dc(events$benchmark)
+
+print(events$benchmark)</code></pre>
+<pre><code>## # A tibble: 32 x 9
 ##    event first.day  last.day   duration dbt       volume  qmin tqmin      pooled
 ##    &lt;int&gt; &lt;date&gt;     &lt;date&gt;     &lt;drtn&gt;   &lt;drtn&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;      &lt;dbl&gt;
-##  1     4 1981-10-18 1981-12-27  71 days  71 days  3.35e4 0     1981-11-23      0
-##  2     5 1982-10-07 1982-10-18  12 days  12 days  1.17e3 0     1982-10-07      0
-##  3     6 1983-06-03 1983-09-01  91 days  58 days  1.17e3 0.001 1983-08-12      8
-##  4     7 1983-09-20 1983-11-20  62 days  62 days  7.87e3 0     1983-09-20      0
-##  5     9 1985-11-12 1985-11-26  15 days  15 days  1.73e3 0.004 1985-11-12      0
-##  6    11 1986-12-29 1987-01-08  11 days   3 days  5.49e1 0.009 1987-01-08      2
-##  7    13 1991-08-21 1991-09-05  16 days  15 days  2.88e2 0     1991-09-03      1
-##  8    15 1992-01-16 1992-02-19  35 days  32 days  7.94e3 0.005 1992-02-05      2
-##  9    16 1992-05-12 1992-06-10  30 days  28 days  1.95e3 0.006 1992-05-27      2
-## 10    19 1993-01-01 1993-05-11 131 days 129 days  5.55e4 0.003 1993-03-05      1
-## 11    21 1993-09-19 1993-10-11  23 days  21 days  7.29e2 0     1993-09-19      1
-## 12    22 1993-12-22 1994-01-04  14 days  14 days  1.82e3 0.008 1994-01-01      0
-## 13    23 1994-03-20 1994-04-18  30 days  28 days  2.17e3 0.005 1994-04-13      2
-## 14    24 1994-05-02 1994-10-16 168 days 162 days  2.87e4 0     1994-07-25      2
-## 15    25 1994-11-25 1995-09-01 281 days 281 days  1.27e5 0     1995-06-06      0
-## 16    26 1995-09-29 1995-11-16  49 days  49 days  6.58e3 0     1995-09-29      0
-## 17    27 2000-02-29 2000-03-22  23 days  22 days  1.33e3 0.011 2000-03-18      1</code></pre>
+##  1     1 1981-01-01 1981-04-22 112 days 112 days 100349. 0.01  1981-02-04      0
+##  2     2 1981-06-09 1981-12-28 203 days 187 days  84024. 0     1981-11-23      4
+##  3     5 1982-05-01 1982-06-01  32 days  30 days   7235. 0.017 1982-05-25      1
+##  4     6 1982-06-25 1982-10-19 117 days 106 days  14406. 0     1982-10-07      3
+##  5     7 1983-01-31 1983-11-22 296 days 296 days 202991. 0     1983-09-20      0
+##  6     8 1983-12-03 1983-12-17  15 days  15 days   5915. 0.009 1983-12-13      0
+##  7     9 1984-02-17 1984-02-27  11 days  11 days   3787. 0.018 1984-02-22      0
+##  8    10 1984-10-22 1984-11-03  13 days  11 days    533. 0.007 1984-10-22      1
+##  9    12 1985-10-12 1985-12-25  75 days  66 days  17653. 0.004 1985-11-12      2
+## 10    13 1986-11-29 1987-01-11  44 days  44 days  22026. 0.009 1987-01-08      0
+## # … with 22 more rows</code></pre>
 </div>
-<div id="human-influenced-drought-characteristics" class="section level1" number="4">
-<h1 number="4"><span class="header-section-number">4</span> Human-influenced drought characteristics</h1>
-<p>Extent the <strong>benchmark</strong> threshold calculated in step 1 to the period of the <strong>human-influenced</strong> time series. Note that this can be a different time period than was used to calculate the <strong>benchmark</strong> threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).<label for="tufte-sn-5" class="margin-toggle sidenote-number">5</label><input type="checkbox" id="tufte-sn-5" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">5</span> Tobias: this paragraph doesn’t make sense here. This is probably my fault but I think you don’t need it at all.</span></p>
-<p><label for="tufte-sn-6" class="margin-toggle sidenote-number">6</label><input type="checkbox" id="tufte-sn-6" class="margin-toggle"><span class="sidenote"><span class="sidenote-number">6</span> Tobias: These plots just explain why I used the Q95. With Q80 the droughts would not terminate within a year. Again: if you want to keep one or all of these plots we should show the code producing them. </span></p>
-<p><img src="10-1_human_influences_files/figure-html/unnamed-chunk-10-1.png" width="768"  /></p>
-<pre class="r"><code># calculate the drought events for the human influenced time series
-events$influenced &lt;- influenced %&gt;%
-  filter(year &gt;= 1991 &amp; year &lt;= 2000) %&gt;%
+<div id="calculate-the-human-influenced-drought-indices" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Calculate the human-influenced drought indices</h1>
+<p>Apply the benchmark threshold (Step 2) to identify drought events in the human-influenced time series. Note that we are using the same period (1981-2000) as was used to derive drought indices for the benchmark time series. Furthermore, we are applying the same inter-event criterion and exclusion of minor drought events (Step 3). The resultant drought indices of the human-influenced time series are: (a) mean duration 304 days, and (b) mean deficit volume 310,000 mm</p>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 10.xxxx: Benchmark (top) and human-influenced (bottom) flows during the comparison period 1981-2000. The smoothed Q80 threshold is shown in red. Discharge is plotted on a log scale to emphasize low flow behavior.
+</p>
+<img src="10-1_human_influences_files/figure-html/unnamed-chunk-11-1.png" alt="Figure 10.xxxx: Benchmark (top) and human-influenced (bottom) flows during the comparison period 1981-2000. The smoothed Q80 threshold is shown in red. Discharge is plotted on a log scale to emphasize low flow behavior." width="672"  />
+</div>
+<pre class="r"><code>### Calculate the drought events for the benchmark time series
+### Filter to 1981-2000
+### use the influenced column as discharge
+events$influenced &lt;- guadiana_full %&gt;%
+  filter(year &gt;= 1981 &amp; year &lt;= 2000) %&gt;%
+   rename(discharge = influenced) %&gt;% 
   drought_events(threshold = threshold,
                  pooling = &quot;inter-event&quot;,
                  pooling.pars = list(min.duration = 10, min.vol.ratio = Inf))  %&gt;%
@@ -234,20 +217,21 @@ drought.char$influenced &lt;- summarize_dc(events$influenced)</code></pre>
 </div>
 <div id="comparison-of-drought-characteristics" class="section level1" number="5">
 <h1 number="5"><span class="header-section-number">5</span> Comparison of drought characteristics</h1>
-<p>For the Upper-Guadiana, these would be the drought characteristics:</p>
+<p>In this final step, we compare the drought indices between the benchmark and human-influenced time series. We calculate the percentage difference between the two sets of drought indices, <span class="math inline">\(\Delta DC\)</span> :</p>
+<p><span class="math display">\[\Delta DC = \frac{DC_{HI} - DC_{BM}}{DC_{BM}} \cdot 100\]</span></p>
+<p>where <span class="math inline">\(\Delta DC\)</span> is the percentage difference in drought index (DC) between the human-influenced (<span class="math inline">\(DC_{HI}\)</span>) and benchmark (<span class="math inline">\(DC_{BM}\)</span>) time series</p>
 <pre class="r"><code>drought.char</code></pre>
 <pre><code>## $benchmark
 ## mean.duration  mean.deficit 
-##      62.47059   16427.09647 
+##      90.59375   57967.00200 
 ## 
 ## $influenced
 ## mean.duration  mean.deficit 
-##      175.4118    59454.0932</code></pre>
-<p>Calculate the percentage difference between the <strong>benchmark</strong> and <strong>human-influenced</strong> drought characteristics.</p>
-<p><span class="math display">\[\Delta DC = \frac{DCHI - DCBM}{DCBM} \cdot 100\]</span> where <span class="math inline">\(\Delta DC\)</span> is the percentage change in drought characteristics (<span class="math inline">\(DC\)</span>) between the <strong>human-influenced</strong> (<span class="math inline">\(DCHI\)</span>) and <strong>benchmark</strong> (<span class="math inline">\(DCBM\)</span>) time series. For the Upper-Guadiana, these would be the differences in drought characteristics:</p>
+##        304.45     309833.02</code></pre>
 <pre class="r"><code>(drought.char$influenced - drought.char$benchmark) / drought.char$benchmark * 100</code></pre>
 <pre><code>## mean.duration  mean.deficit 
-##       180.791       261.927</code></pre>
+##      236.0607      434.4990</code></pre>
+<p>We find that the difference in mean duration is 236%, and in mean deficit volume it is 434%. To conclude, the mean duration of streamflow droughts in the Upper-Guadiana catchment has increased with about 236% and the mean deficit with 434% in the human-influenced situation compared to the naturalised situation.</p>
 </div>
 
 
