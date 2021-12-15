@@ -4,7 +4,4 @@ require(bookdown)
 
 bookdown::render_book("index.Rmd", "bookdown::gitbook")
 
-
-bookdown::render_book("index.Rmd", "bookdown::pdf_book")
-
-
+Then you need to move the docs folder out to the docs folder in the home directory

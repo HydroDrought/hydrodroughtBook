@@ -6,7 +6,7 @@ author: "Worked example 10.1"
 ```{r, setup, include=FALSE}
 ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-select <- dplyr::select
+dplyr::select <- dplyr::dplyr::select
 ```
 
 ```{r, echo = FALSE}
@@ -14,7 +14,7 @@ library(tidyverse)
 library(hydroDrought)
 # Load the data
 guadiana <- read_tsv("../../data/Guadiana_Delay_LogEff_including_Psim.txt") %>%
-  select(time = "date.yyyymmdd",  Qsim, Qobs)  
+  dplyr::select(time = "date.yyyymmdd",  Qsim, Qobs)  
 # append_group(by = "day")
 ```
 
@@ -52,7 +52,7 @@ fig.cap <- "Figure 10.xxxx: Time series showing the benchmark and human-influenc
 
 plot_df <- guadiana_full %>%	
 	mutate(jdate = yday(time)) %>% 
-	#select(-time) %>% 
+	#dplyr::select(-time) %>% 
 	pivot_longer(cols = c("benchmark", "influenced"))	 %>%
 	rename(facet = name) %>%
 	mutate(line = facet) %>%
@@ -125,7 +125,7 @@ p
 
 # Calculate the benchmark drought indices
 
-Apply the benchmark threshold (Step 2) to identify drought events in the benchmark time series using the threshold level method (Section 5.4.1) for a selected period. Note that this time period can differ from the reference period used to calculate the benchmark threshold. In this example, we use the period 1981-2000, which equals the period with the main human intervention in the Upper Guadiana catchment. 
+Apply the benchmark threshold (Step 2) to identify drought events in the benchmark time series using the threshold level method (Section 5.4.1) for a dplyr::selected period. Note that this time period can differ from the reference period used to calculate the benchmark threshold. In this example, we use the period 1981-2000, which equals the period with the main human intervention in the Upper Guadiana catchment. 
 
 ```{r}
 # initialize empty list for events
@@ -171,13 +171,13 @@ fig.cap <- "Figure 10.xxxx: Benchmark (top) and human-influenced (bottom) flows 
 
 ### Create a dataframe of the threshold for each day
 thresh_plot <- guadiana_full %>%
-	select(time, year) %>%
+	dplyr::select(time, year) %>%
 	mutate(jdate = yday(time))
 
 plot_thresh <- thresh_plot %>%
 	mutate(line = "threshold", facet = "benchmark") %>%
 	bind_rows(thresh_plot %>% mutate(line = "threshold", facet = "influenced")) %>%
-	left_join(threshold %>% mutate(jdate = yday(day)) %>% select(-day), by = "jdate") %>%
+	left_join(threshold %>% mutate(jdate = yday(day)) %>% dplyr::select(-day), by = "jdate") %>%
 	mutate(source = line) %>%
 	rename(discharge = threshold)
 	

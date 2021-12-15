@@ -2,6 +2,7 @@
 
 ## Worked example 10.1: Quantifying the human influence on drought
 
+
 ```{r, echo = FALSE}
 library(tidyverse)
 library(hydroDrought)
@@ -74,7 +75,6 @@ p <- ggplot(plot_df, aes(x=time)) %>%
 ### Display figure (stored in variable p)
 p
 ```
-
 
 ### Threshold calculation
 
@@ -236,6 +236,8 @@ drought.char
 ```
 
 We find that the difference in mean duration is 236%, and in mean deficit volume it is 434%. To conclude, the mean duration of streamflow droughts in the Upper-Guadiana catchment has increased with about 236% and the mean deficit with 434% in the human-influenced situation compared to the naturalised situation.
+
+
 
 
 
