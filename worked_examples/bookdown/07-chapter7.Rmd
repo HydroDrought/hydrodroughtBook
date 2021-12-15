@@ -102,7 +102,7 @@ p <- ggplot(elbe_annual, aes(x=year)) %>%
 	+ scale_colour_manual(name = "", values = c("blue")) %>%
 	+ scale_fill_manual(name = "Interval (95%)", values = c("grey25", "grey83")) %>%
 	+ scale_x_continuous( name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
-	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~~(~m^3~s^-1)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
 	+ coord_cartesian(xlim=c(1869,2021), ylim = c(90,550), expand = FALSE) %>%
 	+ theme(legend.position=c(0.93,0.9), legend.spacing = unit(0.15, "cm")) %>%
 	+ guides(colour = guide_legend(title.position="top", title.hjust = 0.1, order = 1),
@@ -168,7 +168,7 @@ p <- ggplot(gota_annual, aes(x=year)) %>%
 	+ scale_colour_manual(name = "", values = c("blue")) %>%
 	+ scale_fill_manual(name = "Interval (95%)", values = c("grey25", "grey83")) %>%
 	+ scale_x_continuous( name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
-	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~~(~m^3~s^-1)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
 	+ coord_cartesian(xlim=c(1940,2021), ylim = c(-10,310), expand = FALSE) %>%
 	+ theme(legend.position=c(0.1,0.9), legend.spacing = unit(0.15, "cm")) %>%
 	+ guides(colour = guide_legend(title.position="top", title.hjust = 0.1, order = 1),
@@ -188,9 +188,10 @@ p <- ggplot(gota_annual, aes(x=year, y=resid)) %>%
 	+ geom_hline(yintercept=0, linetype="dashed", color = "grey50") %>%
 	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
 	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
-	+ scale_y_continuous(name=bquote('OLS Trend Residual'~(m^3/s)), labels = scales::comma) ## Set the y-axis title and add commas to values
+	+ scale_y_continuous(name=bquote('OLS Trend Residual'~~(~m^3~s^-1)), labels = scales::comma) ## Set the y-axis title and add commas to values
 p
 ```
+
 
 ## Worked Example 7.2: Non Parametric Trends
 
@@ -276,7 +277,7 @@ p <- ggplot(flow_annual_subset, aes(x=year, y=min_m3s)) %>%
 	+ scale_colour_brewer(name="Model", type="qual", palette="Set2")  %>%  ### Set colors, use color-deficient friendly palette
 	+ scale_linetype_manual(name="Model", values=c("longdash","solid"))  %>%   ### Set linetypes
 	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
-	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~~(~m^3~s^-1)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
 	+ theme(legend.position = c(0.25, 0.9))   ## Move legend to inside figure, upper left
 p
 
@@ -333,7 +334,7 @@ p <- ggplot(flow_annual_longer, aes(x=year, y=min_m3s)) %>%
 	+ scale_colour_brewer(name="Model", type="qual", palette="Set2")  %>%  ### Set colors, use color-deficient friendly palette
 	+ scale_linetype_manual(name="Model", values=c("longdash","solid"))  %>%   ### Set linetypes
 	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
-	+ scale_y_continuous(name = bquote('Annual Min Flow'~(m^3/s)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
+	+ scale_y_continuous(name = bquote('Annual Min Flow'~~(~m^3~s^-1)), labels = scales::comma) %>% ## Set the y-axis title and add commas to values
 	+ theme(legend.position = c(0.25, 0.9))   ## Move legend to inside figure, upper left
 p
 ```
@@ -376,7 +377,7 @@ p <- ggplot(flow_df, aes(x=time, y=discharge)) %>%
 	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
 	+ scale_x_date(name = "Year", breaks = date_breaks, date_labels = "%Y") %>%
 	#+ scale_x_continuous(name="Date", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
-	+ scale_y_continuous(name = bquote('Daily Discharge'~(m^3/s)), labels = scales::comma) 
+	+ scale_y_continuous(name = bquote('Daily Discharge'~~(~m^3~s^-1)), labels = scales::comma) 
 p
 ```
 
@@ -403,7 +404,7 @@ p <- ggplot(flow_annual, aes(x=year, y=min_m3s)) %>%
 	+ geom_point(alpha = 0.5, colour = "black") %>%
 	+ theme_classic() %>%  ## Use the classic theme (vertical and horizontal axes)
 	+ scale_x_continuous(name="Year", breaks=seq(0,3000,10)) %>%   ## Set the x-axis title and style to be years with breaks every 10 years
-	+ scale_y_continuous(name = bquote('Annual Minimum Discharge'~(m^3/s)), labels = scales::comma) 
+	+ scale_y_continuous(name = bquote('Annual Minimum Discharge'~~(~m^3~s^-1)), labels = scales::comma) 
 p
 ```
 
@@ -454,7 +455,7 @@ fig.cap <- "Figure 7.14: Candidate models for Chow Breakpoint Test. Null model (
 ```
 
 ```{r, echo=FALSE, fig.cap=fig.cap}
-plot(flow_annual_ts[,"min_m3s"], xlab="Date", ylab="Annual Minimum Flow (m3s)")
+plot(flow_annual_ts[,"min_m3s"], xlab="Date", ylab=expression(Annual~Minimum~Flow~(m^5~s^-1)))
 lines(ts(fitted(fm0), start = first_year), col = 3)
 lines(ts(fitted(fm1), start = first_year), col = 4)
 ### Add a line for breakpoint
@@ -462,6 +463,7 @@ lines(bp_int_only)
 ### Add confidence interval around breakpoint
 lines(ci_int_only)
 ```
+
 
 To test the possibility of additional breakpoints, we introduce more complex models with 2-5 breakpoints (Bai and Perron, 2003; Zeileis et al. 2003). However, adding these breaks did not significantly decrease the model residuals, pointing to the presence of a single breakpoint.
 
@@ -633,8 +635,8 @@ p1 <- ggplot(plot_points, aes(x=ALPHA_star, y=`Q95/Q50_star`)) %>%
 	+ geom_line(data = plot_line, aes(x=ALPHA_star, y=second_var, group=group), colour = "blue") %>%
 	+ geom_text_repel(aes(label = station), vjust=-1, size = 3, colour = "grey40", alpha =0.8)  %>%
 	+ geom_text_repel(data = plot_line %>% filter(ALPHA_star !=0), aes(label = group, x=ALPHA_star, y=second_var ),  vjust=-1, colour = "blue") %>%
-	+ scale_x_continuous(name="ALPHA*") %>%
-	+ scale_y_continuous(name ="Q95/Q50*") %>%
+	+ scale_x_continuous(name="ALPHA") %>%
+	+ scale_y_continuous(name ="Q95/Q50") %>%
 	+ coord_fixed(ratio=1, xlim=c(-2.5,2.5), ylim=c(-2.5,2.5))
 ```
 ```{r}

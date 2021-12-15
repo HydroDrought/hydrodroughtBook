@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Worked example 5.3: No-flow indices</title>
+
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
+<link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
+<link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Worked example 5.3: No-flow indices</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#loading-the-data"><span class="toc-section-number">1</span> Loading the Data</a></li>
+<li><a href="#finding-intermittent-rivers"><span class="toc-section-number">2</span> Finding intermittent rivers</a></li>
+<li><a href="#computing-indices"><span class="toc-section-number">3</span> Computing indices</a></li>
+<li><a href="#visualising-streamflow-permanence"><span class="toc-section-number">4</span> Visualising streamflow permanence</a></li>
+</ul>
+</div>
+
+<div id="loading-the-data" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Loading the Data</h1>
+<p>In this example we use river flow data from the rivers of the International Data Set in the package <strong>hydroDrought</strong> that are classified as intermittent or ephemeral. The dataset becomes accessible by loading the <strong>hydroDrought</strong> package.</p>
+<pre class="r"><code>library(hydroDrought)
+library(tidyverse)
+
+rivers &lt;- international %&gt;%
+  select(river, data) </code></pre>
+</div>
+<div id="finding-intermittent-rivers" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Finding intermittent rivers</h1>
+<p>A river is defined as intermittent or ephemeral if the river flow is below a threshold of 0.001m<sup>3</sup>s<sup>-1</sup> at least for 5 days each year. Six rivers in the International Dataset fulfil the criteria: Sabar at Alfartanejo and Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US). If the first and/or last year in the time series contain missing values, these years are removed. Only years without missing values are included in the analysis.</p>
+<pre class="r"><code>intermittent &lt;- rivers %&gt;%
+  mutate(
+    is.intermittent = map_lgl(data, ~is_intermittent(.x$time, .x$discharge))
+  ) %&gt;% 
+  filter(is.intermittent) %&gt;%
+  mutate(
+    clipped = map(data, remove_incomplete_first_last),
+  ) </code></pre>
+</div>
+<div id="computing-indices" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Computing indices</h1>
+<p>The following indices are calculated and included in the table below:</p>
+<ul>
+<li><p><code>frac nf years</code>: the proportion of no-flow years, defined as the number of years with no-flow occurrence divided by the total number of years in the time series;</p></li>
+<li><p><code>MAN</code>: the mean annual number of no-flow days;</p></li>
+<li><p><code>CVAN</code>: the coefficient of variation of no-flow days</p></li>
+<li><p><code>no flow days</code>: the number of days without flow for each year of the time series. This is list of integer values corresponing to the number of years in the record.</p></li>
+<li><p><code>MAMD</code>: the mean annual maximum no-flow spell duration;</p></li>
+<li><p><code>onset</code>: arithmetic mean of the date the first annual no-flow spell starts (using circular statistics).</p></li>
+<li><p><code>sd onset</code>: standard deviation of the date the first annual no-flow spell starts (using circular statistics).</p></li>
+<li><p><code>term.</code>: arithmetic mean of the date the first no-flow spell ends (using circular statistics)</p></li>
+</ul>
+<pre class="r"><code>f &lt;- list(&quot;frac nf years&quot; = no_flow_years ,
+          &quot;MAN&quot; = MAN, &quot;CVAN&quot; = CVAN, &quot;no flow days&quot; = FAN,
+          &quot;MAMD&quot; = MAMD,
+          &quot;onset&quot; = tau0, &quot;sd onset&quot; = tau0r, &quot;term.&quot; = tauE)
+
+metrics &lt;- intermittent %&gt;%
+  transmute(
+    river,
+    metrics = map(clipped, ~map(f, exec, time = .x$time, flow = .x$discharge))
+  ) %&gt;%
+  unnest_wider(metrics)</code></pre>
+<p><label for="tufte-mn-1" class="margin-toggle">⊕</label><input type="checkbox" id="tufte-mn-1" class="margin-toggle"><span class="marginnote">Table 5.xx. No-flow indices for rivers Sabar at Alfartanejo, Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US)</span></p>
+<pre><code>## # A tibble: 6 x 9
+##   river          `frac nf years`    MAN    CVAN `no flow days`   MAMD  onset `sd onset`  term.
+##   &lt;chr&gt;                    &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;          &lt;dbl&gt; &lt;date&gt;      &lt;dbl&gt; &lt;date&gt;
+## 1 Sabar                    1     185.   0.239   &lt;int [29]&gt;     168.   -05-12       60.0 -11-29
+## 2 Upper Guadiana           0.116   8.12 3.26    &lt;int [40]&gt;       8.12 -08-12       25.8 -10-14
+## 3 Dawib                    1     361.   0.00830 &lt;int [6]&gt;      298.   -01-01        0   -01-27
+## 4 Elands                   0.214  14.4  1.83    &lt;int [9]&gt;        7.89 -08-22       83.6 -09-04
+## 5 Ray                      0.945  98.2  0.576   &lt;int [46]&gt;      40.2  -05-14       52.8 -05-20
+## 6 Arroyo Seco              0.441  39.0  1.33    &lt;int [118]&gt;     38.3  -07-30       24.7 -10-24</code></pre>
+</div>
+<div id="visualising-streamflow-permanence" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Visualising streamflow permanence</h1>
+<pre class="r"><code>spells &lt;- intermittent %&gt;%
+  mutate(
+    spells = map(clipped, ~ires_metric(.x$time, .x$discharge, na = &quot;drop_year&quot;))
+  ) %&gt;%
+  select(river, spells) %&gt;%
+  unnest(spells) %&gt;%
+  mutate(
+    year = water_year(time),
+    day = monthDay(time)
+  ) 
+
+onoff &lt;- metrics %&gt;%
+  select(river, &quot;mean onset&quot; = onset, &quot;mean termination&quot; = `term.`) %&gt;%
+  pivot_longer(-river, names_to = &quot;Timing&quot;)
+
+ggplot(spells, aes(monthDay(time), year, fill = state)) +
+  geom_tile() +
+  geom_vline(data = onoff, aes(xintercept = value, linetype = Timing), 
+             col = &quot;red&quot;, size = 0.2) + 
+  scale_x_month(expand = expansion(), nletters = 1) +
+  scale_y_continuous(expand = expansion(), breaks = breaks_integer()) +
+  scale_fill_manual(&quot;Spell&quot;, values = c(&quot;no-flow&quot; = &quot;grey80&quot;, &quot;flow&quot; = &quot;grey60&quot;, 
+                                        &quot;no-data&quot; = &quot;NA&quot;), 
+                    drop = FALSE) +
+  facet_wrap(vars(river), scales = &quot;free_y&quot;) +
+  guides(fill = guide_legend(override.aes = list(col = 1))) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor.x = element_line(colour = &quot;black&quot;, size = 0.1),
+        panel.grid.minor.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.ontop = TRUE,
+        panel.background = element_rect(fill = NA),
+        axis.title = element_blank())</code></pre>
+<div class="figure">
+<p class="caption marginnote shownote">
+Figure 5.xx Streamflow permanence for rivers Sabar at Alfartanejo, Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US)
+</p>
+<img src="5-3_no_flow_indices_files/figure-html/unnamed-chunk-7-1.png" alt="Figure 5.xx Streamflow permanence for rivers Sabar at Alfartanejo,  Upper Guadiana at site 4008 in Spain, Dawib (Namibia), Elands at Elands River Drift (South Africa), Ray at Grednon underwood (UK) and Arroyo Seco at Soledad (US)" width="672"  />
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

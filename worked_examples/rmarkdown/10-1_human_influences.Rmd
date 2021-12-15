@@ -1,5 +1,5 @@
 ---
-title: "Quantifying effect of human influences"
+title: "Quantifying the human influence on drought"
 author: "Worked example 10.1"
 ---
 
@@ -12,116 +12,120 @@ select <- dplyr::select
 ```{r, echo = FALSE}
 library(tidyverse)
 library(hydroDrought)
-# Let's pretend the data is already inside the package...
+# Load the data
 guadiana <- read_tsv("../../data/Guadiana_Delay_LogEff_including_Psim.txt") %>%
-  select(time = "date.yyyymmdd",  Qsim, Qobs)  # %>%
+  select(time = "date.yyyymmdd",  Qsim, Qobs)  
 # append_group(by = "day")
 ```
 
-
-If we want to quantify the human influence on hydrological drought by comparing two time series, one with and one without this human influence, we want to use the threshold of the **benchmark** time series to calculate droughts in both the **human-influenced** and **benchmark** time series. These are the steps that we will discuss in this Worked Example:
-
-1) Calculate the threshold from the **benchmark** time series
-
-2) Calculate drought characteristics for the **benchmark** time series, using the **benchmark** threshold ^[Tobias: As you are always using the benchmark threshold I suggest to omit the last part of the sentence.]
-
-3) Calculate drought characteristics for the **human-influenced** time series, using the **benchmark** threshold
-
-4) Compare drought characteristics between the **benchmark** & **human-influenced** time series
-
+A comparison of two time series from the Upper-Guadiana catchment, one with and one without human influence, is done to demonstrate the catchment-scale observation-based methods to quantify the human influence on hydrological drought (Section 10.4.1; Fig. 10.6). These time series can be calculated from a paired catchment analysis, an upstream-downstream comparison, observed-naturalised comparison, or pre-post disturbance analysis (Section 10.4.1). In this example, we use the observed-naturalised approach. 
 
 # Loading the data
 
-As an example we here use the Upper-Guadiana dataset with the two time series: the **benchmark** time series and the **human-influenced** time series. 
+We begin by loading the two time series from the Upper-Guadiana dataset: the benchmark (natural) time series and the human-influenced time series.
 
 ```{r}
 library(tidyverse)
 library(lubridate)
 library(hydroDrought)
 
-print(guadiana)
-range(guadiana$time)
+### Filter to the period 1960-2000 
+### Rename the columns
+### Calculate the water year
+guadiana_full <- guadiana %>%
+	dplyr::select(time, benchmark = Qsim, influenced = Qobs) %>%
+  	mutate(
+    	year = water_year(time)
+	) %>%
+	filter(year >= 1960,  year <= 2000) 
+
+print(guadiana_full)
+range(guadiana_full$time)
 ```
 
-^[Tobias: To simplify the code, should we subset the included dataset to the period of 1960-2000? Data outside this period is not used, as far as I can see...]
+The benchmark time series is simulated as described in Section 9.3.3. In this case, the observed time series from the Upper-Guadiana catchment is the human-influenced time series (Section 4.5.X).
 
-The **benchmark** time series comprises the uninfluenced, naturalized discharge $Q_{sim}$. Note that **benchmark** time series can be calculated from a paired catchment analysis (Sect. XX), an upstream-downstream comparison (Sect. XX), model naturalisation (Sect. XX), or pre-post disturbance analysis (Sect. XX). The **benchmark** time series for this catchment are modeled as described in Sect. XX.
 
-```{r}
-benchmark <- guadiana %>%
-  select(time, discharge = Qsim) %>%
-  mutate(
-    year = water_year(time)
-  ) %>%
-  print()
+
+```{r, echo=FALSE}
+fig.cap <- "Figure 10.xxxx: Time series showing the benchmark and human-influenced time series. Discharge is plotted on a log scale to emphasize low flow behavior. The grey region shows the comparison period for human influence (1981-2000)."
+
+plot_df <- guadiana_full %>%	
+	mutate(jdate = yday(time)) %>% 
+	#select(-time) %>% 
+	pivot_longer(cols = c("benchmark", "influenced"))	 %>%
+	rename(facet = name) %>%
+	mutate(line = facet) %>%
+	mutate(line = factor(line, levels = c("thresh_basis", "benchmark", "influenced"), labels = c("Threshold\nBasis", "Benchmark", "Human\nInfluenced"))) %>%
+	mutate(facet = factor(facet, levels = c("thresh_basis", "benchmark", "influenced"), labels = c("Threshold Basis", "Benchmark", "Influenced"))) %>%
+	mutate(label = "Threshold")
+
 ```
 
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot the 1960-2000 timee series
+p <- ggplot(plot_df, aes(x=time)) %>%
+	 + geom_rect(aes(xmin=as.Date("1980-01-01"), xmax= as.Date("2000-12-31"), ymin=0, ymax=Inf), fill = "grey90", alpha = 0.2) %>% 
+	 + geom_line(aes( y=value, colour = line)) %>%
+	#+ geom_line(aes(y = threshold), colour = "grey20") %>%
+	 + geom_vline(xintercept = c(as.Date("1981-01-01"), as.Date("2000-12-31")), linetype = "dashed", size = 0.5, colour = "grey30") %>%
+	+ scale_colour_manual(name = "", values = c("black", "#377eb8"), limits = c("Benchmark", "Human\nInfluenced")) %>%
+	+ facet_grid(facet~.) %>%
+	+  scale_y_log10(name = "Discharge (mm/day)",
+		breaks = scales::trans_breaks("log10", function(x) 10^x),
+		labels = scales::trans_format("log10", scales::math_format(10^.x))
+	) %>%
+	+ annotation_logticks(sides = "lr") %>%
+	+ theme(panel.grid.minor = element_blank())	 
 
-
-The **human-influenced** time series is basically the time series of observed discharge $Q_{obs}$ from the Upper-Guadiana catchment. 
-
-```{r}
-influenced <- guadiana %>%
-  select(time, discharge = Qobs) %>%
-  mutate(
-    year = water_year(time)
-  ) %>%print()
+### Display figure (stored in variable p)
+p
 ```
-
 
 # Threshold calculation
 
-Here we are taking the `benchmark` time series. First we are smoothing the column `discharge` with a 30-day moving average. The threshold itself is calculated as a daily varying $Q_{95}$ yielding a dataset with a row for each day of the year and the appropriate $Q_{95}$ in the column named `threshold`. 
+In this example we use a daily varying threshold, the Q80, calculated based on a smoothed 30-day moving average series over the period 1960-2000. The threshold is derived based on the benchmark time series.
 
 ```{r}
-threshold <- benchmark %>%
-  # applying a 30-day moving average smoother
-  mutate(discharge = moving_average(discharge, n = 30, sides = "center")) %>%
-  
-  # the following line could be obsolete
-  filter(year >= 1960,  year <= 2000) %>%
-  
-  # computing the Q95 for each day of the year
-  var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.95) 
+### First apply a 30-day moving average smoother
+### Then compute the Q80 for each day of the year
+threshold <- guadiana_full %>%
+  mutate(discharge = moving_average(benchmark, n = 30, sides = "center")) %>%
+  var_threshold(vary.by = "day", fun = lfquantile, exc.freq = 0.80) 
 
 print(threshold)
 ```
 
-^[Tobias: These plots are just to show data coverage and the handling of leap-years. If you want to have some of them in the Worked Example should print the code producing them. ]
+
 
 ```{r, echo=FALSE}
-p1 <- benchmark %>%
-  filter(is.finite(discharge)) %>%
-  plot_coverage() + 
-  theme(legend.position = "top")
+fig.cap <- "Figure 10.xxxx: Benchmark discharge for the period 1960-2000 showing seasonality, with each line representing a year. The smoothed Q80 threshold is shown in bold red."
 
-# p1 <- benchmark %>%
-#   mutate(
-#     day = group_ts(time = time, by = "day")
-#   ) %>%
-#   left_join(threshold, by = "day") %>%
-#   
-#   ggplot(aes(x = day, y = year, fill = threshold)) + 
-#   geom_tile() + 
-#   scale_fill_viridis_c() + 
-#   scale_x_date(date_breaks = "1 months", date_labels = "%b") + 
-#   theme(legend.position = "top", 
-#         axis.title.x = element_blank())
+### Add julian dates and a plot date
+plot_df <- guadiana_full %>%
+	mutate(jdate = yday(time)) %>%
+	mutate(plot_date = as.Date(paste0("2000-01-01"))+jdate - 1)
 
-p2 <- ggplot(data = threshold, aes(x = day, y = threshold)) + 
-  geom_step() + 
-  scale_x_date(date_breaks = "1 months", date_labels = "%b", 
-               expand = expansion()) + 
-  theme(axis.title.x = element_blank())
-
-cowplot::plot_grid(p1, p2, align = "hv", axis = c("l", "r"), 
-                   ncol = 1, rel_heights = c(5, 2))
+plot_thresh <- threshold %>% 
+	mutate(jdate = yday(day)) %>%
+	mutate(plot_date = as.Date(paste0("2000-01-01"))+jdate - 1)
 ```
 
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot the threshold against flows
+p <- ggplot(plot_df, aes(x=plot_date)) + 
+	geom_line(aes(group=year, y=benchmark), alpha = 0.2) + 
+	geom_line(data = plot_thresh, aes(y=threshold), colour="red", size = 2) + 
+ 	scale_x_date(date_labels = "%b")+
+	scale_y_continuous()
 
-# Benchmark Drought characteristics
+### Display figure (stored in variable p)
+p
+```
 
-^[Tobias: I think this Worked Example could be easier to follow if we fist compute the drought events for both time series and in a separate section the drought characteristics. So section 2 could become "Drought Events", Section 3 "Drought Characteristics".]
+# Calculate the benchmark drought indices
+
+Apply the benchmark threshold (Step 2) to identify drought events in the benchmark time series using the threshold level method (Section 5.4.1) for a selected period. Note that this time period can differ from the reference period used to calculate the benchmark threshold. In this example, we use the period 1981-2000, which equals the period with the main human intervention in the Upper Guadiana catchment. 
 
 ```{r}
 # initialize empty list for events
@@ -136,13 +140,15 @@ summarize_dc <- function(x) {
     "mean.deficit" = mean(x$volume))
 }
 ```
-
-Periods with discharges below the before calculated threshold are considered drought events.   Consecutive drought events with an inter-event time of less than or equal to 10 days (argument `min.duration = 10`) get pooled into single drought event regardless of their inter-event excess volume (argument `min.vol.ratio = Inf`). To get rid of minor droughts, only drought events with a duration of more than 10 days are kept. 
+Consecutive drought events with an inter-event time less than or equal to 10 days are pooled into a single drought event. To remove minor droughts, only drought events with a duration of more than 10 days are kept. The resultant drought indices of the naturalised benchmark time series are: (a) mean duration 91 days, and (b) mean deficit volume 58,000 mm.
 
 ```{r}
-# calculate the drought events for the benchmark time series
-events$benchmark <- benchmark %>%
+### Calculate the drought events for the benchmark time series
+### Filter to 1981-2000
+### use the benchmark column as discharge
+events$benchmark <- guadiana_full %>%
   filter(year >= 1981, year <= 2000) %>%
+  rename(discharge = benchmark) %>%
   drought_events(
     threshold = threshold,
     pooling = "inter-event",
@@ -152,47 +158,65 @@ events$benchmark <- benchmark %>%
 
 # calculate the drought characteristics for the benchmark time series
 drought.char$benchmark <- summarize_dc(events$benchmark)
-```
 
-
-For the Upper-Guadiana, these would be the drought events of the **benchmark** time series. Events numbers that are missing in the sequence are minor drought events that have been filtered out.
-```{r}
 print(events$benchmark)
 ```
 
+# Calculate the human-influenced drought indices
 
+Apply the benchmark threshold (Step 2) to identify drought events in the human-influenced time series. Note that we are using the same period (1981-2000) as was used to derive drought indices for the benchmark time series. Furthermore, we are applying the same inter-event criterion and exclusion of minor drought events (Step 3). The resultant drought indices of the human-influenced time series are: (a) mean duration 304 days, and (b) mean deficit volume 310,000 mm
 
-# Human-influenced drought characteristics 
+```{r, echo=FALSE}
+fig.cap <- "Figure 10.xxxx: Benchmark (top) and human-influenced (bottom) flows during the comparison period 1981-2000. The smoothed Q80 threshold is shown in red. Discharge is plotted on a log scale to emphasize low flow behavior."
 
-Extent the **benchmark** threshold calculated in step 1 to the period of the **human-influenced** time series. Note that this can be a different time period than was used to calculate the **benchmark** threshold (for example, for Upper-Guadiana, we are using the period 1981-2000).^[Tobias: this paragraph doesn't make sense here. This is probably my fault but I think you don't need it at all.]
+### Create a dataframe of the threshold for each day
+thresh_plot <- guadiana_full %>%
+	select(time, year) %>%
+	mutate(jdate = yday(time))
 
-
-^[Tobias: These plots just explain why I used the Q95. With Q80 the droughts would not terminate within a year. Again: if you want to keep one or all of these plots we should show the code producing them. ]
-
-```{r, warning=FALSE, echo=FALSE, fig.width=8, fig.height=10}
-infl <- influenced %>%
-  mutate(
-    day = group_ts(time = time, by = "day")
-  ) %>%
-  filter(year >= 1991 & year <= 2000) %>%
-  left_join(threshold, by = "day")
-
-infl %>%
-  ggplot() + 
-  geom_line(aes(x = time, y = discharge)) + 
-  geom_step(aes(x = time, y = threshold), 
-            linetype = "dashed", size = 0.2, col = "red") + 
-  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
-  scale_y_log10() +
-  facet_wrap(~year, scales = "free_x", ncol = 1, strip.position = "right")
+plot_thresh <- thresh_plot %>%
+	mutate(line = "threshold", facet = "benchmark") %>%
+	bind_rows(thresh_plot %>% mutate(line = "threshold", facet = "influenced")) %>%
+	left_join(threshold %>% mutate(jdate = yday(day)) %>% select(-day), by = "jdate") %>%
+	mutate(source = line) %>%
+	rename(discharge = threshold)
+	
+### Merge discharge with the threshold and create columns for plotting
+plot_df <- guadiana_full %>%
+	pivot_longer(cols = c("benchmark", "influenced"), names_to = "source", values_to  = "discharge") %>%
+	mutate(jdate = yday(time), year = year (time)) %>%
+	mutate(line = source) %>%
+	mutate(facet = source) %>%
+	bind_rows(plot_thresh) %>%
+	mutate(line = factor(line, levels = c("benchmark", "influenced", "threshold"), labels = c("Benchmark", "Human\nInfluenced", "Threshold"))) %>%
+	mutate(facet = factor(facet, levels = c("benchmark", "influenced", "threshold"), labels = c("Benchmark", "Human\nInfluenced", "Threshold"))) %>%
+	mutate(plot_date = as.Date(paste0("2000-01-01"))+jdate - 1)
 ```
 
+```{r, echo=FALSE, fig.cap=fig.cap}
+### Plot flow with time relative to the threshold
+p <- ggplot(plot_df, aes(x=time)) %>%
+	+ geom_line(aes( y=discharge, colour = line)) %>%
+	+ facet_grid(facet~.) %>%
+	+ scale_colour_manual(name = "", values = c("black", "#377eb8", "red"), limits = c("Benchmark", "Human\nInfluenced", "Threshold")) %>%
+	+ scale_x_date(name = "Date", date_labels = "%Y") %>%
+	+  scale_y_log10(name = "Discharge (mm/day)") %>%
+	+ annotation_logticks(sides = "lr") %>%
+	+ theme(panel.grid.minor = element_blank())	%>%
+	+ coord_cartesian(xlim=c(as.Date("1981-01-01"), as.Date("2001-01-01"))) %>%
+	+ theme(legend.position="bottom")
 
+### Display figure (stored in variable p)
+p
+```
 
 ```{r}
-# calculate the drought events for the human influenced time series
-events$influenced <- influenced %>%
-  filter(year >= 1991 & year <= 2000) %>%
+### Calculate the drought events for the benchmark time series
+### Filter to 1981-2000
+### use the influenced column as discharge
+events$influenced <- guadiana_full %>%
+  filter(year >= 1981 & year <= 2000) %>%
+   rename(discharge = influenced) %>% 
   drought_events(threshold = threshold,
                  pooling = "inter-event",
                  pooling.pars = list(min.duration = 10, min.vol.ratio = Inf))  %>%
@@ -203,22 +227,20 @@ drought.char$influenced <- summarize_dc(events$influenced)
 ```
 
 
-
 # Comparison of drought characteristics    
+In this final step, we compare the drought indices between the benchmark and human-influenced time series. We calculate the percentage difference between the two sets of drought indices, $\Delta DC$ :
 
-For the Upper-Guadiana, these would be the drought characteristics:
+$$\Delta DC = \frac{DC_{HI} - DC_{BM}}{DC_{BM}} \cdot 100$$
+
+where $\Delta DC$ is the percentage difference in drought index (DC) between the human-influenced ($DC_{HI}$) and benchmark ($DC_{BM}$) time series
+
 ```{r}
 drought.char
 ```
-
-
-Calculate the percentage difference between the **benchmark** and **human-influenced** drought characteristics.
-
-$$\Delta DC = \frac{DCHI - DCBM}{DCBM} \cdot 100$$
-where $\Delta DC$ is the percentage change in drought characteristics ($DC$) between the **human-influenced** ($DCHI$) and **benchmark** ($DCBM$) time series.
-For the Upper-Guadiana, these would be the differences in drought characteristics:
-
 ```{r}
 (drought.char$influenced - drought.char$benchmark) / drought.char$benchmark * 100
 ```
+
+We find that the difference in mean duration is 236%, and in mean deficit volume it is 434%. To conclude, the mean duration of streamflow droughts in the Upper-Guadiana catchment has increased with about 236% and the mean deficit with 434% in the human-influenced situation compared to the naturalised situation.
+
 

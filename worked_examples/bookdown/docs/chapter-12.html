@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 12 | Hydrological Drought (2nd Edition)</title>
+  <title>6 Chapter 12 | Hydrological Drought (2nd Edition)</title>
   <meta name="description" content="Worked examples for Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (2nd Edition)" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 12 | Hydrological Drought (2nd Edition)" />
+  <meta property="og:title" content="6 Chapter 12 | Hydrological Drought (2nd Edition)" />
   <meta property="og:type" content="book" />
   <meta property="og:url" content="https://github.com/jstagge/hydroDrought/docs" />
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 12 | Hydrological Drought (2nd Edition)" />
+  <meta name="twitter:title" content="6 Chapter 12 | Hydrological Drought (2nd Edition)" />
   
   <meta name="twitter:description" content="Worked examples for Hydrologic Drought: Processes and Estimation Methods for Streamflow and Groundwater (2nd Edition)" />
   
@@ -30,7 +30,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="chapter-10.html"/>
+<link rel="prev" href="loading-the-data-10.html"/>
 <link rel="next" href="chapter-13.html"/>
 <script src="libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
@@ -85,38 +85,39 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  background-color: #f8f8f8; }
+  {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ef2929; } /* Alert */
-code span.an { color: #8f5902; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #c4a000; } /* Attribute */
-code span.bn { color: #0000cf; } /* BaseN */
-code span.cf { color: #204a87; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4e9a06; } /* Char */
-code span.cn { color: #000000; } /* Constant */
-code span.co { color: #8f5902; font-style: italic; } /* Comment */
-code span.cv { color: #8f5902; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #8f5902; font-weight: bold; font-style: italic; } /* Documentation */
-code span.dt { color: #204a87; } /* DataType */
-code span.dv { color: #0000cf; } /* DecVal */
-code span.er { color: #a40000; font-weight: bold; } /* Error */
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
-code span.fl { color: #0000cf; } /* Float */
-code span.fu { color: #000000; } /* Function */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
 code span.im { } /* Import */
-code span.in { color: #8f5902; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #204a87; font-weight: bold; } /* Keyword */
-code span.op { color: #ce5c00; font-weight: bold; } /* Operator */
-code span.ot { color: #8f5902; } /* Other */
-code span.pp { color: #8f5902; font-style: italic; } /* Preprocessor */
-code span.sc { color: #000000; } /* SpecialChar */
-code span.ss { color: #4e9a06; } /* SpecialString */
-code span.st { color: #4e9a06; } /* String */
-code span.va { color: #000000; } /* Variable */
-code span.vs { color: #4e9a06; } /* VerbatimString */
-code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warning */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 </head>
@@ -131,152 +132,145 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><b><a href="./">Hydrologic Drought </a></b>2nd Edition</li>
-<a href="./">Tallaksen and van Lanen (2021) </a>
-
-<li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html"><i class="fa fa-check"></i>Chapter 5</a>
+<li class="chapter" data-level="1" data-path="chapter-5.html"><a href="chapter-5.html"><i class="fa fa-check"></i><b>1</b> Chapter 5</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.1-flow-duration-curve"><i class="fa fa-check"></i>Worked Example 5.1: Flow Duration Curve</a>
+<li class="chapter" data-level="1.1" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.1-flow-duration-curve"><i class="fa fa-check"></i><b>1.1</b> Worked Example 5.1: Flow Duration Curve</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-of-the-fdc"><i class="fa fa-check"></i>Calculation of the FDC</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#plot-of-the-fdc"><i class="fa fa-check"></i>Plot of the FDC</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#selected-exceedance-values"><i class="fa fa-check"></i>Selected exceedance values</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track"><i class="fa fa-check"></i>Fast-Track</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#standardized-flow-duration-curves"><i class="fa fa-check"></i>Standardized Flow Duration Curves</a></li>
+<li class="chapter" data-level="1.1.1" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data"><i class="fa fa-check"></i><b>1.1.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="1.1.2" data-path="chapter-5.html"><a href="chapter-5.html#calculation-of-the-fdc"><i class="fa fa-check"></i><b>1.1.2</b> Calculation of the FDC</a></li>
+<li class="chapter" data-level="1.1.3" data-path="chapter-5.html"><a href="chapter-5.html#plot-of-the-fdc"><i class="fa fa-check"></i><b>1.1.3</b> Plot of the FDC</a></li>
+<li class="chapter" data-level="1.1.4" data-path="chapter-5.html"><a href="chapter-5.html#selected-exceedance-values"><i class="fa fa-check"></i><b>1.1.4</b> Selected exceedance values</a></li>
+<li class="chapter" data-level="1.1.5" data-path="chapter-5.html"><a href="chapter-5.html#fast-track"><i class="fa fa-check"></i><b>1.1.5</b> Fast-Track</a></li>
+<li class="chapter" data-level="1.1.6" data-path="chapter-5.html"><a href="chapter-5.html#standardized-flow-duration-curves"><i class="fa fa-check"></i><b>1.1.6</b> Standardized Flow Duration Curves</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.2-mean-annual-minimum-n-day-flow"><i class="fa fa-check"></i>Worked example 5.2: Mean annual minimum n-day flow</a>
+<li class="chapter" data-level="1.2" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.2-mean-annual-minimum-n-day-flow"><i class="fa fa-check"></i><b>1.2</b> Worked example 5.2: Mean annual minimum n-day flow</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-1"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation"><i class="fa fa-check"></i>Calculation</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-1"><i class="fa fa-check"></i>Fast Track</a></li>
+<li class="chapter" data-level="1.2.1" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-1"><i class="fa fa-check"></i><b>1.2.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="1.2.2" data-path="chapter-5.html"><a href="chapter-5.html#calculation"><i class="fa fa-check"></i><b>1.2.2</b> Calculation</a></li>
+<li class="chapter" data-level="1.2.3" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-1"><i class="fa fa-check"></i><b>1.2.3</b> Fast Track</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.3-base-flow-index"><i class="fa fa-check"></i>Worked Example 5.3: Base Flow Index</a>
+<li class="chapter" data-level="1.3" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.3-base-flow-index"><i class="fa fa-check"></i><b>1.3</b> Worked Example 5.3: Base Flow Index</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-2"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-1"><i class="fa fa-check"></i>Calculation</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#results"><i class="fa fa-check"></i>Results</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-2"><i class="fa fa-check"></i>Fast Track</a></li>
+<li class="chapter" data-level="1.3.1" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-2"><i class="fa fa-check"></i><b>1.3.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="1.3.2" data-path="chapter-5.html"><a href="chapter-5.html#calculation-1"><i class="fa fa-check"></i><b>1.3.2</b> Calculation</a></li>
+<li class="chapter" data-level="1.3.3" data-path="chapter-5.html"><a href="chapter-5.html#results"><i class="fa fa-check"></i><b>1.3.3</b> Results</a></li>
+<li class="chapter" data-level="1.3.4" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-2"><i class="fa fa-check"></i><b>1.3.4</b> Fast Track</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.4-threshold-level-method"><i class="fa fa-check"></i>Worked example 5.4: Threshold level method</a>
+<li class="chapter" data-level="1.4" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.4-threshold-level-method"><i class="fa fa-check"></i><b>1.4</b> Worked example 5.4: Threshold level method</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-3"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#missing-values"><i class="fa fa-check"></i>Missing values</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#threshold-selection-and-drought-events"><i class="fa fa-check"></i>Threshold selection and drought events</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#removing-minor-droughts-filtering"><i class="fa fa-check"></i>Removing minor droughts (Filtering)</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#eliminating-dependent-droughts-pooling"><i class="fa fa-check"></i>Eliminating dependent droughts (Pooling)</a></li>
+<li class="chapter" data-level="1.4.1" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-3"><i class="fa fa-check"></i><b>1.4.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="1.4.2" data-path="chapter-5.html"><a href="chapter-5.html#missing-values"><i class="fa fa-check"></i><b>1.4.2</b> Missing values</a></li>
+<li class="chapter" data-level="1.4.3" data-path="chapter-5.html"><a href="chapter-5.html#threshold-selection-and-drought-events"><i class="fa fa-check"></i><b>1.4.3</b> Threshold selection and drought events</a></li>
+<li class="chapter" data-level="1.4.4" data-path="chapter-5.html"><a href="chapter-5.html#removing-minor-droughts-filtering"><i class="fa fa-check"></i><b>1.4.4</b> Removing minor droughts (Filtering)</a></li>
+<li class="chapter" data-level="1.4.5" data-path="chapter-5.html"><a href="chapter-5.html#eliminating-dependent-droughts-pooling"><i class="fa fa-check"></i><b>1.4.5</b> Eliminating dependent droughts (Pooling)</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.5-sequent-peak-algorithm"><i class="fa fa-check"></i>Worked example 5.5: Sequent Peak Algorithm</a>
+<li class="chapter" data-level="1.5" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.5-sequent-peak-algorithm"><i class="fa fa-check"></i><b>1.5</b> Worked example 5.5: Sequent Peak Algorithm</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-4"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculation-2"><i class="fa fa-check"></i>Calculation</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#selection-of-the-drought-deficit-volume-and-duration"><i class="fa fa-check"></i>Selection of the drought deficit volume and duration</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#results-1"><i class="fa fa-check"></i>Results</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-3"><i class="fa fa-check"></i>Fast Track</a></li>
+<li class="chapter" data-level="1.5.1" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-4"><i class="fa fa-check"></i><b>1.5.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="1.5.2" data-path="chapter-5.html"><a href="chapter-5.html#calculation-2"><i class="fa fa-check"></i><b>1.5.2</b> Calculation</a></li>
+<li class="chapter" data-level="1.5.3" data-path="chapter-5.html"><a href="chapter-5.html#selection-of-the-drought-deficit-volume-and-duration"><i class="fa fa-check"></i><b>1.5.3</b> Selection of the drought deficit volume and duration</a></li>
+<li class="chapter" data-level="1.5.4" data-path="chapter-5.html"><a href="chapter-5.html#results-1"><i class="fa fa-check"></i><b>1.5.4</b> Results</a></li>
+<li class="chapter" data-level="1.5.5" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-3"><i class="fa fa-check"></i><b>1.5.5</b> Fast Track</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.6-example-of-how-to-estimate-sgi-using-data-from-stonor-park-uk"><i class="fa fa-check"></i>Worked example 5.6, Example of how to estimate SGI using data from Stonor Park, UK</a>
+<li class="chapter" data-level="1.6" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.6-example-of-how-to-estimate-sgi-using-data-from-stonor-park-uk"><i class="fa fa-check"></i><b>1.6</b> Worked example 5.6, Example of how to estimate SGI using data from Stonor Park, UK</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#load-the-data"><i class="fa fa-check"></i>Load the data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#create-a-regular-times-series-of-monthly-data"><i class="fa fa-check"></i>Create a regular times series of monthly data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#calculate-an-sgi-values"><i class="fa fa-check"></i>Calculate an SGI values</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-4"><i class="fa fa-check"></i>Fast-Track</a></li>
+<li class="chapter" data-level="1.6.1" data-path="chapter-5.html"><a href="chapter-5.html#load-the-data"><i class="fa fa-check"></i><b>1.6.1</b> Load the data</a></li>
+<li class="chapter" data-level="1.6.2" data-path="chapter-5.html"><a href="chapter-5.html#create-a-regular-times-series-of-monthly-data"><i class="fa fa-check"></i><b>1.6.2</b> Create a regular times series of monthly data</a></li>
+<li class="chapter" data-level="1.6.3" data-path="chapter-5.html"><a href="chapter-5.html#calculate-an-sgi-values"><i class="fa fa-check"></i><b>1.6.3</b> Calculate an SGI values</a></li>
+<li class="chapter" data-level="1.6.4" data-path="chapter-5.html"><a href="chapter-5.html#fast-track-4"><i class="fa fa-check"></i><b>1.6.4</b> Fast-Track</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.7-rank-and-correlation-coefficients"><i class="fa fa-check"></i>Worked example 5.7: Rank and correlation coefficients</a>
+<li class="chapter" data-level="1.7" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.7-rank-and-correlation-coefficients"><i class="fa fa-check"></i><b>1.7</b> Worked example 5.7: Rank and correlation coefficients</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-5"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#indices"><i class="fa fa-check"></i>Indices</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#ranks"><i class="fa fa-check"></i>Ranks</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#pearson-correlation"><i class="fa fa-check"></i>Pearson correlation</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#spearman-rank-correlation"><i class="fa fa-check"></i>Spearman (rank) correlation</a></li>
+<li class="chapter" data-level="1.7.1" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-5"><i class="fa fa-check"></i><b>1.7.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="1.7.2" data-path="chapter-5.html"><a href="chapter-5.html#indices"><i class="fa fa-check"></i><b>1.7.2</b> Indices</a></li>
+<li class="chapter" data-level="1.7.3" data-path="chapter-5.html"><a href="chapter-5.html#ranks"><i class="fa fa-check"></i><b>1.7.3</b> Ranks</a></li>
+<li class="chapter" data-level="1.7.4" data-path="chapter-5.html"><a href="chapter-5.html#pearson-correlation"><i class="fa fa-check"></i><b>1.7.4</b> Pearson correlation</a></li>
+<li class="chapter" data-level="1.7.5" data-path="chapter-5.html"><a href="chapter-5.html#spearman-rank-correlation"><i class="fa fa-check"></i><b>1.7.5</b> Spearman (rank) correlation</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.8-no-flow-indices"><i class="fa fa-check"></i>Worked example 5.8: No-flow indices</a>
+<li class="chapter" data-level="1.8" data-path="chapter-5.html"><a href="chapter-5.html#worked-example-5.8-no-flow-indices"><i class="fa fa-check"></i><b>1.8</b> Worked example 5.8: No-flow indices</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-6"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#finding-intermittent-rivers"><i class="fa fa-check"></i>Finding intermittent rivers</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#computing-metrics"><i class="fa fa-check"></i>Computing metrics</a></li>
-<li class="chapter" data-level="" data-path="chapter-5.html"><a href="chapter-5.html#visualising-streamflow-permanence-spells"><i class="fa fa-check"></i>Visualising streamflow permanence (spells)</a></li>
-</ul></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html"><i class="fa fa-check"></i>Chapter 6</a>
-<ul>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.1-low-flow-frequency-analysis"><i class="fa fa-check"></i>Worked Example 6.1: Low flow frequency analysis</a>
-<ul>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#loading-the-data-7"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-an-empirical-distribution-function"><i class="fa fa-check"></i>Derivation of an empirical distribution function</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#fitting-a-distribution"><i class="fa fa-check"></i>Fitting a distribution</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#estimation-of-t-year-events"><i class="fa fa-check"></i>Estimation of T-year events</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#ft"><i class="fa fa-check"></i>Fast Track</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#probability-plot-using-the-exponential-reduced-variate"><i class="fa fa-check"></i>Probability plot using the exponential reduced variate</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.2-drought-deficit-frequency-analysis"><i class="fa fa-check"></i>Worked Example 6.2: Drought deficit frequency analysis</a>
-<ul>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#data"><i class="fa fa-check"></i>Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-distribution-function"><i class="fa fa-check"></i>Derivation of distribution function</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#calculation-of-the-t-year-event"><i class="fa fa-check"></i>Calculation of the T-year event</a></li>
-<li class="chapter" data-level="" data-path="chapter-6.html"><a href="chapter-6.html#manual-computation"><i class="fa fa-check"></i>Manual computation</a></li>
+<li class="chapter" data-level="1.8.1" data-path="chapter-5.html"><a href="chapter-5.html#loading-the-data-6"><i class="fa fa-check"></i><b>1.8.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="1.8.2" data-path="chapter-5.html"><a href="chapter-5.html#finding-intermittent-rivers"><i class="fa fa-check"></i><b>1.8.2</b> Finding intermittent rivers</a></li>
+<li class="chapter" data-level="1.8.3" data-path="chapter-5.html"><a href="chapter-5.html#computing-metrics"><i class="fa fa-check"></i><b>1.8.3</b> Computing metrics</a></li>
+<li class="chapter" data-level="1.8.4" data-path="chapter-5.html"><a href="chapter-5.html#visualising-streamflow-permanence-spells"><i class="fa fa-check"></i><b>1.8.4</b> Visualising streamflow permanence (spells)</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html"><i class="fa fa-check"></i>Chapter 7</a>
+<li class="chapter" data-level="2" data-path="chapter-6.html"><a href="chapter-6.html"><i class="fa fa-check"></i><b>2</b> Chapter 6</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.1-linear-trend-analysis"><i class="fa fa-check"></i>Worked example 7.1: Linear trend analysis</a>
+<li class="chapter" data-level="2.1" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.1-low-flow-frequency-analysis"><i class="fa fa-check"></i><b>2.1</b> Worked Example 6.1: Low flow frequency analysis</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-8"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-elbe-river"><i class="fa fa-check"></i>Linear trend for Elbe River</a></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-göta-river"><i class="fa fa-check"></i>Linear trend for Göta River</a></li>
+<li class="chapter" data-level="2.1.1" data-path="chapter-6.html"><a href="chapter-6.html#loading-the-data-7"><i class="fa fa-check"></i><b>2.1.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="2.1.2" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-an-empirical-distribution-function"><i class="fa fa-check"></i><b>2.1.2</b> Derivation of an empirical distribution function</a></li>
+<li class="chapter" data-level="2.1.3" data-path="chapter-6.html"><a href="chapter-6.html#fitting-a-distribution"><i class="fa fa-check"></i><b>2.1.3</b> Fitting a distribution</a></li>
+<li class="chapter" data-level="2.1.4" data-path="chapter-6.html"><a href="chapter-6.html#estimation-of-t-year-events"><i class="fa fa-check"></i><b>2.1.4</b> Estimation of T-year events</a></li>
+<li class="chapter" data-level="2.1.5" data-path="chapter-6.html"><a href="chapter-6.html#ft"><i class="fa fa-check"></i><b>2.1.5</b> Fast Track</a></li>
+<li class="chapter" data-level="2.1.6" data-path="chapter-6.html"><a href="chapter-6.html#probability-plot-using-the-exponential-reduced-variate"><i class="fa fa-check"></i><b>2.1.6</b> Probability plot using the exponential reduced variate</a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.2-non-parametric-trends"><i class="fa fa-check"></i>Worked Example 7.2: Non Parametric Trends</a>
+<li class="chapter" data-level="2.2" data-path="chapter-6.html"><a href="chapter-6.html#worked-example-6.2-drought-deficit-frequency-analysis"><i class="fa fa-check"></i><b>2.2</b> Worked Example 6.2: Drought deficit frequency analysis</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-9"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#mann-kendall-test"><i class="fa fa-check"></i>Mann-Kendall test</a></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#high-leverage-outlier-effects"><i class="fa fa-check"></i>High leverage outlier effects</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.3-structural-change-analysis"><i class="fa fa-check"></i>Worked Example 7.3: Structural Change Analysis</a>
-<ul>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#visualizing-daily-flow"><i class="fa fa-check"></i>Visualizing Daily Flow</a></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#testing-for-a-change-point"><i class="fa fa-check"></i>Testing for a change point</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.4-principal-component-analysis"><i class="fa fa-check"></i>Worked Example 7.4: Principal Component Analysis</a>
-<ul>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#simple-pca-with-two-variables"><i class="fa fa-check"></i>Simple PCA with two variables</a></li>
-<li class="chapter" data-level="" data-path="chapter-7.html"><a href="chapter-7.html#pca-with-all-variables"><i class="fa fa-check"></i>PCA with all variables</a></li>
+<li class="chapter" data-level="2.2.1" data-path="chapter-6.html"><a href="chapter-6.html#data"><i class="fa fa-check"></i><b>2.2.1</b> Data</a></li>
+<li class="chapter" data-level="2.2.2" data-path="chapter-6.html"><a href="chapter-6.html#derivation-of-distribution-function"><i class="fa fa-check"></i><b>2.2.2</b> Derivation of distribution function</a></li>
+<li class="chapter" data-level="2.2.3" data-path="chapter-6.html"><a href="chapter-6.html#calculation-of-the-t-year-event"><i class="fa fa-check"></i><b>2.2.3</b> Calculation of the T-year event</a></li>
+<li class="chapter" data-level="2.2.4" data-path="chapter-6.html"><a href="chapter-6.html#manual-computation"><i class="fa fa-check"></i><b>2.2.4</b> Manual computation</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html"><i class="fa fa-check"></i>Chapter 10</a>
+<li class="chapter" data-level="3" data-path="chapter-7.html"><a href="chapter-7.html"><i class="fa fa-check"></i><b>3</b> Chapter 7</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#worked-example-10.1-quantifying-effect-of-human-influences"><i class="fa fa-check"></i>Worked example 10.1: Quantifying effect of human influences</a>
+<li class="chapter" data-level="3.1" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.1-linear-trend-analysis"><i class="fa fa-check"></i><b>3.1</b> Worked example 7.1: Linear trend analysis</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#loading-the-data-10"><i class="fa fa-check"></i>Loading the data</a></li>
-<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#threshold-calculation"><i class="fa fa-check"></i>Threshold calculation</a></li>
-<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#benchmark-drought-characteristics"><i class="fa fa-check"></i>Benchmark Drought characteristics</a></li>
-<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#human-influenced-drought-characteristics"><i class="fa fa-check"></i>Human-influenced drought characteristics</a></li>
-<li class="chapter" data-level="" data-path="chapter-10.html"><a href="chapter-10.html#comparison-of-drought-characteristics"><i class="fa fa-check"></i>Comparison of drought characteristics</a></li>
+<li class="chapter" data-level="3.1.1" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-8"><i class="fa fa-check"></i><b>3.1.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="3.1.2" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-elbe-river"><i class="fa fa-check"></i><b>3.1.2</b> Linear trend for Elbe River</a></li>
+<li class="chapter" data-level="3.1.3" data-path="chapter-7.html"><a href="chapter-7.html#linear-trend-for-göta-river"><i class="fa fa-check"></i><b>3.1.3</b> Linear trend for Göta River</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.2-non-parametric-trends"><i class="fa fa-check"></i><b>3.2</b> Worked Example 7.2: Non Parametric Trends</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="chapter-7.html"><a href="chapter-7.html#loading-the-data-9"><i class="fa fa-check"></i><b>3.2.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="3.2.2" data-path="chapter-7.html"><a href="chapter-7.html#mann-kendall-test"><i class="fa fa-check"></i><b>3.2.2</b> Mann-Kendall test</a></li>
+<li class="chapter" data-level="3.2.3" data-path="chapter-7.html"><a href="chapter-7.html#high-leverage-outlier-effects"><i class="fa fa-check"></i><b>3.2.3</b> High leverage outlier effects</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.3-structural-change-analysis"><i class="fa fa-check"></i><b>3.3</b> Worked Example 7.3: Structural Change Analysis</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="chapter-7.html"><a href="chapter-7.html#visualizing-daily-flow"><i class="fa fa-check"></i><b>3.3.1</b> Visualizing Daily Flow</a></li>
+<li class="chapter" data-level="3.3.2" data-path="chapter-7.html"><a href="chapter-7.html#testing-for-a-change-point"><i class="fa fa-check"></i><b>3.3.2</b> Testing for a change point</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="chapter-7.html"><a href="chapter-7.html#worked-example-7.4-principal-component-analysis"><i class="fa fa-check"></i><b>3.4</b> Worked Example 7.4: Principal Component Analysis</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="chapter-7.html"><a href="chapter-7.html#simple-pca-with-two-variables"><i class="fa fa-check"></i><b>3.4.1</b> Simple PCA with two variables</a></li>
+<li class="chapter" data-level="3.4.2" data-path="chapter-7.html"><a href="chapter-7.html#pca-with-all-variables"><i class="fa fa-check"></i><b>3.4.2</b> PCA with all variables</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html"><i class="fa fa-check"></i>Chapter 12</a>
+<li class="chapter" data-level="4" data-path="chapter-10.html"><a href="chapter-10.html"><i class="fa fa-check"></i><b>4</b> Chapter 10</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#worked-example-12.2-drought-impact-model"><i class="fa fa-check"></i>Worked example 12.2: Drought Impact Model</a>
+<li class="chapter" data-level="4.1" data-path="chapter-10.html"><a href="chapter-10.html#worked-example-10.1-quantifying-the-human-influence-on-drought"><i class="fa fa-check"></i><b>4.1</b> Worked example 10.1: Quantifying the human influence on drought</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="loading-the-data-10.html"><a href="loading-the-data-10.html"><i class="fa fa-check"></i><b>5</b> Loading the data</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#data-1"><i class="fa fa-check"></i>Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#preliminary-visual-comparison"><i class="fa fa-check"></i>Preliminary visual comparison</a></li>
-<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#logistic-regression"><i class="fa fa-check"></i>Logistic Regression</a></li>
-<li class="chapter" data-level="" data-path="chapter-12.html"><a href="chapter-12.html#predicting-drought-impacts"><i class="fa fa-check"></i>Predicting drought impacts</a></li>
+<li class="chapter" data-level="5.0.1" data-path="loading-the-data-10.html"><a href="loading-the-data-10.html#threshold-calculation"><i class="fa fa-check"></i><b>5.0.1</b> Threshold calculation</a></li>
+<li class="chapter" data-level="5.0.2" data-path="loading-the-data-10.html"><a href="loading-the-data-10.html#calculate-the-benchmark-drought-indices"><i class="fa fa-check"></i><b>5.0.2</b> Calculate the benchmark drought indices</a></li>
+<li class="chapter" data-level="5.0.3" data-path="loading-the-data-10.html"><a href="loading-the-data-10.html#calculate-the-human-influenced-drought-indices"><i class="fa fa-check"></i><b>5.0.3</b> Calculate the human-influenced drought indices</a></li>
+<li class="chapter" data-level="5.0.4" data-path="loading-the-data-10.html"><a href="loading-the-data-10.html#comparison-of-drought-characteristics"><i class="fa fa-check"></i><b>5.0.4</b> Comparison of drought characteristics</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="chapter-12.html"><a href="chapter-12.html"><i class="fa fa-check"></i><b>6</b> Chapter 12</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="chapter-12.html"><a href="chapter-12.html#worked-example-12.2-drought-impact-model"><i class="fa fa-check"></i><b>6.1</b> Worked example 12.2: Drought Impact Model</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="chapter-12.html"><a href="chapter-12.html#data-1"><i class="fa fa-check"></i><b>6.1.1</b> Data</a></li>
+<li class="chapter" data-level="6.1.2" data-path="chapter-12.html"><a href="chapter-12.html#preliminary-visual-comparison"><i class="fa fa-check"></i><b>6.1.2</b> Preliminary visual comparison</a></li>
+<li class="chapter" data-level="6.1.3" data-path="chapter-12.html"><a href="chapter-12.html#logistic-regression"><i class="fa fa-check"></i><b>6.1.3</b> Logistic Regression</a></li>
+<li class="chapter" data-level="6.1.4" data-path="chapter-12.html"><a href="chapter-12.html#predicting-drought-impacts"><i class="fa fa-check"></i><b>6.1.4</b> Predicting drought impacts</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html"><i class="fa fa-check"></i>Chapter 13</a>
+<li class="chapter" data-level="7" data-path="chapter-13.html"><a href="chapter-13.html"><i class="fa fa-check"></i><b>7</b> Chapter 13</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#worked-example-13.1-forecast-skill"><i class="fa fa-check"></i>Worked example 13.1: Forecast skill</a>
+<li class="chapter" data-level="7.1" data-path="chapter-13.html"><a href="chapter-13.html#worked-example-13.1-forecast-skill"><i class="fa fa-check"></i><b>7.1</b> Worked example 13.1: Forecast skill</a>
 <ul>
-<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#loading-the-data-11"><i class="fa fa-check"></i>Loading the Data</a></li>
-<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#calculate-long-term-low-flow-threshold-from-observations"><i class="fa fa-check"></i>Calculate long-term low flow threshold from observations</a></li>
-<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#calculate-the-brier-score-bs"><i class="fa fa-check"></i>Calculate the Brier Score (BS)</a></li>
-<li class="chapter" data-level="" data-path="chapter-13.html"><a href="chapter-13.html#calculate-the-brier-skill-score-bss"><i class="fa fa-check"></i>Calculate the Brier Skill Score (BSS)</a></li>
+<li class="chapter" data-level="7.1.1" data-path="chapter-13.html"><a href="chapter-13.html#loading-the-data-11"><i class="fa fa-check"></i><b>7.1.1</b> Loading the Data</a></li>
+<li class="chapter" data-level="7.1.2" data-path="chapter-13.html"><a href="chapter-13.html#calculate-long-term-low-flow-threshold-from-observations"><i class="fa fa-check"></i><b>7.1.2</b> Calculate long-term low flow threshold from observations</a></li>
+<li class="chapter" data-level="7.1.3" data-path="chapter-13.html"><a href="chapter-13.html#calculate-the-brier-score-bs"><i class="fa fa-check"></i><b>7.1.3</b> Calculate the Brier Score (BS)</a></li>
+<li class="chapter" data-level="7.1.4" data-path="chapter-13.html"><a href="chapter-13.html#calculate-the-brier-skill-score-bss"><i class="fa fa-check"></i><b>7.1.4</b> Calculate the Brier Skill Score (BSS)</a></li>
 </ul></li>
 </ul></li>
-<li class="divider"></li>
-<li><a href="https://github.com/rstudio4edu/rstudio4edu-book" target="blank">Published with bookdown</a></li>
-
 </ul>
 
       </nav>
@@ -294,31 +288,31 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="chapter-12" class="section level1">
-<h1>Chapter 12</h1>
-<div id="worked-example-12.2-drought-impact-model" class="section level2">
-<h2>Worked example 12.2: Drought Impact Model</h2>
+<div id="chapter-12" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Chapter 12</h1>
+<div id="worked-example-12.2-drought-impact-model" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> Worked example 12.2: Drought Impact Model</h2>
 <p>For this example, we will determine how agricultural drought impacts in Germany are related to drought severity, by defining an impact model and using it to make predictions of impact likelihood.</p>
-<div id="data-1" class="section level3">
-<h3>Data</h3>
+<div id="data-1" class="section level3" number="6.1.1">
+<h3><span class="header-section-number">6.1.1</span> Data</h3>
 <p>We will be considering 4 drought indices as potential predictors of drought impacts: the SPI3, SPEI3, SPI12, and SPEI12. See Section 5.5 for full definitions of the Standardized Precipitation Index (SPI) and Standardized Precipitation-Evapotransporation Index (SPEI). But for our purposes, we should know that the SPI3 normalizes precipitation from the preceding 3 months, while the SPI12 normalizes precipitation over the preceding 12 months. The SPEI uses the same number convention, but instead uses climatic water balance (precipitation minus reference potential evapotranspiration).</p>
 <p>We begin by loading the agricultural drought impact data, collected annually, and the drought indices, which are all stored in the package hydroDrought. This data is loaded when the hydroDrought package is loaded. The SPI and SPEI data is provided at a monthly resolution, so we must reduce this to an annual resolution to match the impact series. We choose to filter only to July, based on our prior knowledge of agricultural practices.</p>
-<div class="sourceCode" id="cb204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb204-1"><a href="chapter-12.html#cb204-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb204-2"><a href="chapter-12.html#cb204-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hydroDrought)</span>
-<span id="cb204-3"><a href="chapter-12.html#cb204-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb204-4"><a href="chapter-12.html#cb204-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb204-5"><a href="chapter-12.html#cb204-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Push these into the function</span></span>
-<span id="cb204-6"><a href="chapter-12.html#cb204-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
-<span id="cb204-7"><a href="chapter-12.html#cb204-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(grid)</span>
-<span id="cb204-8"><a href="chapter-12.html#cb204-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb204-9"><a href="chapter-12.html#cb204-9" aria-hidden="true" tabindex="-1"></a>spi_de <span class="ot">&lt;-</span> spi_de <span class="sc">%&gt;%</span></span>
-<span id="cb204-10"><a href="chapter-12.html#cb204-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(month <span class="sc">==</span> <span class="dv">7</span>)</span>
-<span id="cb204-11"><a href="chapter-12.html#cb204-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb204-12"><a href="chapter-12.html#cb204-12" aria-hidden="true" tabindex="-1"></a><span class="do">### Merge dataframes using a full join (i.e. all records are included, even if data is missing)</span></span>
-<span id="cb204-13"><a href="chapter-12.html#cb204-13" aria-hidden="true" tabindex="-1"></a>spi_impacts <span class="ot">&lt;-</span> spi_de <span class="sc">%&gt;%</span></span>
-<span id="cb204-14"><a href="chapter-12.html#cb204-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">full_join</span>(impacts_de, <span class="at">by =</span> <span class="st">&quot;year&quot;</span>)  <span class="sc">%&gt;%</span> <span class="do">### Join on year</span></span>
-<span id="cb204-15"><a href="chapter-12.html#cb204-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">drop_na</span>(impact) <span class="sc">%&gt;%</span>                     <span class="do">### Drop rows with NA in the impact column</span></span>
-<span id="cb204-16"><a href="chapter-12.html#cb204-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(spi_impacts)                      <span class="do">### Check results</span></span></code></pre></div>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="chapter-12.html#cb190-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb190-2"><a href="chapter-12.html#cb190-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hydroDrought)</span>
+<span id="cb190-3"><a href="chapter-12.html#cb190-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-4"><a href="chapter-12.html#cb190-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-5"><a href="chapter-12.html#cb190-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Push these into the function</span></span>
+<span id="cb190-6"><a href="chapter-12.html#cb190-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb190-7"><a href="chapter-12.html#cb190-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(grid)</span>
+<span id="cb190-8"><a href="chapter-12.html#cb190-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-9"><a href="chapter-12.html#cb190-9" aria-hidden="true" tabindex="-1"></a>spi_de <span class="ot">&lt;-</span> spi_de <span class="sc">%&gt;%</span></span>
+<span id="cb190-10"><a href="chapter-12.html#cb190-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(month <span class="sc">==</span> <span class="dv">7</span>)</span>
+<span id="cb190-11"><a href="chapter-12.html#cb190-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-12"><a href="chapter-12.html#cb190-12" aria-hidden="true" tabindex="-1"></a><span class="do">### Merge dataframes using a full join (i.e. all records are included, even if data is missing)</span></span>
+<span id="cb190-13"><a href="chapter-12.html#cb190-13" aria-hidden="true" tabindex="-1"></a>spi_impacts <span class="ot">&lt;-</span> spi_de <span class="sc">%&gt;%</span></span>
+<span id="cb190-14"><a href="chapter-12.html#cb190-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">full_join</span>(impacts_de, <span class="at">by =</span> <span class="st">&quot;year&quot;</span>)  <span class="sc">%&gt;%</span> <span class="do">### Join on year</span></span>
+<span id="cb190-15"><a href="chapter-12.html#cb190-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">drop_na</span>(impact) <span class="sc">%&gt;%</span>                     <span class="do">### Drop rows with NA in the impact column</span></span>
+<span id="cb190-16"><a href="chapter-12.html#cb190-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(spi_impacts)                      <span class="do">### Check results</span></span></code></pre></div>
 <pre><code>## # A tibble: 172 x 11
 ##    date        year month index_val index index_type index_months country impact_count nuts_n impact
 ##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;        &lt;chr&gt;          &lt;int&gt;  &lt;int&gt; &lt;lgl&gt; 
@@ -334,79 +328,79 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
 ## 10 1979-07-01  1979     7     0.763 spei… spei       12           DE                 0     13 FALSE 
 ## # … with 162 more rows</code></pre>
 </div>
-<div id="preliminary-visual-comparison" class="section level3">
-<h3>Preliminary visual comparison</h3>
+<div id="preliminary-visual-comparison" class="section level3" number="6.1.2">
+<h3><span class="header-section-number">6.1.2</span> Preliminary visual comparison</h3>
 <p>As a preliminary comparison, we can plot the time series of July SPEI3 (in blue) overlaid on the occurrence of annual impacts (vertical red bars).</p>
-<div class="sourceCode" id="cb206"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb206-1"><a href="chapter-12.html#cb206-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Only plot SPEI 3</span></span>
-<span id="cb206-2"><a href="chapter-12.html#cb206-2" aria-hidden="true" tabindex="-1"></a>plot_df <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
-<span id="cb206-3"><a href="chapter-12.html#cb206-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(index <span class="sc">==</span> <span class="st">&quot;spei_3&quot;</span>)</span>
-<span id="cb206-4"><a href="chapter-12.html#cb206-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb206-5"><a href="chapter-12.html#cb206-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Extract the impacts for separate plotting</span></span>
-<span id="cb206-6"><a href="chapter-12.html#cb206-6" aria-hidden="true" tabindex="-1"></a>plot_impacts <span class="ot">&lt;-</span> plot_df <span class="sc">%&gt;%</span></span>
-<span id="cb206-7"><a href="chapter-12.html#cb206-7" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(year, impact) <span class="sc">%&gt;%</span></span>
-<span id="cb206-8"><a href="chapter-12.html#cb206-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(impact <span class="sc">==</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb206-9"><a href="chapter-12.html#cb206-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">left =</span> year <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">right =</span> year <span class="sc">+</span> <span class="fl">0.5</span>)</span>
-<span id="cb206-10"><a href="chapter-12.html#cb206-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb206-11"><a href="chapter-12.html#cb206-11" aria-hidden="true" tabindex="-1"></a><span class="do">### Create the time series plot</span></span>
-<span id="cb206-12"><a href="chapter-12.html#cb206-12" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(<span class="at">x=</span>year)) <span class="sc">%&gt;%</span></span>
-<span id="cb206-13"><a href="chapter-12.html#cb206-13" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="dv">0</span>,  <span class="at">color =</span> <span class="st">&quot;grey70&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Make a horizontal axis at y= 0</span></span>
-<span id="cb206-14"><a href="chapter-12.html#cb206-14" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_rect</span>(<span class="at">data =</span> plot_impacts, <span class="fu">aes</span>(<span class="at">xmin=</span>left, <span class="at">xmax=</span>right, <span class="at">ymin=</span><span class="sc">-</span><span class="cn">Inf</span>, <span class="at">ymax=</span><span class="sc">+</span><span class="cn">Inf</span>), <span class="at">fill=</span><span class="st">&#39;pink&#39;</span>, <span class="at">alpha=</span><span class="fl">0.9</span>) <span class="sc">%&gt;%</span>   <span class="do">### Create a pink region around the impact</span></span>
-<span id="cb206-15"><a href="chapter-12.html#cb206-15" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">data =</span> plot_impacts, <span class="fu">aes</span>(<span class="at">xintercept =</span> year), <span class="at">linetype=</span><span class="st">&quot;dotted&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">%&gt;%</span>   <span class="do">### Add a vertical line at the impact</span></span>
-<span id="cb206-16"><a href="chapter-12.html#cb206-16" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_line</span>( <span class="fu">aes</span>(<span class="at">y =</span> index_val), <span class="at">colour=</span><span class="st">&quot;#377eb8&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Draw the time series of SPI12</span></span>
-<span id="cb206-17"><a href="chapter-12.html#cb206-17" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme_classic</span>(<span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb206-18"><a href="chapter-12.html#cb206-18" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Year&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">1950</span>,<span class="dv">2100</span>,<span class="dv">5</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb206-19"><a href="chapter-12.html#cb206-19" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">&quot;SPEI-3 (July)&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>,<span class="dv">3</span>,<span class="fl">0.5</span>)) </span>
-<span id="cb206-20"><a href="chapter-12.html#cb206-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb206-21"><a href="chapter-12.html#cb206-21" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="chapter-12.html#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Only plot SPEI 3</span></span>
+<span id="cb192-2"><a href="chapter-12.html#cb192-2" aria-hidden="true" tabindex="-1"></a>plot_df <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
+<span id="cb192-3"><a href="chapter-12.html#cb192-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(index <span class="sc">==</span> <span class="st">&quot;spei_3&quot;</span>)</span>
+<span id="cb192-4"><a href="chapter-12.html#cb192-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb192-5"><a href="chapter-12.html#cb192-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Extract the impacts for separate plotting</span></span>
+<span id="cb192-6"><a href="chapter-12.html#cb192-6" aria-hidden="true" tabindex="-1"></a>plot_impacts <span class="ot">&lt;-</span> plot_df <span class="sc">%&gt;%</span></span>
+<span id="cb192-7"><a href="chapter-12.html#cb192-7" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(year, impact) <span class="sc">%&gt;%</span></span>
+<span id="cb192-8"><a href="chapter-12.html#cb192-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(impact <span class="sc">==</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb192-9"><a href="chapter-12.html#cb192-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">left =</span> year <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">right =</span> year <span class="sc">+</span> <span class="fl">0.5</span>)</span>
+<span id="cb192-10"><a href="chapter-12.html#cb192-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb192-11"><a href="chapter-12.html#cb192-11" aria-hidden="true" tabindex="-1"></a><span class="do">### Create the time series plot</span></span>
+<span id="cb192-12"><a href="chapter-12.html#cb192-12" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(<span class="at">x=</span>year)) <span class="sc">%&gt;%</span></span>
+<span id="cb192-13"><a href="chapter-12.html#cb192-13" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="dv">0</span>,  <span class="at">color =</span> <span class="st">&quot;grey70&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Make a horizontal axis at y= 0</span></span>
+<span id="cb192-14"><a href="chapter-12.html#cb192-14" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_rect</span>(<span class="at">data =</span> plot_impacts, <span class="fu">aes</span>(<span class="at">xmin=</span>left, <span class="at">xmax=</span>right, <span class="at">ymin=</span><span class="sc">-</span><span class="cn">Inf</span>, <span class="at">ymax=</span><span class="sc">+</span><span class="cn">Inf</span>), <span class="at">fill=</span><span class="st">&#39;pink&#39;</span>, <span class="at">alpha=</span><span class="fl">0.9</span>) <span class="sc">%&gt;%</span>   <span class="do">### Create a pink region around the impact</span></span>
+<span id="cb192-15"><a href="chapter-12.html#cb192-15" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">data =</span> plot_impacts, <span class="fu">aes</span>(<span class="at">xintercept =</span> year), <span class="at">linetype=</span><span class="st">&quot;dotted&quot;</span>, <span class="at">color =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">%&gt;%</span>   <span class="do">### Add a vertical line at the impact</span></span>
+<span id="cb192-16"><a href="chapter-12.html#cb192-16" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_line</span>( <span class="fu">aes</span>(<span class="at">y =</span> index_val), <span class="at">colour=</span><span class="st">&quot;#377eb8&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Draw the time series of SPI12</span></span>
+<span id="cb192-17"><a href="chapter-12.html#cb192-17" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme_classic</span>(<span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb192-18"><a href="chapter-12.html#cb192-18" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Year&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">1950</span>,<span class="dv">2100</span>,<span class="dv">5</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb192-19"><a href="chapter-12.html#cb192-19" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">&quot;SPEI-3 (July)&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>,<span class="dv">3</span>,<span class="fl">0.5</span>)) </span>
+<span id="cb192-20"><a href="chapter-12.html#cb192-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb192-21"><a href="chapter-12.html#cb192-21" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-163"></span>
 <img src="_main_files/figure-html/unnamed-chunk-163-1.png" alt="Figure 12.10 NEED CAPTION." width="672" />
 <p class="caption">
-Figure 20: Figure 12.10 NEED CAPTION.
+Figure 6.1: Figure 12.10 NEED CAPTION.
 </p>
 </div>
 <p>When SPEI3 is very negative (approximately -2) in 1975 an impact occurs, but when SPEI3 is near -1.5, we have two impact years (2003, 2006) and two non-impact years (1989, 2008). So, it appears that at an SPEI3 of -1.5, we have an approximately 50% chance of an impact. As we approach positive SPEI3, based on this data, the number of drought impacts drops to near 0 (there are no impact records in this database).</p>
 <p>We can also visualise the relationship between SPEI3 and impact by plotting each value of SPEI3 from the time series along the x-axis and stacking the proportion of impact vs. no impact months along the y-axis (Fig. 12.11).</p>
-<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="chapter-12.html#cb207-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create a meaningful column for impacts when plotted</span></span>
-<span id="cb207-2"><a href="chapter-12.html#cb207-2" aria-hidden="true" tabindex="-1"></a>plot_all_df <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
-<span id="cb207-3"><a href="chapter-12.html#cb207-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">impact_label =</span> <span class="fu">case_when</span>( impact <span class="sc">==</span> <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Impact Reported&quot;</span>,</span>
-<span id="cb207-4"><a href="chapter-12.html#cb207-4" aria-hidden="true" tabindex="-1"></a>                         <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;No Impact&quot;</span></span>
-<span id="cb207-5"><a href="chapter-12.html#cb207-5" aria-hidden="true" tabindex="-1"></a>        )  ) <span class="sc">%&gt;%</span></span>
-<span id="cb207-6"><a href="chapter-12.html#cb207-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">impact_label =</span> <span class="fu">factor</span>(impact_label, <span class="at">levels=</span><span class="fu">c</span>( <span class="st">&quot;No Impact&quot;</span>, <span class="st">&quot;Impact Reported&quot;</span>)))</span>
-<span id="cb207-7"><a href="chapter-12.html#cb207-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb207-8"><a href="chapter-12.html#cb207-8" aria-hidden="true" tabindex="-1"></a><span class="do">###  Create a smoothed plot showing proportion in each category</span></span>
-<span id="cb207-9"><a href="chapter-12.html#cb207-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(plot_all_df, <span class="fu">aes</span>(<span class="at">x=</span>index_val, <span class="at">fill =</span> impact_label)) <span class="sc">%&gt;%</span></span>
-<span id="cb207-10"><a href="chapter-12.html#cb207-10" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_density</span>(<span class="at">position =</span> <span class="st">&quot;fill&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb207-11"><a href="chapter-12.html#cb207-11" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">xintercept=</span><span class="dv">0</span>,  <span class="at">color =</span> <span class="st">&quot;grey30&quot;</span>, <span class="at">linetype=</span><span class="st">&quot;longdash&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Make a vartical axis at x= 0</span></span>
-<span id="cb207-12"><a href="chapter-12.html#cb207-12" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme_classic</span>(<span class="dv">8</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb207-13"><a href="chapter-12.html#cb207-13" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Drought Index in July&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>,<span class="dv">5</span>,<span class="fl">0.5</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb207-14"><a href="chapter-12.html#cb207-14" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Proportion of Years in Impact Category&quot;</span>, <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> 5L), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb207-15"><a href="chapter-12.html#cb207-15" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">type =</span> <span class="st">&quot;qual&quot;</span>, <span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb207-16"><a href="chapter-12.html#cb207-16" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.9</span>), <span class="at">legend.title =</span> <span class="fu">element_blank</span>()) <span class="sc">%&gt;%</span></span>
-<span id="cb207-17"><a href="chapter-12.html#cb207-17" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span> index)</span>
-<span id="cb207-18"><a href="chapter-12.html#cb207-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb207-19"><a href="chapter-12.html#cb207-19" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
+<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="chapter-12.html#cb193-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create a meaningful column for impacts when plotted</span></span>
+<span id="cb193-2"><a href="chapter-12.html#cb193-2" aria-hidden="true" tabindex="-1"></a>plot_all_df <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
+<span id="cb193-3"><a href="chapter-12.html#cb193-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">impact_label =</span> <span class="fu">case_when</span>( impact <span class="sc">==</span> <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Impact Reported&quot;</span>,</span>
+<span id="cb193-4"><a href="chapter-12.html#cb193-4" aria-hidden="true" tabindex="-1"></a>                         <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;No Impact&quot;</span></span>
+<span id="cb193-5"><a href="chapter-12.html#cb193-5" aria-hidden="true" tabindex="-1"></a>        )  ) <span class="sc">%&gt;%</span></span>
+<span id="cb193-6"><a href="chapter-12.html#cb193-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">impact_label =</span> <span class="fu">factor</span>(impact_label, <span class="at">levels=</span><span class="fu">c</span>( <span class="st">&quot;No Impact&quot;</span>, <span class="st">&quot;Impact Reported&quot;</span>)))</span>
+<span id="cb193-7"><a href="chapter-12.html#cb193-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb193-8"><a href="chapter-12.html#cb193-8" aria-hidden="true" tabindex="-1"></a><span class="do">###  Create a smoothed plot showing proportion in each category</span></span>
+<span id="cb193-9"><a href="chapter-12.html#cb193-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(plot_all_df, <span class="fu">aes</span>(<span class="at">x=</span>index_val, <span class="at">fill =</span> impact_label)) <span class="sc">%&gt;%</span></span>
+<span id="cb193-10"><a href="chapter-12.html#cb193-10" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_density</span>(<span class="at">position =</span> <span class="st">&quot;fill&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb193-11"><a href="chapter-12.html#cb193-11" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">xintercept=</span><span class="dv">0</span>,  <span class="at">color =</span> <span class="st">&quot;grey30&quot;</span>, <span class="at">linetype=</span><span class="st">&quot;longdash&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Make a vartical axis at x= 0</span></span>
+<span id="cb193-12"><a href="chapter-12.html#cb193-12" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme_classic</span>(<span class="dv">8</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb193-13"><a href="chapter-12.html#cb193-13" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Drought Index in July&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>,<span class="dv">5</span>,<span class="fl">0.5</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb193-14"><a href="chapter-12.html#cb193-14" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Proportion of Years in Impact Category&quot;</span>, <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> 5L), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb193-15"><a href="chapter-12.html#cb193-15" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_fill_brewer</span>(<span class="at">type =</span> <span class="st">&quot;qual&quot;</span>, <span class="at">palette =</span> <span class="st">&quot;Set2&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb193-16"><a href="chapter-12.html#cb193-16" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.9</span>), <span class="at">legend.title =</span> <span class="fu">element_blank</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb193-17"><a href="chapter-12.html#cb193-17" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span> index)</span>
+<span id="cb193-18"><a href="chapter-12.html#cb193-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb193-19"><a href="chapter-12.html#cb193-19" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-165"></span>
 <img src="_main_files/figure-html/unnamed-chunk-165-1.png" alt="Figure 12.11 NEED CAPTION." width="672" />
 <p class="caption">
-Figure 21: Figure 12.11 NEED CAPTION.
+Figure 6.2: Figure 12.11 NEED CAPTION.
 </p>
 </div>
 <p>The relationship for SPEI3 is shown in the top-right figure (Fig. 12.11b). If we approximate the boundary between impact years (orange) and non-impact years (green), it appears there is a consistent increase in impact proportion as SPEI-3 decreases (shifts from right to left).</p>
 <p>SPEI3 appears to have the most consistent relationship with impacts (Fig 12.11b), whereas the relationship with SPI3 is confounded by some drought periods (low SPI) where the ‘No Impacts’ category dominates. If we chose a wider smoothing interval, this effect might be averaged out. For the 12-month accumulated indices (Fig 12.11a, 12.11c), years with impacts appear to be scattered throughout the SPI/SPEI range, suggesting a weaker connection. The likelihood of impacts increases for both severe drought and pluvials, further supporting the hypothesis that the 12-month indices are not useful for making the distinction between impact and no impact.</p>
 </div>
-<div id="logistic-regression" class="section level3">
-<h3>Logistic Regression</h3>
+<div id="logistic-regression" class="section level3" number="6.1.3">
+<h3><span class="header-section-number">6.1.3</span> Logistic Regression</h3>
 <p>Figure 12.11 is a visual analogy of logistic regression, which is the more rigorous statistical method we will use to model the relationship between one or more predictors and a binary (TRUE/FALSE) predictand. Please keep this visual analogy in mind as we proceed using logistic regression to develop a quantitative impact model. For more methodological details, see Section 7.3.7, Generalized Linear Models.</p>
 <p>In R, logistic regression models are calibrated using the glm() command, which can fit a range of Generalized Linear Models (GLMs).</p>
-<div class="sourceCode" id="cb208"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb208-1"><a href="chapter-12.html#cb208-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create data for fitting</span></span>
-<span id="cb208-2"><a href="chapter-12.html#cb208-2" aria-hidden="true" tabindex="-1"></a>fit_data <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
-<span id="cb208-3"><a href="chapter-12.html#cb208-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(date, year, month, index, index_val, impact) <span class="sc">%&gt;%</span></span>
-<span id="cb208-4"><a href="chapter-12.html#cb208-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spread</span>(index, index_val)</span>
-<span id="cb208-5"><a href="chapter-12.html#cb208-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb208-6"><a href="chapter-12.html#cb208-6" aria-hidden="true" tabindex="-1"></a><span class="do">### Fit simple logistic regression using SPEI-3 as a predictor variable</span></span>
-<span id="cb208-7"><a href="chapter-12.html#cb208-7" aria-hidden="true" tabindex="-1"></a><span class="do">### Force an intercept to be included by using + 1</span></span>
-<span id="cb208-8"><a href="chapter-12.html#cb208-8" aria-hidden="true" tabindex="-1"></a>spei_3_fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(impact <span class="sc">~</span> spei_3 <span class="sc">+</span> <span class="dv">1</span>, <span class="at">data =</span> fit_data, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb208-9"><a href="chapter-12.html#cb208-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(spei_3_fit)</span></code></pre></div>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="chapter-12.html#cb194-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create data for fitting</span></span>
+<span id="cb194-2"><a href="chapter-12.html#cb194-2" aria-hidden="true" tabindex="-1"></a>fit_data <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
+<span id="cb194-3"><a href="chapter-12.html#cb194-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(date, year, month, index, index_val, impact) <span class="sc">%&gt;%</span></span>
+<span id="cb194-4"><a href="chapter-12.html#cb194-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spread</span>(index, index_val)</span>
+<span id="cb194-5"><a href="chapter-12.html#cb194-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb194-6"><a href="chapter-12.html#cb194-6" aria-hidden="true" tabindex="-1"></a><span class="do">### Fit simple logistic regression using SPEI-3 as a predictor variable</span></span>
+<span id="cb194-7"><a href="chapter-12.html#cb194-7" aria-hidden="true" tabindex="-1"></a><span class="do">### Force an intercept to be included by using + 1</span></span>
+<span id="cb194-8"><a href="chapter-12.html#cb194-8" aria-hidden="true" tabindex="-1"></a>spei_3_fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(impact <span class="sc">~</span> spei_3 <span class="sc">+</span> <span class="dv">1</span>, <span class="at">data =</span> fit_data, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb194-9"><a href="chapter-12.html#cb194-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(spei_3_fit)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = impact ~ spei_3 + 1, family = &quot;binomial&quot;, data = fit_data)
@@ -429,35 +423,35 @@ Figure 21: Figure 12.11 NEED CAPTION.
 ## AIC: 27.362
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
-<div class="sourceCode" id="cb210"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb210-1"><a href="chapter-12.html#cb210-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(spei_3_fit)</span></code></pre></div>
+<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="chapter-12.html#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(spei_3_fit)</span></code></pre></div>
 <pre><code>##                 2.5 %    97.5 %
 ## (Intercept) -5.181009 -1.634530
 ## spei_3      -5.049901 -1.167493</code></pre>
 <p>The fitted model appears similar to our visual analogy (Figure 12.11), but now follows a formal logistic regression equation, with confidence intervals (Fig 12.12). As expected from our visual analogy, the likelihood of an impact is approximately 50% for SPEI3 of -1.1, near 100% for -2 and near 0 for positive values.</p>
-<div class="sourceCode" id="cb212"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb212-1"><a href="chapter-12.html#cb212-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Plot the relationship with SPEI-3</span></span>
-<span id="cb212-2"><a href="chapter-12.html#cb212-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logistbarplot</span>(<span class="at">log.fit =</span> spei_3_fit, <span class="at">log.var =</span> <span class="st">&quot;spei_3&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="chapter-12.html#cb198-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Plot the relationship with SPEI-3</span></span>
+<span id="cb198-2"><a href="chapter-12.html#cb198-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logistbarplot</span>(<span class="at">log.fit =</span> spei_3_fit, <span class="at">log.var =</span> <span class="st">&quot;spei_3&quot;</span>)</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-168"></span>
 <img src="_main_files/figure-html/unnamed-chunk-168-1.png" alt="Figure 12.12 NEED CAPTION." width="672" />
 <p class="caption">
-Figure 22: Figure 12.12 NEED CAPTION.
+Figure 6.3: Figure 12.12 NEED CAPTION.
 </p>
 </div>
 <p>Remember from Section 7.2.3 that logistic regression converts likelihoods of a binary response into log-odds space (also called logit space). When a line fit in this space is transformed back to probability space, it produces the characteristic S-shape curve between 0 and 1. If we had used linear regression without the logit transform, we might have produced likelihoods greater than 1 or less than 0, which are not feasible. Check the supplementary code in the repository to see the full conversion from data into log-odds space and ultimately the logistic regression.</p>
 </div>
-<div id="predicting-drought-impacts" class="section level3">
-<h3>Predicting drought impacts</h3>
+<div id="predicting-drought-impacts" class="section level3" number="6.1.4">
+<h3><span class="header-section-number">6.1.4</span> Predicting drought impacts</h3>
 <p>It is now possible to make predictions based on this relationship for our fitting period or for any new values of SPI or SPEI. In R this is easily done using the predict() function.</p>
-<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="chapter-12.html#cb213-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Use the SPEI3 regression to predict the likelihood of an impact</span></span>
-<span id="cb213-2"><a href="chapter-12.html#cb213-2" aria-hidden="true" tabindex="-1"></a><span class="do">### Keep the standard error for confidence intervals around prediction</span></span>
-<span id="cb213-3"><a href="chapter-12.html#cb213-3" aria-hidden="true" tabindex="-1"></a>predict_ts <span class="ot">&lt;-</span> <span class="fu">predict</span>(spei_3_fit, <span class="at">newdata =</span> fit_data, <span class="at">type =</span> <span class="st">&quot;link&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb213-4"><a href="chapter-12.html#cb213-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb213-5"><a href="chapter-12.html#cb213-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Add in prediction and confidence intervals</span></span>
-<span id="cb213-6"><a href="chapter-12.html#cb213-6" aria-hidden="true" tabindex="-1"></a>predict_df <span class="ot">&lt;-</span> fit_data <span class="sc">%&gt;%</span></span>
-<span id="cb213-7"><a href="chapter-12.html#cb213-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">predict =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit)) <span class="sc">%&gt;%</span></span>
-<span id="cb213-8"><a href="chapter-12.html#cb213-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">predict_upper =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">+</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span> </span>
-<span id="cb213-9"><a href="chapter-12.html#cb213-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">predict_lower =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">-</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span></span>
-<span id="cb213-10"><a href="chapter-12.html#cb213-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>spi_3, <span class="sc">-</span>spei_12, <span class="sc">-</span>spi_12) <span class="sc">%&gt;%</span></span>
-<span id="cb213-11"><a href="chapter-12.html#cb213-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb199-1"><a href="chapter-12.html#cb199-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Use the SPEI3 regression to predict the likelihood of an impact</span></span>
+<span id="cb199-2"><a href="chapter-12.html#cb199-2" aria-hidden="true" tabindex="-1"></a><span class="do">### Keep the standard error for confidence intervals around prediction</span></span>
+<span id="cb199-3"><a href="chapter-12.html#cb199-3" aria-hidden="true" tabindex="-1"></a>predict_ts <span class="ot">&lt;-</span> <span class="fu">predict</span>(spei_3_fit, <span class="at">newdata =</span> fit_data, <span class="at">type =</span> <span class="st">&quot;link&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb199-4"><a href="chapter-12.html#cb199-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb199-5"><a href="chapter-12.html#cb199-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Add in prediction and confidence intervals</span></span>
+<span id="cb199-6"><a href="chapter-12.html#cb199-6" aria-hidden="true" tabindex="-1"></a>predict_df <span class="ot">&lt;-</span> fit_data <span class="sc">%&gt;%</span></span>
+<span id="cb199-7"><a href="chapter-12.html#cb199-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">predict =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit)) <span class="sc">%&gt;%</span></span>
+<span id="cb199-8"><a href="chapter-12.html#cb199-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">predict_upper =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">+</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span> </span>
+<span id="cb199-9"><a href="chapter-12.html#cb199-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">predict_lower =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">-</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span></span>
+<span id="cb199-10"><a href="chapter-12.html#cb199-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>spi_3, <span class="sc">-</span>spei_12, <span class="sc">-</span>spi_12) <span class="sc">%&gt;%</span></span>
+<span id="cb199-11"><a href="chapter-12.html#cb199-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>()</span></code></pre></div>
 <pre><code>## # A tibble: 43 x 8
 ##    date        year month impact   spei_3 predict predict_upper predict_lower
 ##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;     &lt;dbl&gt;   &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;
@@ -473,22 +467,22 @@ Figure 22: Figure 12.12 NEED CAPTION.
 ## 10 1979-07-01  1979     7 FALSE  -0.328   0.107       0.0323           0.301 
 ## # … with 33 more rows</code></pre>
 <p>Making predictions based on the original training data, we can now see (Fig. 12.13) that during most years the likelihood of an agricultural impact remains below 10%. In years with low SPEI3, the likelihood quickly peaks. In 1976, our most severe drought in this period, the predicted likelihood is approximately 90%. Not surprisingly, an impact occurs during this period. For a predicted likelihood of 50%, there are approximately the same number of years with impacts as those without, a sign of a good fit. Also, notice that the prediction intervals are not normally distributed around the estimate. They are normally distributed in logit (log-odds) space, but have been converted into impact likelihood, ensuring that neither the estimate nor the interval produces impossible likelihoods (&lt; 0 or &gt; 1). The supplementary code shows the process testing whether how to include a second drought index as a significant predictor.</p>
-<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="chapter-12.html#cb215-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create a time series plot</span></span>
-<span id="cb215-2"><a href="chapter-12.html#cb215-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(predict_df, <span class="fu">aes</span>(<span class="at">x=</span>year)) <span class="sc">%&gt;%</span></span>
-<span id="cb215-3"><a href="chapter-12.html#cb215-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.5</span>,  <span class="at">color =</span> <span class="st">&quot;grey70&quot;</span>, <span class="at">linetype=</span><span class="st">&quot;dotted&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Make a horizontal axis at y= 0</span></span>
-<span id="cb215-4"><a href="chapter-12.html#cb215-4" aria-hidden="true" tabindex="-1"></a>   <span class="sc">+</span> <span class="fu">geom_rect</span>(<span class="at">data =</span> plot_impacts, <span class="fu">aes</span>(<span class="at">xmin=</span>left, <span class="at">xmax=</span>right, <span class="at">ymin=</span><span class="sc">-</span><span class="cn">Inf</span>, <span class="at">ymax=</span><span class="sc">+</span><span class="cn">Inf</span>), <span class="at">fill=</span><span class="st">&#39;pink&#39;</span>, <span class="at">alpha=</span><span class="fl">0.9</span>) <span class="sc">%&gt;%</span>   <span class="do">### Create a pink region around the impact</span></span>
-<span id="cb215-5"><a href="chapter-12.html#cb215-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   + geom_vline(data = plot_impacts, aes(xintercept = year), linetype=&quot;dotted&quot;, color = &quot;red&quot;) %&gt;%   </span><span class="al">###</span><span class="co"> Add a vertical line at the impact</span></span>
-<span id="cb215-6"><a href="chapter-12.html#cb215-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> predict_lower, <span class="at">ymax =</span> predict_upper), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">fill =</span> <span class="st">&quot;grey20&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb215-7"><a href="chapter-12.html#cb215-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_line</span>( <span class="fu">aes</span>(<span class="at">y =</span> predict), <span class="at">colour=</span><span class="st">&quot;#377eb8&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Draw the time series of SPI12</span></span>
-<span id="cb215-8"><a href="chapter-12.html#cb215-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme_classic</span>(<span class="dv">8</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb215-9"><a href="chapter-12.html#cb215-9" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Year&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">1950</span>,<span class="dv">2100</span>,<span class="dv">5</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb215-10"><a href="chapter-12.html#cb215-10" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Impact Likelihood&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.1</span>), <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> 5L), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))</span>
-<span id="cb215-11"><a href="chapter-12.html#cb215-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb215-12"><a href="chapter-12.html#cb215-12" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
+<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb201-1"><a href="chapter-12.html#cb201-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create a time series plot</span></span>
+<span id="cb201-2"><a href="chapter-12.html#cb201-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(predict_df, <span class="fu">aes</span>(<span class="at">x=</span>year)) <span class="sc">%&gt;%</span></span>
+<span id="cb201-3"><a href="chapter-12.html#cb201-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.5</span>,  <span class="at">color =</span> <span class="st">&quot;grey70&quot;</span>, <span class="at">linetype=</span><span class="st">&quot;dotted&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Make a horizontal axis at y= 0</span></span>
+<span id="cb201-4"><a href="chapter-12.html#cb201-4" aria-hidden="true" tabindex="-1"></a>   <span class="sc">+</span> <span class="fu">geom_rect</span>(<span class="at">data =</span> plot_impacts, <span class="fu">aes</span>(<span class="at">xmin=</span>left, <span class="at">xmax=</span>right, <span class="at">ymin=</span><span class="sc">-</span><span class="cn">Inf</span>, <span class="at">ymax=</span><span class="sc">+</span><span class="cn">Inf</span>), <span class="at">fill=</span><span class="st">&#39;pink&#39;</span>, <span class="at">alpha=</span><span class="fl">0.9</span>) <span class="sc">%&gt;%</span>   <span class="do">### Create a pink region around the impact</span></span>
+<span id="cb201-5"><a href="chapter-12.html#cb201-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   + geom_vline(data = plot_impacts, aes(xintercept = year), linetype=&quot;dotted&quot;, color = &quot;red&quot;) %&gt;%   </span><span class="al">###</span><span class="co"> Add a vertical line at the impact</span></span>
+<span id="cb201-6"><a href="chapter-12.html#cb201-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> predict_lower, <span class="at">ymax =</span> predict_upper), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">fill =</span> <span class="st">&quot;grey20&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb201-7"><a href="chapter-12.html#cb201-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">geom_line</span>( <span class="fu">aes</span>(<span class="at">y =</span> predict), <span class="at">colour=</span><span class="st">&quot;#377eb8&quot;</span>) <span class="sc">%&gt;%</span>  <span class="do">### Draw the time series of SPI12</span></span>
+<span id="cb201-8"><a href="chapter-12.html#cb201-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">theme_classic</span>(<span class="dv">8</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb201-9"><a href="chapter-12.html#cb201-9" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_x_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Year&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">1950</span>,<span class="dv">2100</span>,<span class="dv">5</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb201-10"><a href="chapter-12.html#cb201-10" aria-hidden="true" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">name =</span> <span class="st">&quot;Impact Likelihood&quot;</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.1</span>), <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> 5L), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb201-11"><a href="chapter-12.html#cb201-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb201-12"><a href="chapter-12.html#cb201-12" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-171"></span>
 <img src="_main_files/figure-html/unnamed-chunk-171-1.png" alt="Figure 12.13 NEED CAPTION." width="672" />
 <p class="caption">
-Figure 23: Figure 12.13 NEED CAPTION.
+Figure 6.4: Figure 12.13 NEED CAPTION.
 </p>
 </div>
 
@@ -500,7 +494,7 @@ Figure 23: Figure 12.13 NEED CAPTION.
           </div>
         </div>
       </div>
-<a href="chapter-10.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="loading-the-data-10.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="chapter-13.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
@@ -517,14 +511,14 @@ Figure 23: Figure 12.13 NEED CAPTION.
 gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
-"github": true,
-"facebook": false,
+"github": false,
+"facebook": true,
 "twitter": true,
 "linkedin": false,
 "weibo": false,
 "instapaper": false,
 "vk": false,
-"all": false
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
 "theme": "white",
@@ -532,8 +526,8 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/jstagge/hydroDrought/master/docs/12-chapter12.Rmd",
-"text": ""
+"link": null,
+"text": null
 },
 "history": {
 "link": null,
@@ -545,7 +539,7 @@ gitbook.start({
 },
 "download": null,
 "toc": {
-"collapse": "section"
+"collapse": "subsection"
 }
 });
 });
