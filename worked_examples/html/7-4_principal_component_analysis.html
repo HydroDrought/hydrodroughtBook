@@ -15,11 +15,20 @@
 
 <title>Principal Component Analysis</title>
 
-<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
@@ -31,6 +40,7 @@ if (window.hljs) {
   }
 }
 </script>
+
 
 
 
@@ -60,9 +70,7 @@ if (window.hljs) {
 
 <div id="simple-pca-with-two-variables" class="section level1" number="1">
 <h1 number="1"><span class="header-section-number">1</span> Simple PCA with two variables</h1>
-<p>To explain what PCA is, we can consider two variables from the regional low flow analysis: ALPHA and Q95/Q50 (Table 5.1, Figure 5.16). The values for the 21 sites are replotted in Fig. 7.17a after they have been standardized to have zero mean and unit standard deviation (now referred to as ALPHA* and Q95/Q50*).</p>
-<p>Because ALPHA* and Q95/Q50* are correlated, PC1 captures variability along a nearly 1:1 line (Fig. 7.17a) that measures the value of this artificial variable. This new axis is PC1. PC2, is set at a 90 degree angle (orthogonal), to capture the remaining variability.</p>
-<p>This oversimplified example allows us to visualize these underlying axes, but as we consider more variables, and therefore higher dimensions, it is more appropriate to use the loading plot (Figure 7.17b). After rotating the data into the page so that positive PC1 is along the x-axis, we see that most variance falls along this horizontal axis. In fact, if we only consider PC1, ignoring the vertical PC2, we could still reconstruct 72.14% of the ALPHA* and Q95/Q50* values. This is why PCA is so valuable for data reduction.</p>
+<p>To explain what PCA is, we can first consider two low flow indices derived based on the Regional Dataset (Section 5.x): ALPHA and Q95/Q50 (Table 5.1). The values for the 21 sites are plotted in Fig. 5.16 after being standardized to have zero mean and unit standard deviation (now referred to as ALPHA* and Q95/Q50<em>). Because ALPHA</em> and Q95/Q50* are correlated, PC1 captures variability along a nearly 1:1 line running from the upper left to the lower right corners (Fig. 7.17a). This new axis is PC1. PC2, is added at a 90 degree angle (orthogonal), to capture the remaining variability. As we can see from Fig. 7.17a if we only have a measurement along the PC1 direction, referred to as a loading in PCA, we could reconstruct much of the ALPHA* and Q95/Q50* values. This principle is why PCA is so valuable for data reduction.</p>
 <pre class="r"><code>### Select only two variables
 indices_matrix &lt;- indices %&gt;%
     select(ALPHA, `Q95/Q50`) %&gt;% 
@@ -92,6 +100,7 @@ head(regional_pca$x)</code></pre>
 <pre class="r"><code>#By default, eigenvectors in R point in the negative direction. We can adjust this with a simple change.
 regional_pca$rotation &lt;- -regional_pca$rotation
 regional_pca$x &lt;- -regional_pca$x</code></pre>
+<p>Interpreting more complex relationships can be aided by a loading plot (Fig. 7.17b), which shows that Q95/Q50* loads positively onto PC1, while ALPHA* loads negatively. So, sites like Rosenberg and Stiefern produce a high PC1 score due to high Q95/Q50* and low ALPHA<em>, while a site like Lipsch produces a low PC1 score. PC2 captures the remaining variance not explained by PC1. For example, PC1 measures along an axis that assumes high Q95/Q50</em> is typically correlated with low ALPHA* and vice versa. However, Hoheneich with its simultaneously low Q95/Q50* and ALPHA* produces a PC1 near zero, but has a strongly negative PC2 score. Note the variance explained (72.14% for PC1 and 27.86% for PC2) is shown along the axes. Understanding how to read the loading figure (Fig. 7.17b) is critical for interpreting the PC scores because the loadings (and their sign) determine the meaning of the PCs.</p>
 <pre class="r"><code>### Plot the PC Loading
 p2 &lt;- autoplot(regional_pca,
         loadings.label=TRUE, loadings=TRUE, 
@@ -109,7 +118,7 @@ Figure 7.17: Normalized variables with the PC axes (a) and the resultant PC Load
 </div>
 <div id="pca-with-all-variables" class="section level1" number="2">
 <h1 number="2"><span class="header-section-number">2</span> PCA with all variables</h1>
-<p>If we instead consider all variables, we produce the loading plot shown in Figure 7.18a. The loading plot shows that nearly all low flow metrics load onto PC1 in the negative direction, opposite to ALPHA. Further, all of the flow metrics prior to normalization by Q50, catchment area, and ALPHA load positively onto PC2, while the normalized metrics load negatively. PC2 is highly related to watershed size, and thereby absolute flow.</p>
+<p>This is a trivial example, using two PCs to represent two variables (ALPHA* and Q95/50*). PCA is most commonly used as a form of data reduction, to account for similarities between measured variables while focusing only on the most important components. To test this, we can instead run PCA on all flow indices from the Regional Dataset. This produces the loading diagram shown in Fig. 7.18a. Here we see that ALPHA loads positively onto PC1, whereas all other variables load negatively onto PC1. At sites where ALPHA is high, most other variables are low, and vice versa. Loading for PC2 further separates between the raw measures (e.g. mean, Q95) that load positively, and the relative measures (e.g. Q95/50) that load negatively. There are more PCs, but Fig. 7.18a only displays PC1 and PC2.</p>
 <pre class="r"><code>### Remove all the naming variables
 indices_matrix &lt;- indices %&gt;%
     select(-id, -river, -station) %&gt;%
@@ -132,7 +141,7 @@ p1 &lt;- autoplot(regional_pca,
     + geom_vline(xintercept=0, colour = &quot;grey20&quot;, alpha = 0.5) %&gt;%
     #+ geom_text_repel(vjust=-1, label=indices$station, size = 3, colour = &quot;grey40&quot;, alpha =0.8)  %&gt;%
     + coord_fixed(ratio=1)</code></pre>
-<p>If we are interested in focusing only on the most important PCs in the analysis, there are different ways of deciding how many to include. One method is to look at the scree plot, which graphs the proportion of variance explained by each PC and only retain the components above the scree plot ‘elbow’. In Fig. 7.18b this appears at two PCs. Another common metric is to only retain components with eigen values greater than 1, which also results in retaining the first two components. These two components explain 93.2% of the total variance across 15 variables because the variables are so highly correlated (Figure 7.18a).</p>
+<p>As a form of data reduction, usually only the most important PCs are studied. There are several ways of deciding how many PCs to include. One method is to look at the scree plot, which graphs the proportion of variance explained (also called the eigenvalues) and only retain the components above the scree plot ‘elbow’. In Fig. 7.18b this is either at PC2 or PC3. We know that we can capture 93.2% of the total variance in the regional flow indices using only two scores, PC1 and PC2, and that these two measures are theoretically independent of one another (they should not be correlated). The user can use their knowledge of the system to determine whether PC3, which only explains 5% of the total variance, has a useful meaning or can be considered noise.</p>
 <pre class="r"><code>###  Extract the PC eigen values and variance explained
 pc.importance &lt;- summary (regional_pca)
 
@@ -140,18 +149,12 @@ pc.importance &lt;- summary (regional_pca)
 scree_plot &lt;- data.frame(cbind(Component=seq(1,dim(pc.importance$importance)[2]),t(pc.importance$importance)))
 scree_plot$EigenVal &lt;- scree_plot$Standard.deviation^2
 scree_plot[1:5,]</code></pre>
-<pre><code>##     Component Standard.deviation Proportion.of.Variance Cumulative.Proportion
-## PC1         1          3.3005444                0.72624               0.72624
-## PC2         2          1.7570323                0.20581               0.93205
-## PC3         3          0.8720938                0.05070               0.98275
-## PC4         4          0.3639048                0.00883               0.99158
-## PC5         5          0.2496006                0.00415               0.99574
-##        EigenVal
-## PC1 10.89359347
-## PC2  3.08716252
-## PC3  0.76054757
-## PC4  0.13242668
-## PC5  0.06230047</code></pre>
+<pre><code>##     Component Standard.deviation Proportion.of.Variance Cumulative.Proportion    EigenVal
+## PC1         1          3.3005444                0.72624               0.72624 10.89359347
+## PC2         2          1.7570323                0.20581               0.93205  3.08716252
+## PC3         3          0.8720938                0.05070               0.98275  0.76054757
+## PC4         4          0.3639048                0.00883               0.99158  0.13242668
+## PC5         5          0.2496006                0.00415               0.99574  0.06230047</code></pre>
 <pre class="r"><code>### Create scree plot using proportion of variance explained
 p2 &lt;- ggplot(scree_plot, aes(Component,Proportion.of.Variance*100)) %&gt;%
     + geom_line() %&gt;%

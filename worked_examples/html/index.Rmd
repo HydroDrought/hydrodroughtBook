@@ -1,5 +1,0 @@
----
-title: "Worked Examples"
----
-
-Top level page for worked examples, currently not used.... 

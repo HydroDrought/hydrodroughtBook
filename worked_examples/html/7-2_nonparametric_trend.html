@@ -15,11 +15,20 @@
 
 <title>Non-Parametric Trends</title>
 
-<script src="site_libs/header-attrs-2.1/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
 <link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
@@ -31,6 +40,7 @@ if (window.hljs) {
   }
 }
 </script>
+
 
 
 
@@ -71,7 +81,7 @@ require(zyp)
 ### Filter to the rivers and create columns for dates
 flow_df &lt;- international %&gt;%
     filter(river == &quot;Gota&quot;) %&gt;%
-    select(river, data) %&gt;%
+    dplyr::select(river, data) %&gt;%
     unnest(cols = data) %&gt;%
     mutate(
         year = year(time),
@@ -125,8 +135,8 @@ summary(mk_test_results)</code></pre>
 </div>
 <div id="mann-kendall-test" class="section level1" number="2">
 <h1 number="2"><span class="header-section-number">2</span> Mann-Kendall test</h1>
-<p>The Mann-Kendall test produces an S value of 1426, meaning that we have 1426 more date pairs where the later observation is larger than the earlier. Using this test statistic and the 78 years of observations, the Mann-Kendall test produces a p-value &lt; 2.2x10-16 suggesting there was a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test, though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.</p>
-<p>As discussed in the text, the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results, but is slightly less affected by relatively high outliers during the late 2000s.</p>
+<p>The Mann-Kendall test produces an S value of 1426, derived by calculating the difference between 2200 positive pairs (73.3%) and 774 negative pairs (25.8%) out of 3003 possible data pairs (29 pairs had equal values). Using this test statistic and the 78 years of observations, the Mann-Kendall test produces a p-value of &lt; 1x10-15 suggesting there is a statistically significant increase in annual minimum flow during this period. This finding agrees with our linear regression trend test (Section 7.4.1), though with slightly less confidence because we gave up some statistical power for the flexibility of a non-parametric test.</p>
+<p>As discussed earlier (Section 7.4.2), the Mann-Kendall test only considers increases/decreases and does not estimate the magnitude of the underlying trend. For this, we must calculate the Theil-Sen non-parametric line. When compared to the OLS estimate (Fig. 7.10) the Theil-Sen line shows very similar results (1.02 m3 s-1 per year), but is slightly less affected by relatively high outliers during the late 2000s.</p>
 <pre class="r"><code>### Run the Theil-Sen slope for annual min flow
 sen_slope_results &lt;- zyp.sen(min_m3s ~ year, data = flow_annual_subset)
 sen_slope_results</code></pre>
@@ -164,7 +174,7 @@ Figure 7.10: Comparison of non-parametric (Theil-Sen) trend with parametric (OLS
 </div>
 <div id="high-leverage-outlier-effects" class="section level1" number="3">
 <h1 number="3"><span class="header-section-number">3</span> High leverage outlier effects</h1>
-<p>If we instead expand the Göta River timeseries to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent.</p>
+<p>If we instead expand the Göta River time series to begin in 1934, we introduce three high leverage outliers during the late 1930s. Here, the robustness of the Theil-Sen line is more apparent.</p>
 <pre class="r"><code>### Subset to 1934 and after
 flow_annual_longer &lt;- flow_annual %&gt;% filter( year &gt;= 1934) 
 
@@ -207,8 +217,8 @@ summary(gota_lm_longer)</code></pre>
 ## Residual standard error: 87.96 on 83 degrees of freedom
 ## Multiple R-squared:  0.002476,   Adjusted R-squared:  -0.009543 
 ## F-statistic: 0.206 on 1 and 83 DF,  p-value: 0.6511</code></pre>
-<p>By including only 6 additional years, the OLS line changes from a significantly positive trend (+1.3387372 m3/s per year) to a significantly negative trend (-0.1764901 m3/s per year). The Theil-Sen line is slightly affected by these outliers, decreasing in slope from 1.1724138 to 0.7639319, but maintaining a statistically significant 70-year increasing trend that is clear visually.</p>
-<p>This is an extreme example and we know from Section 7.2.3 that these outliers are related to a change in lake management. Data before 1940 follows a different underlying distribution, violating the assumptions of our model. To prove this, read ahead to Section 7.4.3.</p>
+<p>By including only 6 additional years, the OLS line changes from a significantly positive trend (+1.23 m3 s-1per year) to a significantly negative trend (-0.35 m3 s-1per year). The Theil-Sen line is barely affected by these outliers, instead capturing the 70-year increasing trend.</p>
+<p>This is an extreme example and we know from Section 7.2.3 that these outliers are related to a change in lake management. Data before 1940 follows a different underlying distribution, violating the assumptions of our model (Fig. 7.11). To prove this, read ahead to Section 7.4.3.</p>
 <pre class="r"><code>### Combine for plotting purposes
 trend_lines &lt;- flow_annual_longer %&gt;% 
     select(year) %&gt;%  ### Only select the year
