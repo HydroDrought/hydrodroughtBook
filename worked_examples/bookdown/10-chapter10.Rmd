@@ -109,7 +109,7 @@ p <- ggplot(plot_df, aes(x=plot_date)) +
 p
 ```
 
-### Calculate the benchmark drought indices
+### Calculate the benchmark drought characteristics (drought duration and deficit volume)
 
 Drought events in the benchmark time series are then identified with the threshold level method (Section 5.4.1) for a selected period. Note that this time period can differ from the reference period used to calculate the benchmark threshold. In this example, we derive drought events over the period 1981-2000, which equals the period with the main human intervention in the Upper Guadiana catchment. To limit the problem of dependent droughts, consecutive drought events with an inter-event time less than or equal to 10 days are pooled into a single drought event (Worked Example 5.5). To remove minor droughts, only drought events with a duration of more than 10 days are kept (Section 5.x). Average drought duration and deficit volume are then calculated for the resulting series of events. We find for the naturalised benchmark time series a mean duration of 91 days and a mean deficit volume of 0.67 mm.
 
@@ -154,7 +154,7 @@ drought.char$benchmark <- summarize_dc(events$benchmark)
 print(events$benchmark)
 ```
 
-### Calculate the human-influenced drought indices
+### Calculate the human-influenced drought characteristics
 
 
 Similarly, drought events in the human-influenced time series are identified. Note that we are using the same period (1981-2000) as was used to derive drought indices for the benchmark time series (Step 3). Furthermore, we are applying the same inter-event criterion and exclusion of minor drought events (Step 3). We find for the human-influenced time series a mean duration of 304 days and a mean deficit volume 3.59 mm.

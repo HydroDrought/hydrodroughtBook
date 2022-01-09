@@ -102,8 +102,8 @@ chapter-10
 worked-example-10.1-quantifying-the-human-influence-on-drought
 loading-the-data-10
 threshold-calculation
-calculate-the-benchmark-drought-indices
-calculate-the-human-influenced-drought-indices
+calculate-the-benchmark-drought-characteristics-drought-duration-and-deficit-volume
+calculate-the-human-influenced-drought-characteristics
 comparison-of-drought-characteristics
 chapter-12
 worked-example-12.1-classifying-an-impact-report-by-the-edii-impact-category-and-type-scheme
