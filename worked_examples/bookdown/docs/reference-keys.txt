@@ -106,14 +106,15 @@ calculate-the-benchmark-drought-indices
 calculate-the-human-influenced-drought-indices
 comparison-of-drought-characteristics
 chapter-12
+worked-example-12.1-classifying-an-impact-report-by-the-edii-impact-category-and-type-scheme
 worked-example-12.2-drought-impact-model
-data-1
+loading-the-data-11
 preliminary-visual-comparison
 logistic-regression
 predicting-drought-impacts
 chapter-13
 worked-example-13.1-forecast-skill
-loading-the-data-11
+loading-the-data-12
 calculate-long-term-low-flow-threshold-from-observations
 calculate-the-brier-score-bs
 calculate-the-brier-skill-score-bss
