@@ -295,7 +295,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">5.1</span> Worked example 12.1: Classifying an impact report by the EDII impact category and type scheme</h2>
 <p>The Drought Management Briefing from the Environment Agency (England) in Fig. 12.4 shows an example of how to identify drought impacts according to the EDII impact definition and assigning an impact category and type from the classification scheme (Section 12.3.2).</p>
 <div class="figure">
-<img src="../rmarkdown/images/fig12_4.png" alt="" />
+<img src="images/fig12_4.png" alt="" />
 <p class="caption">A text excerpt of the Environment Agency’s, 2012 Drought Management Briefing for England no. 39, published by the Environment Agency, Bristol. Annotated with the identification of the corresponding impact categories and impact sub-types as defined by the EDII classification scheme (Table 12.1).</p>
 </div>
 <p>The task involves the following steps:</p>
@@ -355,7 +355,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="preliminary-visual-comparison" class="section level3" number="5.2.2">
 <h3><span class="header-section-number">5.2.2</span> Preliminary visual comparison</h3>
 <p>As a preliminary comparison, we can plot the time series of July SPEI-3 (in blue) overlaid on the occurrence of annual agricultural impacts (vertical red bars).</p>
-<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="chapter-12.html#cb192-1" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-163"></span>
 <img src="_main_files/figure-html/unnamed-chunk-163-1.png" alt="Figure 12.10 Time series of July SPEI-3 (in blue) plotted together with the occurrence of annual agricultural drought impacts in Germany (vertical red bars)." width="672" />
 <p class="caption">
@@ -364,7 +363,6 @@ Figure 5.1: Figure 12.10 Time series of July SPEI-3 (in blue) plotted together w
 </div>
 <p>When SPEI-3 is very negative (approximately -2) in 1975 an impact occurs, but when SPEI-3 is near -1.5, we have 2 impact years (2003, 2006) and 2 non-impact years (1989, 2008). So, it appears that at a SPEI-3 of -1.5, we have an approximately 50% chance of an impact. As we approach positive SPEI-3, based on this data, the number of drought impacts drops to near 0 (there are no impact records in this database).</p>
 <p>We can also visualise the relationship between SPEI-3 and impact by plotting each value of SPEI-3 from the time series along the x-axis and stacking the proportion of impact vs. no impact months along the y-axis (Fig. 12.11).</p>
-<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="chapter-12.html#cb193-1" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-165"></span>
 <img src="_main_files/figure-html/unnamed-chunk-165-1.png" alt="Figure 12.11 Relationship between the proportion of years with agricultural impacts (orange field) and no impacts (green field) for: the range of (a) and (b) SPI-12 (a, c),  and (c) and (d) SPI-3 (b, d) values in during July ranging from -2 to 2." width="672" />
 <p class="caption">
@@ -377,15 +375,15 @@ Figure 5.2: Figure 12.11 Relationship between the proportion of years with agric
 <div id="logistic-regression" class="section level3" number="5.2.3">
 <h3><span class="header-section-number">5.2.3</span> Logistic Regression</h3>
 <p>Fig. 12.11 is a visual analogy of logistic regression, which is the more rigorous statistical method we will use to model the relationship between one or more predictors and a binary (TRUE/FALSE) predictand. Please keep this visual analogy in mind as we proceed using logistic regression to develop a quantitative impact model. Section 7.3.7 gives mMore methodological details are given in Section 7.3.7, Generalized Linear Models.</p>
-<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="chapter-12.html#cb194-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create data for fitting</span></span>
-<span id="cb194-2"><a href="chapter-12.html#cb194-2" aria-hidden="true" tabindex="-1"></a>fit_data <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
-<span id="cb194-3"><a href="chapter-12.html#cb194-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(date, year, month, index, index_val, impact) <span class="sc">%&gt;%</span></span>
-<span id="cb194-4"><a href="chapter-12.html#cb194-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spread</span>(index, index_val)</span>
-<span id="cb194-5"><a href="chapter-12.html#cb194-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb194-6"><a href="chapter-12.html#cb194-6" aria-hidden="true" tabindex="-1"></a><span class="do">### Fit simple logistic regression using SPEI-3 as a predictor variable</span></span>
-<span id="cb194-7"><a href="chapter-12.html#cb194-7" aria-hidden="true" tabindex="-1"></a><span class="do">### Force an intercept to be included by using + 1</span></span>
-<span id="cb194-8"><a href="chapter-12.html#cb194-8" aria-hidden="true" tabindex="-1"></a>spei_3_fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(impact <span class="sc">~</span> spei_3 <span class="sc">+</span> <span class="dv">1</span>, <span class="at">data =</span> fit_data, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb194-9"><a href="chapter-12.html#cb194-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(spei_3_fit)</span></code></pre></div>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="chapter-12.html#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Create data for fitting</span></span>
+<span id="cb192-2"><a href="chapter-12.html#cb192-2" aria-hidden="true" tabindex="-1"></a>fit_data <span class="ot">&lt;-</span> spi_impacts <span class="sc">%&gt;%</span></span>
+<span id="cb192-3"><a href="chapter-12.html#cb192-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(date, year, month, index, index_val, impact) <span class="sc">%&gt;%</span></span>
+<span id="cb192-4"><a href="chapter-12.html#cb192-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">spread</span>(index, index_val)</span>
+<span id="cb192-5"><a href="chapter-12.html#cb192-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb192-6"><a href="chapter-12.html#cb192-6" aria-hidden="true" tabindex="-1"></a><span class="do">### Fit simple logistic regression using SPEI-3 as a predictor variable</span></span>
+<span id="cb192-7"><a href="chapter-12.html#cb192-7" aria-hidden="true" tabindex="-1"></a><span class="do">### Force an intercept to be included by using + 1</span></span>
+<span id="cb192-8"><a href="chapter-12.html#cb192-8" aria-hidden="true" tabindex="-1"></a>spei_3_fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(impact <span class="sc">~</span> spei_3 <span class="sc">+</span> <span class="dv">1</span>, <span class="at">data =</span> fit_data, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb192-9"><a href="chapter-12.html#cb192-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(spei_3_fit)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = impact ~ spei_3 + 1, family = &quot;binomial&quot;, data = fit_data)
@@ -408,13 +406,11 @@ Figure 5.2: Figure 12.11 Relationship between the proportion of years with agric
 ## AIC: 27.362
 ## 
 ## Number of Fisher Scoring iterations: 6</code></pre>
-<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="chapter-12.html#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(spei_3_fit)</span></code></pre></div>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="chapter-12.html#cb194-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(spei_3_fit)</span></code></pre></div>
 <pre><code>##                 2.5 %    97.5 %
 ## (Intercept) -5.181009 -1.634530
 ## spei_3      -5.049901 -1.167493</code></pre>
 <p>The fitted model appears similar to our visual analogy (Fig. 12.11), but now follows a formal logistic regression equation, with confidence intervals (Fig. 12.12). As expected from our visual analogy, the likelihood of an impact is approximately 50% for SPEI-3 of -1.1, near 100% for -2 and near 0 for positive values.</p>
-<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="chapter-12.html#cb198-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Plot the relationship with SPEI-3</span></span>
-<span id="cb198-2"><a href="chapter-12.html#cb198-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logistbarplot</span>(<span class="at">log.fit =</span> spei_3_fit, <span class="at">log.var =</span> <span class="st">&quot;spei_3&quot;</span>)</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-168"></span>
 <img src="_main_files/figure-html/unnamed-chunk-168-1.png" alt="Figure 12.12 Relation between the drought index (SPEI-3) and predicted agricultural impact likelihood for Germany as a solid (red) line with shaded 95% confidence intervals; the distribution of SPEI-3 is shown as box plots for months with impacts (top) and months with no impacts (bottom)." width="672" />
 <p class="caption">
@@ -426,17 +422,17 @@ Figure 5.3: Figure 12.12 Relation between the drought index (SPEI-3) and predict
 <div id="predicting-drought-impacts" class="section level3" number="5.2.4">
 <h3><span class="header-section-number">5.2.4</span> Predicting drought impacts</h3>
 <p>It is now possible to make predictions based on this relationship for our fitting period or for any new values of SPI or SPEI.</p>
-<div class="sourceCode" id="cb199"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb199-1"><a href="chapter-12.html#cb199-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Use the SPEI3 regression to predict the likelihood of an impact</span></span>
-<span id="cb199-2"><a href="chapter-12.html#cb199-2" aria-hidden="true" tabindex="-1"></a><span class="do">### Keep the standard error for confidence intervals around prediction</span></span>
-<span id="cb199-3"><a href="chapter-12.html#cb199-3" aria-hidden="true" tabindex="-1"></a>predict_ts <span class="ot">&lt;-</span> <span class="fu">predict</span>(spei_3_fit, <span class="at">newdata =</span> fit_data, <span class="at">type =</span> <span class="st">&quot;link&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb199-4"><a href="chapter-12.html#cb199-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb199-5"><a href="chapter-12.html#cb199-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Add in prediction and confidence intervals</span></span>
-<span id="cb199-6"><a href="chapter-12.html#cb199-6" aria-hidden="true" tabindex="-1"></a>predict_df <span class="ot">&lt;-</span> fit_data <span class="sc">%&gt;%</span></span>
-<span id="cb199-7"><a href="chapter-12.html#cb199-7" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predict =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit)) <span class="sc">%&gt;%</span></span>
-<span id="cb199-8"><a href="chapter-12.html#cb199-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predict_upper =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">+</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span> </span>
-<span id="cb199-9"><a href="chapter-12.html#cb199-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predict_lower =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">-</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span></span>
-<span id="cb199-10"><a href="chapter-12.html#cb199-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>spi_3, <span class="sc">-</span>spei_12, <span class="sc">-</span>spi_12) <span class="sc">%&gt;%</span></span>
-<span id="cb199-11"><a href="chapter-12.html#cb199-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="chapter-12.html#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Use the SPEI3 regression to predict the likelihood of an impact</span></span>
+<span id="cb196-2"><a href="chapter-12.html#cb196-2" aria-hidden="true" tabindex="-1"></a><span class="do">### Keep the standard error for confidence intervals around prediction</span></span>
+<span id="cb196-3"><a href="chapter-12.html#cb196-3" aria-hidden="true" tabindex="-1"></a>predict_ts <span class="ot">&lt;-</span> <span class="fu">predict</span>(spei_3_fit, <span class="at">newdata =</span> fit_data, <span class="at">type =</span> <span class="st">&quot;link&quot;</span>, <span class="at">se =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb196-4"><a href="chapter-12.html#cb196-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb196-5"><a href="chapter-12.html#cb196-5" aria-hidden="true" tabindex="-1"></a><span class="do">### Add in prediction and confidence intervals</span></span>
+<span id="cb196-6"><a href="chapter-12.html#cb196-6" aria-hidden="true" tabindex="-1"></a>predict_df <span class="ot">&lt;-</span> fit_data <span class="sc">%&gt;%</span></span>
+<span id="cb196-7"><a href="chapter-12.html#cb196-7" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predict =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit)) <span class="sc">%&gt;%</span></span>
+<span id="cb196-8"><a href="chapter-12.html#cb196-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predict_upper =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">+</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span> </span>
+<span id="cb196-9"><a href="chapter-12.html#cb196-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">predict_lower =</span> <span class="fu">plogis</span>(predict_ts<span class="sc">$</span>fit <span class="sc">-</span> (<span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> predict_ts<span class="sc">$</span>se.fit))) <span class="sc">%&gt;%</span></span>
+<span id="cb196-10"><a href="chapter-12.html#cb196-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>spi_3, <span class="sc">-</span>spei_12, <span class="sc">-</span>spi_12) <span class="sc">%&gt;%</span></span>
+<span id="cb196-11"><a href="chapter-12.html#cb196-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>()</span></code></pre></div>
 <pre><code>## # A tibble: 43 x 8
 ##    date        year month impact   spei_3 predict predict_upper predict_lower
 ##    &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;     &lt;dbl&gt;   &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;
@@ -452,7 +448,6 @@ Figure 5.3: Figure 12.12 Relation between the drought index (SPEI-3) and predict
 ## 10 1979-07-01  1979     7 FALSE  -0.328   0.107       0.0323           0.301 
 ## # … with 33 more rows</code></pre>
 <p>Making predictions based on the original training data, we can now see (Fig. 12.13) that during most years the likelihood of an agricultural impact remains below 10%. In years with low SPEI-3, the likelihood quickly peaks. In 1976, our most severe drought in this period, the predicted likelihood is approximately 90%. Not surprisingly, an impact occurs during this period. For a predicted likelihood of 50%, there is approximately the same number of years with impacts as those without, a sign of a good fit. Also, notice that the prediction intervals are not normally distributed around the estimate. They are normally distributed in logit (log-odds) space, but have been converted into impact likelihood, ensuring that neither the estimate nor the interval produces impossible likelihoods (&lt; 0 or &gt; 1).</p>
-<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb201-1"><a href="chapter-12.html#cb201-1" aria-hidden="true" tabindex="-1"></a>p</span></code></pre></div>
 <div class="figure"><span id="fig:unnamed-chunk-171"></span>
 <img src="_main_files/figure-html/unnamed-chunk-171-1.png" alt="Figure 12.13 Predictions of the likelihood of an agriculture impact (blue line with grey confidence intervals) and deducted binary predicted occurrence (pink)." width="672" />
 <p class="caption">
