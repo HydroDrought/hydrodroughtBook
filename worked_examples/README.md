@@ -142,6 +142,32 @@ For the full code, see the <a href="https://github.com/jstagge/hydroDrought/tree
   </tr>
 
 
+  
+  <tr>
+    <td> <b> 8. Regionalization procedures</b> </td>
+    <td> <i>Gregor Laaha</i> </td>
+    <td> 2 </td>
+  </tr>
+
+  <tr>
+  <td colspan="3">
+  <ul>
+  <li>8.1 Regional regression: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/8-1_regional_regression.html">Worked Example</a>, 
+    <br><i>Completed. </i>
+
+  </li>
+
+  <li>8.2 Top-kriging: 
+    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/8-2_topkriging.html">Worked Example</a>, 
+    <br><i>Completed.</i>
+  </li>
+
+  </ul>
+  </td>
+  </tr>
+
+
    <tr>
     <td> <b> 9. Process-based modelling</b> </td>
     <td> <i>Henny van Lanen</i> </td>

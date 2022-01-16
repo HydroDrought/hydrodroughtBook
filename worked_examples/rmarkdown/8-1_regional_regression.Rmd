@@ -1,0 +1,242 @@
+---
+title: "Regional Regression"
+author: "Worked example 8.1"
+---
+
+```{r, setup, include=FALSE}
+ggplot2::theme_set(ggplot2::theme_bw(base_size = 10))
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(hydroDrought)
+
+```
+
+
+# Introduction
+This vignette demonstrates the application of regional regression analysis to model low flows in a spatial context. We use the regional dataset of 30 catchments situated in the forelands and pre-Alps in the north-east of Austria (Section 4.5.2). The dataset is fully described in Laaha & Blöschl (2006a, 2006b). The target variable is the long-term low flow characteristic $q_{95}$, i.e. $Q_{95}$ standardized by catchment area to eliminate its predominant effect on low flows. For nested catchments, the $q_{95}$ was disaggregated into the residual $q_{95}$ of sub-catchments to decrease statistical dependency of observations. The method assumes synchronicity of low flow events of neighboring gauges at the same river. For more details on this particular river network approach see Section 8.7.2.
+
+In this section we learn how to
+
+* fit a multiple linear regression model, 
+* perform stepwise regression to perform variable selection and deal with collinearity, 
+* employ the Cook's distance method to deal with outliers, 
+* use the MM-type robust regression method, and 
+* create specific plots to analyse the quality of the regression model and the specific contribution of each predictor to the regression estimate.
+
+
+# Data import
+The text file named `Austria_30.txt` contains several catchment characteristics for the 30 catchments of the regional data set. Each observation (each line) in the text file corresponds to a single gauging station located at the catchment outlet. The variables (our catchment descriptors) are represented as columns of this data set. 
+
+Let us import this tabular data set into an object `x0`. As the very first line of the  text file contains the column headers, we have to specify the `header` argument accordingly. The function `read.table()` will return a `data.frame`. 
+
+```{r}
+x0 <- read.table("../../data/Austria_30.txt", header = TRUE)
+```
+
+
+To get a glimpse of the imported data set, let us print the first three lines of the object `x0`. They contain the catchment descriptors of the first three catchments. 
+
+```{r}
+head(x0, n = 3)
+```
+
+To make sure all variables are imported either as class `integer` or `numeric` (and not accidentally as class `character` or `factor`) let us have a look at the structure of the object `x0`. Calling the function `str()` will print the dimensions of the `data.frame` in the very first line. The following lines contain the name of each variable, its class, and the first few values. 
+
+```{r}
+str(x0)
+```
+
+
+Another way to find out the dimensions of an object is to call `dim(x0)`, `ncol(x0)` or `nrow(x0)` explicitly. 
+
+The raw data set `x0` contains some variables which we do not want to use in our regression model, e.g. the id number or the coordinates of the gauging station. We will remove the columns to simplify the subsequent analysis. It is also a good idea to assign meaningful row names to the `data.frame` (e.g. the station's id `'HZBNR'` or its location name ) to be able to identify the observations later on. 
+
+
+```{r}
+rownames(x0) <- x0$HZBNR
+
+remove <- c("DBMSNR", "HZBNR", "X_LB", "Y_LB", "q95s", "q95w", "A")
+keep <- setdiff(colnames(x0), remove)
+x <- x0[, keep]
+head(x)
+```
+
+
+# Simple linear regression
+As a starting point of the analysis, we fit a simple linear regression model. We take the mean annual precipitation $P$ as the predictor, since it is likely an important control of low flows in the study area.
+```{r, fig.height=6}
+lm.simple <- lm(q95 ~ P, data = x)
+
+summary(lm.simple)
+par(mfrow = c(2, 2))
+plot(lm.simple)
+```
+
+
+<!-- Explore the fitted model object -->
+<!-- ```{r} -->
+<!-- str(lm.simple) -->
+<!-- ``` -->
+<!-- Note that the object is a list, containing vectors, data frames, etc. as elements.  -->
+<!-- These elements may be extracted for further analysis via, e.g.`lm.simple$residuals` -->
+
+<!-- ```{r} -->
+<!-- lm.simple$residuals -->
+<!-- ``` -->
+
+The regression summary contains the residual statistics, the coefficients table, and performance statistics such as the residual standard error (equivalent to the $RMSE$) and the multiple R-squared (equivalent to the coefficient of determination $R^2$). We see from the t-test that $P$ is a highly significant predictor ($p-value$ =`0.00482`) but the intercept is not significant at the $\alpha$ =`0.05` level. We further learn that the model explains `25.08 %` of the low flow variability in the study area, which is quite high for a single predictor model. The estimated regression coefficient of $P$ (when multiplied by 100) translates to a $q_{95}$ increase of `0.53` $l s^{-1} km^{-2}$ per 100 mm increase in precipitation index.
+
+The residual plots can be used to verify the assumptions of the model. In our example, the residuals are quite normally distributed but extreme outliers seem to violate this assumption. A procedure how to deal with such outliers is discussed later in the worked example. The diagnosis gives no clear evidence about the homoscedasticity, due to the presence of outliers in combination with a small data set.
+
+# Stepwise regression
+
+In stepwise regression an 'optimal' model (based on some information criterion, such as the $AIC$, $BIC$ or $C_p$) is obtained by iteratively adding and removing variables. Our procedure will be based on the $AIC$, following the standard setting in $R$. The elementary steps of adding and dropping variables are demonstrated below.  
+
+
+## Manual forward selection
+The first approach to stepwise regression is to start from the empty model and adding the variable with highest explicative value. Such a *manual forward selection* can be performed by calling `add1()`. The function takes a fitted model object together with a `scope` formula which specifies the variables to be considered for adding. In our case the scope contains all variables. Instead of using an empty model our initial model already contains the mean annual precipitation $P$, as we can savely assume that the $q_{95}$ low flow will depend on the long-term average precipitation of the catchment. 
+
+```{r}
+model.init <- lm(q95 ~ P, data = x)
+scope <- formula(paste("~", paste(colnames(x)[-1], collapse = " + ")))
+add1(model.init, scope = scope)
+```
+
+
+```{r include=FALSE, results=FALSE}
+tab <- add1(model.init, scope = scope)
+best <- head(tab[order(tab$AIC), ], 1)
+```
+
+This table tells us that the model would profit most from adding the variable $`r rownames(best)`$ , as this would would minimize the $AIC$ to a value of ``r round(best$AIC, 2)`` and the sum of squared residuals $RSS$ to a value of ``r round(best$RSS, 1)``.  The resulting model is considered better if its $AIC$ is lower than the one of the original model whose performance can be read from the first line of the table, with the label ``r rownames(tab[1,])``.
+
+
+## Manual backward selection
+When starting from a complex model with several predictors the function `drop1()` can be used to remove the least significant variable. The resulting model is again considered better if its $AIC$ is lower than the one of the original model. This procedure is called *backward selection*. 
+
+Care shall be taken when fitting a full model that contains all catchment characteristics, as some of them are usually correlated, leading to a problem known as multicollinearity. Multicollinearity harms parameter estimation and leads to overfitted models, whose parameters are ill-deterimined and have little physical significance. In our case, minimum, maximum and range of altitude are exactly collinear, which means that one of the three variables can be dropped without any loss of information. Other variables respresenting precipitation, geology, altitude, and other landscape characteristics are likely to be collinear as well. As a consequence, we should not fit a model to the full set of catchment characteristics available for the study area. 
+
+Likewise, the backward selection needs to start with a well-defined model. Let us therfore assume that we whant to test a model consiting of  the five variables $P$, $Hm$, $Sm$, $Gq$, $Lf$, which represent different types of catchment characteristics. 
+
+```{r}
+model.full <- lm(q95 ~ P + Hm + Sm + Gq + Lf, data = x)
+```
+
+```{r}
+drop1(model.full)
+```
+
+
+```{r include=FALSE}
+tab <- drop1(model.full)
+#best <- head(tab[order(tab$AIC, decreasing = TRUE), ], 1)
+worst <- head(tab[order(tab$AIC, decreasing = FALSE), ], 1)
+```
+
+The above table tells us that among all single term deletions the model without $`r rownames(worst)`$ would have the the lowest $AIC$ = ``r round(worst$AIC, 2)`` and the lowest sum of squared residuals RSS = ``r round(worst$RSS, 1)`` . This means that dropping $`r rownames(worst)`$ would significantly improve the model.
+
+
+## Automated variable selection
+Single variable addition and deletion can be used repeatedly unless any removal or addition of a variable would result in an increase of the $AIC$ and therefore in an inferior model. Such an automated variable selection is performed by the fuction `step`. Its argument `direction` specifies the mode of stepwise search: `foreward`, `backward` and `both` directions (default).  
+
+```{r, fig.height=6}
+lm.both <- step(model.init, scope = scope, direction = "both", trace = 0) 
+summary(lm.both)
+```
+
+The resulting model consists of four predictors $Lwa, Ggs, Sm, Gc$ and exhibits a coefficient of determination of $R^2 = 0.69$, which is a major improvement over the  simple linear regression model based on $P$. 
+
+
+## Plotting the results
+
+One can show the model performance in a scatter plot by printing the predicted values of $q_{95}$ against the actual, observed values. 
+
+```{r}
+par(pty="s")
+plot(x = x$q95, y = fitted(lm.both), xlab = "observed q95", ylab = "predicted q95")
+abline(lsfit(lm.both$model$q95, lm.both$fitted.values))
+```
+
+
+To depict the contribution of each predictor $x_j$ to the estimated $q95$ the function `termplot()` plots each regression term ($\beta_j \cdot x_j$) against its predictor. All four predictor variables exhibit a positive influence on low flows, but the quality of the relationship differs greatly. For $L_{wa}$ the value of the predictor is `0` for most cases, so the term only affects very few catchments that have a water surface area greater than zero. At the other end of the spectrum is $S_m$ which exhibits a positive linear effect for the entire data set. The predictors $G_c$ and $G_s$ exhibit a linear effect for the majority of catchments and are thus in between these cases.
+
+
+```{r, fig.height=6}
+par(mfrow = c(2,2))
+termplot(lm.both, partial.resid = TRUE) 
+```
+
+As a final step, the assumptions of the model need to be checked by diagnostic plots. 
+
+
+```{r}
+par(mfrow = c(2,2))
+plot(lm.both)
+```
+
+
+# Remove outliers based on Cook's distance
+
+```{r include=FALSE}
+cooks <- sort(abs(cooks.distance(lm.both)), decreasing = TRUE)
+```
+
+
+In the diagnostic plot of the final model obtained by stepwise regression the station with id number ``r names(cooks)[1]`` popped out because of its high Cook's distance of ``r round(cooks[1], 2)``. Such points can can act as leverage points and force the model to get close to them. The model is then too much representing single observations rather than providing an ovarall representation of the data set. In the Cook's distance method the levereage points are held out from model fitting to perform robust parameter estimation.       
+ 
+The analysis is conducted in 3 steps (that may be repeated until no outliers remain...)
+
+(@) Detect outliers based on Cook's distance. You can do this either by looking a the diagnostic plot or by subsetting the result of the function `cooks.distance()`. Let's for example eliminate all outliers with an absolute Cook's distance larger than 1.
+```{r}
+pos <- which(abs(cooks.distance(lm.both)) >= 1)
+pos
+```
+ 
+In our data set this is the station with the id number ``r names(pos)``, which is observation number (row number) ``r pos``.
+ 
+
+(@) Now we can eliminate the outliers manually, by removing this row. 
+```{r}
+x1 <- x[-pos, ]
+dim(x1)
+```
+
+(@) Finally we have to re-run our stepwise regression model. 
+
+```{r}
+lm.new <- step(lm(q95 ~ P, data = x1), scope = scope, trace = 0) 
+summary(lm.new)
+
+par(mfrow = c(2,2))
+plot(lm.new)
+```
+
+
+The so obtained model is free of leverage points and consists of a slightly different parameter set. The coefficient of determination is somewhat higher than the privious stepwise regression model, but needs to be interpreted with care as it is not evaluated for the entire data set.
+
+# Robust regression (alternative to manual outlier detection)
+
+Robust regression can be used as an alternative to manual outlier detection. A number of methods exist. Some of the methods, however, tend to be more sensitive to outliers than to leverage points, and will therefore be less suited than the Cook’s distance method. We use here an MM-type estimator, which constitutes the current standard in $R$'s `robustbase` package. The estimator performs a maximum-likelihood type estimation that is highly efficient and robust to leverage points as well. 
+
+```{r, warning=FALSE}
+library(robustbase)
+model <- q95 ~ Ggs + Gc + Sm + H0
+x.rob <- lmrob(formula = model, data = x)
+summary(x.rob)
+plot(x.rob)
+```
+
+We can see that the robust MM-estimator leads to a well-fitted model with a low $RMSE$ and a high $R^2$. Note, however, that the fit statistics of the robust regression method are not fully comparable with those of the standard regression method as outliers are downweigted in the parameter estimation and will receive lower weight in the fit statistics as well. The residual plots allow a direct comparison among different models. Compared to standard OLS-regression, the MM-estimator performs much better for the majority of cases while showing poor fit for extreme outliers. Leverage points appear to have little impact on the model. 
+
+
+# References
+* Laaha, G. & Blöschl, G. (2006a) Seasonality indices for regionalizing low flows. Hydrol. Process. 20(18), 3851-3878. doi:10.1002/hyp.6161
+* Laaha, G. & Blöschl, G. (2006b) A comparison of low flow regionalisation methods-catchment grouping. J. Hydrol. 323(1-4), 193-214. doi:10.1016/j.jhydrol.2005.09.001
+
+
+
+
+

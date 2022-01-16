@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Worked example 8.2" />
+
+
+<title>Top-kriging</title>
+
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
+<link href="site_libs/tufte-css-2015.12.29/tufte-fonts.css" rel="stylesheet" />
+<link href="site_libs/tufte-css-2015.12.29/tufte.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Top-kriging</h1>
+<h4 class="author">Worked example 8.2</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction"><span class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#data-import"><span class="toc-section-number">2</span> Data import</a>
+<ul>
+<li><a href="#reading-shapefiles"><span class="toc-section-number">2.1</span> Reading Shapefiles</a></li>
+<li><a href="#creating-an-rtopobj"><span class="toc-section-number">2.2</span> Creating an rtopObj</a></li>
+</ul></li>
+<li><a href="#explorative-statistics"><span class="toc-section-number">3</span> Explorative statistics</a>
+<ul>
+<li><a href="#checking-the-low-flow-distribution"><span class="toc-section-number">3.1</span> Checking the low flow distribution</a></li>
+<li><a href="#data-transformation"><span class="toc-section-number">3.2</span> Data transformation</a></li>
+<li><a href="#summary-statistics"><span class="toc-section-number">3.3</span> Summary statistics</a></li>
+<li><a href="#ploting-the-data"><span class="toc-section-number">3.4</span> Ploting the data</a></li>
+</ul></li>
+<li><a href="#variogram-analysis"><span class="toc-section-number">4</span> Variogram analysis</a>
+<ul>
+<li><a href="#sample-variogram"><span class="toc-section-number">4.1</span> Sample variogram</a></li>
+<li><a href="#theoretical-variogram-various-support"><span class="toc-section-number">4.2</span> Theoretical variogram (various support)</a></li>
+</ul></li>
+<li><a href="#kriging"><span class="toc-section-number">5</span> Kriging</a></li>
+<li><a href="#cross-validation"><span class="toc-section-number">6</span> Cross-validation</a></li>
+<li><a href="#references"><span class="toc-section-number">7</span> References</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level1" number="1">
+<h1 number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>This vignette demonstrates the application of Top-kriging presented in Skøien et al. (2006, 2014) to model low flows along the stream network. We use a dataset of 30 gauged and 373 ungauged catchments situated in the forelands and pre-Alps in the north-east of Austria, for details see Section 4.5.2. The target variable is the long-term low flow characteristic <span class="math inline">\(q_{95}\)</span>, i.e. <span class="math inline">\(Q_{95}\)</span> standardized by catchment area. The data consist of overlapping catchment polygons provided in two Shapefiles, the first containing the observed catchments only, the second containing all catchments (prediction locations incl. observed catchments).</p>
+<p>In this worked example, we learn</p>
+<ul>
+<li>how to import SpatialPolygonDataFrames and store them as an rtopObj,</li>
+<li>perform explorative statistics and conduct variogram analysis,</li>
+<li>fit a variogram model and employ kriging to perform prediction to catchments along the stream network</li>
+<li>perform cross-validation,</li>
+<li>and create low flow maps of observed and predicted values.</li>
+</ul>
+</div>
+<div id="data-import" class="section level1" number="2">
+<h1 number="2"><span class="header-section-number">2</span> Data import</h1>
+<p>We will use the <code>rtop</code> package to perform kriging along the river network and the package <code>rgdal</code> for handling geospatial data. We load the packages (after installation at first use).</p>
+<pre class="r"><code>library(rtop)
+library(rgdal)</code></pre>
+<div id="reading-shapefiles" class="section level2" number="2.1">
+<h2 number="2.1"><span class="header-section-number">2.1</span> Reading Shapefiles</h2>
+<p>The methods used here take the catchment topology into account. Our data are therefore Shapefiles that contain the (overlapping) catchment polygons together with an attribute table containing the low flow index and other catchment information. The data is provided in two files. The first file named ´File1.shp´ contains the 30 observed catchments and is used for model fitting. The second one named ´File2.shp´ contains the whole data set (prediction locations incl. observed catchments) and is used for the prediction.</p>
+<p>For the import, we first set the path of the data directory where the Shapefiles are stored:</p>
+<pre class="r"><code>rpath &lt;- &quot;../../data/catchment_shape_files&quot;</code></pre>
+<p>We can now read the Shapefile containing the observation dataset.</p>
+<pre class="r"><code>x.obs &lt;- readOGR(rpath,&quot;File1&quot;)</code></pre>
+<pre><code>## OGR data source with driver: ESRI Shapefile 
+## Source: &quot;/run/media/jhstagge/2DD2A9A003BF0188/Documents/work_folder/projects_research/code/hydroDrought/data/catchment_shape_files&quot;, layer: &quot;File1&quot;
+## with 30 features
+## It has 6 fields</code></pre>
+<!-- x.obs <- readOGR(rpath,"Watershed_Gesamt_zone1_nwkenn_OBS") # Former name of observation data set -->
+<p>We then create a new column <code>x.obs$obs</code> that shall contain the observed values of our target variable. Note that top-kriging requires the flow characteristic standardized per unit area (specific discharge in <span class="math inline">\(l s^{-1} km^{-2}\)</span>), which may need to be calculated from absolute discharge values. In our case, the observed values of specific low flow <code>x.obs$Q95S</code> are simply assigned to the newly created column <code>x.obs$obs</code>.</p>
+<pre class="r"><code>x.obs$obs &lt;- x.obs$Q95S</code></pre>
+<p>The imported object belongs to the <code>SpatialPolygonsDataFrame</code>-class, which consists of 5 slots. We can access each slot (using “@”). This allows us to check the data structure of the attribute table:</p>
+<pre class="r"><code>slotNames(x.obs)</code></pre>
+<pre><code>## [1] &quot;data&quot;        &quot;polygons&quot;    &quot;plotOrder&quot;   &quot;bbox&quot;        &quot;proj4string&quot;</code></pre>
+<pre class="r"><code>str(x.obs@data)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    30 obs. of  7 variables:
+##  $ EZGID     : num  696 1887 1954 2058 2960 ...
+##  $ HZBNR     : num  208108 208512 208678 208447 211508 ...
+##  $ SHAPE_AREA: num  6.07e+07 6.47e+07 7.20e+07 1.31e+08 1.42e+08 ...
+##  $ AREASQKM  : num  60.7 64.7 72 130.6 142.3 ...
+##  $ Q95       : num  0.06 0.06 0.05 0.05 0.11 0.14 0.14 0.08 0.2 0.16 ...
+##  $ Q95S      : num  0.98 0.96 0.75 0.38 0.91 1.2 0.95 0.61 1.07 1.79 ...
+##  $ obs       : num  0.98 0.96 0.75 0.38 0.91 1.2 0.95 0.61 1.07 1.79 ...</code></pre>
+<p>The import and preparation of the prediction dataset is done analogously.</p>
+<pre class="r"><code>x.pred = readOGR(rpath,&quot;File2&quot;)</code></pre>
+<pre><code>## OGR data source with driver: ESRI Shapefile 
+## Source: &quot;/run/media/jhstagge/2DD2A9A003BF0188/Documents/work_folder/projects_research/code/hydroDrought/data/catchment_shape_files&quot;, layer: &quot;File2&quot;
+## with 404 features
+## It has 6 fields</code></pre>
+<pre class="r"><code>x.pred$obs &lt;- x.pred$Q95S # also in x.pred for ploting</code></pre>
+<!-- x.pred = readOGR(rpath,"Watershed_Gesamt_zone1_nwkenn_PRED_BIG3") # Former name of prediction data set -->
+</div>
+<div id="creating-an-rtopobj" class="section level2" number="2.2">
+<h2 number="2.2"><span class="header-section-number">2.2</span> Creating an rtopObj</h2>
+<p>The easiest way to use the functionality of the <em>rtop</em>-package is to create a particular <em>rtop</em>-object. In this step, we need to specify the <code>observations</code> and the <code>predictionLocations</code> object and use the <code>formulaString</code> argument to define the dependent variable and the kriging method. We use <code>obs~1</code> to perform ordinary Top-kriging of a dependent variable <code>obs</code>. For large data sets this step may be time consuming so it is recommended to set the option <code>gdist=TRUE</code> to calculate a simplified distance measure that will reduce computation time.</p>
+<pre class="r"><code>params &lt;- list(gDist = TRUE)
+rtopObj &lt;- createRtopObject(observations=x.obs, predictionLocations=x.pred, formulaString = obs~1, params = params)
+names(rtopObj)</code></pre>
+<pre><code>## [1] &quot;observations&quot;        &quot;predictionLocations&quot; &quot;formulaString&quot;       &quot;params&quot;</code></pre>
+<p>For most functions, the parameters can either be set directly during the function call, or specified in a <code>params</code> list and set as default using the <code>params</code> argument.</p>
+</div>
+</div>
+<div id="explorative-statistics" class="section level1" number="3">
+<h1 number="3"><span class="header-section-number">3</span> Explorative statistics</h1>
+<div id="checking-the-low-flow-distribution" class="section level2" number="3.1">
+<h2 number="3.1"><span class="header-section-number">3.1</span> Checking the low flow distribution</h2>
+<p>Before starting the geostatistical analysis we need to verify the basic assumption of kriging that data shall follow a Gaussian distribution to achieve best linear unbiased estimates. We see from the histograms that the raw data exhibit a skewed distribution so we test different variable transformations.</p>
+<pre class="r"><code>hist(rtopObj$observations$obs)</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-9-1.png" width="672"  /></p>
+<pre class="r"><code>hist(log(rtopObj$observations$obs))</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-9-2.png" width="672"  /></p>
+<pre class="r"><code>hist(sqrt(rtopObj$observations$obs), breaks=9)</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-9-3.png" width="672"  /></p>
+<p>We can see that the sqrt-transformation performs somewhat better than the log-transformation to approximate a Gaussian distribution. Alternatively, the Box-Cox transformation (Section 7.X) can be used to fine-tune the transformation parameters to better approximate normality.</p>
+</div>
+<div id="data-transformation" class="section level2" number="3.2">
+<h2 number="3.2"><span class="header-section-number">3.2</span> Data transformation</h2>
+<p>The best-performing transformation is then applied to the <code>obs</code> data slots, to transform the <code>observations</code> and <code>predictionLocations</code>in the <code>rtopObj</code>.</p>
+<pre class="r"><code>rtopObj$observations$obs &lt;- sqrt(x.obs$Q95S)
+rtopObj$predictionLocations$obs &lt;- sqrt(x.pred$Q95S)</code></pre>
+<p>We finally review the observations in the <code>rtobObj</code> to ensure that our transformation was successful.</p>
+<pre class="r"><code>hist(rtopObj$observations$obs, nclass=9)</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-11-1.png" width="672"  /></p>
+</div>
+<div id="summary-statistics" class="section level2" number="3.3">
+<h2 number="3.3"><span class="header-section-number">3.3</span> Summary statistics</h2>
+<p>We compute summary statistics to provide insight into the distribution of the (transformed) low flow data.</p>
+<pre class="r"><code>summary(rtopObj$observations$obs)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.3317  0.8077  0.9849  1.1190  1.3407  2.0298</code></pre>
+</div>
+<div id="ploting-the-data" class="section level2" number="3.4">
+<h2 number="3.4"><span class="header-section-number">3.4</span> Ploting the data</h2>
+<p>In a final explorative assessment, the values are presented in a geographic map to provide a first impression about the spatial distribution of low flows in the study area. In the left panel we show the untransformed specific low flows, in the right panel the transformed values. We can observe a spatial pattern of decreasing low flows from west to east. The highest values can be found in the south-west in a low-mountain range of about 1000 m altitude.</p>
+<pre class="r"><code>spplot(obj=rtopObj$observations, col.regions = rev(heat.colors(n=100)), col=&quot;grey&quot;,
+       c(&quot;Q95S&quot;, &quot;obs&quot;))</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-13-1.png" width="672"  /></p>
+</div>
+</div>
+<div id="variogram-analysis" class="section level1" number="4">
+<h1 number="4"><span class="header-section-number">4</span> Variogram analysis</h1>
+<p>As in classical geostatistics, the variogram analysis proceeds in two steps. We first calculate the sample variogram representing the spatial correlation structure of observed low flow characteristics. We then fit a theoretical variogram model to the sample variogram, which is used to estimate the optimal weights for the kriging estimator.</p>
+<div id="sample-variogram" class="section level2" number="4.1">
+<h2 number="4.1"><span class="header-section-number">4.1</span> Sample variogram</h2>
+<p>A call to <code>rtopVariogram</code> adds the sample variogram to the <code>rtopObj</code>. The package supports both binned variograms and variogram clouds.</p>
+<pre class="r"><code>rtopObj &lt;- rtopVariogram(rtopObj, cloud=TRUE)</code></pre>
+</div>
+<div id="theoretical-variogram-various-support" class="section level2" number="4.2">
+<h2 number="4.2"><span class="header-section-number">4.2</span> Theoretical variogram (various support)</h2>
+<p>As opposed to ordinary kriging, the theoretical point variogram of Top-kriging cannot be fitted directly to the sample data, due to the different support of the observations. Instead, the function <code>fitVariogram</code> optimizes a point variogram model whose regularized semivariogram values yield best fit to the sample variogram values. This is performed in a iterative procedure, known as <em>back-calculation</em>.</p>
+<pre class="r"><code>rtopObj &lt;- rtopFitVariogram(rtopObj)</code></pre>
+<pre><code>## 52 best 0.709 function convergence 200 parameter convergence 5413.095 
+## 82 best 0.209 function convergence 200 parameter convergence 4068.197 
+## 111 best 0.206 function convergence 200 parameter convergence 2584.538 
+## 138 best 0.197 function convergence 200 parameter convergence 1698.011 
+## 172 best 0.196 function convergence 200 parameter convergence 1223.195 
+## 208 best 0.195 function convergence 114 parameter convergence 1052.82 
+## 238 best 0.195 function convergence 6.7 parameter convergence 791.278 
+## 266 best 0.194 function convergence 5.73 parameter convergence 640.4108 
+## 300 best 0.194 function convergence 1.38 parameter convergence 568.1314 
+## 332 best 0.194 function convergence 1.05 parameter convergence 367.9165 
+## 358 best 0.193 function convergence 0.903 parameter convergence 302.2363 
+## 387 best 0.193 function convergence 0.934 parameter convergence 190.8539 
+## 415 best 0.193 function convergence 0.801 parameter convergence 153.4545 
+## 440 best 0.193 function convergence 0.915 parameter convergence 134.7474 
+## 465 best 0.192 function convergence 0.846 parameter convergence 110.2745 
+## 490 best 0.192 function convergence 0.526 parameter convergence 89.11796 
+## 516 best 0.192 function convergence 0.449 parameter convergence 98.89182 
+## 541 best 0.192 function convergence 0.273 parameter convergence 66.4087 
+## 567 best 0.192 function convergence 0.144 parameter convergence 49.75299 
+## 592 best 0.192 function convergence 0.0897 parameter convergence 53.89657 
+## 617 best 0.192 function convergence 0.0363 parameter convergence 35.03615 
+## 642 best 0.192 function convergence 0.0246 parameter convergence 27.64926 
+## 667 best 0.192 function convergence 0.0202 parameter convergence 30.42742 
+## 693 best 0.192 function convergence 0.0124 parameter convergence 18.39769 
+## 718 best 0.192 function convergence 0.00824 parameter convergence 17.06349 
+## 743 best 0.192 function convergence 0.00665 parameter convergence 11.04282 
+## 768 best 0.192 function convergence 0.0039 parameter convergence 8.570567 
+## 793 best 0.192 function convergence 0.00236 parameter convergence 6.799323 
+## 818 best 0.192 function convergence 0.00147 parameter convergence 5.447261 
+## 843 best 0.192 function convergence 0.000906 parameter convergence 4.904155 
+## 871 best 0.192 function convergence 0.000487 parameter convergence 4.115939 
+## 896 best 0.192 function convergence 0.000223 parameter convergence 3.258334 
+## 921 best 0.192 function convergence 0.000109 parameter convergence 2.802656 
+## 947 best 0.192 function convergence 5.69e-05 parameter convergence 2.10268 
+## 972 best 0.192 function convergence 3.97e-05 parameter convergence 1.771005 
+## 998 best 0.192 function convergence 3.25e-05 parameter convergence 1.138631 
+## 1023 best 0.192 function convergence 1.32e-05 parameter convergence 0.9025049</code></pre>
+<p>The function checkVario generates some diagnostic plots that are usful in variogram analysis. The first two explore the data before variogram fitting, whereas the last two show the correspondence between the sample variogram and the fitted variogram.</p>
+<pre class="r"><code>checkVario(rtopObj, cloud=TRUE, identify=TRUE, acor=0.000001, legx=39000)</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-16-1.png" width="672"  /></p>
+<pre><code>## [1] &quot;cloud is  TRUE&quot;
+## [1] &quot;Creating cloud variogram; this might take some time&quot;
+## [1] &quot;Sampling points from  30 areas&quot;
+## [1] &quot;Sampled on average 217.1 points from 30 areas&quot;</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-16-2.png" width="672"  /><img src="8-2_topkriging_files/figure-html/unnamed-chunk-16-3.png" width="672"  /></p>
+<pre><code>## [1] &quot;Sampling points from  6 areas&quot;
+## [1] &quot;Sampled on average 196 points from 6 areas&quot;
+## [1] &quot;Sampling points from  7 areas&quot;
+## [1] &quot;Sampled on average 141.86 points from 7 areas&quot;
+## [1] &quot;Sampling points from  7 areas&quot;
+## [1] &quot;Sampled on average 198 points from 7 areas&quot;
+## [1] &quot;Sampling points from  7 areas&quot;
+## [1] &quot;Sampled on average 185.29 points from 7 areas&quot;
+## [1] &quot;Sampling points from  7 areas&quot;
+## [1] &quot;Sampled on average 145 points from 7 areas&quot;</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-16-4.png" width="672"  /></p>
+<p>We can see from the first plot the relationship between the variance of observations (known as dispersion variance) and catchment area, with the size of circles proportional to the number of observations in each area class. One of the assumptions of Top-kriging is that the dispersion variance decreases with increasing area, what should be visible from the figure. In our case the evidence is quite uncertain due to limited data in most area classes.</p>
+<p>The second plot shows the variogram cloud where each point represents a pair of catchments. The cloud is useful for identifying outliers that should be discarded from variogram analysis to foster robust parameter estimation. Our plot shows a typical decrease of dissimilarity at larger distances. There is no evidence for outliers (such as strata of high semivariances for data pairs attributed to an extreme observation).</p>
+<p>The third plot shows a (log–log scaled) scatter plot of theoretical (regularized) semivariogram values from a fitted variogram model vs. the sample variogram values. The size of the circles is relative to the number of pairs in each bin. A cloud close to the 1:1 line indicates a good model fit. In our case the model (regularized gamma) deviates from the sample for small semivariances values, while showing a fairly good fit for the remaining range of the variogram.</p>
+<p>The fourth plot shows the (tree-dimensional) variogram model of Top-kriging, i.e. semivariance as a function of distance and area. Lines represent the theoretical variogram model, with solid lines representing regularized semivariograms of equally sized catchments and dotted lines representing combinations of catchments sizes. Points represent the sample variogram, with point size relative to the number of pairs in each bin. The plot shows a linear point-variogram and the decrease of semivariances with catchment area, as a consequence of regularization. The model shows a good fit for the most frequent area bin (300 vs 300 km) but does not fit well for area bins with a low observation frequency (e.g. 750 vs 750 km). Advanced methods for model fitting are presented in Laaha et al. (2013).</p>
+</div>
+</div>
+<div id="kriging" class="section level1" number="5">
+<h1 number="5"><span class="header-section-number">5</span> Kriging</h1>
+<p>The prediction function <code>rtopKrige</code> solves the kriging system based on the computed regularized semivariances. The covariance matrices are internally created by a separate regularization function (<code>varMat</code>), and stored in the <code>rtopObj</code> for easier access if it is necessary to redo parts of the analysis, as this is the computationally expensive part of the prediction.</p>
+<pre class="r"><code>rtopObj &lt;- rtopKrige(rtopObj)</code></pre>
+<pre><code>## [1] &quot;Sampling points from  30 areas&quot;
+## [1] &quot;Sampled on average 217.1 points from 30 areas&quot;
+## [1] &quot;Sampling points from  404 areas&quot;
+## [1] &quot;Sampled on average 210.5 points from 404 areas&quot;
+## [1] &quot;Creating prediction semivariance matrix. This can take some time.&quot;
+## [1] &quot;interpolating  404 areas&quot;</code></pre>
+<pre class="r"><code>names(rtopObj$predictions)</code></pre>
+<pre><code>##  [1] &quot;EZGID&quot;      &quot;HZBNR&quot;      &quot;SHAPE_AREA&quot; &quot;AREASQKM&quot;   &quot;Q95&quot;        &quot;Q95S&quot;       &quot;obs&quot;       
+##  [8] &quot;area&quot;       &quot;var1.pred&quot;  &quot;var1.var&quot;   &quot;sumWeights&quot;</code></pre>
+<pre class="r"><code>spplot(obj=rtopObj$predictions, zcol=c(&quot;obs&quot;, &quot;var1.pred&quot;,&quot;var1.var&quot;),
+       names.attr=c(&quot;obs&quot;, &quot;pred&quot;, &quot;var&quot;),
+       col.regions = rev(heat.colors(n=100)), col=&quot;grey&quot;,
+       main=&quot;Prediction: sqrt(q95)&quot;)</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-17-1.png" width="672"  /></p>
+<p>We can see that Top-kriging yields topologically consistent low flow predictions for the entire river network. Note that the maps display transformed low flow values. The predicted patterns of small (sub-)catchment (pred) appear fully consistent with the observation map (obs). The kriging variance map (var) shows that the predictions are most accurate in data-rich areas and least accurate in data-poor areas.</p>
+</div>
+<div id="cross-validation" class="section level1" number="6">
+<h1 number="6"><span class="header-section-number">6</span> Cross-validation</h1>
+<p>Cross-validation can be called from <code>rtopKrige</code> if the argument <code>cv=TRUE</code> is set. The results allow us to assess how well the model performs in the prediction case.</p>
+<p>In our first assessment we produce synoptic maps of observations and cv-predictions (together with the cv-kriging variance). We can see that the cross-validation corresponds well with observations and shows an equal performance over the study area.</p>
+<pre class="r"><code>rtopObj.cv &lt;- rtopKrige(rtopObj, cv = TRUE)</code></pre>
+<pre><code>## [1] &quot;cross-validating 30 areas&quot;</code></pre>
+<pre class="r"><code>names(rtopObj.cv$predictions)</code></pre>
+<pre><code>##  [1] &quot;EZGID&quot;      &quot;HZBNR&quot;      &quot;SHAPE_AREA&quot; &quot;AREASQKM&quot;   &quot;Q95&quot;        &quot;Q95S&quot;       &quot;obs&quot;       
+##  [8] &quot;area&quot;       &quot;var1.pred&quot;  &quot;var1.var&quot;   &quot;sumWeights&quot; &quot;observed&quot;   &quot;residual&quot;   &quot;zscore&quot;</code></pre>
+<pre class="r"><code>spplot(obj=rtopObj.cv$predictions, zcol=c(&quot;obs&quot;, &quot;var1.pred&quot;,&quot;var1.var&quot;),
+       names.attr=c(&quot;obs&quot;, &quot;pred&quot;, &quot;var&quot;),
+       col.regions = rev(heat.colors(n=100)), col=&quot;grey&quot;,
+       main=&quot;Cross-validation: sqrt(q95)&quot;)</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-18-1.png" width="672"  /></p>
+<p>In our second assessment we produce some residual plots that are useful for investigating the predictive performance of our model in more detail. The first two plots in the upper panel show the distribution of residual (predicted - observed) values as a histogram and in a scatter-plot. We can see that the errors are symmetrically distributed around zero. The scatterplot shows a good agreement of predicted and observed values. Some underestimation of low values and overestimation of high values is visible, which is a typical effect of the simplification associated with modeling.</p>
+<pre class="r"><code>cv &lt;- rtopObj.cv$predictions
+
+def.par &lt;- par(no.readonly = TRUE)
+layout(matrix(c(1,2, 1,2, 1,2, 3,3, 3,3, 4,4, 4,4), 7, 2, byrow = TRUE))
+
+par(pty=&quot;s&quot;, mar=c(5,4,2,2)+0.1)
+hist(cv$var1.pred-cv$obs, xlab=&quot;Predicted - observed&quot;, main=NULL)
+
+xylim &lt;- c(min(cv$obs, cv$var1.pred), max(cv$obs, cv$var1.pred))
+plot(x=cv$obs, y=cv$var1.pred, xlab=&quot;Observed&quot;, ylab=&quot;Predicted&quot;, xlim=xylim, ylim=xylim)
+abline(a=0, b=1)
+
+par(pty=&quot;m&quot;)
+plot(x=cv$var1.pred, y=cv$var1.pred-cv$obs, xlab=&quot;Predicted&quot;, ylab=&quot;Pred - obs&quot;)
+abline(h=0, lty=&quot;dotted&quot;)
+
+plot(x=cv$obs, y=cv$var1.pred-cv$obs, xlab=&quot;Observed&quot;, ylab=&quot;Pred - obs&quot;)
+abline(h=0, lty=&quot;dotted&quot;)</code></pre>
+<p><img src="8-2_topkriging_files/figure-html/unnamed-chunk-19-1.png" width="672"  /></p>
+<pre class="r"><code>par(def.par)</code></pre>
+<p>The remaining two plots show the prediction errors against predicted values (center panel) and against observed values (lower panel). The latter presents the residuals visible from the scatter plot in an alternative way, reflecting a high performance of the model apart from extreme observations. The scatter plot of residuals against predictions shows that the model exhibits a homogeneous prediction error and predictions are thus equally reliable for the range of predicted values.</p>
+<p>We finally calculate cv-performance measures that are commonly used to summarize model performance. The first assessment is based on the transformed values. The model has a low RMSE (compared to the average low flow <span class="math inline">\(sqrt(q_{95})\)</span>), practically no bias, and a high coefficient of determination. The second assessment shows that the high performance is maintained after the back-transformation of the predictions to <span class="math inline">\(q_{95}\)</span>, a necessary step to obtain final results. From all assessments, the model appears well suited to perform low flow predictions in the study area.</p>
+<pre class="r"><code>cv_summary &lt;- function (pred, obs) {
+res &lt;- pred - obs
+ss &lt;- sum(res^2)
+mse &lt;- ss/length(res)
+rmse &lt;- sqrt(mse)
+R2 &lt;- 1-(mse/var(obs))
+bias &lt;- mean(res)
+return(list(&quot;RMSE&quot;=rmse, &quot;BIAS&quot;=bias, &quot;R²&quot;=R2))
+}</code></pre>
+<p>CV-performance of (transformed) <span class="math inline">\(sqrt(q_{95})\)</span></p>
+<pre class="r"><code>cv_summary(pred=rtopObj.cv$predictions$var1.pred, obs=rtopObj.cv$predictions$obs)</code></pre>
+<pre><code>## $RMSE
+## [1] 0.2309757
+## 
+## $BIAS
+## [1] 0.02483843
+## 
+## $`R²`
+## [1] 0.7339904</code></pre>
+<p>CV-performance of retransformed <span class="math inline">\(q_{95}\)</span></p>
+<pre class="r"><code>cv_summary(pred=rtopObj.cv$predictions$var1.pred^2, obs=rtopObj.cv$predictions$obs^2)</code></pre>
+<pre><code>## $RMSE
+## [1] 0.5964349
+## 
+## $BIAS
+## [1] -0.03623533
+## 
+## $`R²`
+## [1] 0.7221237</code></pre>
+</div>
+<div id="references" class="section level1" number="7">
+<h1 number="7"><span class="header-section-number">7</span> References</h1>
+<p>Laaha, G., Skøien, J.O., Nobilis, F. &amp; Blöschl, G. (2013) Spatial Prediction of Stream Temperatures Using Top-Kriging with an External Drift. Environmental Modeling &amp; Assessment 18(6), 671-683. <a href="doi:10.1007/s10666-013-9373-3" class="uri">doi:10.1007/s10666-013-9373-3</a></p>
+<p>Laaha, G., Skøien, J.O. &amp; Blöschl, G. (2014) Spatial prediction on river networks: comparison of top-kriging with regional regression. Hydrological Processes 28, 315–324. <a href="https://doi.org/10.1002/hyp.9578" class="uri">https://doi.org/10.1002/hyp.9578</a></p>
+<p>Skøien, J.O., Merz, R. &amp; Blöschl, G. (2006). Top-kriging - geostatistics on stream networks. Hydrology and Earth System Sciences, 10, 277-287. <a href="https://doi.org/10.5194/hess-10-277-2006" class="uri">https://doi.org/10.5194/hess-10-277-2006</a></p>
+<p>Skøien, J.O., Blöschl, G., Laaha, G., Pebesma, E., Parajka, J. &amp; Viglione, A. (2014). Rtop: An R package for interpolation of data with a variable spatial support, with an example from river networks. Computers &amp; Geosciences, 67, 180–190. <a href="https://doi.org/10.1016/j.cageo.2014.02.009" class="uri">https://doi.org/10.1016/j.cageo.2014.02.009</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
