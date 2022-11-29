@@ -1,9 +1,6 @@
-# Worked Examples  
+# Case Studies
 
-For access to all worked examples, you may either click on the following link: <a href="https://jstagge.github.io/hydroDrought/">https://jstagge.github.io/hydroDrought/</a> or choose the individual worked examples from the table below.
-
-For the full code, see the <a href="https://github.com/jstagge/hydroDrought/tree/master/worked_examples/rmarkdown">rmarkdown folder</a>
-
+Add intro text here.
 
 <table>
   <tr>
@@ -214,14 +211,5 @@ For the full code, see the <a href="https://github.com/jstagge/hydroDrought/tree
     <td>  </td>
   </tr>
 </table>
-
-
-### Prerequisites
-
-In order to run this code, you must install:
-* [R for Statistical Computing](https://www.r-project.org/)
-
-* Install the hydroDrought package, which contains the relevant data and package dependencies.
-
 
 
