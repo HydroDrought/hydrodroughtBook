@@ -3,7 +3,11 @@
 Add intro text here.
 
 <table>
-
+  <tr>
+    <th> <b>Chapter</b> </td>
+    <th> <i>Lead Author</i> </td>
+    <th> Number of Self-Guided Tours </td>
+  </tr>
   <tr>
     <td> <b> 6. Frequency Analysis</b> </td>
     <td> <i>Lena M Tallaksen</i> </td>
