@@ -7,27 +7,13 @@ This repository contains code associated with the book, entitled, 'Hydrological 
 
 ## Contents
 
-* [Worked Examples](https://github.com/jstagge/hydroDrought/tree/master/worked_examples)
-* [R package](https://github.com/jstagge/hydroDrought/tree/master/rpkg/hydroDrought)
-* [Data](https://github.com/jstagge/hydroDrought/tree/master/data)
-* [Case Studies](https://github.com/jstagge/hydroDrought/tree/master/case_studies)
-* [Self-Guided Tours](https://github.com/jstagge/hydroDrought/tree/master/self_guided_tours)
-* [hydroDrought R package](https://github.com/jstagge/hydroDrought/tree/master/rpkg)
+* [Worked Examples](https://github.com/HydroDrought/hydrodroughtBook/tree/master/worked_examples)
+* [Data](https://github.com/HydroDrought/hydrodroughtBook/tree/master/data)
+* [Case Studies](https://github.com/HydroDrought/hydrodroughtBook/tree/master/case_studies)
+* [Self-Guided Tours](https://github.com/HydroDrought/hydrodroughtBook/tree/master/self_guided_tours)
 
-## R package
-In order to use the development version of the package **hydroDrought** you will need to install the package **devtools** once.
-
-``` r
-install.packages("devtools")
-```
-
-It provides the convenient command `install_github()` which installs the most recent version of a package hosted on github. To do so, simply execute the following three lines:
-
-``` r
-library(devtools)
-install_github("jstagge/hydroDrought/rpkg/hydroDrought")
-library(hydroDrought)
-```
+## hydrodroughtR package
+In order to run the worked examples on a personal computer, you must install the [hydrodroughtR package](https://github.com/HydroDrought/hydrodroughtR). 
 
 ## Reference and How to Cite
 
