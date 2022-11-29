@@ -2,6 +2,8 @@
 
 Add intro text here.
 
+Unclear if there are actually case studies
+
 <table>
   <tr>
     <th> <b>Chapter</b> </td>
@@ -70,145 +72,6 @@ Add intro text here.
   </li> 
   </ul>
   </td>
-  </tr>
-
-
-
-  <tr>
-    <td> <b> 6. Frequency Analysis</b> </td>
-    <td> <i>Lena M Tallaksen</i> </td>
-    <td> 2 </td>
-  </tr>
-    <tr>
-  <td colspan="3">
-  <ul>
-  <li>6.1 Low flow frequency analysis: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Worked Example</a>
-  </li>
-
-  <li>6.2 Low flow frequency analysis: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/6-2_drought_deficit_frequency.html">Worked Example</a>
-  </li>
-
-  </ul>
-  </td>
-  </tr>
-
-  
-  <tr>
-    <td> <b> 7. Statistical modelling</b> </td>
-    <td> <i>Jim Stagge</i> </td>
-    <td> 4 </td>
-  </tr>
-
-  <tr>
-  <td colspan="3">
-  <ul>
-  <li>7.1 Linear trend analysis: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-1_linear_trend.html">Worked Example</a>
-
-  </li>
-
-  <li>7.2 Non-Parametric Trends: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-2_nonparametric_trend.html">Worked Example</a>
-  </li>
-
-  <li>7.3 Structural change analysis: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-3_structural_change_analysis.html">Worked Example</a>
-  </li>
-
-  <li>7.4 PCA fundamentals: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/7-4_principal_component_analysis.html">Worked Example</a>
-  </li>
-  </ul>
-  </td>
-  </tr>
-
-
-  
-  <tr>
-    <td> <b> 8. Regionalization procedures</b> </td>
-    <td> <i>Gregor Laaha</i> </td>
-    <td> 2 </td>
-  </tr>
-
-  <tr>
-  <td colspan="3">
-  <ul>
-  <li>8.1 Regional regression: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/8-1_regional_regression.html">Worked Example</a>
-
-  </li>
-
-  <li>8.2 Top-kriging: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/8-2_topkriging.html">Worked Example</a>
-  </li>
-
-  </ul>
-  </td>
-  </tr>
-
-
-   <tr>
-    <td> <b> 9. Process-based modelling</b> </td>
-    <td> <i>Henny van Lanen</i> </td>
-    <td> 0 </td>
-  </tr>
-  <tr>
-    <td> <b> 10. Human Influences</b> </td>
-    <td> <i>Anne F. Van Loon</i> </td>
-    <td> 1 </td>
-  </tr>
-  <tr>
-  <td colspan="3">
-  <ul>
-  <li>10.1 Human Influences: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/10-1_human_influences.html">Worked Example</a>
-  </li>
-
-  <tr>
-    <td> <b> 11. Past and Future Droughts</b> </td>
-    <td> <i>Niko Wanders</i> </td>
-    <td> 0 </td>
-  </tr>
-  <tr>
-    <td> <b> 12. Drought Impacts</b> </td>
-    <td> <i>Kerstin Stahl</i> </td>
-    <td> 2 </td>
-  </tr>
- <tr>
-  <td colspan="3">
-  <ul>
-  <li>12.1 EDII text report: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/12-1_edii_text_report.html">Worked Example</a>
-  </li>
-
-  <li>12.2 Likelihood of impact occurrence: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/12-2_likelihood_of_impact_occurrence.html">Worked Example</a>
-  </li>
-  </ul>
-  </td>
-  </tr>
-
-  <tr>
-    <td> <b> 13. Drought Early warning</b> </td>
-    <td> <i>Christel Prudhomme</i> </td>
-    <td> 1 </td>
-  </tr>
-  <tr>
-  <td colspan="3">
-  <ul>
-  <li>13.1 Forecast skill: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/13-1_forecast_skill.html">Worked Example</a>
-  </li>
-  </ul>
-  </td>
-  </tr>
-
-  <tr>
-    <td> <b> 14. Perspectives</b> </td>
-    <td> <i>Henny van Lanen</i> </td>
-    <td>  </td>
   </tr>
 </table>
 
