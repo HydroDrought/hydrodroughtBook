@@ -1,4 +1,4 @@
-# Self-Guided Tours
+# Supporting Documents
 
 Add intro text here.
 
