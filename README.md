@@ -10,7 +10,7 @@ This repository contains code associated with the book, entitled, 'Hydrological 
 * [Worked Examples](https://github.com/HydroDrought/hydrodroughtBook/tree/master/worked_examples)
 * [Data](https://github.com/HydroDrought/hydrodroughtBook/tree/master/data)
 * [Case Studies](https://github.com/HydroDrought/hydrodroughtBook/tree/master/case_studies)
-* [Self-Guided Tours](https://github.com/HydroDrought/hydrodroughtBook/tree/master/self_guided_tours)
+* [Self-Guided Tours](https://github.com/HydroDrought/hydrodroughtBook/tree/master/self-guided_tours)
 
 ## hydrodroughtR package
 In order to run the worked examples on a personal computer, you must install the [hydrodroughtR package](https://github.com/HydroDrought/hydrodroughtR). 
