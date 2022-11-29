@@ -3,50 +3,55 @@
 Add intro text here.
 
 <table>
-  <tr>
-    <th> <b>Chapter</b> </td>
-    <th> <i>Lead Author</i> </td>
-    <th> Number of Case Studies </td>
-  </tr>
-  <tr>
-    <td> <b> 1. Introduction</b> </td>
-    <td> <i>Lena Tallaksen</i> </td>
-    <td>  </td>
-  </tr>
-  <tr>
-    <td> <b> 2. Hydroclimatology</b> </td>
-    <td> <i>Daniel Kingston</i> </td>
-    <td> 0 </td>
-  </tr>
-  <tr>
-    <td> <b> 3. Drought Generating Processes</b> </td>
-    <td> <i>Henny van Lanen</i> </td>
-    <td> 0 </td>
-  </tr>
-  <tr>
-    <td> <b> 4. Hydrological Data</b> </td>
-    <td> <i>Jamie Hannaford</i> </td>
-    <td>  </td>
-  </tr>
 
   <tr>
-    <td> <b> 5. Hydrological Drought Characteristics</b> </td>
-    <td> <i>Hege Hisdal</i> </td>
-    <td> 7 </td>
+    <td> <b> 6. Frequency Analysis</b> </td>
+    <td> <i>Lena M Tallaksen</i> </td>
+    <td> 1 </td>
   </tr>
-  <tr>
+    <tr>
   <td colspan="3">
   <ul>
-  <li>5.1 Flow duration curve:
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-1_flow_duration_curve.html">Worked Example</a>
+  <li>6.7.3 Regional frequency analysis of hydrological droughts: 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Self-Guided Tour</a>
   </li>
-
-  <li>5.2 Mean annual minimum flow: 
-    <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/html/5-2_mean_annual_minimum_flow.html">Worked Example</a>
-  </li>
-
- 
   </ul>
   </td>
   </tr>
-</table>
+
+ 
+     <tr>
+      <td> <b> 9. Process-based modelling</b> </td>
+      <td> <i>Henny van Lanen</i> </td>
+      <td> 1 </td>
+    </tr>
+    <tr>
+  <td colspan="3">
+  <ul>
+  <li>9.4.3 Groundwater abstraction in Poelsbeek and Bolscherbeek catchments (the Netherlands): 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Self-Guided Tour</a>
+  </li>
+  </ul>
+  </td>
+  </tr>
+  
+  
+    <tr>
+       <td> <b> 13. Drought Early warning</b> </td>
+       <td> <i>Christel Prudhomme</i> </td>
+       <td> 1 </td>
+     </tr>
+     <tr>
+     <td colspan="3">
+     <ul>
+     <li>13.4.4 How to build a statistical seasonal streamflow prediction: 
+       <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/13-1_forecast_skill.html">Worked Example</a>
+     </li>
+     </ul>
+     </td>
+     </tr>
+
+
+   </table>
+
+
