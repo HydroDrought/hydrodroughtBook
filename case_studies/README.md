@@ -8,7 +8,7 @@ Unclear if there are actually case studies
   <tr>
     <th> <b>Chapter</b> </td>
     <th> <i>Lead Author</i> </td>
-    <th> Number of WE </td>
+    <th> Number of Case Studies </td>
   </tr>
   <tr>
     <td> <b> 1. Introduction</b> </td>
