@@ -24,12 +24,11 @@ Add intro text here.
   </td>
   </tr>
 
- 
-     <tr>
-      <td> <b> 9. Process-based modelling</b> </td>
-      <td> <i>Henny van Lanen</i> </td>
-      <td> 1 </td>
-    </tr>
+  <tr>
+    <td> <b> 9. Process-based modelling</b> </td>
+    <td> <i>Henny van Lanen</i> </td>
+    <td> 1 </td>
+  </tr>
     <tr>
   <td colspan="3">
   <ul>
@@ -39,24 +38,23 @@ Add intro text here.
   </ul>
   </td>
   </tr>
-  
-  
+ 
+ 
+  <tr>
+    <td> <b> 13. Drought Early warning</b> </td>
+    <td> <i>Christel Prudhomme</i> </td>
+    <td> 1 </td>
+  </tr>
     <tr>
-       <td> <b> 13. Drought Early warning</b> </td>
-       <td> <i>Christel Prudhomme</i> </td>
-       <td> 1 </td>
-     </tr>
-     <tr>
-     <td colspan="3">
-     <ul>
-     <li>13.4.4 How to build a statistical seasonal streamflow prediction: 
-       <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/13-1_forecast_skill.html">Worked Example</a>
-     </li>
-     </ul>
-     </td>
-     </tr>
-
-
+  <td colspan="3">
+  <ul>
+  <li>13.4.4 How to build a statistical seasonal streamflow prediction: 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Self-Guided Tour</a>
+  </li>
+  </ul>
+  </td>
+  </tr>
+  
    </table>
 
 
