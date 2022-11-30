@@ -8,12 +8,12 @@ Need to fix the links.
 <table>
   <tr>
     <th> <b>Chapter</b> </td>
-    <th> <i>Lead Author</i> </td>
+    <th> <i>Authors</i> </td>
     <th> Number of Data Files </td>
   </tr>
   <tr>
-    <td> <b> 3. Drought Generating Processes</b> </td>
-    <td> <i>Henny van Lanen</i> </td>
+    <td> <b> 4.5 Example datasets</b> </td>
+    <td> <i>Henny Van Lanen, Gregor Laaha, John Bromley</i> </td>
     <td> 4 </td>
   </tr>
   <tr>
