@@ -2,11 +2,16 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.146.svg)](https://doi.org/10.5281/zenodo.146)
 
-This repository contains: a) Data, b) Worked examples (incl. code), c) Self-guided tours, and d) Supporting documents associated with the textbook, entitled, 'Hydrological Drought - Processes and estimation methods for streamflow and groundwater' (Tallaksen and Van Lanen, 2023). 
+The textbook 'Hydrological Drought' provides a comprehensive review of processes and estimation methods for streamflow and groundwater drought (Tallaksen and Van Lanen, 2023). It includes a qualitative conceptual understanding of drought features and processes, a detailed presentation of estimation methods and tools, practical examples and key aspects of how to live with drought under global change, human interventions, early warning).
 
+The drought phenomenon and its diversity across the world are illustrated using an international dataset of daily streamflow series, whereas regional and local aspects of drought are studied using a combination of hydrological time series and catchment information. The textbook concludes with how to live with drought and addresses topics related to the interactions between nature and society. This includes human influences on drought, past and future hydrological drought, drought impacts and, drought forecasting and early warning. The majority of the examples are taken from regions where the rivers run most of the year, but not exclusively. The material presented ranges from well-established knowledge and analysing methods to recent developments in drought research.
 
+Key Features:
+•	Includes a number of innovative tools (Worked examples, Self-guided tours) to support the understanding and learning of different methods for assessing drought severity in space and time (past and future conditions), human influences, drought impacts, and early-warning
+•	Offers applications/demonstrations using a comprehensive database of streamflow from a large number of national and international agencies, which  illustrate how data are used when evaluating drought severity
+•	Presents the state of the art with regard to hydrological drought, including well established knowledge as well as recent developments in drought research.
 
-When run, it will replicate the results published in the book ([link to the book](https://www.google.com)). Please cite both the textbook and this repository if you make use of any part of this.
+This repository contains: a) Data, b) Worked examples (incl. code), c) Self-guided tours, and d) Supporting documents associated with the textbook. When information from this repository is used, please cite both the textbook and this repository if you make use of any part of this.
 
 Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx.
 
