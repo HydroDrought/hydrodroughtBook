@@ -2,8 +2,13 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.146.svg)](https://doi.org/10.5281/zenodo.146)
 
-This repository contains code associated with the book, entitled, 'Hydrological Drought - Processes and estimation methods for streamflow and groundwater'. When run, it will replicate the results published in the book ([link to the book](https://www.google.com)). Please cite both the textbook and this repository if you make use of any part of this.
+This repository contains: a) Data, b) Worked examples (incl. code), c) Self-guided tours, and d) Supporting documents associated with the textbook, entitled, 'Hydrological Drought - Processes and estimation methods for streamflow and groundwater' (Tallaksen and Van Lanen, 2023). 
 
+
+
+When run, it will replicate the results published in the book ([link to the book](https://www.google.com)). Please cite both the textbook and this repository if you make use of any part of this.
+
+Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx.
 
 ## Contents
 
