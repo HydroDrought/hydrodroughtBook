@@ -7,8 +7,11 @@ The textbook 'Hydrological Drought' provides a comprehensive review of processes
 The drought phenomenon and its diversity across the world are illustrated using an international dataset of daily streamflow series, whereas regional and local aspects of drought are studied using a combination of hydrological time series and catchment information. The textbook concludes with how to live with drought and addresses topics related to the interactions between nature and society. This includes human influences on drought, past and future hydrological drought, drought impacts and, drought forecasting and early warning. The majority of the examples are taken from regions where the rivers run most of the year, but not exclusively. The material presented ranges from well-established knowledge and analysing methods to recent developments in drought research.
 
 Key Features:
+
 •	Includes a number of innovative tools (Worked examples, Self-guided tours) to support the understanding and learning of different methods for assessing drought severity in space and time (past and future conditions), human influences, drought impacts, and early-warning
+
 •	Offers applications/demonstrations using a comprehensive database of streamflow from a large number of national and international agencies, which  illustrate how data are used when evaluating drought severity
+
 •	Presents the state of the art with regard to hydrological drought, including well established knowledge as well as recent developments in drought research.
 
 This repository contains: a) Data, b) Worked examples (incl. code), c) Self-guided tours, and d) Supporting documents associated with the textbook. When information from this repository is used, please cite both the textbook and this repository if you make use of any part of this.
