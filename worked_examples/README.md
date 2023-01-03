@@ -1,4 +1,6 @@
-# Worked Examples  
+# Worked Examples 
+
+When run, it will replicate the results published in the book ([link to the book](https://www.google.com)). 
 
 For access to all worked examples, you may either click on the following link: <a href="https://jstagge.github.io/hydroDrought/">https://jstagge.github.io/hydroDrought/</a> or choose the individual worked examples from the table below.
 
