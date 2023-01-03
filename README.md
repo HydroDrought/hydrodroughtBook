@@ -25,10 +25,6 @@ Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes
 * [Self-Guided Tours](https://github.com/HydroDrought/hydrodroughtBook/tree/master/self-guided_tours)
 * [Supporting Documents](https://github.com/HydroDrought/hydrodroughtBook/tree/master/support_docs)
 
-
-This is a leftover, not in Henny's PDF. Are there case studies?
-* [Case Studies](https://github.com/HydroDrought/hydrodroughtBook/tree/master/case_studies)
-
 ## hydrodroughtR package
 In order to run the worked examples on a personal computer, you must install the [hydrodroughtR package](https://github.com/HydroDrought/hydrodroughtR). 
 
