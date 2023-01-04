@@ -14,8 +14,6 @@ Key Features:
 
 •	Presents the state of the art with regard to hydrological drought, including well established knowledge as well as recent developments in drought research.
 
-This repository contains: a) Data, b) Worked examples (incl. code), c) Self-guided tours, and d) Supporting documents associated with the textbook. When information from this repository is used, please cite both the textbook and this repository if you make use of any part of this.
-
 Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx??
 
 <table>
@@ -39,7 +37,46 @@ Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes
     <td> <b> 4. Hydrological data</b> </td>
     <td> <i>Jamie Hannaford</i> </td>
   </tr>
-</table>
+   <tr>
+    <td> <b> 5. Hydrological drought characteristics</b> </td>
+    <td> <i>Hege Hisdal</i> </td>
+  </tr>
+  <tr>
+    <td> <b> 6. Frequency Analysis</b> </td>
+    <td> <i>Lena Tallaksen</i> </td>
+  </tr>
+   <tr>
+    <td> <b> 7. Statistical analysis of drought series</b> </td>
+    <td> <i>Jim Stagge</i> </td>
+  </tr>
+   <tr>
+    <td> <b> 8. Regionalization procedures – estimation at the ungauged site</b> </td>
+    <td> <i>Gregor Laaha</i> </td>
+  </tr>
+  <tr>
+    <td> <b> 9. Process-based modelling</b> </td>
+    <td> <i>Henny Van Lanen</i> </td>
+  </tr>
+  <tr>
+    <td> <b> 10. Human influence</b> </td>
+    <td> <i>Anne Van Loon</i> </td>
+  </tr>
+  <tr>
+    <td> <b> 11. Past and future hydrological drought</b> </td>
+    <td> <i>Niko Wanders</i> </td>
+  </tr>
+  <tr>
+    <td> <b> 12. Drought impacts</b> </td>
+    <td> <i>Kerstin Stahl</i> </td>
+  </tr>
+   <tr>
+    <td> <b> 13. Drought Early Warning Systems: monitoring and forecasting</b> </td>
+    <td> <i>Christel Prudhomme</i> </td>
+  </tr>
+  <tr>
+  </table>
+
+The repository of this Textbook contains: a) Data, b) Worked examples (incl. code), c) Self-guided tours, and d) Supporting documents associated with the textbook. When information from this repository is used, please cite both the textbook and this repository if you make use of any part of this.
 
 ## Contents
 
