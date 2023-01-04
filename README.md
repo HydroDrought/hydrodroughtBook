@@ -32,8 +32,7 @@ In order to run the worked examples on a personal computer, you must install the
 
 For any description of this methodology, please use the following citation (s):
 
-* The book citation [The book citation chapter](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)
-* Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx???.
+* The book citation: Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx???. [The book citation chapter](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)
 
 * The github citation (2018)  doi: 10.5281/zenodo.1467417
 
