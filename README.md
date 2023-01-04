@@ -41,6 +41,7 @@ For any description of this methodology, please use the following citation (s):
 
 * **James H. Stagge** - *Owner* - [jstagge](https://github.com/jstagge)
 * **Tobias Gauster** - *Owner* - [mundl](https://github.com/mundl)
+* **Henny A.J. Van Lanen** - *Owner* - [HennyVanLanen](https://github.com/HennyVanLanen)
 
 
 ## License
