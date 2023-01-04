@@ -91,7 +91,7 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Worked Example</a>
   </li>
 
-  <li>6.2 Low flow frequency analysis: 
+  <li>6.2 Drought deficit frequency analysis: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-2_drought_deficit_frequency.html">Worked Example</a>
   </li>
 
