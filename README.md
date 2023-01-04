@@ -18,6 +18,34 @@ This repository contains: a) Data, b) Worked examples (incl. code), c) Self-guid
 
 Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx??
 
+<table>
+  <tr>
+    <th> <b>Chapter</b> </td>
+    <th> <i>Lead Author</i> </td>
+    <th> Number of WE </td>
+  </tr>
+  <tr>
+    <td> <b> 1. Introduction</b> </td>
+    <td> <i>Lena Tallaksen</i> </td>
+    <td> 0 </td>
+  </tr>
+  <tr>
+    <td> <b> 2. Hydroclimatology</b> </td>
+    <td> <i>Daniel Kingston</i> </td>
+    <td> 0 </td>
+  </tr>
+  <tr>
+    <td> <b> 3. Drought-generating processes</b> </td>
+    <td> <i>Henny Van Lanen</i> </td>
+    <td> 0 </td>
+  </tr>
+  <tr>
+    <td> <b> 4. Hydrological data</b> </td>
+    <td> <i>Jamie Hannaford</i> </td>
+    <td>  </td>
+  </tr>
+
+
 ## Contents
 
 * [Data](https://github.com/HydroDrought/hydrodroughtBook/tree/master/data)
