@@ -50,19 +50,15 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-2_mean_annual_minimum_flow.html">Worked Example</a>
   </li>
 
-  <li>5.3 No-flow indices: 
-    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-3_no_flow_indices.html">Worked Example</a>
-  </li>
-
-  <li>5.4 Base Flow Index: 
+  <li>5.3 Base Flow Index: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-4_base_flow_index.html">Worked Example</a>
   </li>
 
-  <li>5.5 Threshold level method: 
+  <li>5.4 Threshold level method: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-5_threshold_level_method.html">Worked Example</a>
   </li>
     
-  <li>5.3 No-flow indices: 
+  <li>5.5 No-flow indices: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-3_no_flow_indices.html">Worked Example</a>
   </li>
 
