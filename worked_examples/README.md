@@ -37,7 +37,7 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
   <tr>
     <td> <b> 5. Hydrological drought characteristics</b> </td>
     <td> <i>Hege Hisdal</i> </td>
-    <td> 7 </td>
+    <td> 8 </td>
   </tr>
   <tr>
   <td colspan="3">
@@ -60,6 +60,10 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
 
   <li>5.5 Threshold level method: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-5_threshold_level_method.html">Worked Example</a>
+  </li>
+    
+  <li>5.3 No-flow indices: 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-3_no_flow_indices.html">Worked Example</a>
   </li>
 
   <li>5.6 Sequent Peak Algorithm: 
