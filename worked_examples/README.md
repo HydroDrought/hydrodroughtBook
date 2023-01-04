@@ -16,7 +16,7 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
   <tr>
     <td> <b> 1. Introduction</b> </td>
     <td> <i>Lena Tallaksen</i> </td>
-    <td>  </td>
+    <td> 0 </td>
   </tr>
   <tr>
     <td> <b> 2. Hydroclimatology</b> </td>
