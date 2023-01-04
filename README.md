@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.146.svg)](https://doi.org/10.5281/zenodo.146)
 
-The textbook 'Hydrological Drought' provides a comprehensive review of processes and estimation methods for streamflow and groundwater drought (Tallaksen and Van Lanen, 2023; [link to the book](https://www.google.com)). It includes a qualitative conceptual understanding of drought features and processes, a detailed presentation of estimation methods and tools, practical examples and key aspects of how to live with drought under global change, human interventions, early warning).
+The textbook 'Hydrological Drought' provides a comprehensive review of processes and estimation methods for streamflow and groundwater drought (Tallaksen and Van Lanen, 2023; [link to the Textbook](https://www.google.com)). It includes a qualitative conceptual understanding of drought features and processes, a detailed presentation of estimation methods and tools, practical examples and key aspects of how to live with drought under global change, human interventions, early warning).
 
 The drought phenomenon and its diversity across the world are illustrated using an international dataset of daily streamflow series, whereas regional and local aspects of drought are studied using a combination of hydrological time series and catchment information. The textbook concludes with how to live with drought and addresses topics related to the interactions between nature and society. This includes human influences on drought, past and future hydrological drought, drought impacts and, drought forecasting and early warning. The majority of the examples are taken from regions where the rivers run most of the year, but not exclusively. The material presented ranges from well-established knowledge and analysing methods to recent developments in drought research.
 
@@ -32,7 +32,7 @@ In order to run the worked examples on a personal computer, you must install the
 
 For any description of this methodology, please use the following citation (s):
 
-* The book citation: Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx???. [The book citation chapter](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)
+* The book citation: Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx???. [link to Textbook](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)
 
 * The github citation (2018)  doi: 10.5281/zenodo.1467417
 
