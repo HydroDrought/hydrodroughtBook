@@ -24,18 +24,18 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
     <td> 0 </td>
   </tr>
   <tr>
-    <td> <b> 3. Drought Generating Processes</b> </td>
-    <td> <i>Henny van Lanen</i> </td>
+    <td> <b> 3. Drought-generating processes</b> </td>
+    <td> <i>Henny Van Lanen</i> </td>
     <td> 0 </td>
   </tr>
   <tr>
-    <td> <b> 4. Hydrological Data</b> </td>
+    <td> <b> 4. Hydrological data</b> </td>
     <td> <i>Jamie Hannaford</i> </td>
     <td>  </td>
   </tr>
 
   <tr>
-    <td> <b> 5. Hydrological Drought Characteristics</b> </td>
+    <td> <b> 5. Hydrological drought characteristics</b> </td>
     <td> <i>Hege Hisdal</i> </td>
     <td> 7 </td>
   </tr>
@@ -80,8 +80,8 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
 
 
   <tr>
-    <td> <b> 6. Frequency Analysis</b> </td>
-    <td> <i>Lena M Tallaksen</i> </td>
+    <td> <b> 6. Frequency analysis</b> </td>
+    <td> <i>Lena Tallaksen</i> </td>
     <td> 2 </td>
   </tr>
     <tr>
@@ -101,7 +101,7 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
 
   
   <tr>
-    <td> <b> 7. Statistical modelling</b> </td>
+    <td> <b> 7. Statistical analysis of drought series</b> </td>
     <td> <i>Jim Stagge</i> </td>
     <td> 4 </td>
   </tr>
@@ -132,7 +132,7 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
 
   
   <tr>
-    <td> <b> 8. Regionalization procedures</b> </td>
+    <td> <b> 8. Regionalization procedures - estimation at the ungauged site</b> </td>
     <td> <i>Gregor Laaha</i> </td>
     <td> 2 </td>
   </tr>
@@ -156,12 +156,12 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
 
    <tr>
     <td> <b> 9. Process-based modelling</b> </td>
-    <td> <i>Henny van Lanen</i> </td>
+    <td> <i>Henny Van Lanen</i> </td>
     <td> 0 </td>
   </tr>
   <tr>
-    <td> <b> 10. Human Influences</b> </td>
-    <td> <i>Anne F. Van Loon</i> </td>
+    <td> <b> 10. Human influence</b> </td>
+    <td> <i>Anne Van Loon</i> </td>
     <td> 1 </td>
   </tr>
   <tr>
@@ -172,12 +172,12 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
   </li>
 
   <tr>
-    <td> <b> 11. Past and Future Droughts</b> </td>
+    <td> <b> 11. Past and future hydrological drought</b> </td>
     <td> <i>Niko Wanders</i> </td>
     <td> 0 </td>
   </tr>
   <tr>
-    <td> <b> 12. Drought Impacts</b> </td>
+    <td> <b> 12. Drought impacts</b> </td>
     <td> <i>Kerstin Stahl</i> </td>
     <td> 2 </td>
   </tr>
@@ -196,7 +196,7 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
   </tr>
 
   <tr>
-    <td> <b> 13. Drought Early warning</b> </td>
+    <td> <b> 13. Drought Early Warning: monitoring and forecasting</b> </td>
     <td> <i>Christel Prudhomme</i> </td>
     <td> 1 </td>
   </tr>
@@ -205,16 +205,7 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
   <ul>
   <li>13.1 Forecast skill: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/13-1_forecast_skill.html">Worked Example</a>
-  </li>
-  </ul>
-  </td>
-  </tr>
-
-  <tr>
-    <td> <b> 14. Perspectives</b> </td>
-    <td> <i>Henny van Lanen</i> </td>
-    <td>  </td>
-  </tr>
+    </tr>
 </table>
 
 
