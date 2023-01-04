@@ -184,11 +184,11 @@ For the full code, see the <a href="https://github.com/HydroDrought/hydrodrought
  <tr>
   <td colspan="3">
   <ul>
-  <li>12.1 EDII text report: 
+  <li>12.1 Classifying an impact report by the EDII impact category and sub-type scheme EDII text report: 
     <a href="https://htmlpreview.github.io/?https://github.com/jstagge/hydroDrought/blob/master/worked_examples/files/12-1_edii_text_report.html">Worked Example</a>
   </li>
 
-  <li>12.2 Likelihood of impact occurrence: 
+  <li>12.2 Drought impact model: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/12-2_likelihood_of_impact_occurrence.html">Worked Example</a>
   </li>
   </ul>
