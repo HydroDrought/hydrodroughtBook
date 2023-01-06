@@ -1,6 +1,6 @@
-# Supporting Documents
+# Supporting documents
 
-Add intro text here.
+This section describes Self-guided tours that are used to illustrate methodologies and approaches. They facilitate the learning process. Self-guided tours are briefly introduced in the Textbook and are demonstrations of advanced methodologies/models that involve several calculation steps. They are presented in Chapters 6, 9 and 13. Self-guided tours are given
 
 <table>
   <tr>
