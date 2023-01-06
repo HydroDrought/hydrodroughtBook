@@ -5,19 +5,19 @@ This section describes Supporting documents that provide detailed background inf
 <table>
   <tr>
     <th> <b>Chapter</b> </td>
-    <th> <i>Lead Author</i> </td>
-    <th> Number of Self-Guided Tours </td>
+    <th> <i>Author</i> </td>
+    <th> Number of Supporting documents</td>
   </tr>
   
   <tr>
-    <td> <b> 6. Frequency Analysis</b> </td>
-    <td> <i>Lena M Tallaksen</i> </td>
-    <td> 1 </td>
+    <td> <b> 3. Drought-generating processes</b> </td>
+    <td> <i>Henny Van Lanen</i> </td>
+    <td> 2 </td>
   </tr>
     <tr>
   <td colspan="3">
   <ul>
-  <li>6.7.3 Regional frequency analysis of hydrological droughts: 
+  <li>3.1 Methods to calculate evaporation, groundwater recharge, groundwater discharge and lake inflow and outflow: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Self-Guided Tour</a>
   </li>
   </ul>
