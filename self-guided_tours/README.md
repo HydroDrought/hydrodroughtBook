@@ -1,6 +1,6 @@
 # Self-Guided Tours
 
-Add intro text here.
+This section describes Self-guided tours that are used to illustrate methodologies and approaches. They facilitate the learning process. Self-guided tours are briefly introduced in the Textbook and are demonstrations of advanced methodologies/models that involve several calculation steps. They are presented in Chapters 6, 9 and 13. Self-guided tours are given as online PowerPoint presentations. The tour will let you work through the procedure at an individual pace and you may review or skip a section. At the bottom of the page there are buttons that allow you to jump between sub-sections (e.g. introduction, aim, methodology, study area, model, example, references). Within a sub-section you can use the navigation buttons at the lower right bottom (or the keyboard arrows) to go to the next or previous page. Please note that Self-guided tours only demonstrate how results are obtained using advanced imethodologies/models and different from Worked examples you cannot insert own data to obtain results for your specific case.
 
 <table>
   <tr>
