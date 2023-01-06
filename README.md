@@ -81,9 +81,9 @@ The repository of this Textbook contains: a) Data, b) Worked examples (incl. cod
 ## Contents
 
 * [Data](https://github.com/HydroDrought/hydrodroughtBook/tree/master/data)
-* [Worked Examples](https://github.com/HydroDrought/hydrodroughtBook/tree/master/worked_examples)
-* [Self-Guided Tours](https://github.com/HydroDrought/hydrodroughtBook/tree/master/self-guided_tours)
-* [Supporting Documents](https://github.com/HydroDrought/hydrodroughtBook/tree/master/support_docs)
+* [Worked examples](https://github.com/HydroDrought/hydrodroughtBook/tree/master/worked_examples)
+* [Self-guided tours](https://github.com/HydroDrought/hydrodroughtBook/tree/master/self-guided_tours)
+* [Supporting documents](https://github.com/HydroDrought/hydrodroughtBook/tree/master/support_docs)
 
 ## hydrodroughtR package
 In order to run the worked examples on a personal computer, you must install the [hydrodroughtR package](https://github.com/HydroDrought/hydrodroughtR). 
