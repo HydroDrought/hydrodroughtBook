@@ -1,4 +1,4 @@
-# Worked Examples 
+# Worked examples 
 
 This section describes several Worked examples that are used to illustrate methodologies and approaches presented in the Textbook on Hydrological Drought. Worked examples are sample methods that are demonstrated in a stepwise manner using data available on Github. The worked examples enable the reader to repeat the calculations, as briefly describred in the Textbook. When run, it will replicate the results published in the book ([link to the book](https://www.google.com)). Further details of the calculation procedure, including code, are provided here. In the next phase, readers can repeat the calculation with their own data.
 
