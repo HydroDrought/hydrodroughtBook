@@ -5,7 +5,7 @@ This section describes Self-guided tours that are used to illustrate methodologi
 <table>
   <tr>
     <th> <b>Chapter</b> </td>
-    <th> <i>Lead Author</i> </td>
+    <th> <i>Author</i> </td>
    </tr>
   
   <tr>
