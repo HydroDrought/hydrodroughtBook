@@ -1,6 +1,6 @@
 # Supporting documents
 
-This section describes Self-guided tours that are used to illustrate methodologies and approaches. They facilitate the learning process. Self-guided tours are briefly introduced in the Textbook and are demonstrations of advanced methodologies/models that involve several calculation steps. They are presented in Chapters 6, 9 and 13. Self-guided tours are given
+This section describes Supporting documents that provide detailed background information (text files). In the Textbook on Hydrological Drought reference is made to these documents, that is, in Chapters 3, 4, 9 and 10. Supporting documents vary in nature. For example, some describe models or calculation procedure, and others provide information on catchments or modeling results. The Supporting documents facilitate more in-depth understanding of results presented (e.g. drought-generating processes) or add additional aspects (impact of land use).
 
 <table>
   <tr>
