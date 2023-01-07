@@ -28,7 +28,7 @@ This section describes Supporting documents that provide detailed background inf
  
   <tr>
     <td> <b> 4. Hydrological data</b> </td>
-    <td> <i>Jamie Hannaford et al./i> </td>
+    <td> <i>Jamie Hannaford et al.</i> </td>
     <td> 1 </td>
   </tr>
     <tr>
@@ -68,7 +68,7 @@ This section describes Supporting documents that provide detailed background inf
  
   <tr>
     <td> <b> 10. Human influence</b> </td>
-    <td> <i>Lena Tallaksen/i> </td>
+    <td> <i>Lena Tallaksen</i> </td>
     <td> 1 </td>
   </tr>
     <tr>
