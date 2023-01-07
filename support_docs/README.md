@@ -1,6 +1,6 @@
 # Supporting documents
 
-This section describes Supporting documents that provide detailed background information (text files). In the Textbook on Hydrological Drought reference is made to these documents, that is, in Chapters 3, 4, 9 and 10. Supporting documents vary in nature. For example, some describe models or calculation procedure, and others provide information on catchments or modeling results. The Supporting documents facilitate more in-depth understanding of results presented (e.g. drought-generating processes) or add additional aspects (impact of land use).
+This section describes Supporting documents that provide detailed background information (text files). In the Textbook on Hydrological Drought reference is made to these documents, that is, in Chapters 3, 4, 9 and 10. Supporting documents vary in nature. For example, some describe models or calculation procedures, and others provide information on catchments or modeling results. The Supporting documents facilitate more in-depth understanding of results presented (e.g. drought-generating processes) or add additional aspects (impact of land use).
 
 <table>
   <tr>
@@ -18,7 +18,7 @@ This section describes Supporting documents that provide detailed background inf
   <td colspan="3">
   <ul>
   <li>3.1 Methods to calculate evaporation, groundwater recharge, groundwater discharge and lake inflow and outflow: 
-    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Self-Guided Tour</a>
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Supporting document</a>
   </li>
   </ul>
   </td>
