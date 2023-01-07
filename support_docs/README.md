@@ -16,8 +16,25 @@ This section describes Supporting documents that provide detailed background inf
   </tr>
     <tr>
   <td colspan="3">
+
+ <ul>
+  <li>3.1 Methods to calculate evaporation, groundwater recharge, groundwater discharge and lake inflow and outflow:
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-1_flow_duration_curve.html">Supporting document</a>
+  </li>
+
+  <li>3.2 Catchment descriptors: 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-2_mean_annual_minimum_flow.html">Supporting document</a>
+  </li>
+ 
+  <tr>
+    <td> <b> 4. Hydrological data</b> </td>
+    <td> <i>Jamie Hannaford et al./i> </td>
+    <td> 1 </td>
+  </tr>
+    <tr>
+  <td colspan="3">
   <ul>
-  <li>3.1 Methods to calculate evaporation, groundwater recharge, groundwater discharge and lake inflow and outflow: 
+  <li>4.1 Large-scale datasets: climate, hydrological and physiographic: 
     <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Supporting document</a>
   </li>
   </ul>
@@ -27,29 +44,38 @@ This section describes Supporting documents that provide detailed background inf
   <tr>
     <td> <b> 9. Process-based modelling</b> </td>
     <td> <i>Henny van Lanen</i> </td>
-    <td> 1 </td>
+    <td> 4 </td>
   </tr>
     <tr>
   <td colspan="3">
-  <ul>
-  <li>9.4.3 Groundwater abstraction in Poelsbeek and Bolscherbeek catchments (the Netherlands): 
-    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Self-Guided Tour</a>
+
+<ul>
+  <li>9.1 Distributed process-based hydrological model SIMGRO:
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-1_flow_duration_curve.html">Supporting document</a>
   </li>
-  </ul>
-  </td>
-  </tr>
+
+  <li>9.2 Description of the Poelsbeek and Bolscherbeek catchments: 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-2_mean_annual_minimum_flow.html">Supporting document</a>
+  </li>
  
+   <li>9.3 Calibration and verification of the SIMGRO model for the Poelsbeek and Bolscherbeek catchments:
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-1_flow_duration_curve.html">Supporting document</a>
+  </li>
+
+  <li>9.4 Results for the reference situation of the SIMGRO model for the Poelsbeek and Bolscherbeek catchments: 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/5-2_mean_annual_minimum_flow.html">Supporting document</a>
+  </li>
  
   <tr>
-    <td> <b> 13. Drought Early warning</b> </td>
-    <td> <i>Christel Prudhomme</i> </td>
+    <td> <b> 10. Human influence</b> </td>
+    <td> <i>Lena Tallaksen/i> </td>
     <td> 1 </td>
   </tr>
     <tr>
   <td colspan="3">
   <ul>
-  <li>13.4.4 How to build a statistical seasonal streamflow prediction: 
-    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Self-Guided Tour</a>
+  <li>10.1 Modelling land use change effects on low flows: 
+    <a href="https://htmlpreview.github.io/?https://github.com/HydroDrought/hydrodroughtBook/blob/master/worked_examples/html/6-1_low_flow_frequency_analysis.html">Supporting document</a>
   </li>
   </ul>
   </td>
