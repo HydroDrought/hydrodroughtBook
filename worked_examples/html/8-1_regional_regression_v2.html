@@ -262,7 +262,7 @@ summary(lm.simple)</code></pre>
 ## F-statistic: 9.375 on 1 and 28 DF,  p-value: 0.004817</code></pre>
 <pre class="r"><code>par(mfrow = c(2, 2))
 plot(lm.simple)</code></pre>
-<p><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-6-1.png" width="672"  /></p>
+<p><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-6-1.png" width="672"  /></p>
 <!-- Explore the fitted model object -->
 <!-- ```{r} -->
 <!-- str(lm.simple) -->
@@ -468,7 +468,7 @@ the actual, observed values.</p>
 <pre class="r"><code>par(pty=&quot;s&quot;)
 plot(x = x$q95, y = fitted(lm.both), xlab = &quot;observed q95&quot;, ylab = &quot;predicted q95&quot;)
 abline(lsfit(lm.both$model$q95, lm.both$fitted.values))</code></pre>
-<p><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-13-1.png" width="672"  /></p>
+<p><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-13-1.png" width="672"  /></p>
 <p>To depict the contribution of each predictor <span
 class="math inline">\(x_j\)</span> to the estimated <span
 class="math inline">\(q95\)</span> the function <code>termplot()</code>
@@ -483,12 +483,12 @@ class="math inline">\(S_m\)</span> (mean topographic slope) shows a
 positive linear effect for the entire dataset.</p>
 <pre class="r"><code>par(mfrow = c(2,2))
 termplot(lm.both, partial.resid = TRUE) </code></pre>
-<p><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-14-1.png" width="672"  /></p>
+<p><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-14-1.png" width="672"  /></p>
 <p>As a final step, the assumptions of the model need to be checked by
 diagnostic plots.</p>
 <pre class="r"><code>par(mfrow = c(2,2))
 plot(lm.both)</code></pre>
-<p><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-15-1.png" width="672"  /></p>
+<p><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-15-1.png" width="672"  /></p>
 </div>
 </div>
 <div id="remove-outliers-based-on-cooks-distance" class="section level1"
@@ -553,7 +553,7 @@ summary(lm.new)</code></pre>
 ## F-statistic: 15.37 on 4 and 24 DF,  p-value: 2.31e-06</code></pre>
 <pre class="r"><code>par(mfrow = c(2,2))
 plot(lm.new)</code></pre>
-<p><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-19-1.png" width="672"  /></p>
+<p><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-19-1.png" width="672"  /></p>
 <p>The so obtained model is free of influential points and consists of a
 slightly different parameter set. The coefficient of determination is
 somewhat higher than the previous stepwise regression model, but needs
@@ -620,7 +620,7 @@ summary(x.rob)</code></pre>
 ##                  &quot;SM&quot; 
 ## seed : int(0)</code></pre>
 <pre class="r"><code>plot(x.rob)</code></pre>
-<p><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-20-1.png" width="672"  /><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-20-2.png" width="672"  /><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-20-3.png" width="672"  /><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-20-4.png" width="672"  /><img src="8-1_regional_regression_files/figure-html/unnamed-chunk-20-5.png" width="672"  /></p>
+<p><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-20-1.png" width="672"  /><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-20-2.png" width="672"  /><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-20-3.png" width="672"  /><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-20-4.png" width="672"  /><img src="8-1_regional_regression_v2_files/figure-html/unnamed-chunk-20-5.png" width="672"  /></p>
 <p>We can see from the summary that the robust MM-estimator leads to a
 well-fitted model with a low <span class="math inline">\(RMSE\)</span>
 and a high <span class="math inline">\(R^2\)</span>. Note, however, that

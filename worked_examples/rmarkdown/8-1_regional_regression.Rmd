@@ -11,33 +11,23 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 ```{r, echo = FALSE}
 library(tidyverse)
 library(hydroDrought)
-
 ```
 
 
 # Introduction
-This vignette demonstrates the application of regional regression analysis to model low flows in a spatial context. We use the regional dataset of 30 catchments situated in the forelands and pre-Alps in the north-east of Austria (Section 4.5.2). The dataset is fully described in Laaha & Blöschl (2006a, 2006b). The target variable is the long-term low flow characteristic $q_{95}$, i.e. $Q_{95}$ standardized by catchment area to eliminate its predominant effect on low flows. For nested catchments, the $q_{95}$ was disaggregated into the residual $q_{95}$ of sub-catchments to decrease statistical dependency of observations. The method assumes synchronicity of low flow events of neighboring gauges at the same river. For more details on this particular river network approach see Section 8.7.2.
-
-In this section we learn how to
-
-* fit a multiple linear regression model, 
-* perform stepwise regression to perform variable selection and deal with collinearity, 
-* employ the Cook's distance method to deal with outliers, 
-* use the MM-type robust regression method, and 
-* create specific plots to analyse the quality of the regression model and the specific contribution of each predictor to the regression estimate.
-
+This vignette demonstrates the application of regional regression analysis to model low flows in a spatial context. We use the regional dataset of 30 catchments situated in the forelands and pre-Alps in the north-east of Austria (Section 4.5.2). The dataset is fully described in Laaha & Blöschl (2006a, 2006b). The target variable is the long-term low flow characteristic $q_{95}$, i.e. $Q_{95}$ standardized by catchment area to eliminate its predominant effect on low flows. For nested catchments, the $q_{95}$ was disaggregated into the residual $q_{95}$ of sub-catchments (Section 8.7.2), assuming regional synchronicity of low flow events within the same river. We learn how to fit a multiple linear regression model, perform stepwise regression to perform variable selection and deal with collinearity, employ the Cook's distance method to deal with outliers (Section 7.3.4), perform a robust regression method, and create specific plots to analyse the quality of the regression model and the specific contribution of each predictor to the regression estimate. An outlier is a data point that does not follow the general trend of the sample data, whereas a data point has high leverage if it  has an extreme (high or low) predictor value (Section 7.3.4). High-leverage points have the potential to cause large changes in parameter estimates if they are deleted, i.e. they are influential points.
 
 # Data import
-The text file named `Austria_30.txt` contains several catchment characteristics for the 30 catchments of the regional data set. Each observation (each line) in the text file corresponds to a single gauging station located at the catchment outlet. The variables (our catchment descriptors) are represented as columns of this data set. 
+The text file named `Austria_30.txt` contains several catchment characteristics for the 30 catchments of the Regional Dataset of Eastern Austria. Each observation (each line) in the text file corresponds to a single gauging station. The variables (our catchment descriptors) are represented as columns of this dataset. 
 
-Let us import this tabular data set into an object `x0`. As the very first line of the  text file contains the column headers, we have to specify the `header` argument accordingly. The function `read.table()` will return a `data.frame`. 
+Let us import this tabular dataset into an object `x0`. As the very first line of the  text file contains the column headers, we have to specify the `header` argument accordingly. The function `read.table()` will return a `data.frame`. 
 
 ```{r}
 x0 <- read.table("../../data/Austria_30.txt", header = TRUE)
 ```
 
 
-To get a glimpse of the imported data set, let us print the first three lines of the object `x0`. They contain the catchment descriptors of the first three catchments. 
+To get a glimpse of the imported dataset, let us print the first three lines of the object `x0`. They contain the catchment descriptors of the first three catchments. 
 
 ```{r}
 head(x0, n = 3)
@@ -52,7 +42,7 @@ str(x0)
 
 Another way to find out the dimensions of an object is to call `dim(x0)`, `ncol(x0)` or `nrow(x0)` explicitly. 
 
-The raw data set `x0` contains some variables which we do not want to use in our regression model, e.g. the id number or the coordinates of the gauging station. We will remove the columns to simplify the subsequent analysis. It is also a good idea to assign meaningful row names to the `data.frame` (e.g. the station's id `'HZBNR'` or its location name ) to be able to identify the observations later on. 
+The raw dataset `x0` contains some variables which we do not want to use in our regression model, e.g. the id number or the coordinates of the gauging station. We will remove the columns to simplify the subsequent analysis. It is also a good idea to assign meaningful row names to the `data.frame` (e.g. the station's id `'HZBNR'` or its location name ) to be able to identify the observations later on. 
 
 
 ```{r}
@@ -89,11 +79,11 @@ plot(lm.simple)
 
 The regression summary contains the residual statistics, the coefficients table, and performance statistics such as the residual standard error (equivalent to the $RMSE$) and the multiple R-squared (equivalent to the coefficient of determination $R^2$). We see from the t-test that $P$ is a highly significant predictor ($p-value$ =`0.00482`) but the intercept is not significant at the $\alpha$ =`0.05` level. We further learn that the model explains `25.08 %` of the low flow variability in the study area, which is quite high for a single predictor model. The estimated regression coefficient of $P$ (when multiplied by 100) translates to a $q_{95}$ increase of `0.53` $l s^{-1} km^{-2}$ per 100 mm increase in precipitation index.
 
-The residual plots can be used to verify the assumptions of the model. In our example, the residuals are quite normally distributed but extreme outliers seem to violate this assumption. A procedure how to deal with such outliers is discussed later in the worked example. The diagnosis gives no clear evidence about the homoscedasticity, due to the presence of outliers in combination with a small data set.
+The residual plots can be used to verify the assumptions of the model. In our example, the residuals are quite normally distributed but extreme outliers seem to violate this assumption. A procedure how to deal with such outliers is discussed later in the worked example. The diagnosis gives no clear evidence about the homoscedasticity, due to the presence of outliers in combination with a small dataset.
 
 # Stepwise regression
 
-In stepwise regression an 'optimal' model (based on some information criterion, such as the $AIC$, $BIC$ or $C_p$) is obtained by iteratively adding and removing variables. Our procedure will be based on the $AIC$, following the standard setting in $R$. The elementary steps of adding and dropping variables are demonstrated below.  
+In stepwise regression an 'optimal' model (based on some information criterion, such as the $AIC$, $BIC$ or $C_p$ (Section 7.3.5)) is obtained by iteratively adding and removing variables. Our procedure will be based on the $AIC$, following the standard setting in the software package $R$. The elementary steps of adding and dropping variables are demonstrated below.  
 
 
 ## Manual forward selection
@@ -147,7 +137,7 @@ lm.both <- step(model.init, scope = scope, direction = "both", trace = 0)
 summary(lm.both)
 ```
 
-The resulting model consists of four predictors $Lwa, Ggs, Sm, Gc$ and exhibits a coefficient of determination of $R^2 = 0.69$, which is a major improvement over the  simple linear regression model based on $P$. 
+We find a model consisting of four predictors: the areal fractions of water surfaces ($L_{wa}$), shallow aquifers ($G_{gs}$), crystalline rock($G_c$) and the mean topographic slope ($S_m$). The model exhibits a coefficient of determination of $R^2$ = 0.69, which is a major improvement over the simple linear regression model based on $P$ only (Step 2). 
 
 
 ## Plotting the results
@@ -161,8 +151,7 @@ abline(lsfit(lm.both$model$q95, lm.both$fitted.values))
 ```
 
 
-To depict the contribution of each predictor $x_j$ to the estimated $q95$ the function `termplot()` plots each regression term ($\beta_j \cdot x_j$) against its predictor. All four predictor variables exhibit a positive influence on low flows, but the quality of the relationship differs greatly. For $L_{wa}$ the value of the predictor is `0` for most cases, so the term only affects very few catchments that have a water surface area greater than zero. At the other end of the spectrum is $S_m$ which exhibits a positive linear effect for the entire data set. The predictors $G_c$ and $G_s$ exhibit a linear effect for the majority of catchments and are thus in between these cases.
-
+To depict the contribution of each predictor $x_j$ to the estimated $q95$ the function `termplot()` plots each regression term ($\beta_j \cdot x_j$) against its predictor. All four predictor variables exhibit a positive influence on low flows, but the quality of the relationship differs greatly. For example, in case of $L_{wa}$ the value of the predictor is `0` for most cases, so the term only affects catchments that have a water surface area greater than zero. In contrast, $S_m$ (mean topographic slope) shows a positive linear effect for the entire dataset.
 
 ```{r, fig.height=6}
 par(mfrow = c(2,2))
@@ -185,7 +174,7 @@ cooks <- sort(abs(cooks.distance(lm.both)), decreasing = TRUE)
 ```
 
 
-In the diagnostic plot of the final model obtained by stepwise regression the station with id number ``r names(cooks)[1]`` popped out because of its high Cook's distance of ``r round(cooks[1], 2)``. Such points can can act as leverage points and force the model to get close to them. The model is then too much representing single observations rather than providing an ovarall representation of the data set. In the Cook's distance method the levereage points are held out from model fitting to perform robust parameter estimation.       
+In the diagnostic plot of the final model one station with id number ``r names(cooks)[1]`` stands out because of its high Cook's distance of ``r round(cooks[1], 2)``. Such points can can act as influential points and force the model to get close to them. The model is then too much representing single observations rather than providing an ovarall representation of the dataset. In the Cook's distance method the influential points are excluded from model fitting to obtain robust parameter estimation.       
  
 The analysis is conducted in 3 steps (that may be repeated until no outliers remain...)
 
@@ -195,7 +184,7 @@ pos <- which(abs(cooks.distance(lm.both)) >= 1)
 pos
 ```
  
-In our data set this is the station with the id number ``r names(pos)``, which is observation number (row number) ``r pos``.
+In our dataset this is the station with the id number ``r names(pos)``, which is observation number (row number) ``r pos``.
  
 
 (@) Now we can eliminate the outliers manually, by removing this row. 
@@ -215,11 +204,11 @@ plot(lm.new)
 ```
 
 
-The so obtained model is free of leverage points and consists of a slightly different parameter set. The coefficient of determination is somewhat higher than the privious stepwise regression model, but needs to be interpreted with care as it is not evaluated for the entire data set.
+The so obtained model is free of influential points and consists of a slightly different parameter set. The coefficient of determination is somewhat higher than the previous stepwise regression model, but needs to be interpreted with care as it is not evaluated for the entire dataset.
 
 # Robust regression (alternative to manual outlier detection)
 
-Robust regression can be used as an alternative to manual outlier detection. A number of methods exist. Some of the methods, however, tend to be more sensitive to outliers than to leverage points, and will therefore be less suited than the Cook’s distance method. We use here an MM-type estimator, which constitutes the current standard in $R$'s `robustbase` package. The estimator performs a maximum-likelihood type estimation that is highly efficient and robust to leverage points as well. 
+Robust regression can be used as an alternative to manual outlier detection. A number of methods exist. Some of the methods, however, tend to be more sensitive to outliers than to leverage points, and will therefore be less suited than the Cook’s distance method. We use here an MM-type estimator, which constitutes the current standard in $R$'s `robustbase` package. The estimator performs a maximum-likelihood type estimation that is highly efficient and robust to leverage points. 
 
 ```{r, warning=FALSE}
 library(robustbase)
@@ -229,7 +218,7 @@ summary(x.rob)
 plot(x.rob)
 ```
 
-We can see that the robust MM-estimator leads to a well-fitted model with a low $RMSE$ and a high $R^2$. Note, however, that the fit statistics of the robust regression method are not fully comparable with those of the standard regression method as outliers are downweigted in the parameter estimation and will receive lower weight in the fit statistics as well. The residual plots allow a direct comparison among different models. Compared to standard OLS-regression, the MM-estimator performs much better for the majority of cases while showing poor fit for extreme outliers. Leverage points appear to have little impact on the model. 
+We can see from the summary that the robust MM-estimator leads to a well-fitted model with a low $RMSE$ and a high $R^2$. Note, however, that the fit statistics of the robust regression method are not fully comparable with those of the standard regression method as outliers are downweigted in the parameter estimation and will receive lower weight in the fit statistics as well. The residual plots allow a direct comparison to the previous models. Compared to standard OLS-regression, the MM-estimator performs much better for the majority of cases while showing poor fit for extreme outliers (207985,  210989, 210039). Outliers and leverage points appear to have little impact on the model. 
 
 
 # References
