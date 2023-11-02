@@ -14,7 +14,7 @@ Key Features:
 
 •	Presents the state of the art with regard to hydrological drought, including well established knowledge as well as recent developments in drought research.
 
-Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1, doi: xxxxx??
+Tallaksen, L.M., Van Lanen, H.A.J. (Eds.), 2023. Hydrological Drought. Processes and Estimation Methods for Streamflow and Groundwater. Elsevier Publisher, ISBN 978-0-12-819082-1.
 
 <table>
   <tr>
