@@ -16,7 +16,6 @@ options("rgdal_show_exportToProj4_warnings"="none")
 ```{r, echo = FALSE}
 library(tidyverse)
 library(hydroDrought)
-
 ```
 
 
@@ -34,12 +33,12 @@ In this worked example, we learn
 
 # Data import
 
-We will use the `rtop` package to perform kriging along the river network and the package `rgdal` for handling geospatial data. 
-We load the packages (after installation at first use).
+We will use the `rtop` package to perform kriging along the river network, the package `sf` for handling geospatial data, and the package `sp` for plotting. We load the packages (after installation at first use).
 
 ```{r}
 library(rtop)
-library(rgdal)
+library(sf)
+library(sp)
 ```
 
 ## Reading Shapefiles
@@ -53,7 +52,8 @@ rpath <- "../../data/catchment_shape_files"
 
 We can now read the Shapefile containing the observation dataset.
 ```{r}
-x.obs <- readOGR(rpath,"File1")
+x.obs.sf = st_read(rpath, "File1")
+x.obs = as(x.obs.sf, "Spatial")
 ```
 <!-- x.obs <- readOGR(rpath,"Watershed_Gesamt_zone1_nwkenn_OBS") # Former name of observation data set -->
 
@@ -74,7 +74,8 @@ str(x.obs@data)
 The import and preparation of the prediction dataset is done analogously.
 
 ```{r}
-x.pred = readOGR(rpath,"File2")
+x.pred.sf = st_read(rpath, "File2")
+x.pred = as(x.pred.sf, "Spatial")
 x.pred$obs <- x.pred$Q95S # also in x.pred for ploting
 ```
 <!-- x.pred = readOGR(rpath,"Watershed_Gesamt_zone1_nwkenn_PRED_BIG3") # Former name of prediction data set -->
@@ -171,7 +172,7 @@ The second plot shows the variogram cloud where each point represents a pair of 
 
 The third plot shows a (log–log scaled) scatter plot of theoretical (regularized) semivariogram values from a fitted variogram model vs. the sample variogram values. The size of the circles is relative to the number of pairs in each bin. A cloud close to the 1:1 line indicates a good model fit. In our case the model (regularized gamma) deviates from the sample for small semivariances values, while showing a fairly good fit for the remaining range of the variogram.
 
-The fourth plot shows the (tree-dimensional) variogram model of Top-kriging, i.e. semivariance as a function of distance and area. Lines represent the theoretical variogram model, with solid lines representing regularized semivariograms of equally sized catchments and dotted lines representing combinations of catchments sizes. Points represent the sample variogram, with point size relative to the number of pairs in each bin. The plot shows a linear point-variogram and the decrease of semivariances with catchment area, as a consequence of regularization. The model shows a good fit for the most frequent area bin (300 vs 300 km) but does not fit well for area bins with a low observation frequency (e.g. 750 vs 750 km). Advanced methods for model fitting are presented in Laaha et al. (2013).
+The fourth plot shows the (three-dimensional) variogram model of Top-kriging, i.e. semivariance as a function of distance and area. Lines represent the theoretical variogram model, with solid lines representing regularized semivariograms of equally sized catchments and dotted lines representing combinations of catchments sizes. Points represent the sample variogram, with point size relative to the number of pairs in each bin. The plot shows a linear point-variogram and the decrease of semivariances with catchment area, as a consequence of regularization. The model shows a good fit for the most frequent area bin (300 vs 300 km) but does not fit well for area bins with a low observation frequency (e.g. 750 vs 750 km). Advanced methods for model fitting are presented in Laaha et al. (2013).
 
 # Kriging
 The prediction function `rtopKrige` solves the kriging system based on the computed regularized semivariances. The covariance matrices are internally created by a separate regularization function (`varMat`), and stored in the `rtopObj` for easier access if it is necessary to redo parts of the analysis, as this is the computationally expensive part of the prediction.
